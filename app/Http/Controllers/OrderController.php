@@ -1,0 +1,154 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Validator;
+
+use App\Models\Order;
+use App\Models\OrderLabel;
+use App\Models\OrderProduct;
+use App\Models\OrderBump;
+use App\Models\UpSell;
+use App\Models\Product;
+use App\Models\OutgoingStock;
+use App\Models\User;
+use App\Models\CartAbandon;
+
+
+class OrderController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function allOrders()
+    {
+        $orders = Order::all();
+        $agents = User::where('type','agent')->get();
+        return view('pages.orders.allOrders', compact('orders', 'agents'));
+    }
+
+    //orderForm
+    public function singleOrder($unique_key)
+    {
+        
+        $order = Order::where('unique_key', $unique_key);
+        if(!$order->exists()) {
+            abort(404);
+        }
+        $order = $order->first();
+        $url = env('APP_URL').'/'.$order->url;
+        $orderedProducts = unserialize($order->products);
+        $products = [];
+        $gross_revenue = 0;
+        $currency = '';
+        
+        //return $packages;
+        
+        $outgoingStocks = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted'])->get();
+        foreach ($outgoingStocks as $key => $product) {
+            $products['product'] = $this->productById($product->product_id);
+            $products['quantity_removed'] = $product->quantity_removed;
+            $products['revenue'] =  $product->amount_accrued;
+            $gross_revenue += $product->amount_accrued;
+            $currency = $this->productById($product->product_id)->country->symbol;
+
+            $packages[] = $products;
+        }
+
+        return view('pages.orders.singleOrder', compact('url', 'order', 'packages', 'gross_revenue', 'currency'));
+    }
+
+    public function assignAgentToOrder(Request $request)
+    {
+        $data = $request->all();
+        $order_id = $data['order_id'];
+        $agent_id = $data['agent_id'];
+
+        //upd order
+        Order::where('id',$order_id)->update(['agent_assigned_id'=>$agent_id]);
+
+        return back()->with('success', 'Agent Assigned Successfully');
+    }
+
+    public function cartAbandon()
+    {
+        $carts = CartAbandon::all();
+        $contacts = [];
+        $packages = [];
+        foreach ($carts as $key => $cart) {
+            $cart_ids['cart_id'] = $cart->id;
+            $contacts[] = \unserialize($cart->customer_info);
+            $packages [] = \unserialize($cart->package_info);
+        }
+
+        $contact_info = $contacts[0]['inputValueName'];
+        $product_info = $packages[0]['product_package']; ['1'];
+
+        //["Jerry|first-name","James|last-name","09876234567|phone-number","09876234567|whatsapp-phone-number","jerrry@email.com|active-email","Lagos|state","Ikeja|city","1"]
+
+        $customers = []; $customer_holder=[];
+        foreach ($contact_info as $key => $contact) {
+            $customers['firstname'] = (explode("|", $contact)[1] == 'first-name') ? explode("|", $contact)[0] : 'none';
+            $customers['lastname'] = (explode("|", $contact)[1] == 'last-name') ? explode("|", $contact)[0] : 'none';
+            $customers['phone_number'] = (explode("|", $contact)[1] == 'phone-number') ? explode("|", $contact)[0] : 'none';
+            $customers['whatsapp_phone_number'] = (explode("|", $contact)[1] == 'whatsapp-phone-number') ? explode("|", $contact)[0] : 'none';
+            $customers['active_email'] = (explode("|", $contact)[1] == 'active-email') ? explode("|", $contact)[0] : 'none';
+            $customers['state'] = (explode("|", $contact)[1] == 'state') ? explode("|", $contact)[0] : 'none';
+            $customers['city'] = (explode("|", $contact)[1] == 'city') ? explode("|", $contact)[0] : 'none'; 
+        }
+        //return $customers;
+
+        $customer_holder['customer'] = $customers;
+
+        $products = [];
+        foreach ($product_info as $key => $id) {
+            $products['products'] = $this->productById($id)->first();
+        }
+
+        $final_cart = array_merge($customer_holder, $products, $cart_ids);
+
+        $agents = User::where('type','agent')->get();
+        return view('pages.orders.cartAbandon', compact('carts', 'agents', 'final_cart'));
+    }
+
+    public function singleCartAbandon($unique_key)
+    {
+        $cart = CartAbandon::where('unique_key', $unique_key)->first();
+        $customer_info = \unserialize($cart->customer_info)['inputValueName'];
+        $package_info = \unserialize($cart->package_info)['product_package']; //wat customer clicked
+
+        $order = $cart->FormHolder->order;
+
+        $orderedProducts = unserialize($order->products);
+
+        $products = [];
+        $gross_revenue = 0;
+        $currency = '';
+        
+        $outgoingStocks = OutgoingStock::where(['order_id'=>$order->id])->get();
+        foreach ($outgoingStocks as $key => $product) {
+            $products['product'] = $this->productById($product->product_id);
+            $products['quantity_removed'] = $product->quantity_removed;
+            $products['revenue'] =  $product->amount_accrued;
+            $gross_revenue += $product->amount_accrued;
+            $currency = $this->productById($product->product_id)->country->symbol;
+
+            $packages[] = $products;
+        }
+        
+        return view('pages.orders.singleCartAbandon', compact('cart', 'customer_info', 'package_info', 'order', 'packages', 'gross_revenue', 'currency'));
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function productById($id){
+        return $product = Product::where('id',$id)->first();
+    }
+}
