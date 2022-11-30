@@ -205,11 +205,9 @@
     
                                                     <div class="make-your-choice d-flex justify-content-center">
     
-                                                        <label for="orderbump_refusal" class="form-label d-flex align-items-center">
-                                                            <input type="checkbox" name="orderbump_refusal" id="orderbump_refusal" class="cta-check2 me-1 orderbump_refusal"
-                                                            @error('product') checked @enderror value="true"/>
-                                                            <span class="fw-bold" style="color: #012970;">No, thank you</span>
-                                                        </label>
+                                                        <div class="d-flex justify-content-center">
+                                                            <button type="submit" class="btn w-100 p-2 text-white orderbump_submit_btn" style="background-color: #012970;">ADD TO MY ORDER</button>
+                                                        </div>
     
                                                     </div>
                                                     
@@ -217,9 +215,17 @@
                                             </div>
                                         </div>
                                         
+                                        
+
                                         <div class="col-12">
-                                            <div class="d-flex justify-content-center">
-                                                <button type="submit" class="btn w-50 p-2 text-white orderbump_submit_btn" style="background-color: #012970;">ADD TO MY ORDER</button>
+                                            <div class="make-your-choice d-flex justify-content-center">
+    
+                                                <label for="orderbump_refusal" class="form-label d-flex align-items-center">
+                                                    <input type="checkbox" name="orderbump_refusal" id="orderbump_refusal" class="cta-check2 me-1 orderbump_refusal invisible"
+                                                    @error('product') checked @enderror value="true"/>
+                                                    <span class="fw-light" style="color: #012970;">No, thank you</span>
+                                                </label>
+
                                             </div>
                                         </div>
                                             
@@ -275,11 +281,7 @@
 
                                                     <div class="make-your-choice d-flex justify-content-center">
     
-                                                        <label for="upsell_refusal" class="form-label d-flex align-items-center">
-                                                            <input type="checkbox" name="upsell_refusal" id="upsell_refusal" class="cta-check2 me-1 upsell_refusal"
-                                                            @error('product') checked @enderror value="true"/>
-                                                            <span class="fw-bold" style="color: #012970;">No, thank you</span>
-                                                        </label>
+                                                        <button type="submit" class="btn w-100 p-2 text-white upsell_submit_btn" style="background-color: #012970;">ADD TO MY ORDER</button>
     
                                                     </div>
                                                     
@@ -289,8 +291,14 @@
                                         </div>
                                         
                                         <div class="col-12">
-                                            <div class="d-flex justify-content-center">
-                                                <button type="submit" class="btn w-50 p-2 text-white upsell_submit_btn" style="background-color: #012970;">ADD TO MY ORDER</button>
+                                            <div class="make-your-choice d-flex justify-content-center">
+    
+                                                <label for="upsell_refusal" class="form-label d-flex align-items-center">
+                                                    <input type="checkbox" name="upsell_refusal" id="upsell_refusal" class="cta-check2 me-1 upsell_refusal invisible"
+                                                    @error('product') checked @enderror value="true"/>
+                                                    <span class="fw-light" style="color: #012970;">No, thank you</span>
+                                                </label>
+
                                             </div>
                                         </div>
                                             
