@@ -98,8 +98,10 @@
                                     <div class="col-lg-6 mb-3 contact-parent">
                                         <label class="form-label">{{ $contact['form_label'] }}</label>
                                         @if($contact['form_type'] == 'text_field')
-                                        <input type="{{ $contact['form_name'] == 'active-email' ? 'email' : 'text' }}" data-name="{{ $contact['form_name'] }}" class="contact-input form-control {{ $contact['form_name'] }} @error($contact['form_name']) is-invalid @enderror"
-                                        placeholder="Type here" required>
+                                        <input type="{{ $contact['form_name'] == 'active-email' ? 'email' : 'text' }}"
+                                        data-name="{{ $contact['form_name'] }}"
+                                        class="contact-input form-control {{ $contact['form_name'] }} @error($contact['form_name']) is-invalid @enderror"
+                                        placeholder="Type here" @if($contact['form_name'] != 'active-email') required @endif>
                                         {{-- @elseif other field types will fall here --}}
                                         @endif
                                         <!--if such error-->

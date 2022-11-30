@@ -17,6 +17,13 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
+//symlink for sites that allow
+// Route::get('/storage-link', function(){
+//     $tagartFolder = storage_path('app/pulbic');
+//     $linkFolder = $_SERVER['DOCUMENT_ROOT'] .'/storage';
+//     symlink($tagartFolder,$linkFolder);
+// });
+
 Route::get('/test', [FormBuilderController::class, 'test'])->name('test');
 Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
 

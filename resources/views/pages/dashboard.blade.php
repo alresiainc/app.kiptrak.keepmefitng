@@ -47,9 +47,9 @@
       <div class="col-lg-3 col-md-6">
         <div class="card bg-1">
           <div class="card-body p-2">
-            <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex justify-content-between align-items-center">
               <div class="text-start">
-                <h2 class="fw-bold">N{{ number_format((float)$purchases_due, 2, '.', ''); }}</h2>
+                <h2 class="fw-bold">N{{ number_format((float)$purchases_due, 2, '.', '') }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold"
                   >Purchase Due</small
                 >
@@ -299,7 +299,7 @@
       <div class="col-lg-6">
         <div class="card card-top-border border-top-success">
           <div class="card-body">
-            <h5 class="card-title">Top 10 Trending Items</h5>
+            <h5 class="card-title">Top 5 Selling Products</h5>
 
             <!-- Line Chart -->
             <div>
@@ -571,20 +571,20 @@
         "Inspiron 14",
         "iPhone X-128GB",
         "Redmi Note 10-32GB",
-        "Colgate toothpaste",
-        "Redmi Note 10-64GB",
+        // "Colgate toothpaste",
+        // "Redmi Note 10-64GB",
       ],
       datasets: [{
           label: 'Top Items',
-          data: ["7.00", "5.00", "4.00", "4.00", "2.00", "1.00", "1.00"],
+          data: ["7.00", "5.00", "4.00", "4.00", "2.00"],
           backgroundColor: [
           'rgb(102, 102, 255)',
           'rgb(255, 51, 153)',
           'rgb(0, 204, 153)',
           'rgb(204, 204, 0)',
           'rgb(37, 195, 72)',
-          'rgb(31, 161, 212, 1)',
-          'rgb(238, 27, 37, 1)'
+          // 'rgb(31, 161, 212, 1)',
+          // 'rgb(238, 27, 37, 1)'
           ],
           hoverOffset: 4
       }]
