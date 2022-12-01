@@ -130,15 +130,15 @@
                             <li><a class="dropdown-item" href="">Pending</a></li>
                             <li><hr class="dropdown-divider"></li>
 
-                            <li><a class="dropdown-item" href="">Confirmed</a></li>
+                            <li><a class="dropdown-item" href="">Cancelled</a></li>
                             <li><hr class="dropdown-divider"></li>
 
-                            <li><a class="dropdown-item" href="">Awaiting</a></li>
+                            <li><a class="dropdown-item" href="">Delivered Not Remitted</a></li>
                             <li><hr class="dropdown-divider"></li>
 
-                            <li><a class="dropdown-item" href="">Delivered</a></li>
+                            <li><a class="dropdown-item" href="">Delivered & Remitted</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            
+
                           </ul>
                         </div>
 
