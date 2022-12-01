@@ -642,10 +642,10 @@
                     alert("Phone number must be filled");
                     return false;
                 }
-                if (active_email == "" || active_email == null) {
-                    alert("Email address must be filled");
-                    return false;
-                }
+                // if (active_email == "" || active_email == null) {
+                //     alert("Email address must be filled");
+                //     return false;
+                // }
                 if (state == "" || state == null) {
                     alert("Your State must be filled");
                     return false;

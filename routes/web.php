@@ -2,6 +2,15 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TestMail;
+use App\Events\TestEvent;
+use App\Notifications\TestNofication;
+use Illuminate\Support\Facades\Notification;
+use App\Models\User;
+use App\Models\Customer;
+use Carbon\Carbon;
+use Illuminate\Support\Arr;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +32,37 @@ use Illuminate\Support\Facades\Route;
 //     $linkFolder = $_SERVER['DOCUMENT_ROOT'] .'/storage';
 //     symlink($tagartFolder,$linkFolder);
 // });
+
+// Route::get('/email', function () {
+//     Mail::to('test@email.com')->send(new TestMail());
+// }); 
+
+Route::get('/notify', function () {
+    
+    //return view('invoice2');
+    //Mail::to('test@email.com')->send(new TestMail());
+     $user = User::find(1);
+     $receivers = User::where('type','staff')->get();
+      //$to = User::find(5);
+     //$when = Carbon::now()->addMinutes(10);
+     //$when = Carbon::now()->addSeconds(10);
+    //  foreach ($receivers as $key => $value) {
+    //     $value->notify((new TestNofication($user))->delay($when));
+    //  }
+     
+    //Notification::send($user, new TestNofication($user)); //notify to multiple receivers like admins
+
+    $invData = [
+        'user' => $user,
+        'first' => 'akon',
+        'last' => 'ugo',
+        'email' => 'akon@gmail.com',
+    ];
+
+    event(new TestEvent($invData)); //sending mail to new user using TestMail in event
+
+    return 'Ok';
+}); 
 
 Route::get('/test', [FormBuilderController::class, 'test'])->name('test');
 Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');

@@ -6,6 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Session;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TestMail;
+use App\Events\TestEvent;
+use App\Notifications\TestNofication;
+use Illuminate\Support\Facades\Notification;
+use Carbon\Carbon;
+use Illuminate\Support\Arr;
+
 use App\Models\FormHolder;
 use App\Models\Product;
 use App\Models\Order;
@@ -585,10 +593,12 @@ class FormBuilderController extends Controller
         if (!isset($formHolder)) {
             \abort(404);
         }
+
+        $authUser = User::find(1);
+
         $formName = $formHolder->name;
         $formData = \unserialize($formHolder->form_data);
         
-
         $formContactInfo = [];
         $formPackage = [];
         $form_names = $formData['form_names'];
@@ -649,7 +659,6 @@ class FormBuilderController extends Controller
             }
         }
 
-        
         //upsell
         $upsellProduct_revenue = 0; //price * qty
         $upsell_outgoingStock = '';
@@ -660,7 +669,6 @@ class FormBuilderController extends Controller
             }
         }
         
-
         //order total amt
         $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
         $grand_total = $order_total_amount; //might include discount later
@@ -682,8 +690,28 @@ class FormBuilderController extends Controller
             $orderId = '0'.$order->id;
         }
 
-        //customer
-        $customer = isset($order->customer) ? $order->customer : '';
+        $customer = ''; $invoiceData = [];
+        if (isset($order->customer)) {
+            //customer
+            $customer =  $order->customer;
+
+            $receipients = Arr::collapse([[$authUser->email],[$customer->email]]);
+
+            //notify admin or group od admins that some one has placed order
+            Notification::send($authUser, new TestNofication($customer));
+
+            //mail user about their new order
+            $invoiceData = [
+                'order' => $order,
+                'customer' => $order->customer,
+                'mainProducts_outgoingStocks' => $mainProducts_outgoingStocks,
+                'orderbump_outgoingStock' => $orderbump_outgoingStock == '' ? '' : $orderbump_outgoingStock,
+                'upsell_outgoingStock' => $upsell_outgoingStock == '' ? '' : $upsell_outgoingStock,
+            ];
+
+            event(new TestEvent($invoiceData));
+        }
+        
 
         //package or product qty. sum = 0, if it doesnt exist
         $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
