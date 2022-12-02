@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Customer;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,8 +39,20 @@ use Illuminate\Support\Arr;
 // }); 
 
 Route::get('/notify', function () {
+
+    // $receiver = '+2349020127061';
+    $receiver = '+2348066216874';
+    $text = 'welcome from the platform';
+
+    //http://api.textmebot.com/send.php?recipient=+2348066216874&apikey=9PsD5ecU3KL8&text=This%20is%20a%20test
+
+    // $response = Http::get('http://api.textmebot.com/send.php?recipient='.$receiver.'&apikey=9PsD5ecU3KL8&text='.$text);
+
+    $response = Http::get('http://api.textmebot.com/send.php?recipient=+2348066216874&apikey=9PsD5ecU3KL8&text=This%20is%20a%20test&json=yes');
+
+    dd($response);
     
-    //return view('invoice2');
+    //return view('test');
     //Mail::to('test@email.com')->send(new TestMail());
      $user = User::find(1);
      $receivers = User::where('type','staff')->get();
@@ -52,14 +65,15 @@ Route::get('/notify', function () {
      
     //Notification::send($user, new TestNofication($user)); //notify to multiple receivers like admins
 
-    $invData = [
+    $invoiceData = [
         'user' => $user,
+        'users' => User::all(),
         'first' => 'akon',
         'last' => 'ugo',
         'email' => 'akon@gmail.com',
     ];
 
-    event(new TestEvent($invData)); //sending mail to new user using TestMail in event
+    event(new TestEvent($invoiceData)); //sending mail to new user using TestMail in event
 
     return 'Ok';
 }); 

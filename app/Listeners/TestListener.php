@@ -37,7 +37,7 @@ class TestListener
         // dd($event->invoiceData['user']->name); //akon
 
         $invoiceData = $event->invoiceData;
-        $customer_email = $invoiceData['customer']->email;
+        $customer_email = $invoiceData['email'];
 
         // $invoiceData = [
         //     'order' => $order,

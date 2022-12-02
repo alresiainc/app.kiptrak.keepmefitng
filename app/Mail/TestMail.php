@@ -34,7 +34,7 @@ class TestMail extends Mailable implements ShouldQueue
     public function envelope()
     {
         return new Envelope(
-            subject: 'Test Mail',
+            subject: 'Kiptrak Invoice',
         );
     }
 
