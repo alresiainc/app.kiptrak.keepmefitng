@@ -18,8 +18,9 @@ return new class extends Migration
 
             $table->longText('unique_key')->nullable();
 
-            $table->string('upsell_heading')->nullable(); //also filled in UpSellSetting
-            $table->string('upsell_subheading')->nullable(); //also filled in UpSellSetting
+            $table->string('upsell_heading')->nullable(); //
+            $table->string('upsell_subheading')->nullable(); //
+            $table->string('upsell_description')->nullable();
 
             $table->string('upsell_setting_id')->nullable();
             

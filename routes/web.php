@@ -237,3 +237,13 @@ Route::post('/add-money-transfers', [AccountController::class, 'addMoneyTransfer
 //balanceSheet
 Route::get('/balance-sheet', [AccountController::class, 'balanceSheet'])->name('balanceSheet');
 
+//allUpsellTemplates
+Route::get('/all-upsell-templates', [UpsellSettingController::class, 'allUpsellTemplates'])->name('allUpsellTemplates');
+Route::get('/view-upsell-template/{unique_key}', [UpsellSettingController::class, 'singleUpsellTemplate'])->name('singleUpsellTemplate');
+Route::get('/add-upsell-templates', [UpsellSettingController::class, 'addUpsellTemplate'])->name('addUpsellTemplate');
+Route::post('/add-upsell-templates', [UpsellSettingController::class, 'addUpsellTemplatePost'])->name('addUpsellTemplatePost');
+Route::get('/edit-upsell-templates/{unique_key}', [UpsellSettingController::class, 'editUpsellTemplate'])->name('editUpsellTemplate');
+Route::post('/edit-upsell-templates/{unique_key}', [UpsellSettingController::class, 'editUpsellTemplatePost'])->name('editUpsellTemplatePost');
+
+
+

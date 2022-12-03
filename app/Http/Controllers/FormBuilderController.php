@@ -24,6 +24,7 @@ use App\Models\OrderBump;
 use App\Models\UpSell;
 use App\Models\Customer;
 use App\Models\CartAbandon;
+use App\Models\UpsellSetting;
 
 
 class FormBuilderController extends Controller
@@ -103,7 +104,6 @@ class FormBuilderController extends Controller
                 
             }
             
-            
         }
 
         //update formHolder
@@ -125,8 +125,8 @@ class FormBuilderController extends Controller
         //return $formHolders;
 
         $products = Product::where('status', 'true')->get();
-        return view('pages.allFormBuilders', compact('formHolders', 'products'));
-
+        $upsellTemplates = UpsellSetting::all();
+        return view('pages.allFormBuilders', compact('formHolders', 'products', 'upsellTemplates'));
         
     }
 
@@ -482,6 +482,7 @@ class FormBuilderController extends Controller
         $upsell = new UpSell();
         $upsell->upsell_heading = !empty($data['upsell_heading']) ? $data['upsell_heading'] : 'Wait, One More Chance';
         $upsell->upsell_subheading = !empty($data['upsell_subheading']) ? $data['upsell_subheading'] : 'We\'re giving this at a giveaway price';
+        $upsell->upsell_setting_id = $data['upsell_setting_id'];
         $upsell->product_id = $data['upsell_product'];
         $upsell->order_id = $formHolder->order->id;
         $upsell->product_expected_quantity_to_be_sold = 1;
@@ -525,6 +526,7 @@ class FormBuilderController extends Controller
         $upsell = UpSell::where('id', $formHolder->upsell->id)->first();
         $upsell->upsell_heading = !empty($data['upsell_heading']) ? $data['upsell_heading'] : 'Wait, One More Chance';
         $upsell->upsell_subheading = !empty($data['upsell_subheading']) ? $data['upsell_subheading'] : 'We\'re giving this at a giveaway price';
+        $upsell->upsell_setting_id = $data['upsell_setting_id'];
         $upsell->product_id = $data['upsell_product'];
         $upsell->order_id = $formHolder->order->id;
         $upsell->product_expected_quantity_to_be_sold = 1;
@@ -697,19 +699,19 @@ class FormBuilderController extends Controller
 
             $receipients = Arr::collapse([[$authUser->email],[$customer->email]]);
 
-            //notify admin or group od admins that some one has placed order
-            Notification::send($authUser, new TestNofication($customer));
+            // //notify admin or group od admins that some one has placed order
+            // Notification::send($authUser, new TestNofication($customer));
 
-            //mail user about their new order
-            $invoiceData = [
-                'order' => $order,
-                'customer' => $order->customer,
-                'mainProducts_outgoingStocks' => $mainProducts_outgoingStocks,
-                'orderbump_outgoingStock' => $orderbump_outgoingStock == '' ? '' : $orderbump_outgoingStock,
-                'upsell_outgoingStock' => $upsell_outgoingStock == '' ? '' : $upsell_outgoingStock,
-            ];
+            // //mail user about their new order
+            // $invoiceData = [
+            //     'order' => $order,
+            //     'customer' => $order->customer,
+            //     'mainProducts_outgoingStocks' => $mainProducts_outgoingStocks,
+            //     'orderbump_outgoingStock' => $orderbump_outgoingStock == '' ? '' : $orderbump_outgoingStock,
+            //     'upsell_outgoingStock' => $upsell_outgoingStock == '' ? '' : $upsell_outgoingStock,
+            // ];
 
-            event(new TestEvent($invoiceData));
+            // event(new TestEvent($invoiceData));
         }
         
 

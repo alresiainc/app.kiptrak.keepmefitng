@@ -279,7 +279,6 @@
 
                               </div>
                               
-                              
                                <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                                 <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> SUBMIT</button>
@@ -323,12 +322,36 @@
                                     
                                     <div class="mt-3">
                                       <label for="" class="form-label">Heading</label>
-                                      <input type="text" name="upsell_heading"  class="form-control" value="{{ $formHolder->upsell->upsell_heading }}">
+                                      <textarea name="upsell_heading" id="upsell_heading" class="form-control" cols="30" rows="3">{{ $formHolder->upsell->upsell_heading }}</textarea>
+                                      
                                     </div>
 
                                     <div class="mt-3">
                                       <label for="" class="form-label">Sub Heading</label>
-                                      <input type="text" name="upsell_subheading"  class="form-control" value="{{ $formHolder->upsell->upsell_subheading }}">
+                                      <textarea name="upsell_heading" class="form-control" id="" cols="30" rows="3">{{ $formHolder->upsell->upsell_subheading }}</textarea>
+                                      
+                                    </div>
+
+                                    <div class="mt-3">
+                                      <label for="upsell_product" class="form-label">Select Template</label>
+                                      <select name="upsell_setting_id" data-live-search="true" class="custom-select form-control border btn-dark @error('upsell_product') is-invalid @enderror"
+                                                id="" style="color: black !important;">
+                                        <option value="{{ $formHolder->upsell->template->id }}" selected>{{ $formHolder->upsell->template->template_code }}</option>
+                                        @if (count($upsellTemplates) > 0)
+
+                                          @foreach ($upsellTemplates as $template)
+                                            <option value="{{ $template->id }}">{{ $template->template_code }}</option>
+                                          @endforeach
+
+                                        @endif
+                                
+                                      </select>
+
+                                      @error('upsell_product')
+                                        <span class="invalid-feedback mb-3" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                      @enderror
                                     </div>
 
                                     <div class="mt-3">
@@ -401,14 +424,37 @@
 
                                 <div class="mt-3">
                                   <label for="" class="form-label">Heading</label>
-                                  <input type="text" name="upsell_heading"  class="form-control" value="">
+                                  <textarea name="upsell_heading" class="form-control" id="" cols="30" rows="3"></textarea>
+                                  
                                 </div>
 
                                 <div class="mt-3">
                                   <label for="" class="form-label">Sub Heading</label>
-                                  <input type="text" name="upsell_subheading"  class="form-control" value="">
+                                  <textarea name="upsell_subheading" class="form-control" id="" cols="30" rows="3"></textarea>
                                 </div>
                                 
+                                <div class="mt-3">
+                                  <label for="upsell_product" class="form-label">Select Template</label>
+                                  <select name="upsell_setting_id" data-live-search="true" class="custom-select form-control border btn-dark @error('product') is-invalid @enderror"
+                                            id="" style="color: black !important;">
+                                    <option value="">Nothing Selected</option>
+                                    @if (count($upsellTemplates) > 0)
+
+                                    @foreach ($upsellTemplates as $template)
+                                      <option value="{{ $template->id }}">{{ $template->template_code }}</option>
+                                    @endforeach
+
+                                    @endif
+                            
+                                  </select>
+
+                                  @error('product')
+                                    <span class="invalid-feedback mb-3" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                  @enderror
+                                </div>
+
                                 <div class="mt-3">
                                   <label for="upsell_product" class="form-label">Select Product Package</label>
                                   <select name="upsell_product" data-live-search="true" class="custom-select form-control border btn-dark @error('product') is-invalid @enderror"

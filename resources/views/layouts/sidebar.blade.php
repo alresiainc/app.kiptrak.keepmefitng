@@ -287,10 +287,10 @@
       </a>
       <ul id="setting-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
         <li>
-          <a href="{{ route('addProduct') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>By Warehouse</span></a>
+          <a href="{{ route('allUpsellTemplates') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Upsell Templates</span></a>
         </li>
         <li>
-          <a href="{{ route('allProducts') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>By Agents</span></a>
+          <a href="{{ route('addUpsellTemplate') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>By Agents</span></a>
         </li>
       </ul>
     </li>

@@ -38,4 +38,9 @@ class UpSell extends Model
     {
         return $this->belongsTo(Product::class, 'product_id');  
     }
+
+    public function template()
+    {
+        return $this->belongsTo(UpsellSetting::class, 'upsell_setting_id');  
+    }
 }

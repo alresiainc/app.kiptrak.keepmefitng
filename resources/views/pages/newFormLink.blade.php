@@ -39,7 +39,7 @@
         <link href="{{asset('/customerform/assets/vendor/font-awesome/css/all.min.css')}}" type="text/css" rel="stylesheet">
 
         
-        <!-- Template Main CSS File -->
+        <!-- upsell->Template Main CSS File -->
         <link href="{{asset('/customerform/assets/css/ui.css')}}" rel="stylesheet">
         <link href="{{asset('/customerform/assets/css/form-style.css')}}" rel="stylesheet">
 
@@ -245,11 +245,18 @@
             <input type="hidden" name="has_upsell" class="has_upsell" value="{{ isset($formHolder->upsell_id) ? 'true' : 'false' }}">
             @if ($stage == "")  
             @if (isset($formHolder->upsell_id))
-                <div class="row view" id="upsell-section" style="display: none;">
                 
+                <div class="row view" id="upsell-section" style="display: none;">
+        
                     <div class="col-md-12">
         
-                        <article class="card">
+                        <article class="card @if($formHolder->upsell->template->body_border_radius != 'normal') {{ $formHolder->upsell->template->body_border_radius }} @endif"
+                            style="background-color: {{ $formHolder->upsell->template->body_bg_color }};
+                            border-style: {{ $formHolder->upsell->template->body_border_style }};
+                            border-color: {{ $formHolder->upsell->template->body_border_color }};
+                            border-width: {{ $formHolder->upsell->template->body_border_thickness }};
+                            "
+                            >
                             <div class="card-body">
                                 {{-- <h5 class="card-title">Contact info</h5> --}}
                                 <form action="">@csrf
@@ -259,11 +266,30 @@
                                         <div class="col-12 mb-3">
                                             <div class="d-flex justify-content-center">
                                                 <div class="content text-center p-3">
-                                                    <h3 class="heading">{{ $formHolder->upsell->upsell_heading }}</h3>
-                                                    <h4 class="subheading" style="color: #012970;">{{ $formHolder->upsell->upsell_subheading }}</h4>
                                                     
-                                                    <div class="upsell-product-image mb-3">
-                                                        <img src="{{ asset('/storage/products/'.$formHolder->upsell->product->image) }}" width="100" class="img-thumbnail img-fluid"
+                                                    <h3 class="heading text-{{ $formHolder->upsell->template->heading_text_align }} fst-{{ $formHolder->upsell->template->heading_text_style }}"
+                                                    style="color: {{ $formHolder->upsell->template->heading_text_color }};">{{ $formHolder->upsell->upsell_heading }}</h3>
+                                                    
+                                                    <h4 class="subheading text-{{ $formHolder->upsell->template->subheading_text_align }} fst-{{ $formHolder->upsell->template->subheading_text_style }}"
+                                                    style="color: {{ $formHolder->upsell->template->subheading_text_color }};">{{ $formHolder->upsell->upsell_subheading }}</h4>
+                                                    
+                                                    @if (isset($formHolder->upsell->template->description_text))
+                                                    
+                                                    <p class="description text-{{ $formHolder->upsell->template->description_text_align }} fst-{{ $formHolder->upsell->template->description_text_style }}"
+                                                    style="color: {{ $formHolder->upsell->template->description_text_color }};">
+                                                        {{ isset($upsell->upsell_description) ? $upsell->upsell_description : '' }}
+                                                    </p>
+
+                                                    @else
+
+                                                    <p class="description">
+                                                        {{ isset($upsell->upsell_description) ? $upsell->upsell_description : '' }}
+                                                    </p>
+                                                    
+                                                    @endif
+
+                                                    <div class="upsell-product-image mb-3" style="width: 400px; height:300px;">
+                                                        <img src="{{ asset('/storage/products/'.$formHolder->upsell->product->image) }}" class="img-thumbnail img-fluid"
                                                         alt="{{$formHolder->upsell->product->name}}">
                                                     </div>
         
@@ -273,15 +299,22 @@
                                                             <label for="upsell_product" class="form-label d-flex align-items-center">
                                                                 <input type="hidden" name="upsell_product" class="upsell_product_checkbox me-1" id="upsell_product"
                                                                 value="{{ $formHolder->upsell->product->id }}">
-                                                                <span>{{ $formHolder->upsell->product->name }} =
-                                                                    {{ $formHolder->upsell->product->country->symbol }}{{ $formHolder->upsell->product->price }}</span>
+                                                                
+                                                                <span class="text-{{ $formHolder->upsell->template->package_text_align }} fst-{{ $formHolder->upsell->template->package_text_style }}"
+                                                                    style="color: {{ $formHolder->upsell->template->package_text_color }};">
+                                                                    {{ $formHolder->upsell->product->name }} = {{ $formHolder->upsell->product->country->symbol }}{{ $formHolder->upsell->product->price }}
+                                                                </span>
+
                                                             </label>
                                                         </div>
                                                     </div>
 
                                                     <div class="make-your-choice d-flex justify-content-center">
     
-                                                        <button type="submit" class="btn w-100 p-2 text-white upsell_submit_btn" style="background-color: #012970;">ADD TO MY ORDER</button>
+                                                        {{-- <button type="submit" class="btn w-100 p-2 text-white upsell_submit_btn" style="background-color: #012970;">ADD TO MY ORDER</button> --}}
+
+                                                        <button type="submit" class="btn w-100 p-2 upsell_submit_btn text-{{ $formHolder->upsell->template->button_text_align }} fst-{{ $formHolder->upsell->template->button_text_style }}"
+                                                        style="background-color: {{ $formHolder->upsell->template->button_bg_color }}; color: {{ $formHolder->upsell->template->button_text_color }};">ADD TO MY ORDER</button>
     
                                                     </div>
                                                     
@@ -311,11 +344,11 @@
                     </div>
                     
                 </div>
+                    
+                
             @endif
             @endif
 
-        
-        
             <!-- THANKYOU VIEW -->
             @if ($stage != "") 
             <div class="view" id="thankyou-section" style="display: block;">
@@ -486,7 +519,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/0.9.0rc1/jspdf.min.js"></script>
-        <!-- Template Main JS File -->
+        <!-- upsell->Template Main JS File -->
         <script src="{{asset('/customerform/assets/js/main.js?v=42')}}"></script>
         <script src="{{asset('/customerform/assets/js/navigation.js?v=4')}}"></script>
 
