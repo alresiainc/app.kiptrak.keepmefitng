@@ -34,6 +34,8 @@ class DatabaseSeeder extends Seeder
             EmployeeSeeder::class,
             CategorySeeder::class,
             GeneralSettingSeeder::class,
+            RoleSeeder::class,
+            PermissionSeeder::class,
         ]);
     }
 }

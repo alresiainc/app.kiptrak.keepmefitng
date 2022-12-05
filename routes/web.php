@@ -253,6 +253,14 @@ Route::post('/general-setting', [GeneralSettingController::class, 'generalSettin
 Route::get('/purchase-revenue', [FinanceController::class, 'purchaseRevenue'])->name('purchaseRevenue');
 Route::get('/sales-revenue', [FinanceController::class, 'saleRevenue'])->name('saleRevenue');
 
+//allRole
+Route::get('/all-roles', [RoleController::class, 'allRole'])->name('allRole');
+Route::get('/add-role', [RoleController::class, 'addRole'])->name('addRole');
+Route::post('/add-role', [RoleController::class, 'addRolePost'])->name('addRolePost');
+Route::get('/view-role/{unique_key}', [RoleController::class, 'singleRole'])->name('singleRole');
+Route::get('/edit-role/{unique_key}', [RoleController::class, 'editRole'])->name('editRole');
+Route::post('/edit-role/{unique_key}', [RoleController::class, 'editRolePost'])->name('editRolePost');
+
 
 
 

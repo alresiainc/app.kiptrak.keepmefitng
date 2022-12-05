@@ -154,7 +154,7 @@
       </a>
       <ul id="hrm-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
         <li>
-          <a href="{{ route('addAccount') }}"><i style="font-size: 100%!important;" class="bi bi-list"></i><span>Department</span></a>
+          <a href="{{ route('allRole') }}"><i style="font-size: 100%!important;" class="bi bi-list"></i><span>Roles & Permissions</span></a>
         </li>
         <li>
           <a href="{{ route('allAccount') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Employee</span></a>
