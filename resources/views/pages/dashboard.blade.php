@@ -51,7 +51,7 @@
               <div class="text-start">
                 <h2 class="fw-bold">N{{ number_format((float)$purchases_due, 2, '.', '') }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold"
-                  >Purchase Due</small
+                  >Purchases</small
                 >
               </div>
               <div class="rounded-circle float-end">
@@ -70,7 +70,7 @@
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
                 <h2 class="fw-bold">N{{ number_format((float)$sales_due, 2, '.', ''); }}</h2>
-                <small class="text-uppercase small pt-1 fw-bold">Sales Due</small
+                <small class="text-uppercase small pt-1 fw-bold">Sales</small
                 >
               </div>
               <div class="rounded-circle float-end">
@@ -91,7 +91,7 @@
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
                 <h2 class="fw-bold">N{{ number_format((float)$sales_paid, 2, '.', ''); }}</h2>
-                <small class="text-uppercase small pt-1 fw-bold">Sales</small
+                <small class="text-uppercase small pt-1 fw-bold">Expenses</small
                 >
               </div>
               <div class="rounded-circle float-end">
@@ -110,7 +110,7 @@
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
                 <h2 class="fw-bold">N{{ number_format((float)$expenses, 2, '.', ''); }}</h2>
-                <small class="text-uppercase small pt-1 fw-bold">Expenses</small
+                <small class="text-uppercase small pt-1 fw-bold">Profit</small
                 >
               </div>
               <div class="rounded-circle float-end">

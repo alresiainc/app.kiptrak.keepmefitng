@@ -24,6 +24,10 @@ return new class extends Migration
             $table->string('color')->nullable();
             $table->string('size')->nullable();
             $table->string('country_id'); //will contain country_id
+            
+            $table->string('purchase_id');
+            $table->string('sale_id');
+
             $table->string('price');
             $table->string('code')->unique()->nullable();
             $table->longText('features')->nullable(); //serialized

@@ -29,9 +29,11 @@ return new class extends Migration
             // $table->integer('biller_id'); like created_by
             $table->string('product_id')->nullable();
             $table->string('product_qty_sold')->nullable(); //product_qty sold
+            $table->string('product_selling_price')->nullable();
 
             $table->string('outgoing_stock_id')->nullable();
 
+            $table->string('discount_type')->nullable(); //fixed or percentage
             $table->string('total_discount')->nullable();
             $table->string('total_tax')->nullable();
 

@@ -48,6 +48,7 @@ return new class extends Migration
             $table->string('amount_expected')->nullable(); //total when admin is preparing it
             $table->string('amount_realised')->nullable(); //total after customer paid
 
+            $table->string('delivery_duration')->nullable(); //in days //updated in //formBuilderContoller@newformlinkPost
             $table->string('delivery_going_time')->nullable(); //time agent took-off
             $table->string('delivery_meet_time')->nullable(); //time btwn take-off, and meeting customer
             $table->string('delivery_returning_time')->nullable(); //time agent got home

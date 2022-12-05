@@ -26,13 +26,15 @@ return new class extends Migration
 
             $table->string('product_id')->nullable(); //product table will be updated here, due to change in cost price & qty
             $table->string('product_qty_purchased')->nullable(); //new qty added
+            $table->string('product_purchase_price')->nullable(); //actual product price
             $table->string('incoming_stock_id')->nullable(); //used in editing to check which stock to update
 
             $table->string('amount_due')->nullable(); //amt remaining if amt not paid
-            $table->string('amount_paid')->nullable();
+            $table->string('amount_paid')->nullable(); //
 
             $table->string('order_tax')->nullable(); //will affect the product price
-            $table->string('discount')->nullable(); //will affect the product price
+            $table->string('discount_type')->nullable(); //fixed or percentage
+            $table->string('total_discount')->nullable(); //will affect the product price
             $table->string('shipping_cost')->nullable(); //will affect the product price
 
             $table->string('payment_type')->nullable(); //cash, card, cheque, bank_transfer

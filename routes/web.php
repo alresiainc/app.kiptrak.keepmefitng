@@ -245,5 +245,9 @@ Route::post('/add-upsell-templates', [UpsellSettingController::class, 'addUpsell
 Route::get('/edit-upsell-templates/{unique_key}', [UpsellSettingController::class, 'editUpsellTemplate'])->name('editUpsellTemplate');
 Route::post('/edit-upsell-templates/{unique_key}', [UpsellSettingController::class, 'editUpsellTemplatePost'])->name('editUpsellTemplatePost');
 
+//generalSetting
+Route::get('/general-setting', [GeneralSettingController::class, 'generalSetting'])->name('generalSetting');
+Route::post('/general-setting', [GeneralSettingController::class, 'generalSettingPost'])->name('generalSettingPost');
+
 
 

@@ -740,7 +740,8 @@ class FormBuilderController extends Controller
             'state' => 'required',
             'city' => 'required',
             'address' => 'required',
-            'product_packages' => 'required'
+            'delivery_duration' => 'required',
+            'product_packages' => 'required',
         ]);
 
         if (!empty($request->orderbump_check)) {
@@ -811,7 +812,7 @@ class FormBuilderController extends Controller
         $customer->save();
 
         //update order status
-        $order->update(['customer_id'=>$customer->id, 'status'=>'pending']);
+        $order->update(['customer_id'=>$customer->id, 'delivery_duration'=>$data['delivery_duration'], 'status'=>'pending']);
 
         //to activate psell & thankyou part
         if ($request->upsell_available != '') {

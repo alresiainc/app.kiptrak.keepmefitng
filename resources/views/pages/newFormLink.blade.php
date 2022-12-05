@@ -43,6 +43,19 @@
         <link href="{{asset('/customerform/assets/css/ui.css')}}" rel="stylesheet">
         <link href="{{asset('/customerform/assets/css/form-style.css')}}" rel="stylesheet">
 
+        <style>
+            /* select2 height proper */
+        .select2-selection__rendered {
+            line-height: 31px !important;
+        }
+        .select2-container .select2-selection--single {
+            height: 35px !important;
+        }
+        .select2-selection__arrow {
+            height: 34px !important;
+        }
+        </style>
+
         
     </head>
 
@@ -51,13 +64,13 @@
         <!-- will be shown in singlelink-->
     <nav class="navbar bg-light sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="/">
             <img src="{{asset('/customerform/assets/img/logo.png')}}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
             <span class="project-name"></span>
             </a>
         </div>
     </nav>
-
+    
     <main class="container mb-5 py-5 min-vh-100">
         
         @if(Session::has('success'))
@@ -92,18 +105,22 @@
                             <form action="">@csrf
                                 
                                 <div class="row">
-
+                                    
                                     @foreach ($formContact as $contact)
-                                    @if (($contact['form_name']) !== 'Product Package')
+                                    @if (($contact['form_name']) != 'product-package')
                                     <div class="col-lg-6 mb-3 contact-parent">
                                         <label class="form-label">{{ $contact['form_label'] }}</label>
+
                                         @if($contact['form_type'] == 'text_field')
+
                                         <input type="{{ $contact['form_name'] == 'active-email' ? 'email' : 'text' }}"
                                         data-name="{{ $contact['form_name'] }}"
                                         class="contact-input form-control {{ $contact['form_name'] }} @error($contact['form_name']) is-invalid @enderror"
                                         placeholder="Type here" @if($contact['form_name'] != 'active-email') required @endif>
                                         {{-- @elseif other field types will fall here --}}
+
                                         @endif
+
                                         <!--if such error-->
                                         @error($contact['form_name'])
                                             <span class="invalid-feedback" role="alert">
@@ -114,6 +131,27 @@
                                     </div> <!-- col end.// -->
                                     @endif
                                     @endforeach
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="" class="form-label">Select how long you want the order to be delivered *</label>
+                                        <select name="delivery_duration" class="select2 form-control border @error('delivery_duration') is-invalid @enderror" id="">
+                                          <option value="1">1 day</option>
+                                          <option value="2">2 days</option>
+                                          <option value="3">3 days</option>
+                                          <option value="4">4 days</option>
+                                          <option value="5">5 days</option>
+                                          <option value="6">6 days</option>
+                                          <option value="7">7 days</option>
+                
+                                        </select>
+                                        @error('delivery_duration')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                    
+                                    
                                     <input type="hidden" name="formholder_unique_key" class="formholder_unique_key" value="{{ $unique_key }}">
                                     
                                     <hr>
