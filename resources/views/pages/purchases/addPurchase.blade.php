@@ -43,6 +43,12 @@
     </div>
     @endif
 
+    @if(Session::has('duplicate_error'))
+    <div class="alert alert-danger mb-3 text-center">
+        {{Session::get('duplicate_error')}}
+    </div>
+    @endif
+
     <section>
       <div class="row">
         <div class="col-md-12">
@@ -97,8 +103,10 @@
 
                     @foreach ($products as $product)
                         <!---1-30-3000--->
-                        <option value="{{ $product->code }}|{{ $product->name }}|{{ $product->id }}|{{ $product->price }}">
-                            {{ $product->code }} | {{ $product->name }}
+                        <option value="{{ $product->code }}|{{ $product->name }}|{{ $product->id }}|{{ $product->purchase_price }}">
+                            {{ $product->code }} | {{ $product->name }} | Stock: {{ $product->stock_available() }}
+                            @if (isset($product->purchase_price)) | Purchase Price: {{ $product->purchase_price }} @endif
+                            @if (isset($product->sale_price)) | Selling Price: {{ $product->sale_price }} @endif
                         </option>
                     @endforeach
                         

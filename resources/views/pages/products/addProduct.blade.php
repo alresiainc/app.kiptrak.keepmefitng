@@ -83,6 +83,26 @@
                   @enderror
                 </div>
 
+                <div class="col-md-4">
+                  <label for="" class="form-label">Unit Purchase Price<span class="text-danger fw-bolder">*</span></label>
+                  <input type="number" name="purchase_price" class="form-control @error('purchase_price') is-invalid @enderror" placeholder="" value="{{ old('purchase_price') }}">
+                  @error('purchase_price')
+                      <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                      </span>
+                  @enderror
+                </div>
+
+                <div class="col-md-4">
+                  <label for="" class="form-label">Selling Price (optional)</label>
+                  <input type="number" name="sale_price" class="form-control @error('price') is-invalid @enderror" placeholder="" value="{{ old('price') }}">
+                  @error('price')
+                      <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                      </span>
+                  @enderror
+                </div>
+
                 <!--unit taken care-of by size-->
                 {{-- <div class="col-md-4">
                   <label for="" class="form-label">Unit | optional</label>
@@ -124,15 +144,7 @@
                   @enderror
                 </div>
                 
-                <div class="col-md-4">
-                  <label for="" class="form-label">Unit Price<span class="text-danger fw-bolder">*</span></label>
-                  <input type="number" name="price" class="form-control @error('price') is-invalid @enderror" placeholder="" value="{{ old('price') }}">
-                  @error('price')
-                      <span class="invalid-feedback" role="alert">
-                          <strong>{{ $message }}</strong>
-                      </span>
-                  @enderror
-                </div>
+                
 
                 <div class="col-md-4">
                   <label for="" class="form-label">Unique Code | optional</label>

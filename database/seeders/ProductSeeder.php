@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Product;
+use App\Models\Purchase;
 
 class ProductSeeder extends Seeder
 {
@@ -22,7 +23,9 @@ class ProductSeeder extends Seeder
         $product->color = 'Light Yellow';
         $product->size = '30kg';
         $product->country_id = 1;
-        $product->price = 1000;
+        $product->purchase_price = 1000;
+        $product->sale_price = 1500;
+        $product->purchase_id = 1;
         $product->code = 'CF001';
         $product->features = !empty($features1) ? serialize($features1) : null;
         $product->warehouse_id = '1';
@@ -31,6 +34,7 @@ class ProductSeeder extends Seeder
         $product->image = '1.jpg';
         $product->save();
 
+        
         //product2
         $features2 = ['Result Oriented Mix', 'Daily Impact',  'Quickly Adapt to new Changes',];
         $product = new Product();
@@ -39,7 +43,9 @@ class ProductSeeder extends Seeder
         $product->color = 'Black';
         $product->size = '30kg';
         $product->country_id = 1;
-        $product->price = 1500;
+        $product->purchase_price = 1500;
+        $product->sale_price = 1800;
+        $product->purchase_id = 2;
         $product->code = 'CF002';
         $product->features = !empty($features2) ? serialize($features2) : null;
         $product->warehouse_id = '1';
@@ -56,7 +62,9 @@ class ProductSeeder extends Seeder
         $product->color = 'White';
         $product->size = '50kg';
         $product->country_id = 1;
-        $product->price = 2000;
+        $product->purchase_price = 2000;
+        $product->sale_price = 2500;
+        $product->purchase_id = 3;
         $product->code = 'CF003';
         $product->features = !empty($features3) ? serialize($features3) : null;
         $product->warehouse_id = '1';
@@ -73,7 +81,9 @@ class ProductSeeder extends Seeder
         $product->color = 'White';
         $product->size = '50kg';
         $product->country_id = 1;
-        $product->price = 5000;
+        $product->purchase_price = 5000;
+        $product->sale_price = 5500;
+        $product->purchase_id = 4;
         $product->code = 'CF004';
         $product->features = !empty($features4) ? serialize($features4) : null;
         $product->warehouse_id = '1';
@@ -90,7 +100,9 @@ class ProductSeeder extends Seeder
         // $product->color = 'White';
         $product->size = '50kg';
         $product->country_id = 1;
-        $product->price = 1000;
+        $product->purchase_price = 1000;
+        $product->sale_price = 1200;
+        $product->purchase_id = 5;
         $product->code = 'CF005';
         $product->features = !empty($features4) ? serialize($features5) : null;
         $product->warehouse_id = '1';

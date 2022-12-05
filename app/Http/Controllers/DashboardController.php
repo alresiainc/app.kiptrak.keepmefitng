@@ -9,7 +9,7 @@ use App\Models\Sale;
 use App\Models\Expense;
 use App\Models\Customer;
 use App\Models\Supplier;
-
+use App\Models\GeneralSetting;
 
 
 class DashboardController extends Controller
@@ -27,10 +27,14 @@ class DashboardController extends Controller
             ->setLabels(['Sales', 'Deposit'])
             ->setDataset('Income by Category', 'donut', [1907, 1923]); //not used
 
-        $purchases_due = Purchase::sum('amount_due');
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+
+        $purchases_amount_paid = Purchase::sum('amount_paid');
         $sales_due = Sale::sum('amount_due');
         $sales_paid = Sale::sum('amount_paid');
         $expenses = Expense::sum('amount');
+
+        $profit = $sales_paid - $purchases_amount_paid;
 
         $customers_count = Customer::count();
         $suppliers_count = Supplier::count();
@@ -38,10 +42,12 @@ class DashboardController extends Controller
         $salesInvoice = Sale::where('parent_id', null)->count();
         $purchasesInvoice = Purchase::where('parent_id', null)->count();
 
+        $sales_count = Sale::count();
+
         $invoices_count = $salesInvoice + $purchasesInvoice;
 
-        return view('pages.dashboard', compact('chart', 'purchases_due', 'sales_due', 'sales_paid', 'expenses',
-        'customers_count', 'suppliers_count', 'purchases_count', 'invoices_count'));
+        return view('pages.dashboard', compact('chart', 'generalSetting', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit',
+        'customers_count', 'suppliers_count', 'purchases_count', 'sales_count','invoices_count'));
     }
 
     /**

@@ -249,5 +249,10 @@ Route::post('/edit-upsell-templates/{unique_key}', [UpsellSettingController::cla
 Route::get('/general-setting', [GeneralSettingController::class, 'generalSetting'])->name('generalSetting');
 Route::post('/general-setting', [GeneralSettingController::class, 'generalSettingPost'])->name('generalSettingPost');
 
+//generalSetting
+Route::get('/purchase-revenue', [FinanceController::class, 'purchaseRevenue'])->name('purchaseRevenue');
+Route::get('/sales-revenue', [FinanceController::class, 'saleRevenue'])->name('saleRevenue');
+
+
 
 

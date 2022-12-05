@@ -125,8 +125,10 @@
                     
                     @foreach ($products as $product)
                         <!---1-30-3000--->
-                        <option value="{{ $product->code }}|{{ $product->name }}|{{ $product->id }}|{{ $product->price }}">
+                        <option value="{{ $product->code }}|{{ $product->name }}|{{ $product->id }}|{{ $product->sale_price }}">
                             {{ $product->code }} | {{ $product->name }} | Stock: {{ $product->stock_available() }}
+                            @if (isset($product->purchase_price)) | Purchase Price {{ $product->purchase_price }} @endif
+                            @if (isset($product->sale_price)) | Selling Price {{ $product->sale_price }} @endif
                         </option>
                     @endforeach
                         
@@ -165,10 +167,10 @@
                                 </td>
 
                                 <td style='width:150px'><input type='number' name='unit_price[]' class='form-control unit-price'
-                                    value='{{ $sale->product->price }}'>
+                                    value='{{ $sale->product->sale_price }}'>
                                 </td>
 
-                                <td class="total">{{ $sale->product->price * $sale->product_qty_sold }}</td>
+                                <td class="total">{{ $sale->product->sale_price * $sale->product_qty_sold }}</td>
                                 <td class='btnDelete btn btn-danger btn-sm mt-1 mb-1'>Remove</td>
                             </tr>
                         @endforeach

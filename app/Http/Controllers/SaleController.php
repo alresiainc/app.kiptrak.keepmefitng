@@ -61,6 +61,21 @@ class SaleController extends Controller
         ]);
 
         $data = $request->all();
+        //duplicate. break fxn here
+        $dup = [];
+        foreach($data['product_id'] as $key => $id){
+            if(!empty($id)){
+                
+                if(!in_array($id, $dup)){
+                    $dup[] = $id;
+                
+                } else {
+                    return back()->with('duplicate_error', 'Duplicate Product Detected. You can increase quantity accordingly');
+                }
+            }
+            
+        }
+
         $sale_code = 'kps-' . date("Ymd") . '-'. date("his");
 
         $imageName = '';
@@ -90,9 +105,6 @@ class SaleController extends Controller
 
                 $grand_total += $data['product_qty'][$key] * $data['unit_price'][$key];
 
-                //update product <price></price>
-                Product::where(['id'=>$id])->update(['price'=>$data['unit_price'][$key]]);
-
                 //update product stock
                 $outgoingStock = new OutgoingStock();
                 $outgoingStock->product_id = $id;
@@ -116,9 +128,10 @@ class SaleController extends Controller
                 $sale->product_id = $id;
 
                 $sale->product_qty_sold = $data['product_qty'][$key];
+                $sale->product_selling_price = $data['unit_price'][$key];
                 $sale->outgoing_stock_id = $outgoingStock->id;
-                $sale->amount_due = $data['product_qty'][$key] * $data['unit_price'][$key];
-                $sale->amount_paid = 0;
+                $sale->amount_due = $data['payment_status'] == 'paid' ? 0 : $data['product_qty'][$key] * $data['unit_price'][$key];
+                $sale->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key];
 
                 $sale->payment_status = $data['payment_status'];
                 $sale->note = !empty($data['note']) ? $data['note'] : null;
@@ -130,6 +143,8 @@ class SaleController extends Controller
 
                 $sale->save();
 
+                //update product <price></price>
+                Product::where(['id'=>$id])->update(['sale_id'=>$sale->id,'sale_price'=>$data['unit_price'][$key]]);
 
             }
         }
@@ -192,8 +207,20 @@ class SaleController extends Controller
             'attached_document' => 'nullable|mimes:jpg, jpeg, png, pdf, csv, docx, xlsx, txt, gif, svg, webp|max:2048',
         ]);
 
-
         $data = $request->all();
+
+        $dup = [];
+        foreach($data['product_id'] as $key => $id){
+            if(!empty($id)){
+                
+                if(!in_array($id, $dup)){
+                    $dup[] = $id;
+                
+                } else {
+                    return back()->with('duplicate_error', 'Duplicate Product Detected. You can increase quantity accordingly');
+                }
+            }
+        }
 
         $sale_code = $sale->sale_code;
 
@@ -228,11 +255,13 @@ class SaleController extends Controller
                 
                 $parent_sale = Sale::where('sale_code', $sale->sale_code);
 
-                Product::where(['id'=>$id])->update(['price'=>$data['unit_price'][$key]]);
-
                 $grand_total += $data['product_qty'][$key] * $data['unit_price'][$key];
 
                 $existing_sale = $parent_sale->where('product_id', $id);
+
+                //update product <price></price>
+                Product::where(['id'=>$id])->update(['sale_id'=>$existing_sale->first()->id,'sale_price'=>$data['unit_price'][$key]]);
+
                 if ($existing_sale->exists()) {
                     
                     $existing_sale->update([
@@ -241,8 +270,8 @@ class SaleController extends Controller
                         'sale_date' => $data['sale_date'],
                         'product_id' => $id,
                         'product_qty_sold' => $data['product_qty'][$key],
-                        'amount_due' => $data['product_qty'][$key] * $data['unit_price'][$key],
-                        'amount_paid' => 0,
+                        'amount_due' => $data['payment_status'] == 'paid' ? 0 : $data['product_qty'][$key] * $data['unit_price'][$key],
+                        'amount_paid' => $data['product_qty'][$key] * $data['unit_price'][$key],
 
                         'payment_status' => $data['payment_status'],
                         'note' => !empty($data['note']) ? $data['note'] : null,
@@ -294,8 +323,8 @@ class SaleController extends Controller
 
                     $sale->product_qty_sold = $data['product_qty'][$key];
                     $sale->outgoing_stock_id = $outgoingStock->id;
-                    $sale->amount_due = $data['product_qty'][$key] * $data['unit_price'][$key];
-                    $sale->amount_paid = 0;
+                    $sale->amount_due = $data['payment_status'] == 'paid' ? 0 : $data['product_qty'][$key] * $data['unit_price'][$key];
+                    $sale->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key];
 
                     $sale->payment_status = $data['payment_status'];
                     $sale->note = !empty($data['note']) ? $data['note'] : null;
@@ -306,6 +335,9 @@ class SaleController extends Controller
                     $sale->status = $data['sale_status'];
 
                     $sale->save();
+
+                    //update product <price></price>
+                    Product::where(['id'=>$id])->update(['sale_id'=>$sale->id,'sale_price'=>$data['unit_price'][$key]]);
 
                     //for balanceSheet accounting
                     $payment = new Payment;

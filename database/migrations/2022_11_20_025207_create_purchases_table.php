@@ -26,7 +26,7 @@ return new class extends Migration
 
             $table->string('product_id')->nullable(); //product table will be updated here, due to change in cost price & qty
             $table->string('product_qty_purchased')->nullable(); //new qty added
-            $table->string('product_purchase_price')->nullable(); //actual product price
+            $table->string('product_purchase_price')->nullable(); //product unit price
             $table->string('incoming_stock_id')->nullable(); //used in editing to check which stock to update
 
             $table->string('amount_due')->nullable(); //amt remaining if amt not paid

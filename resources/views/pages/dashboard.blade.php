@@ -49,7 +49,7 @@
           <div class="card-body p-2">
             <div class="d-flex justify-content-between align-items-center">
               <div class="text-start">
-                <h2 class="fw-bold">N{{ number_format((float)$purchases_due, 2, '.', '') }}</h2>
+                <h2 class="fw-bold">{{ $generalSetting->country->symbol }}{{ number_format((float)$purchases_amount_paid, 2, '.', ',') }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold"
                   >Purchases</small
                 >
@@ -69,7 +69,7 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
-                <h2 class="fw-bold">N{{ number_format((float)$sales_due, 2, '.', ''); }}</h2>
+                <h2 class="fw-bold">{{ $generalSetting->country->symbol }}{{ number_format((float)$sales_paid, 2, '.', ''); }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold">Sales</small
                 >
               </div>
@@ -90,7 +90,7 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
-                <h2 class="fw-bold">N{{ number_format((float)$sales_paid, 2, '.', ''); }}</h2>
+                <h2 class="fw-bold">{{ $generalSetting->country->symbol }}{{ number_format((float)$expenses, 2, '.', ','); }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold">Expenses</small
                 >
               </div>
@@ -109,7 +109,14 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
-                <h2 class="fw-bold">N{{ number_format((float)$expenses, 2, '.', ''); }}</h2>
+                <h2 class="fw-bold">
+                  @if ($profit > 0)
+                  {{ $generalSetting->country->symbol }}{{ number_format((float)$profit, 2, '.', ','); }}
+                  @else
+                  ({{ number_format((float)abs($profit), 2, '.', ','); }})
+                  @endif
+                  
+                </h2>
                 <small class="text-uppercase small pt-1 fw-bold">Profit</small
                 >
               </div>
@@ -189,12 +196,12 @@
             <div class="d-flex align-items-center justify-content-start">
               <div class="border rounded shadow-sm px-2 me-2">
                 <i
-                  class="bi bi-file-earmark-pdf display-1 text-light-black"
+                  class="bi bi-receipt display-1 text-light-black"
                 ></i>
               </div>
               <div class="text-start">
-                <h2 class="fw-bold">{{ $invoices_count }}</h2>
-                <small class="text-uppercase text-muted small pt-1 fw-bold">Invoices</small
+                <h2 class="fw-bold">{{ $sales_count }}</h2>
+                <small class="text-uppercase text-muted small pt-1 fw-bold">Sales</small
                 >
               </div>
             </div>

@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             EmployeeSeeder::class,
             CategorySeeder::class,
+            GeneralSettingSeeder::class,
         ]);
     }
 }

@@ -52,6 +52,21 @@ class PurchaseController extends Controller
 
         $data = $request->all();
 
+        //duplicate. break fxn here
+        $dup = [];
+        foreach($data['product_id'] as $key => $id){
+            if(!empty($id)){
+                
+                if(!in_array($id, $dup)){
+                    $dup[] = $id;
+                
+                } else {
+                    return back()->with('duplicate_error', 'Duplicate Product Detected. You can increase quantity accordingly');
+                }
+            }
+            
+        }
+
         $imageName = '';
         if ($request->attached_document) {
             //image
@@ -60,18 +75,20 @@ class PurchaseController extends Controller
             $request->attached_document->storeAs('purchase', $imageName, 'public');
         }
 
+        //normal looping
         foreach ($data['product_id'] as $key => $id) {
             if(!empty($id)){
-                $parent_purchase = Purchase::where('purchase_code', $data['purchase_code']);
 
-                //update product price
-                Product::where(['id'=>$id])->update(['price'=>$data['unit_price'][$key]]);
+                $parent_purchase = Purchase::where('purchase_code', $data['purchase_code']); //for grouping purchases
+
+                //update product purchase price currently
+                Product::where(['id'=>$id])->update(['purchase_price'=>$data['unit_price'][$key]]);
 
                 //update product stock
                 $incomingStock = new IncomingStock();
                 $incomingStock->product_id = $id;
                 $incomingStock->quantity_added = $data['product_qty'][$key];
-                $incomingStock->reason_added = 'as_new_product'; //as_new_product, as_returned_product, as_administrative
+                $incomingStock->reason_added = 'as_purchase'; //as_new_product, as_returned_product, as_purchase
                 $incomingStock->created_by = 1;
                 $incomingStock->status = 'true';
                 $incomingStock->save();
@@ -85,8 +102,10 @@ class PurchaseController extends Controller
                 $purchase->product_id = $id;
                 $purchase->product_qty_purchased = $data['product_qty'][$key];
                 $purchase->incoming_stock_id = $incomingStock->id;
+
+                $purchase->product_purchase_price = $data['unit_price'][$key];
                 $purchase->amount_due = $data['product_qty'][$key] * $data['unit_price'][$key];
-                $purchase->amount_paid = 0;
+                $purchase->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key]; //u cant owe as d admin
 
                 $purchase->payment_type = $data['payment_type'];
                 $purchase->note = !empty($data['note']) ? $data['note'] : null;

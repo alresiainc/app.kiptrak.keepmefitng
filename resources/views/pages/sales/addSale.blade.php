@@ -124,8 +124,11 @@
 
                     @foreach ($products as $product)
                         <!---1-30-3000--->
-                        <option value="{{ $product->code }}|{{ $product->name }}|{{ $product->id }}|{{ $product->price }}">
+                        <option value="{{ $product->code }}|{{ $product->name }}|{{ $product->id }}|{{ isset($product->sale_price) ? $product->sale_price : $product->purchase_price }}">
                             {{ $product->code }} | {{ $product->name }} | Stock: {{ $product->stock_available() }}
+                            @if (isset($product->purchase_price)) | Purchase Price {{ $product->purchase_price }} @endif
+                            @if (isset($product->sale_price)) | Selling Price {{ $product->sale_price }} @endif
+                                 
                         </option>
                     @endforeach
                         

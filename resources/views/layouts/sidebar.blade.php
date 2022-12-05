@@ -2,7 +2,7 @@
 
   <ul class="sidebar-nav" id="sidebar-nav">
       
-    <li class="nav-item"><a class="nav-link" data-bs-target="#dashboard-nav" href="./">
+    <li class="nav-item"><a class="nav-link" data-bs-target="#dashboard-nav" href="/">
       <i class="bi bi-grid"></i><span>Dashboard</span></a>
       <ul id="dashboard-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav"></ul>
     </li>
@@ -125,7 +125,7 @@
     </li>
 
     <!---accounts--->
-    <li class="nav-item">
+    <li class="nav-item d-none">
       <a class="nav-link collapsed" data-bs-target="#accounts-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-bank"></i>
         <span>Accounting</span><i class="bi bi-chevron-down ms-auto"></i>
@@ -240,10 +240,13 @@
       </a>
       <ul id="finance-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
         <li>
-          <a href="{{ route('addProduct') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>By Warehouse</span></a>
+          <a href="{{ route('purchaseRevenue') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Purchase Revenue</span></a>
         </li>
         <li>
-          <a href="{{ route('allProducts') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>By Agents</span></a>
+          <a href="{{ route('saleRevenue') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Sales Revenue</span></a>
+        </li>
+        <li class="d-none">
+          <a href="{{ route('allProducts') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Gross Profit</span></a>
         </li>
       </ul>
     </li>

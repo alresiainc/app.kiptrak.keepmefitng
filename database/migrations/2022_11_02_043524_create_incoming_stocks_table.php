@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('product_id')->nullable();
             $table->longText('unique_key')->nullable();
             $table->string('quantity_added')->nullable();
-            $table->string('reason_added')->nullable(); //as_new_product, as_returned_product, as_administrative
+            $table->string('reason_added')->nullable(); //as_new_product, as_returned_product, as_administrative(purchased)
 
             $table->string('created_by');
             $table->string('status'); //'true','false'

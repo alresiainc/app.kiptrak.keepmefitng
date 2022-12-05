@@ -51,7 +51,7 @@ class ProductController extends Controller
             // 'color' => 'nullable|string',
             // 'size' => 'nullable|string',
             'currency' => 'required',
-            'price' => 'required|numeric',
+            'purchase_price' => 'required|numeric',
             'code' => 'nullable|string|unique:products',
             // 'features' => 'nullable|array',
             //'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
@@ -67,7 +67,7 @@ class ProductController extends Controller
         $product->color = !empty($data['color']) ? $data['color'] : null;
         $product->size = !empty($data['size']) ? $data['size'] : null;
         $product->country_id = $data['currency']; //country_id
-        $product->price = $data['price'];
+        $product->purchase_price = $data['purchase_price'];
 
         if (empty($data['code'])) {
             $count = Product::count() + 1;
@@ -97,6 +97,29 @@ class ProductController extends Controller
         $incomingStock->created_by = '1';
         $incomingStock->status = 'true';
         $incomingStock->save();
+
+        //Purchase
+        $purchase = new Purchase();
+        $purchase_code = 'kpa-' . date("Ymd") . '-'. date("his");
+        $purchase->purchase_code = $purchase_code;
+        
+        $purchase->product_id = $product->id;
+        $purchase->product_qty_purchased = $data['quantity'];
+        $purchase->incoming_stock_id = $incomingStock->id;
+
+        $purchase->product_purchase_price = $data['purchase_price']; //per unit
+        $purchase->amount_due = $data['quantity'] * $data['purchase_price'];
+        $purchase->amount_paid = $data['quantity'] * $data['purchase_price']; //u cant owe as d admin
+
+        $purchase->payment_type = 'cash';
+        $purchase->note = 'Product added from system';
+
+        $purchase->created_by = 1;
+        $purchase->status = 'received';
+
+        $purchase->save();
+
+        $product->update(['purchase_id', $purchase->id]);
 
         return back()->with('success', 'Product Created Successfully');
 

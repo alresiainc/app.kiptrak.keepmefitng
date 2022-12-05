@@ -23,12 +23,15 @@ return new class extends Migration
             $table->string('quantity_limit')->nullable(); //lessthan this is out-of-stock
             $table->string('color')->nullable();
             $table->string('size')->nullable();
-            $table->string('country_id'); //will contain country_id
+            $table->string('country_id')->nullable(); //will contain country_id
             
-            $table->string('purchase_id');
-            $table->string('sale_id');
+            $table->string('purchase_price')->nullable(); //currently
+            $table->string('sale_price')->nullable(); //currently
 
-            $table->string('price');
+            $table->string('purchase_id')->nullable(); //in product update, to knw the exact purchase to update
+            $table->string('sale_id')->nullable();
+
+            $table->string('price')->nullable(); //might not be in use
             $table->string('code')->unique()->nullable();
             $table->longText('features')->nullable(); //serialized
 
