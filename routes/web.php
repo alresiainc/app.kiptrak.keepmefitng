@@ -261,6 +261,14 @@ Route::get('/view-role/{unique_key}', [RoleController::class, 'singleRole'])->na
 Route::get('/edit-role/{unique_key}', [RoleController::class, 'editRole'])->name('editRole');
 Route::post('/edit-role/{unique_key}', [RoleController::class, 'editRolePost'])->name('editRolePost');
 
+//allAttendance
+Route::get('/all-attendances', [AttendanceController::class, 'allAttendance'])->name('allAttendance');
+Route::get('/add-attendance', [AttendanceController::class, 'addAttendance'])->name('addAttendance');
+Route::post('/add-attendance', [AttendanceController::class, 'addAttendancePost'])->name('addAttendancePost');
+Route::get('/view-attendance/{unique_key}', [AttendanceController::class, 'singleAttendance'])->name('singleAttendance');
+Route::get('/edit-attendance/{unique_key}', [AttendanceController::class, 'editAttendance'])->name('editAttendance');
+Route::post('/edit-attendance/{unique_key}', [AttendanceController::class, 'editAttendancePost'])->name('editAttendancePost');
+
 
 
 

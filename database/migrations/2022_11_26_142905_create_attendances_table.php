@@ -20,8 +20,8 @@ return new class extends Migration
 
             $table->string('date')->nullable();
             $table->string('employee_id')->nullable();
-            $table->string('checkin')->nullable();
-            $table->string('checkout')->nullable();
+            $table->string('check_in')->nullable();
+            $table->string('check_out')->nullable();
             $table->string('daily_status')->nullable(); //late, present, absent
             $table->string('note')->nullable();
             
