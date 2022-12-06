@@ -32,4 +32,10 @@ class Payroll extends Model
 
         return $string;
     }
+
+    public function employee()
+    {
+        return $this->belongsTo(User::class, 'employee_id');  
+    }
+    
 }

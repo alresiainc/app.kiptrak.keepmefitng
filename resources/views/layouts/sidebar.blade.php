@@ -163,7 +163,7 @@
           <a href="{{ route('allAttendance') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Attendance</span></a>
         </li>
         <li>
-          <a href="{{ route('allMoneyTransfer') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Payroll</span></a>
+          <a href="{{ route('allPayroll') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Payroll</span></a>
         </li>
       </ul>
     </li>

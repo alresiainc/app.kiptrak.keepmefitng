@@ -269,6 +269,15 @@ Route::get('/view-attendance/{unique_key}', [AttendanceController::class, 'singl
 Route::get('/edit-attendance/{unique_key}', [AttendanceController::class, 'editAttendance'])->name('editAttendance');
 Route::post('/edit-attendance/{unique_key}', [AttendanceController::class, 'editAttendancePost'])->name('editAttendancePost');
 
+//allPayroll
+Route::get('/all-payrolls', [PayrollController::class, 'allPayroll'])->name('allPayroll');
+Route::get('/add-payroll', [PayrollController::class, 'addPayroll'])->name('addPayroll');
+Route::post('/add-payroll', [PayrollController::class, 'addPayrollPost'])->name('addPayrollPost');
+Route::get('/view-payroll/{unique_key}', [PayrollController::class, 'singlePayroll'])->name('singlePayroll');
+Route::get('/edit-payroll/{unique_key}', [PayrollController::class, 'editPayroll'])->name('editPayroll');
+Route::post('/edit-payroll/{unique_key}', [PayrollController::class, 'editPayrollPost'])->name('editPayrollPost');
+Route::get('/delete-payroll/{unique_key}', [PayrollController::class, 'deletePayroll'])->name('deletePayroll');
+
 
 
 
