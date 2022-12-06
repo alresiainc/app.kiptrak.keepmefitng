@@ -22,6 +22,7 @@ class UserSeeder extends Seeder
         $user->email = 'super@email.com';
         $user->password = Hash::make('password');
         $user->type = 'superadmin';
+        $user->isSuperAdmin = true;
 
         $user->phone_1 = '01011223344';
         $user->phone_2 = '03011423644';

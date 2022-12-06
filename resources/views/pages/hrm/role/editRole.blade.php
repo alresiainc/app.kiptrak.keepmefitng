@@ -63,7 +63,7 @@
                                 </figure>                            
                             </div>
 
-                            <button type="button" class="btn btn-sm text-white"
+                            <button type="button" class="btn btn-sm text-white d-none"
                                 style="background-color: #093040; height: 30px;"
                                 data-bs-target="#importModal" data-bs-toggle="modal" data-bs-placement="auto" data-bs-title="Export Data">
                                 <i class="fa fa-plus"></i>

@@ -50,6 +50,7 @@
                   <tr>
                       <th>Name</th>
                       <th>Permissions</th>
+                      <th>Staff Assigned</th>
                       <th>Created By</th>
                       <th>Date Created</th>
                       <th>Action</th>
@@ -62,6 +63,7 @@
                       
                       <td>{{ $role->name }}</td>
                       <td>{{ $role->permissions->count() }}</td>
+                      <td>{{ $role->users->count() }}</td>
                       
                       <td>Ugo Sunday</td>
                       

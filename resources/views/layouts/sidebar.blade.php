@@ -157,7 +157,7 @@
           <a href="{{ route('allRole') }}"><i style="font-size: 100%!important;" class="bi bi-list"></i><span>Roles & Permissions</span></a>
         </li>
         <li>
-          <a href="{{ route('allAccount') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Employee</span></a>
+          <a href="{{ route('allStaff') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Employee</span></a>
         </li>
         <li>
           <a href="{{ route('allMoneyTransfer') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Attendance</span></a>

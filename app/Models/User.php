@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\UserRole;
 
 
 class User extends Authenticatable
@@ -65,4 +66,17 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Country::class, 'country_id');  
     }
+
+    public function roles() {
+        return $this->belongsToMany(Role::class,'user_roles');
+    }
+
+    public function hasAnyRole($user_id) {
+        return (bool) UserRole::where('user_id', $user_id)->count();
+    }
+
+    public function role($user_id) {
+        return UserRole::where('user_id', $user_id)->first();
+    }
+
 }

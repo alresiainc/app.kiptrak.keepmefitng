@@ -141,12 +141,12 @@ Route::post('/assign-agent-to-order', [OrderController::class, 'assignAgentToOrd
 
 //register any user, customer or agent, staff, etc
 //staff
-Route::get('/staff', [AuthController::class, 'allStaff'])->name('allStaff');
-Route::get('/create-staff', [AuthController::class, 'addStaff'])->name('addStaff');
-Route::post('/create-staff', [AuthController::class, 'addStaffPost'])->name('addStaffPost');
-Route::get('/view-staff/{unique_key}', [AuthController::class, 'singleStaff'])->name('singleStaff');
-Route::get('/edit-staff/{unique_key}', [AuthController::class, 'editStaff'])->name('editStaff');
-Route::post('/edit-staff/{unique_key}', [AuthController::class, 'editStaffPost'])->name('editStaffPost');
+Route::get('/employees', [EmployeeController::class, 'allStaff'])->name('allStaff');
+Route::get('/create-employee', [EmployeeController::class, 'addStaff'])->name('addStaff');
+Route::post('/create-employee', [EmployeeController::class, 'addStaffPost'])->name('addStaffPost');
+Route::get('/view-employee/{unique_key}', [EmployeeController::class, 'singleStaff'])->name('singleStaff');
+Route::get('/edit-employee/{unique_key}', [EmployeeController::class, 'editStaff'])->name('editStaff');
+Route::post('/edit-employee/{unique_key}', [EmployeeController::class, 'editStaffPost'])->name('editStaffPost');
 
 //agent
 Route::get('/agents', [AuthController::class, 'allAgent'])->name('allAgent');

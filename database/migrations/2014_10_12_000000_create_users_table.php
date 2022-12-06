@@ -23,10 +23,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
 
-            
             // user(those with initial incomplete-order), customer, agent, staff(staff are not agents), superadmin.
 
-            // $table->boolean('isSuperAdmin')->default(false);
+            $table->boolean('isSuperAdmin')->default(false);
             // $table->boolean('isStaff')->default(false);
             // $table->boolean('isAgent')->default(false);
 
