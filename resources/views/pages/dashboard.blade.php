@@ -225,7 +225,9 @@
             <!-- Line Chart -->
             <!-- <div id="reportsChart"></div> -->
             <div>
-              <canvas class="bar-chartcanvas"></canvas>
+              {{-- <canvas class="bar-chartcanvas"></canvas> --}}
+              <canvas class="bar-chartcanvas" data-sale_chart_value = "{{json_encode($yearly_sale_amount)}}" data-purchase_chart_value = "{{json_encode($yearly_purchase_amount)}}"
+              data-expense_chart_value = "{{json_encode($yearly_expense_amount)}}" data-label1="Purchase" data-label2="Sales" data-label3="Expenses"></canvas>
               {{-- {!! $chart->container() !!} --}}
 
             </div>
@@ -246,22 +248,29 @@
                 <tr>
                   <th scope="col">Photo</th>
                   <th scope="col">Item</th>
-                  <th scope="col">Sales Price</th>
+                  <th scope="col">Purchase Price</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <th scope="row">
-                    <img
-                      src="./assets/img/product-1.jpg"
-                      width="50"
-                      class="img-thumbnail img-fluid"
-                      alt="Product"
-                    />
-                  </th>
-                  <td class="align-middle">Nike Shoe</td>
-                  <td class="align-middle">N10,000</td>
-                </tr>
+
+                @if (count($recentProducts) > 0)
+                  @foreach ($recentProducts as $product)
+                  <tr>
+                    <th scope="row">
+                      <a
+                        href="{{ asset('/storage/products/'.$product->image) }}"
+                        data-fancybox="gallery"
+                        data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
+                        >   
+                        <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid"
+                        alt="{{$product->name}}" style="height: 30px;"></a>
+                    </th>
+                    <td class="align-middle fw-bold" style="font-size: 10px;">{{ $product->name }}</td>
+                    <td class="align-middle">{{ $generalSetting->country->symbol }}{{ $product->purchase_price }}</td>
+                  </tr>
+                  @endforeach
+                @endif
+                
               </tbody>
             </table>
           </div>
@@ -284,14 +293,26 @@
               >
                 <thead>
                   <tr>
-                    <th scope="col">#</th>
+                    <th scope="col">Item Code</th>
                     <th scope="col">Item Name</th>
-                    <th scope="col">Category Name</th>
-                    <th scope="col">Brand Name</th>
+                    {{-- <th scope="col">Brand Name</th> --}}
                     <th scope="col">Stock</th>
                   </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                  @if ($products->count() > 0)
+                      @foreach ($products as $product)
+                          @if ($product->stock_available() < 10)
+                          <tr>
+                            <td>{{ $product->code }}</td>
+                            <td>{{ $product->name }}</td>
+                            <td>{{ $product->stock_available() }}</td>
+                          </tr>
+                          @endif
+                      @endforeach
+                  @endif
+                  
+                </tbody>
               </table>
             </div>
           </div>
@@ -322,21 +343,49 @@
       <div class="col-lg-6">
         <div class="card border-top-5 border-top-warning card-top-border">
           <div class="card-body">
-            <div class="card-title">Recent Sales Invoice</div>
+            <div class="card-title">Recent Orders</div>
 
             <table class="table">
               <thead>
                 <tr>
-                  <th scope="col">SI.No</th>
-                  <th scope="col">Date</th>
-                  <th scope="col">Invoice ID</th>
+                  <th scope="col">Order No.</th>
                   <th scope="col">Customer</th>
-                  <th scope="col">Total</th>
+                  <th scope="col">Delivery Address</th>
+                  <th scope="col">Agent</th>
                   <th scope="col">Status</th>
-                  <th scope="col">Created By</th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody>
+                @if ($recentOrders->count() > 0)
+                 @foreach ($recentOrders as $order)
+                 <tr>
+                  <td>{{ $order->orderCode($order->id) }}</td>
+                  <td>{{ $order->customer_id ? $order->customer->firstname : 'No response' }} {{ $order->customer_id ? $order->customer->lastname : '' }}</td>
+                  <td style="width: 150px;">{{ $order->customer_id ? $order->customer->delivery_address : 'No response' }}</td>
+
+                  @if (isset($order->agent_assigned_id))
+                  <td>
+                    {{ $order->agent->name }}
+                  </td>
+                  @else
+                  <td style="width: 120px">
+                    None 
+                  </td>
+                  @endif
+
+                  <td>
+                    
+                      @if (!isset($order->status) || $order->status=='pending')
+                        <span class="badge badge-danger">Pending</span>
+                      @endif
+                      
+                  </td>
+                </tr> 
+                 @endforeach
+                
+                @endif
+                
+              </tbody>
             </table>
           </div>
         </div>
@@ -385,6 +434,47 @@
   });
 </script>
 
+@if ($yearly_best_selling_qty->count() == 5)
+<script>
+  //trendingItemsChart
+  var trendingItemsChart = document.getElementById("trendingItemsChart");
+  var _trendingItemsChart = new Chart(trendingItemsChart, {
+    type: 'doughnut',
+    data: {
+      labels: [
+        "{{ $bestSellingProductsBulk[0]['product_name'] }}",
+        "{{ $bestSellingProductsBulk[1]['product_name'] }}",
+        "{{ $bestSellingProductsBulk[2]['product_name'] }}",
+        "{{ $bestSellingProductsBulk[3]['product_name'] }}",
+        "{{ $bestSellingProductsBulk[4]['product_name'] }}",
+        // "Colgate toothpaste",
+        // "Redmi Note 10-64GB",
+      ],
+      datasets: [{
+          label: 'Top Items',
+          // data: ["{{ $yearly_best_selling_qty[0]->sold_qty }}", "{{ $yearly_best_selling_qty[1]->sold_qty }}", "{{ $yearly_best_selling_qty[2]->sold_qty }}",
+          // "{{ $yearly_best_selling_qty[2]->sold_qty }}", "{{ $yearly_best_selling_qty[2]->sold_qty }}"],
+          data: [{{ $bestSellingProductsBulk[0]['sold_qty'] }}, {{ $bestSellingProductsBulk[1]['sold_qty'] }}, {{ $bestSellingProductsBulk[2]['sold_qty'] }},
+          {{ $bestSellingProductsBulk[3]['sold_qty'] }}, {{ $bestSellingProductsBulk[4]['sold_qty'] }}],
+          backgroundColor: [
+          'rgb(102, 102, 255)',
+          'rgb(255, 51, 153)',
+          'rgb(0, 204, 153)',
+          'rgb(204, 204, 0)',
+          'rgb(37, 195, 72)',
+          // 'rgb(31, 161, 212, 1)',
+          // 'rgb(238, 27, 37, 1)'
+          ],
+          hoverOffset: 4
+      }]
+    },
+    //options
+  });
+</script>
+@endif
+
+
+
 <script>
    'use strict';
 
@@ -424,64 +514,58 @@
     "#58595b",
     "#8549ba",
   ];
-  //BAR CHART
+
+  //BAR CHART, YEARLY REPORT, PURCHASE, SALES, EXPENSES
   $(function () {
     //get the bar chart canvas
     var ctx = $(".bar-chartcanvas");
 
+    var yearly_sale_amount = ctx.data('sale_chart_value');
+    var yearly_purchase_amount = ctx.data('purchase_chart_value');
+    var yearly_expense_amount = ctx.data('expense_chart_value');
+    var label1 = ctx.data('label1');
+    var label2 = ctx.data('label2');
+
     //bar chart data
     var data = {
       labels: [
-        "May,2022",
-        "Jun,2022",
-        "Jul,2022",
-        "Aug,2022",
-        "Sep,2022",
-        "Oct,2022",
-        "Nov,2022",
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ],
       datasets: [
         {
           label: "Purchase",
-          data: [
-            "450.0000",
-            "10.0000",
-            "820.0000",
-            "100.0000",
-            "520.0000",
-            "80.0000",
-            "30.0000",
-          ],
+          data: [ yearly_purchase_amount[0], yearly_purchase_amount[1], yearly_purchase_amount[2], yearly_purchase_amount[3], yearly_purchase_amount[4], yearly_purchase_amount[5],
+                  yearly_purchase_amount[6], yearly_purchase_amount[7], yearly_purchase_amount[8], yearly_purchase_amount[9], yearly_purchase_amount[10], yearly_purchase_amount[11],
+                  0],
           borderColor: window.chartColors.red,
           backgroundColor: window.chartColors.red,
           borderWidth: 1,
         },
         {
           label: "Sales",
-          data: [
-            "5.0000",
-            "51.0000",
-            "85.0000",
-            "89.0000",
-            "92.0000",
-            "150.0000",
-            "590.0000",
-          ],
+          data: [ yearly_sale_amount[0], yearly_sale_amount[1], yearly_sale_amount[2], yearly_sale_amount[3], yearly_sale_amount[4], yearly_sale_amount[5],
+                  yearly_sale_amount[6], yearly_sale_amount[7], yearly_sale_amount[8], yearly_sale_amount[9], yearly_sale_amount[10], yearly_sale_amount[11],
+                  0],
           borderColor: window.chartColors.blue,
           backgroundColor: window.chartColors.blue,
           borderWidth: 1,
         },
         {
           label: "Expense",
-          data: [
-            "85.0000",
-            "85.0000",
-            "10.0000",
-            "65.0000",
-            "96.0000",
-            "6.0000",
-            "46.0000",
-          ],
+          data: [ yearly_expense_amount[0], yearly_expense_amount[1], yearly_expense_amount[2], yearly_expense_amount[3], yearly_expense_amount[4], yearly_expense_amount[5],
+                  yearly_expense_amount[6], yearly_expense_amount[7], yearly_expense_amount[8], yearly_expense_amount[9], yearly_expense_amount[10], yearly_expense_amount[11],
+                  0],
           borderColor: window.chartColors.green,
           backgroundColor: window.chartColors.green,
           borderWidth: 1,
@@ -525,82 +609,8 @@
     //end-bar-chartcanvas
   
 
-    /** DOUGHNUT CHART */
-    //PIE CHART
-
-    // new Chart(document.getElementById("#doughnut-chart"), {
-    //   type: "doughnut",
-    //   data: {
-    //     labels: [
-    //       "iPhone X-64GB",
-    //       "Redmi Note 10-128GB",
-    //       "Inspiron 14",
-    //       "iPhone X-128GB",
-    //       "Redmi Note 10-32GB",
-    //       "Colgate toothpaste",
-    //       "Redmi Note 10-64GB",
-    //     ],
-    //     datasets: [
-    //       {
-    //         label: "Top Items",
-    //         backgroundColor: [
-    //           "#6666ff",
-    //           "#ff3399",
-    //           "#00cc99",
-    //           "#cccc00",
-    //           "#ff6600",
-    //           window.chartColors.red, //above color settings
-    //         ],
-    //         data: ["7.00", "5.00", "4.00", "4.00", "2.00", "1.00", "1.00"],
-    //       },
-    //     ],
-    //   },
-    //   options: {
-    //     title: {
-    //       display: true,
-    //       text: "Top 10 Trending Items",
-    //     },
-    //   },
-    // });
 
   });
 </script>
-
-<!---trendingItemsChart-->
-<script>
-  var trendingItemsChart = document.getElementById("trendingItemsChart");
-  var _trendingItemsChart = new Chart(trendingItemsChart, {
-    type: 'doughnut',
-    data: {
-      labels: [
-        "iPhone X-64GB",
-        "Redmi Note 10-128GB",
-        "Inspiron 14",
-        "iPhone X-128GB",
-        "Redmi Note 10-32GB",
-        // "Colgate toothpaste",
-        // "Redmi Note 10-64GB",
-      ],
-      datasets: [{
-          label: 'Top Items',
-          data: ["7.00", "5.00", "4.00", "4.00", "2.00"],
-          backgroundColor: [
-          'rgb(102, 102, 255)',
-          'rgb(255, 51, 153)',
-          'rgb(0, 204, 153)',
-          'rgb(204, 204, 0)',
-          'rgb(37, 195, 72)',
-          // 'rgb(31, 161, 212, 1)',
-          // 'rgb(238, 27, 37, 1)'
-          ],
-          hoverOffset: 4
-      }]
-    },
-    //options
-  });
-</script>
-<!---trendingItemsChart---->
-
-{{-- {!! $chart->script() !!} --}}
 
 @endsection

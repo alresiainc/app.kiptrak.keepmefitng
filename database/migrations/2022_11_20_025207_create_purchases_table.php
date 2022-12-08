@@ -37,6 +37,8 @@ return new class extends Migration
             $table->string('total_discount')->nullable(); //will affect the product price
             $table->string('shipping_cost')->nullable(); //will affect the product price
 
+            $table->string('grand_total')->nullable(); //after discount n all
+
             $table->string('payment_type')->nullable(); //cash, card, cheque, bank_transfer
             $table->string('attached_document')->nullable(); //file of proove
             $table->string('batch_number')->nullable(); //product batch number

@@ -102,8 +102,8 @@
                       <td>{{ $product->code  }}</td>
                       {{-- <td>{{ isset($product->color) ? $product->color : 'None' }}</td>
                       <td>{{ isset($product->size) ? $product->size : 'None' }}</td> --}}
-                      <td>{{ $product->quantity }}</td>
-                      <td>{{ $product->country->symbol }}{{ $product->price }}</td>
+                      <td>{{ $product->stock_available() }}</td>
+                      <td>{{ $product->country->symbol }}{{ $product->purchase_price }}</td>
                       <td>{{ $product->created_at }}</td>
                       <td>
                         <div class="d-flex">

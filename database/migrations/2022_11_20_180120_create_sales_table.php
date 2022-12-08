@@ -45,6 +45,8 @@ return new class extends Migration
             $table->string('order_discount')->nullable();
             $table->string('shipping_cost')->nullable();
 
+            $table->string('grand_total')->nullable(); //after discount n all
+
             $table->string('payment_type')->nullable(); //cash, card, cheque, bank_transfer
             $table->string('payment_status'); //pending, due, partial, paid
 
