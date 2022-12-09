@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Validator;
+use Illuminate\Support\Facades\Session;
+use App\Notifications\UserLogin;
+use Illuminate\Support\Facades\Notification;
 
 use App\Models\User;
 use App\Models\Country;
@@ -12,6 +17,54 @@ use App\Models\Country;
 
 class AuthController extends Controller
 {
+    //login
+    public function login()
+    {
+        return view('pages.auth.login');
+    }
+
+    public function loginPost(Request $request)
+    {
+        $rules = array(
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        );
+        $messages = [
+            'email.required' => '* Your Email is required',
+            'email.string' => '* Invalid Characters',
+            'email.email' => '* Must be of Email format with \'@\' symbol',
+            
+            'password.required'   => 'This field is required',
+            'password.string'   => 'Invalid Characters',
+        ];
+        $validator = Validator::make($request->all(), $rules, $messages);
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        } else {
+
+            $credentials = $request->only('email', 'password');
+            $check = Auth::attempt($credentials);
+            if (!$check) {
+                return back()->with('login_error', 'Invalid email or password, please check your credentials and try again');
+            }
+            $user = Auth::user();
+
+            $admin = User::where('isSuperAdmin', true)->first();
+            //notify admin
+            Notification::send($admin, new UserLogin($user));
+            return redirect()->route('dashboard');
+        }
+    }
+
+    public function logout()
+    {
+        $user = auth()->user();
+        Auth::logout($user);
+        Session::flush();
+
+        return redirect()->route('login');
+    }
+
     public function allStaff()
     {
         $staffs = User::where('type', 'staff')->get();

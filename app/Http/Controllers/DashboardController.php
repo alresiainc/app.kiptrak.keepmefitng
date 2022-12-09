@@ -85,6 +85,7 @@ class DashboardController extends Controller
 
         //return $yearly_best_selling_qty[0]->sold_qty;
 
+        $bestSellingProductsBulk = [];
         foreach ($yearly_best_selling_qty as $key => $sale) {
             $product = DB::table('products')->find($sale->product_id);
             $bestSellingProducts['product_id'] = $sale->product_id;

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\TestMail;
 use App\Events\TestEvent;
 use App\Notifications\TestNofication;
+use App\Notifications\sendUserMessageNotification;
 use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use App\Models\Customer;
@@ -40,17 +41,23 @@ use Illuminate\Support\Facades\Http;
 
 Route::get('/notify', function () {
 
+    //https://api.ebulksms.com:8080/sendsms?username=ralphsunny114@gmail.com&apikey=e1f6f5adc595fed1a13ec3593b2516a4ea8eb61d&sender=Ugo&dndsender=1&messagetext=helloralph&flash=0/1&recipients=2348066216874
     // $receiver = '+2349020127061';
-    $receiver = '+2348066216874';
-    $text = 'welcome from the platform';
+    //$receiver = '+2348066216874';
+    //$text = 'welcome from the platform';
 
     //http://api.textmebot.com/send.php?recipient=+2348066216874&apikey=9PsD5ecU3KL8&text=This%20is%20a%20test
 
     // $response = Http::get('http://api.textmebot.com/send.php?recipient='.$receiver.'&apikey=9PsD5ecU3KL8&text='.$text);
 
-    $response = Http::get('http://api.textmebot.com/send.php?recipient=+2348066216874&apikey=9PsD5ecU3KL8&text=This%20is%20a%20test&json=yes');
+    //$response = Http::get('http://api.textmebot.com/send.php?recipient=+2348066216874&apikey=9PsD5ecU3KL8&text=This%20is%20a%20test&json=yes');
 
-    dd($response);
+    //dd($response);
+    $message = \App\Models\Message::first();
+    $recipients = User::whereIn('id', ['1', '2'])->get();
+    Notification::send($recipients, new sendUserMessageNotification($message));
+
+    return 'ok';
     
     //return view('test');
     //Mail::to('test@email.com')->send(new TestMail());
@@ -79,8 +86,17 @@ Route::get('/notify', function () {
 }); 
 
 Route::get('/test', [FormBuilderController::class, 'test'])->name('test');
-Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
 
+
+//login
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login', [AuthController::class, 'loginPost'])->name('loginPost');
+
+Route::group(['middleware' => 'auth'], function() {
+
+Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+	
 //Forms
 Route::get('/forms', [FormController::class, 'allForms'])->name('allForms');
 Route::get('/create-form', [FormController::class, 'addForm'])->name('addForm');
@@ -277,6 +293,27 @@ Route::get('/view-payroll/{unique_key}', [PayrollController::class, 'singlePayro
 Route::get('/edit-payroll/{unique_key}', [PayrollController::class, 'editPayroll'])->name('editPayroll');
 Route::post('/edit-payroll/{unique_key}', [PayrollController::class, 'editPayrollPost'])->name('editPayrollPost');
 Route::get('/delete-payroll/{unique_key}', [PayrollController::class, 'deletePayroll'])->name('deletePayroll');
+
+//sms messages
+Route::get('/compose-sms-message', [MessageController::class, 'composeSmsMessage'])->name('composeSmsMessage');
+Route::post('/compose-sms-message', [MessageController::class, 'composeSmsMessagePost'])->name('composeSmsMessagePost');
+Route::get('/sent-sms-messages', [MessageController::class, 'sentSmsMessage'])->name('sentSmsMessage'); //list
+
+//email messages
+Route::get('/compose-email-message', [MessageController::class, 'composeEmailMessage'])->name('composeEmailMessage');
+Route::post('/compose-email-message', [MessageController::class, 'composeEmailMessagePost'])->name('composeEmailMessagePost');
+Route::get('/sent-email-messages', [MessageController::class, 'sentEmailMessage'])->name('sentEmailMessage'); //list
+
+Route::get('/send-sms/{phone?}', [MessageController::class, 'sendVCode'])->name('sendVCode'); //list
+
+});
+
+
+
+
+
+
+//https://api.ebulksms.com:4433/sendsms?username=ralphsunny114@gmail.com&apikey=b7199affae645712ff475bf7cbb13f8a7b260de0&sender=ugo&messagetext=hey&flash=0&recipients=2348066216874
 
 
 

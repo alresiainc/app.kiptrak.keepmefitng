@@ -62,6 +62,17 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function shortName($name) {
+        $shortName = "";
+    
+        $names = explode(" ", $name);
+    
+        foreach ($names as $w) {
+            $shortName .= $w[0];
+        }
+        return $shortName;
+    }
+
     public function country()
     {
         return $this->belongsTo(Country::class, 'country_id');  

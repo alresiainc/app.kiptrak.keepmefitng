@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('currency')->nullable();
             $table->string('currency_position')->nullable();
             $table->string('developed_by')->nullable(); //Ugo Sunday Raphael
-
+            
             $table->string('created_by')->nullable();
             $table->string('status')->nullable(); 
             $table->softDeletes();

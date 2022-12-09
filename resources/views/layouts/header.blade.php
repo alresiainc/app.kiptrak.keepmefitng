@@ -148,25 +148,19 @@
       <!-- End Messages Nav -->
 
       <li class="nav-item dropdown pe-3">
-        <a
-          class="nav-link nav-profile d-flex align-items-center pe-0"
-          href="#"
-          data-bs-toggle="dropdown"
-        >
-          <span class="d-none d-md-block dropdown-toggle ps-2"
-            >Super Admin</span
-          >
+        <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+          <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->name }}</span>
           <span class="text-muted">|</span>
-          <img
-            src="assets/img/profile-img.jpg"
-            alt="Profile"
-            class="rounded-circle"
-          /> </a
+          @if (isset(Auth::user()->profile_picture))
+            <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle" /> 
+          @else
+            <span class="bg-dark rounded-circle p-2 text-white">{{ Auth::user()->shortName(Auth::user()->name) }}</span>
+          @endif
+          
+          </a
         ><!-- End Profile Iamge Icon -->
 
-        <ul
-          class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile"
-        >
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
           <li class="dropdown-header">
             <h6>Kelly O.</h6>
             <span>Super Admin</span>
@@ -215,9 +209,9 @@
           </li>
 
           <li>
-            <a class="dropdown-item d-flex align-items-center" href="#">
+            <a class="dropdown-item d-flex align-items-center" href="{{ route('logout') }}">
               <i class="bi bi-box-arrow-right"></i>
-              <span>Sign Out</span>
+              <span>Logout</span>
             </a>
           </li>
         </ul>
@@ -225,6 +219,10 @@
       </li>
       <!-- End Profile Nav -->
 
+      @guest
+      <li class="nav-item"><a href="{{ route('login') }}">Login</a></li>
+      @endguest
+      
       <li></li>
       <i class="bi bi-list toggle-sidebar-btn"></i>
     </ul>
