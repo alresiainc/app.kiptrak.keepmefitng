@@ -35,6 +35,8 @@
   {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.css"> --}}
   <link href="{{asset('/myassets/css/jquery.fancybox.css')}}" rel="stylesheet">
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.3/css/intlTelInput.min.css" />
+
   <!-- Template Main CSS File -->
   <link href="{{asset('/assets/css/style.css')}}" rel="stylesheet">
   <link href="{{asset('/assets/css/colors.css')}}" rel="stylesheet" />
@@ -88,16 +90,8 @@
 
   <script src="{{asset('/assets/js/select2.min.js')}}"></script>
 
-  <script
-      type="text/javascript"
-      charset="utf8"
-      src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"
-    ></script><!--imp-->
-    <script
-      type="text/javascript"
-      charset="utf8"
-      src="//cdn.datatables.net/buttons/2.2.3/js/buttons.bootstrap5.min.js"
-    ></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script><!--imp-->
+  <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/buttons/2.2.3/js/buttons.bootstrap5.min.js"></script>
     <script
       type="text/javascript"
       charset="utf8"
@@ -134,6 +128,10 @@
   {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script> --}}
   <script src="{{asset('/myassets/js/jquery.fancybox.min.js')}}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/intlTelInput.js"></script>
+  {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.3/js/intlTelInput.min.js"></script> --}}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"></script>
 
   <!-- Template Main JS File -->
   <script src="{{asset('/assets/js/main.js')}}"></script>

@@ -27,13 +27,22 @@ class DashboardController extends Controller
     public function dashboard()
     {
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency = $generalSetting->country->symbol;
         ///////////////////////////////////////////////////////////////////////
         $purchases_amount_paid = Purchase::sum('amount_paid');
         $sales_due = Sale::sum('amount_due');
         $sales_paid = Sale::sum('amount_paid');
-        $expenses = Expense::sum('amount');
+        $expenses = $this->shorten(Expense::sum('amount'));
 
-        $profit = $sales_paid - $purchases_amount_paid;
+        $profit_val = $sales_paid - $purchases_amount_paid;
+        $purchases_amount_paid = $this->shorten($purchases_amount_paid);
+        $sales_paid = $this->shorten($sales_paid);
+
+        if ($profit_val > 0) {
+            $profit = $this->shorten($profit_val);
+        } else {
+            $profit = $this->shorten($profit_val);
+        }
 
         $customers_count = Customer::count();
         $suppliers_count = Supplier::count();
@@ -102,19 +111,26 @@ class DashboardController extends Controller
 
         $recentOrders = Order::orderBy('id','DESC')->take(5)->get();
 
-        return view('pages.dashboard', compact('generalSetting', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit',
+        return view('pages.dashboard', compact('generalSetting', 'currency', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
         'customers_count', 'suppliers_count', 'purchases_count', 'sales_count','invoices_count', 'yearly_sale_amount', 'yearly_purchase_amount', 'yearly_expense_amount',
         'recentProducts', 'products', 'yearly_best_selling_qty', 'bestSellingProductsBulk', 'recentOrders'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+    public function shorten($num, $digits = 1) {
+        $num = preg_replace('/[^0-9]/','',$num);
+        if ($num >= 1000000000) {
+            $num = number_format(abs($num / 1000000000), $digits, '.', '') + 0;
+            $num = $num . "b";
+        }
+        if ($num >= 1000000) {
+            $num = number_format(abs($num / 1000000), $digits, '.', '') + 0;
+            $num = $num . 'm';
+        }
+        if ($num >= 1000) {
+            $num = number_format(abs($num / 1000), $digits, '.', '') + 0;
+            $num = $num . 'k';
+        }
+        return $num;
     }
 
     /**

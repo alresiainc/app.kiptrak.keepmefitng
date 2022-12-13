@@ -75,7 +75,7 @@
 
                 <div class="col-md-6">
                   <label for="" class="form-label">Phone 1</label>
-                  <input type="tel" name="phone_1" class="form-control @error('phone_1') is-invalid @enderror" placeholder="" >
+                  <input type="tel" id="phone" name="phone_1" class="form-control phone_1 @error('phone_1') is-invalid @enderror" placeholder="" >
                   @error('phone_1')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>
@@ -84,7 +84,7 @@
                 </div>
                 <div class="col-md-6">
                   <label for="" class="form-label">Phone 2</label>
-                  <input type="tel" name="phone_2" class="form-control @error('phone_2') is-invalid @enderror" placeholder="">
+                  <input type="tel" name="phone_2" class="form-control phone_2 @error('phone_2') is-invalid @enderror" placeholder="">
                   @error('phone_2')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>
@@ -163,4 +163,46 @@
 
 </main><!-- End #main -->
 
+@endsection
+
+@section('extra_js')
+<script>
+//var input = document.querySelector("#phone");
+  // intlTelInput(input, {
+  //   // any initialisation options go here
+  //   utilScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"
+  // });
+
+  // var isPhoneValid = false;
+  // var telInput = $("#phone");
+  // var errorMsg = $("#error-msg");
+  // var validMsg = $("#valid-msg");
+
+  // // initialise plugin
+  // telInput.intlTelInput({
+  //   allowExtensions: true,
+  //   formatOnDisplay: true,
+  //   autoFormat: true,
+  //   autoHideDialCode: true,
+  //   autoPlaceholder: true,
+  //   defaultCountry: "",
+  //   ipinfoToken: "yolo",
+
+  //   nationalMode: false,
+  //   numberType: "MOBILE",
+  //   //onlyCountries: ['us', 'gb', 'ch', 'ca'. 'do'],
+  //   preferredCountries: ['sa', 'ae', 'qa', 'bh', 'do'],
+  //   preventInvalidNumbers: true,
+  //   separateDialCode: true,
+  //   initialCountry: "GB",
+  //   //GB
+  //   geoIpLookup: function(callback) {
+  //     $.get("http://ipinfo.io", function() {}, "jsonp").always(function(resp) {
+  //       var countryCode = (resp && resp.country) ? resp.country : "";
+
+  //       callback(countryCode);
+  //     });
+  //   }
+  // })
+</script>
 @endsection

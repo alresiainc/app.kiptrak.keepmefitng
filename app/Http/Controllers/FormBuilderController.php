@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\TestMail;
 use App\Events\TestEvent;
 use App\Notifications\TestNofication;
+use App\Notifications\NewOrder;
 use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -25,6 +26,7 @@ use App\Models\UpSell;
 use App\Models\Customer;
 use App\Models\CartAbandon;
 use App\Models\UpsellSetting;
+use App\Models\GeneralSetting;
 
 
 class FormBuilderController extends Controller
@@ -53,7 +55,6 @@ class FormBuilderController extends Controller
     
         $form_code = $randomString;
         
-
         $package_select = '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
         <option value=""> --Select Product-- </option>';
         foreach($products as $product):
@@ -95,7 +96,7 @@ class FormBuilderController extends Controller
                 $outgoingStock->product_id = $product->id;
                 $outgoingStock->order_id = $order->id;
                 $outgoingStock->quantity_removed = 1;
-                $outgoingStock->amount_accrued = $product->price; //since qty is always one
+                $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
                 $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
                 $outgoingStock->quantity_returned = 0; //by default
                 $outgoingStock->created_by = 1;
@@ -266,7 +267,7 @@ class FormBuilderController extends Controller
                 $outgoingStock->product_id = $product->id;
                 $outgoingStock->order_id = $order->id;
                 $outgoingStock->quantity_removed = 1;
-                $outgoingStock->amount_accrued = $product->price; //since qty is always one
+                $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
                 $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
                 $outgoingStock->quantity_returned = 0; //by default
                 $outgoingStock->created_by = 1;
@@ -338,7 +339,7 @@ class FormBuilderController extends Controller
                     $outgoingStock->product_id = $product->id;
                     $outgoingStock->order_id = $order->id;
                     $outgoingStock->quantity_removed = 1;
-                    $outgoingStock->amount_accrued = $product->price; //since qty is always one
+                    $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
                     $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
                     $outgoingStock->quantity_returned = 0; //by default
                     $outgoingStock->created_by = 1;
@@ -411,7 +412,7 @@ class FormBuilderController extends Controller
         $outgoingStock->product_id = $data['orderbump_product'];
         $outgoingStock->order_id = $formHolder->order->id;
         $outgoingStock->quantity_removed = 1;
-        $outgoingStock->amount_accrued = $product->price; //since qty is always one
+        $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
         $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
         $outgoingStock->quantity_returned = 0; //by default
         $outgoingStock->created_by = 1;
@@ -454,7 +455,7 @@ class FormBuilderController extends Controller
         $outgoingStock->product_id = $data['orderbump_product'];
         $outgoingStock->order_id = $formHolder->order->id;
         $outgoingStock->quantity_removed = 1;
-        $outgoingStock->amount_accrued = $product->price; //since qty is always one
+        $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
         $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
         $outgoingStock->quantity_returned = 0; //by default
         $outgoingStock->created_by = 1;
@@ -498,7 +499,7 @@ class FormBuilderController extends Controller
         $outgoingStock->product_id = $data['upsell_product'];
         $outgoingStock->order_id = $formHolder->order->id;
         $outgoingStock->quantity_removed = 1;
-        $outgoingStock->amount_accrued = $product->price; //since qty is always one
+        $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
         $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
         $outgoingStock->quantity_returned = 0; //by default
         $outgoingStock->created_by = 1;
@@ -542,7 +543,7 @@ class FormBuilderController extends Controller
         $outgoingStock->product_id = $data['upsell_product'];
         $outgoingStock->order_id = $formHolder->order->id;
         $outgoingStock->quantity_removed = 1;
-        $outgoingStock->amount_accrued = $product->price; //since qty is always one
+        $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
         $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
         $outgoingStock->quantity_returned = 0; //by default
         $outgoingStock->created_by = 1;
@@ -567,7 +568,7 @@ class FormBuilderController extends Controller
         $formPackage = \unserialize($formHolder->package);
         foreach ($formPackage as $package) {
             foreach ($package['values'] as $key => $option) {
-                $option['product_price'] = Product::where('code', $option['value'])->first()->price;
+                $option['product_price'] = Product::where('code', $option['value'])->first()->sale_price;
                 $option['type'] = $package['type'] == 'radio-group' ? 'radio' : 'checkbox';
                 $products[] = $option;
             }
@@ -631,7 +632,7 @@ class FormBuilderController extends Controller
             $product = Product::where('id', $package)->first();
             $formPackage['id'] = $package; //product_id
             $formPackage['name'] = $product->name;
-            $formPackage['price'] = $product->price;
+            $formPackage['price'] = $product->sale_price;
             $formPackage['form_name'] = Str::slug($package_form_name);
             $formPackage['form_label'] = $package_form_label;
             $formPackage['form_type'] = $package_form_type;
@@ -647,7 +648,7 @@ class FormBuilderController extends Controller
 
         if ( count($mainProducts_outgoingStocks) > 0 ) {
             foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-                $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->price * $main_outgoingStock->quantity_removed);
+                $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
             }
         }
 
@@ -657,7 +658,7 @@ class FormBuilderController extends Controller
         if (isset($formHolder->orderbump_id)) {
             $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
             if ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
-                $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->price * $orderbump_outgoingStock->quantity_removed);
+                $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
             }
         }
 
@@ -667,7 +668,7 @@ class FormBuilderController extends Controller
         if (isset($formHolder->upsell_id)) {
             $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
             if ($upsell_outgoingStock->customer_acceptance_status == 'accepted') {
-                $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->price * $upsell_outgoingStock->quantity_removed);
+                $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
             }
         }
         
@@ -692,29 +693,6 @@ class FormBuilderController extends Controller
             $orderId = '0'.$order->id;
         }
 
-        $customer = ''; $invoiceData = [];
-        if (isset($order->customer)) {
-            //customer
-            $customer =  $order->customer;
-
-            $receipients = Arr::collapse([[$authUser->email],[$customer->email]]);
-
-            // //notify admin or group od admins that some one has placed order
-            // Notification::send($authUser, new TestNofication($customer));
-
-            // //mail user about their new order
-            // $invoiceData = [
-            //     'order' => $order,
-            //     'customer' => $order->customer,
-            //     'mainProducts_outgoingStocks' => $mainProducts_outgoingStocks,
-            //     'orderbump_outgoingStock' => $orderbump_outgoingStock == '' ? '' : $orderbump_outgoingStock,
-            //     'upsell_outgoingStock' => $upsell_outgoingStock == '' ? '' : $upsell_outgoingStock,
-            // ];
-
-            // event(new TestEvent($invoiceData));
-        }
-        
-
         //package or product qty. sum = 0, if it doesnt exist
         $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
         $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
@@ -722,6 +700,16 @@ class FormBuilderController extends Controller
         $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
 
         //end thankyou part
+
+        $customer = ''; $invoiceData = [];
+        if (isset($order->customer)) {
+            //customer
+            $customer =  $order->customer;
+
+            $receipients = Arr::collapse([[$authUser->email],[$customer->email]]);
+
+            // event(new TestEvent($invoiceData));
+        }
         
         return view('pages.newFormLink', compact('unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products',
         'mainProducts_outgoingStocks', 'order', 'orderId', 'mainProduct_revenue', 'orderbump_outgoingStock', 'orderbumpProduct_revenue', 'upsell_outgoingStock',
@@ -826,6 +814,7 @@ class FormBuilderController extends Controller
 
     }
 
+    //after clicking first main btn
     public function saveNewFormFromCustomer(Request $request)
     {
         $data = $request->all();
@@ -836,7 +825,7 @@ class FormBuilderController extends Controller
         //update package in OutgoingStock
         foreach ($data['product_packages'] as $key => $product_id) {
             $data['product_id'] = $product_id;
-            if(!empty($product_id)){
+            if (!empty($product_id)) {
 
                 //accepted updated
                 OutgoingStock::where(['product_id'=>$product_id, 'order_id'=>$order->id, 'reason_removed'=>'as_order_firstphase'])
@@ -863,17 +852,26 @@ class FormBuilderController extends Controller
         $customer->city = $data['city'];
         $customer->state = $data['state'];
         $customer->delivery_address = $data['address'];
+        $customer->delivery_duration = $data['delivery_duration'];
         $customer->created_by = 1;
         $customer->status = 'true';
         $customer->save();
 
         //update order status
-        $order->update(['customer_id'=>$customer->id, 'status'=>'pending']);
+        $order->customer_id = $customer->id;
+        $order->status = 'pending';
+        $order->save();
+        //$order = $order->update(['customer_id'=>$customer->id, 'status'=>'pending']);
 
         $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
         $has_upsell = isset($formHolder->upsell_id) ? true : false;
         $data['has_orderbump'] = $has_orderbump; 
-        $data['has_upsell'] = $has_upsell; 
+        $data['has_upsell'] = $has_upsell;
+        
+        //call notify fxn
+        if ($has_orderbump==false && $has_upsell==false) {
+            $this->invoiceData($formHolder, $customer, $order);
+        }
 
         return response()->json([
             'status'=>true,
@@ -898,10 +896,20 @@ class FormBuilderController extends Controller
         }
 
         //update order with same orderbump as formholder
-        $order->update(['orderbump_id'=>$formHolder->orderbump_id]);
+        // $order->update(['orderbump_id'=>$formHolder->orderbump_id]);
+        $order->orderbump_id = $formHolder->orderbump_id;
+        $order->save();
 
         $has_upsell = isset($formHolder->upsell_id) ? true : false;
         $data['has_upsell'] = $has_upsell;
+
+        $customer =  $order->customer;
+
+        //call notify fxn
+        if ($has_upsell==false) {
+            $this->invoiceData($formHolder, $customer, $order);
+
+        }
 
         return response()->json([
             'status'=>true,
@@ -928,6 +936,12 @@ class FormBuilderController extends Controller
         //update order with same orderbump as formholder
         $order->update(['upsell_id'=>$formHolder->upsell_id]);
 
+        //////////////////////////////////////////////////////////////////////////////////////
+        $customer =  $order->customer;
+        $this->invoiceData($formHolder, $customer, $order);
+    
+        //////////////////////////////////////////////////////////////////////////////
+        
         return response()->json([
             'status'=>true,
             'data'=>$data,
@@ -1051,13 +1065,108 @@ class FormBuilderController extends Controller
         ]);
     }
 
+    //callback for notifying admin abt new order
+    public function invoiceData($formHolder, $customer, $order)
+    {
+
+        //mainProduct_revenue
+        $mainProduct_revenue = 0;  //price * qty
+        $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase', 'customer_acceptance_status'=>'accepted'])->get();
+
+        if ( count($mainProducts_outgoingStocks) > 0 ) {
+            foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
+                $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+            }
+        }
+
+        //orderbump
+        //orderbump
+        $orderbumpProduct_revenue = 0; //price * qty
+        $orderbump_outgoingStock = '';
+        if (isset($formHolder->orderbump_id)) {
+            $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
+            if ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+                $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+            }
+        }
+        
+        //upsell
+        $upsellProduct_revenue = 0; //price * qty
+        $upsell_outgoingStock = '';
+        if (isset($formHolder->upsell_id)) {
+            $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
+            if ($upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+                $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+            }
+        }
+        
+        //order total amt
+
+        $orderId = ''; //used in thankYou section
+        if ($order->id < 10){
+            $orderId = '0000'.$order->id;
+        }
+        // <!-- > 10 < 100 -->
+        if (($order->id > 10) && ($order->id < 100)) {
+            $orderId = '000'.$order->id;
+        }
+        // <!-- > 100 < 1000 -->
+        if (($order->id) > 100 && ($order->id < 1000)) {
+            $orderId = '00'.$order->id;
+        }
+        // <!-- > 1000 < 10000++ -->
+        if (($order->id) > 1000 && ($order->id < 1000)) {
+            $orderId = '0'.$order->id;
+        }
+
+        //package or product qty. sum = 0, if it doesnt exist
+        $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
+        $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
+        $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
+        $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
+
+        $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
+        $grand_total = $order_total_amount; //might include discount later
+
+        $admin = GeneralSetting::first();
+
+        // $whatsapp_phone_number = '';
+        // if (substr($customer->whatsapp_phone_number, 0, 1) === '0') {
+        //     $whatsapp_phone_number = '234' . substr($customer->whatsapp_phone_number, 1);
+        // }
+
+        $whatsapp_msg = "Hi ".$customer->firstname." ".$customer->lastname.", you just placed order with Invoice-id: kp-".$orderId.". We will get back to you soon";
+
+        // $whatsapp_msg = Hi {{ $invoiceData['customer']->firstname }} {{ $invoiceData['customer']->lastname }},
+        //         you just placed order with Invoice-id: kp-{{ $invoiceData['orderId'] }}. We will get back to you soon
+
+        // //mail user about their new order
+        $invoiceData = [
+            'order' => $order,
+            'orderId' => $orderId,
+            'customer' => $customer,
+            'mainProducts_outgoingStocks' => $mainProducts_outgoingStocks,
+            'mainProduct_revenue' => $mainProduct_revenue,
+            'orderbump_outgoingStock' => $orderbump_outgoingStock,
+            'orderbumpProduct_revenue' => $orderbumpProduct_revenue,
+            'whatsapp_msg' => $whatsapp_msg,
+            'upsell_outgoingStock' => $upsell_outgoingStock,
+            'upsellProduct_revenue' => $upsellProduct_revenue,
+            'qty_total' => $qty_total,
+            'order_total_amount' => $order_total_amount,
+            'grand_total' => $grand_total,
+        ];
+
+        Notification::route('mail', [$admin->official_notification_email])->notify(new NewOrder($invoiceData));
+    }
+
     /**
      * Display the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    //not user
+    //not used
     public function formLink($unique_key)
     {
         $formHolder = FormHolder::where('unique_key', $unique_key)->first();
@@ -1069,7 +1178,7 @@ class FormBuilderController extends Controller
         $formPackage = \unserialize($formHolder->package);
         foreach ($formPackage as $package) {
             foreach ($package['values'] as $key => $option) {
-                $option['product_price'] = Product::where('code', $option['value'])->first()->price;
+                $option['product_price'] = Product::where('code', $option['value'])->first()->sale_price;
                 $option['type'] = $package['type'] == 'radio-group' ? 'radio' : 'checkbox';
                 $option['name'] = isset($package['name']) ? $package['name'] : 'package';
                 $products[] = $option;
@@ -1096,7 +1205,7 @@ class FormBuilderController extends Controller
 
         if ( count($mainProducts_outgoingStocks) > 0 ) {
             foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-                $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->price * $main_outgoingStock->quantity_removed);
+                $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
             }
         }
 
@@ -1104,14 +1213,14 @@ class FormBuilderController extends Controller
         $orderbumpProduct_revenue = 0; //price * qty
         $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
         if ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
-            $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->price * $orderbump_outgoingStock->quantity_removed);
+            $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
         }
         
         //upsell
         $upsellProduct_revenue = 0; //price * qty
         $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
         if ($upsell_outgoingStock->customer_acceptance_status == 'accepted') {
-            $upsellProduct_revenue = $upsellProduct_revenue + ($upsell_outgoingStock->product->price * $upsell_outgoingStock->quantity_removed);
+            $upsellProduct_revenue = $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
         }
 
         //order total amt
@@ -1151,7 +1260,7 @@ class FormBuilderController extends Controller
         'customer', 'qty_total', 'order_total_amount', 'grand_total'));
     }
 
-    //formLinkPost
+    //not used formLinkPost
     public function formLinkPost(Request $request, $unique_key)
     {
         $request->validate([

@@ -49,7 +49,8 @@
           <div class="card-body p-2">
             <div class="d-flex justify-content-between align-items-center">
               <div class="text-start">
-                <h2 class="fw-bold">{{ $generalSetting->country->symbol }}{{ number_format((float)$purchases_amount_paid, 2, '.', ',') }}</h2>
+                {{-- <h2 class="fw-bold">{{ $currency }}{{ number_format((float)$purchases_amount_paid, 2, '.', ',') }}</h2> --}}
+                <h2 class="fw-bold">{{ $currency }}{{ $purchases_amount_paid }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold"
                   >Purchases</small
                 >
@@ -69,7 +70,7 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
-                <h2 class="fw-bold">{{ $generalSetting->country->symbol }}{{ number_format((float)$sales_paid, 2, '.', ''); }}</h2>
+                <h2 class="fw-bold">{{ $currency }}{{ $sales_paid }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold">Sales</small
                 >
               </div>
@@ -90,7 +91,7 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
-                <h2 class="fw-bold">{{ $generalSetting->country->symbol }}{{ number_format((float)$expenses, 2, '.', ','); }}</h2>
+                <h2 class="fw-bold">{{ $currency }}{{ $expenses }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold">Expenses</small
                 >
               </div>
@@ -110,10 +111,11 @@
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
                 <h2 class="fw-bold">
-                  @if ($profit > 0)
-                  {{ $generalSetting->country->symbol }}{{ number_format((float)$profit, 2, '.', ','); }}
+                  @if ($profit_val > 0)
+                  {{ $currency }}{{ $profit }}
                   @else
-                  ({{ number_format((float)abs($profit), 2, '.', ','); }})
+                  {{-- ({{ number_format((float)abs($profit), 2, '.', ','); }}) --}}
+                  ({{ $profit }})
                   @endif
                   
                 </h2>
@@ -266,7 +268,7 @@
                         alt="{{$product->name}}" style="height: 30px;"></a>
                     </th>
                     <td class="align-middle fw-bold" style="font-size: 10px;">{{ $product->name }}</td>
-                    <td class="align-middle">{{ $generalSetting->country->symbol }}{{ $product->purchase_price }}</td>
+                    <td class="align-middle">{{ $currency }}{{ $product->purchase_price }}</td>
                   </tr>
                   @endforeach
                 @endif

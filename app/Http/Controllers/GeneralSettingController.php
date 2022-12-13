@@ -43,6 +43,7 @@ class GeneralSettingController extends Controller
             $generalSetting->site_description = $data['site_description'];
             $generalSetting->currency = $data['currency'];
             $generalSetting->developed_by = 'Ugo Sunday Raphael';
+            $generalSetting->official_notification_email = $data['official_notification_email'];
             $generalSetting->created_by = 1;
             $generalSetting->status = 'true';
             
@@ -63,11 +64,13 @@ class GeneralSettingController extends Controller
         $generalSetting->site_description = $data['site_description'];
         $generalSetting->currency = $data['currency'];
         $generalSetting->developed_by = 'Ugo Sunday Raphael';
+        $generalSetting->official_notification_email = $data['official_notification_email'];
         $generalSetting->created_by = 1;
         $generalSetting->status = 'true';
         
         //image
         if ($request->site_logo) {
+            
             $oldImage = $generalSetting->site_logo; //1.jpg
             if(Storage::disk('public')->exists('generalSetting/'.$oldImage)){
                 Storage::disk('public')->delete('generalSetting/'.$oldImage);

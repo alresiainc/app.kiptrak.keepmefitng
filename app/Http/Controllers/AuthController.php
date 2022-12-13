@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Notification;
 
 use App\Models\User;
 use App\Models\Country;
+use App\Models\GeneralSetting;
 
 
 class AuthController extends Controller
@@ -49,13 +50,15 @@ class AuthController extends Controller
             }
             $user = Auth::user();
 
-            $admin = User::where('isSuperAdmin', true)->first();
+            //$admin = User::where('isSuperAdmin', true)->first();
+            $admin = GeneralSetting::first();
             //notify admin
-            Notification::send($admin, new UserLogin($user));
+            // Notification::send($admin, new UserLogin($user));
+            Notification::route('mail', [$admin->official_notification_email])->notify(new UserLogin($user));
             return redirect()->route('dashboard');
         }
     }
-
+    
     public function logout()
     {
         $user = auth()->user();
@@ -243,14 +246,17 @@ public function addAgentPost(Request $request)
     ]);
 
     $data = $request->all();
-
+    if (substr($data['phone_2'], 0, 1) === '0') {
+        $phone_1 = '234' . substr($data['phone_2'], 1);
+    }
+    
     $user = new User();
     $user->name = $data['firstname'].' '.$data['lastname'];
     $user->email = $data['email'];
     $user->password = Hash::make($data['password']);
     $user->type = 'agent';  //customer, staff, agent, superadmin
     $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
-    $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
+    $user->phone_2 = !empty($data['phone_2']) ? $phone_2 : null;
     $user->city = !empty($data['city']) ? $data['city'] : null;
     $user->state = $data['state'];
     $user->country_id = $data['country'];

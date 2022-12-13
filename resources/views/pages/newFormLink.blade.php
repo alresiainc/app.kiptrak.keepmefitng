@@ -134,7 +134,7 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label for="" class="form-label">Select how long you want the order to be delivered *</label>
-                                        <select name="delivery_duration" class="select2 form-control border @error('delivery_duration') is-invalid @enderror" id="">
+                                        <select data-name="delivery_duration" class="delivery_duration select2 form-control border @error('delivery_duration') is-invalid @enderror" id="">
                                           <option value="1">1 day</option>
                                           <option value="2">2 days</option>
                                           <option value="3">3 days</option>
@@ -213,7 +213,7 @@
                                                     {{-- <p class="product-feature">Melts Away Fats In 2 Days!</p> --}}
     
                                                     <div class="orderbump-product-image mb-3">
-                                                        <img src="{{ asset('/storage/products/'.$formHolder->orderbump->product->image) }}" width="100" class="img-thumbnail img-fluid"
+                                                        <img src="{{ asset('/storage/products/'.$formHolder->orderbump->product->image) }}" class="w-100 img-thumbnail img-fluid"
                                                         alt="{{ $formHolder->orderbump->product->name }}">
                                                     </div>
     
@@ -224,7 +224,7 @@
                                                     <p class="more-info">
                                                         This offer is not available at ANY other time or place
                                                     </p>
-
+                                                        
                                                     <div class="col-12 mb-3 select-product">
                                                         <p class="form-label">Click button to Add Product Package</p>
                                                         <label for="product" class="form-label btn btn-outline border d-flex align-items-center me-3
@@ -489,7 +489,7 @@
                                             </div> 
                                             <div class="info"> 
                                                 <p class="title">{{ $orderbump_outgoingStock->product->name }}</p> 
-                                                <strong>N{{ $orderbump_outgoingStock->product->price * $orderbump_outgoingStock->quantity_removed }} ({{ $orderbump_outgoingStock->quantity_removed }} item)</strong> 
+                                                <strong>N{{ $orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed }} ({{ $orderbump_outgoingStock->quantity_removed }} item)</strong> 
                                             </div> 
                                         </div> 
                                     </li>
@@ -503,7 +503,7 @@
                                             </div> 
                                             <div class="info"> 
                                                 <p class="title">{{ $upsell_outgoingStock->product->name }}</p> 
-                                                <strong>N{{ $upsell_outgoingStock->product->price * $upsell_outgoingStock->quantity_removed }} ({{ $upsell_outgoingStock->quantity_removed }} item)</strong> 
+                                                <strong>N{{ $upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed }} ({{ $upsell_outgoingStock->quantity_removed }} item)</strong> 
                                             </div> 
                                         </div> 
                                     </li>
@@ -695,7 +695,10 @@
                 var state = $(".state").val();
                 var city = $(".city").val();
                 var address = $(".address").val();
+                var delivery_duration = $(".delivery_duration").val();
                 var product_package = $(".product-package").val();
+
+                
 
                 if (firstname == "" || firstname == null) {
                     alert("First name must be filled");
@@ -749,7 +752,7 @@
                     type:'get',
                     url:'/ajax-save-new-form-link',
                     data:{unique_key:unique_key, firstname:firstname, lastname:lastname, phone_number:phone_number, whatsapp_phone_number:whatsapp_phone_number,
-                        active_email:active_email, state:state, city:city, address:address, product_packages:product_packages, 
+                        active_email:active_email, state:state, city:city, address:address, delivery_duration:delivery_duration, product_packages:product_packages, 
                         },
                     success:function(resp){
                         console.log(resp)

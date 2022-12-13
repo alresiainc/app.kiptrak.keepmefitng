@@ -70,7 +70,6 @@
                     <div class="text-dark" style="font-size: 14px;">{{ $package['product']->name }}</div>
                 </div>
 
-                
                 <div class="col-lg-3">
                     <label for="" class="fw-bolder">Quantity Ordered</label>
                     <div class="text-dark" style="font-size: 14px;">{{ $package['quantity_removed'].' @'. $package['product']->price }}</div>

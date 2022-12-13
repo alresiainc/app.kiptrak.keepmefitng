@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('state')->nullable();
             $table->longText('delivery_address')->nullable();
+            $table->longText('delivery_duration')->nullable();
 
             $table->longText('profile_picture')->nullable();
             

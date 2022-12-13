@@ -21,6 +21,7 @@ class GeneralSettingSeeder extends Seeder
         $generalSetting->site_description = 'CRM APPLICATION PLATFORM';
         $generalSetting->currency = 1;
         $generalSetting->developed_by = 'Ugo Sunday Raphael';
+        $generalSetting->official_notification_email = 'ralphsunny114@gmail.com';
         $generalSetting->created_by = 1;
         $generalSetting->status = 'true';
         $generalSetting->save();

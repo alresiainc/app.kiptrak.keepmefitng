@@ -113,7 +113,18 @@
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
-                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="" class="form-label">Site Official Receive Notification Email</label>
+                  <input type="email" name="official_notification_email" class="form-control @error('official_notification_email') is-invalid @enderror"
+                  value="{{ $generalSetting != '' ? $generalSetting->official_notification_email : 'ralphsunny114@gmail.com' }}">
+                  @error('official_notification_email')
+                      <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                      </span>
+                  @enderror
+                </div>
                 
                 
                 <div class="text-end">
