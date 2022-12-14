@@ -78,6 +78,7 @@
                   {{-- <th scope="col">Subheading</th> --}}
                   
                   <th scope="col">OrderId</th>
+                  <th scope="col">Staff Assigned</th>
                   <th scope="col">OrderBump</th>
                   <th scope="col">UpSell</th>
                   <th scope="col">Customer</th>
@@ -123,6 +124,21 @@
                           
                         </a>
                       </td>
+
+                      
+                        @if (isset($formHolder->order->staff_assigned_id))
+                            <td>
+                              {{ $formHolder->order->staff->name }} <br>
+                              <button class="btn btn-sm btn-dark rounded-pill" onclick="changeAgentModal('{{ $formHolder->order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Staff">
+                                <i class="bi bi-plus"></i> <span>Change Staff</span></button>
+                            </td>
+                        @else
+                        <td style="width: 120px">
+                          <button class="btn btn-sm btn-success rounded-pill" onclick="addAgentModal('{{ $formHolder->order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Staff">
+                            <i class="bi bi-plus"></i> <span>Assign Staff</span></button> 
+                        </td>
+                        @endif
+                      
 
                       @if (isset($formHolder->orderbump_id))
                       
@@ -581,11 +597,91 @@
   </div>
 </div>
 
+<!-- Modal addAgentModal -->
+<div class="modal fade" id="addAgentModal" tabindex="-1" aria-labelledby="addAgentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h1 class="modal-title fs-5" id="addAgentModalLabel">Assign Staff</h1>
+              <button type="button" class="btn-close"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{{ route('assignStaffToOrder') }}" method="POST">@csrf
+              <div class="modal-body">
+                  
+                  <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                  <div class="d-grid mb-3">
+                      <label for="">Select Staff</label>
+                      <select name="staff_id" id="" data-live-search="true" class="custom-select form-control border border-dark">
+                          <option value="">Nothing Selected</option>
+
+                          @foreach ($staffs as $staff)
+                            <option value="{{ $staff->id }}">{{ $staff->name }} | kpu-{{ $staff->id }}</option>
+                          @endforeach
+                          
+                      </select>
+                  </div>
+              
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary addAgentBtn">Assign Agent</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+<!-- Modal changeAgentModal -->
+<div class="modal fade" id="changeAgentModal" tabindex="-1" aria-labelledby="changeAgentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h1 class="modal-title fs-5" id="changeAgentModalLabel">Change Assigned Staff</h1>
+              <button type="button" class="btn-close"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{{ route('assignStaffToOrder') }}" method="POST">@csrf
+              <div class="modal-body">
+                  
+                  <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                  <div class="d-grid mb-3">
+                      <label for="">Select Staff</label>
+                      <select name="staff_id" id="changeAgentModalSelect" data-live-search="true" class="custom-select form-control border border-dark">
+                          <option value="" selected>Nothing Selected</option>
+                          
+                          @foreach ($staffs as $staff)
+                            <option value="{{ $staff->id }}">{{ $staff->name }} | kpu-{{ $staff->id }}</option>
+                          @endforeach
+                          
+                      </select>
+                  </div>
+                
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary addAgentBtn">Update Assigned Staff</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
 @endsection
 
 @section('extra_js')
 <script>
   new ClipboardJS('.clipboard-btn');
+</script>
+
+<script>
+  function addAgentModal($orderId="") {
+    $('#addAgentModal').modal("show");
+    $('.order_id').val($orderId);
+  }
+
+  function changeAgentModal($orderId="") {
+    $('#changeAgentModal').modal("show");
+    $('.order_id').val($orderId);
+  }
 </script>
 
 {{-- @if ($errors->has('orderbump_product')) --}}

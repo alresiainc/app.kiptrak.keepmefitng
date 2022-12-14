@@ -31,26 +31,43 @@ return new class extends Migration
             $table->string('heading_text_style')->nullable(); //normal, italic
             $table->string('heading_text_align')->nullable(); //left, center, right
             $table->string('heading_text_color')->nullable();
+            $table->string('heading_text_weight')->nullable(); //font-weight: light, bold
+            $table->string('heading_text_size')->nullable(); //font-size: 1-24px
 
             $table->longText('subheading_text')->nullable();
             $table->string('subheading_text_style')->nullable(); //normal, italic
             $table->string('subheading_text_align')->nullable(); //left, center, right
             $table->string('subheading_text_color')->nullable();
+            $table->string('subheading_text_weight')->nullable(); //font-weight: light, bold
+            $table->string('subheading_text_size')->nullable(); //font-size: 1-24px
 
             $table->longText('description_text')->nullable();
             $table->string('description_text_style')->nullable(); //normal, italic
             $table->string('description_text_align')->nullable(); //left, center, right
             $table->string('description_text_color')->nullable();
+            $table->string('description_text_weight')->nullable(); //font-weight: light, bold
+            $table->string('description_text_size')->nullable(); //font-size: 1-24px
 
             $table->longText('package_text_style')->nullable(); //normal, italic
             $table->longText('package_text_align')->nullable(); //left, center, right
             $table->longText('package_text_color')->nullable();
+            $table->string('package_text_weight')->nullable(); //font-weight: light, bold
+            $table->string('package_text_size')->nullable(); //font-size: 1-24px
+
+            $table->string('before_button_text')->nullable();
+            $table->string('before_button_text_style')->nullable(); //normal, italic
+            $table->string('before_button_text_align')->nullable(); //left, center, right
+            $table->string('before_button_text_color')->nullable();
+            $table->string('before_button_text_weight')->nullable(); //font-weight: light, bold
+            $table->string('before_button_text_size')->nullable(); //font-size: 1-24px
 
             $table->string('button_bg_color')->nullable();
             $table->string('button_text')->nullable();
             $table->string('button_text_style')->nullable(); //normal, itallic
             $table->string('button_text_align')->nullable(); //left, center, right
             $table->string('button_text_color')->nullable();
+            $table->string('button_text_weight')->nullable(); //font-weight: light, bold
+            $table->string('button_text_size')->nullable(); //font-size: 1-24px
 
             $table->string('created_by')->nullable();
             $table->string('status')->nullable(); 

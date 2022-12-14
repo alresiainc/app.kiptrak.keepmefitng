@@ -1,5 +1,5 @@
 @extends('layouts.design')
-@section('title')Create UpSale Template @endsection
+@section('title')Create Downsell Template @endsection
 @section('extra_css')
     <style>
         select{
@@ -12,7 +12,7 @@
         /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
             color: #999;
         } */
-        div.filter-option-inner-inner{
+        div.filter-option-inner-inner {
             color: #000 !important;
         }
     </style>
@@ -22,11 +22,11 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Create Upsell Template</h1>
+      <h1>Create Downsell Template</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-          <li class="breadcrumb-item active">Create Upsell Template</li>
+          <li class="breadcrumb-item active">Create Downsell Template</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->

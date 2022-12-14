@@ -44,6 +44,7 @@ class FormBuilderController extends Controller
     public function newFormBuilder()
     {
         $products = Product::all();
+        $staffs = User::where('type','staff')->get();
         // $products_jqueryArray = \json_encode($products);
 
         $string = 'kpf-' . date("his");
@@ -62,8 +63,15 @@ class FormBuilderController extends Controller
         endforeach;
         $package_select .='</select>';
 
+        $staff_select = '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
+        <option value=""> --Select Product-- </option>';
+        foreach($staffs as $user):
+            $staff_select .= '<option value="'. $user->id.'"> '.$user->name.'</option>' ;
+        endforeach;
+        $staff_select .='</select>';
 
-        return view('pages.newFormBuilder', compact('products', 'package_select', 'form_code'));
+
+        return view('pages.newFormBuilder', compact('products', 'package_select', 'form_code', 'staff_select'));
     }
 
     public function newFormBuilderPost(Request $request)
@@ -127,7 +135,8 @@ class FormBuilderController extends Controller
 
         $products = Product::where('status', 'true')->get();
         $upsellTemplates = UpsellSetting::all();
-        return view('pages.allFormBuilders', compact('formHolders', 'products', 'upsellTemplates'));
+        $staffs = User::where('type','staff')->get();
+        return view('pages.allFormBuilders', compact('formHolders', 'products', 'upsellTemplates', 'staffs'));
         
     }
 

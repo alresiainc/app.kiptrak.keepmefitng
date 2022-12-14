@@ -115,7 +115,7 @@
                   {{ $currency }}{{ $profit }}
                   @else
                   {{-- ({{ number_format((float)abs($profit), 2, '.', ','); }}) --}}
-                  ({{ $profit }})
+                  -{{ $profit }}
                   @endif
                   
                 </h2>
@@ -228,7 +228,7 @@
             <!-- <div id="reportsChart"></div> -->
             <div>
               {{-- <canvas class="bar-chartcanvas"></canvas> --}}
-              <canvas class="bar-chartcanvas" data-sale_chart_value = "{{json_encode($yearly_sale_amount)}}" data-purchase_chart_value = "{{json_encode($yearly_purchase_amount)}}"
+              <canvas class="bar-chartcanvas" data-sale_chart_value = "{{json_encode($yearly_sale_amount)}}" data-profit_chart_value = "{{json_encode($yearly_profit_amount)}}"
               data-expense_chart_value = "{{json_encode($yearly_expense_amount)}}" data-label1="Purchase" data-label2="Sales" data-label3="Expenses"></canvas>
               {{-- {!! $chart->container() !!} --}}
 
@@ -454,10 +454,10 @@
       ],
       datasets: [{
           label: 'Top Items',
-          // data: ["{{ $yearly_best_selling_qty[0]->sold_qty }}", "{{ $yearly_best_selling_qty[1]->sold_qty }}", "{{ $yearly_best_selling_qty[2]->sold_qty }}",
-          // "{{ $yearly_best_selling_qty[2]->sold_qty }}", "{{ $yearly_best_selling_qty[2]->sold_qty }}"],
-          data: [{{ $bestSellingProductsBulk[0]['sold_qty'] }}, {{ $bestSellingProductsBulk[1]['sold_qty'] }}, {{ $bestSellingProductsBulk[2]['sold_qty'] }},
-          {{ $bestSellingProductsBulk[3]['sold_qty'] }}, {{ $bestSellingProductsBulk[4]['sold_qty'] }}],
+          data: ["{{ $yearly_best_selling_qty[0]->sold_qty }}", "{{ $yearly_best_selling_qty[1]->sold_qty }}", "{{ $yearly_best_selling_qty[2]->sold_qty }}",
+          "{{ $yearly_best_selling_qty[3]->sold_qty }}", "{{ $yearly_best_selling_qty[4]->sold_qty }}"],
+          // data: [{{ $bestSellingProductsBulk[0]['sold_qty'] }}, {{ $bestSellingProductsBulk[1]['sold_qty'] }}, {{ $bestSellingProductsBulk[2]['sold_qty'] }},
+          // {{ $bestSellingProductsBulk[3]['sold_qty'] }}, {{ $bestSellingProductsBulk[4]['sold_qty'] }}],
           backgroundColor: [
           'rgb(102, 102, 255)',
           'rgb(255, 51, 153)',
@@ -522,8 +522,8 @@
     //get the bar chart canvas
     var ctx = $(".bar-chartcanvas");
 
+    var yearly_profit_amount = ctx.data('profit_chart_value');
     var yearly_sale_amount = ctx.data('sale_chart_value');
-    var yearly_purchase_amount = ctx.data('purchase_chart_value');
     var yearly_expense_amount = ctx.data('expense_chart_value');
     var label1 = ctx.data('label1');
     var label2 = ctx.data('label2');
@@ -546,16 +546,7 @@
       ],
       datasets: [
         {
-          label: "Purchase",
-          data: [ yearly_purchase_amount[0], yearly_purchase_amount[1], yearly_purchase_amount[2], yearly_purchase_amount[3], yearly_purchase_amount[4], yearly_purchase_amount[5],
-                  yearly_purchase_amount[6], yearly_purchase_amount[7], yearly_purchase_amount[8], yearly_purchase_amount[9], yearly_purchase_amount[10], yearly_purchase_amount[11],
-                  0],
-          borderColor: window.chartColors.red,
-          backgroundColor: window.chartColors.red,
-          borderWidth: 1,
-        },
-        {
-          label: "Sales",
+          label: "Revenue",
           data: [ yearly_sale_amount[0], yearly_sale_amount[1], yearly_sale_amount[2], yearly_sale_amount[3], yearly_sale_amount[4], yearly_sale_amount[5],
                   yearly_sale_amount[6], yearly_sale_amount[7], yearly_sale_amount[8], yearly_sale_amount[9], yearly_sale_amount[10], yearly_sale_amount[11],
                   0],
@@ -568,10 +559,21 @@
           data: [ yearly_expense_amount[0], yearly_expense_amount[1], yearly_expense_amount[2], yearly_expense_amount[3], yearly_expense_amount[4], yearly_expense_amount[5],
                   yearly_expense_amount[6], yearly_expense_amount[7], yearly_expense_amount[8], yearly_expense_amount[9], yearly_expense_amount[10], yearly_expense_amount[11],
                   0],
+          borderColor: window.chartColors.red,
+          backgroundColor: window.chartColors.red,
+          borderWidth: 1,
+        },
+        {
+          label: "Profit",
+          data: [ yearly_profit_amount[0], yearly_profit_amount[1], yearly_profit_amount[2], yearly_profit_amount[3], yearly_profit_amount[4], yearly_profit_amount[5],
+          yearly_profit_amount[6], yearly_profit_amount[7], yearly_profit_amount[8], yearly_profit_amount[9], yearly_profit_amount[10], yearly_profit_amount[11],
+                  0],
           borderColor: window.chartColors.green,
           backgroundColor: window.chartColors.green,
           borderWidth: 1,
         },
+        
+        
       ],
     };
 
@@ -610,7 +612,6 @@
     });
     //end-bar-chartcanvas
   
-
 
   });
 </script>

@@ -18,10 +18,11 @@ return new class extends Migration
             $table->string('unique_key')->nullable();
             
             $table->string('expense_code');
-            $table->string('expense_category_id');
-            $table->string('warehouse_id');
+            $table->string('expense_category_id')->nullable();
+            $table->string('warehouse_id')->nullable();
+            $table->string('product_id')->nullable(); //expense relating to purchases
             $table->string('amount');
-            $table->string('account_id');
+            $table->string('account_id')->nullable();
             $table->text('note')->nullable();
             $table->string('expense_date')->nullable();
 

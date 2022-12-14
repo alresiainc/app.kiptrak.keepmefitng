@@ -110,4 +110,8 @@ class Order extends Model
         return $this->belongsTo(User::class, 'agent_assigned_id');  
     }
 
+    public function staff() {
+        return $this->belongsTo(User::class, 'staff_assigned_id');  
+    }
+
 }

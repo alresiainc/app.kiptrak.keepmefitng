@@ -80,6 +80,7 @@
 
                 <!---used in my-form-builder.js--->
                 <input type="hidden" name="products[]" class="package_select" value="{{ $package_select }}">
+                <input type="hidden" name="staffs[]" class="package_select" value="{{ $staff_select }}">
 
                 <div>
                     <div id="question-field" class='row ml-2 mr-2'>
@@ -103,6 +104,7 @@
                                             <option value="City">City</option>
                                             <option value="Address">Address</option>
                                             <option value="Product Package">Product Package</option>
+                                            {{-- <option value="Staff Assigned">Staff Assigned</option> --}}
                                         </select>
                                     </div>
 
@@ -178,6 +180,7 @@
                                 <option value="City">City</option>
                                 <option value="Address">Address</option>
                                 <option value="Product Package">Product Package</option>
+                                {{-- <option value="Staff Assigned">Staff Assigned</option> --}}
                             </select>
                         </div>
 

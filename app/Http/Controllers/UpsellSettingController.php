@@ -49,6 +49,7 @@ class UpsellSettingController extends Controller
      */
     public function addUpsellTemplatePost(Request $request)
     {
+        $data = $request->all();
         $request->validate([
             'heading_text' => 'required|string',
             'subheading_text' => 'required|string',
@@ -71,28 +72,45 @@ class UpsellSettingController extends Controller
         $upsellTemplate->heading_text_style = $data['heading_text_style']; //normal, italic
         $upsellTemplate->heading_text_align = $data['heading_text_align']; //left, center, right
         $upsellTemplate->heading_text_color = $data['heading_text_color'];
+        $upsellTemplate->heading_text_weight = $data['heading_text_weight'];
+        $upsellTemplate->heading_text_size = $data['heading_text_size'];
 
         $upsellTemplate->subheading_text = $data['subheading_text'];
         $upsellTemplate->subheading_text_style = $data['subheading_text_style']; //normal, italic
         $upsellTemplate->subheading_text_align = $data['subheading_text_align']; //left, center, right
         $upsellTemplate->subheading_text_color = $data['subheading_text_color'];
+        $upsellTemplate->subheading_text_weight = $data['subheading_text_weight'];
+        $upsellTemplate->subheading_text_size = $data['subheading_text_size'];
 
         if (!empty($data['description_text'])) {
             $upsellTemplate->description_text = $data['description_text'];
             $upsellTemplate->description_text_style = $data['description_text_style']; //normal, italic
             $upsellTemplate->description_text_align = $data['description_text_align']; //left, center, right
             $upsellTemplate->description_text_color = $data['description_text_color'];
+            $upsellTemplate->description_text_weight = $data['description_text_weight'];
+            $upsellTemplate->description_text_weight = $data['description_text_weight'];
         }
         
         $upsellTemplate->package_text_style = $data['package_text_style']; //normal, italic
         $upsellTemplate->package_text_align = $data['package_text_align']; //left, center, right
         $upsellTemplate->package_text_color = $data['package_text_color'];
+        $upsellTemplate->package_text_weight = $data['package_text_weight'];
+        $upsellTemplate->package_text_weight = $data['package_text_weight'];
+
+        $upsellTemplate->before_button_text = $data['before_button_text'];
+        $upsellTemplate->before_button_text_style = $data['before_button_text_style']; //normal, itallic
+        $upsellTemplate->before_button_text_align = $data['before_button_text_align']; //left, center, right
+        $upsellTemplate->before_button_text_color = $data['before_button_text_color'];
+        $upsellTemplate->before_button_text_weight = $data['before_button_text_weight'];
+        $upsellTemplate->before_button_text_weight = $data['before_button_text_weight'];
 
         $upsellTemplate->button_bg_color = $data['button_bg_color'];
         $upsellTemplate->button_text = $data['button_text'];
         $upsellTemplate->button_text_style = $data['button_text_style']; //normal, itallic
         $upsellTemplate->button_text_align = $data['button_text_align']; //left, center, right
         $upsellTemplate->button_text_color = $data['button_text_color'];
+        $upsellTemplate->button_text_weight = $data['button_text_weight'];
+        $upsellTemplate->button_text_weight = $data['button_text_weight'];
 
         $upsellTemplate->created_by = 1;
         $upsellTemplate->status = 'true';

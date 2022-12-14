@@ -17,7 +17,7 @@ class ExpenseController extends Controller
      */
     public function allExpense ()
     {
-        $expenses = Expense::all();
+        $expenses = Expense::where('product_id', null)->get();
         return view('pages.expenses.allExpense', compact('expenses'));
     }
 

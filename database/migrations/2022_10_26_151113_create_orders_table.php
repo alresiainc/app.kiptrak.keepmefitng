@@ -27,8 +27,10 @@ return new class extends Migration
             $table->longText('delivery_address')->nullable();
 
             $table->string('form_holder_id')->nullable(); //incase coming from embedded form
-            $table->string('agent_assigned_id')->nullable(); //staff that delivered the order
+            $table->string('agent_assigned_id')->nullable(); //delivery agent that delivered the order
+            
             $table->string('created_by')->nullable();
+            $table->string('staff_assigned_id')->nullable();
 
             $table->longText('url')->nullable(); //link sent to customer, not used
             $table->string('discount')->nullable(); //10% or 10

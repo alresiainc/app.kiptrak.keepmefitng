@@ -154,6 +154,7 @@ Route::get('/create-order', [OrderController::class, 'addOrder'])->name('addOrde
 Route::post('/create-order', [OrderController::class, 'addOrderPost'])->name('addOrderPost');
 Route::get('/view-order/{unique_key}', [OrderController::class, 'singleOrder'])->name('singleOrder'); //viewed by admin
 Route::post('/assign-agent-to-order', [OrderController::class, 'assignAgentToOrder'])->name('assignAgentToOrder');
+Route::post('/assign-staff-to-order', [OrderController::class, 'assignStaffToOrder'])->name('assignStaffToOrder');
 
 //register any user, customer or agent, staff, etc
 //staff

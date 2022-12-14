@@ -55,14 +55,14 @@
                             <div class="col-12 mb-3">
                                 <div class="d-flex justify-content-center">
                                     <div class="content p-3">
-                                        <h3 class="heading text-{{ $upsellTemplate->heading_text_align }} fst-{{ $upsellTemplate->heading_text_style }}"
-                                        style="color: {{ $upsellTemplate->heading_text_color }};">{{ $upsellTemplate->heading_text }}</h3>
+                                        <p class="heading text-{{ $upsellTemplate->heading_text_align }} fst-{{ $upsellTemplate->heading_text_style }} fw-{{$upsellTemplate->heading_text_weight}} fs-{{$upsellTemplate->heading_text_size}}"
+                                        style="color: {{ $upsellTemplate->heading_text_color }};">{{ $upsellTemplate->heading_text }}</p>
 
-                                        <h4 class="subheading text-{{ $upsellTemplate->subheading_text_align }} fst-{{ $upsellTemplate->subheading_text_style }}"
-                                        style="color: {{ $upsellTemplate->subheading_text_color }};">{{ $upsellTemplate->subheading_text }}</h4>
+                                        <p class="subheading text-{{ $upsellTemplate->subheading_text_align }} fst-{{ $upsellTemplate->subheading_text_style }} fw-{{$upsellTemplate->subheading_text_weight}} fs-{{$upsellTemplate->subheading_text_size}}"
+                                        style="color: {{ $upsellTemplate->subheading_text_color }};">{{ $upsellTemplate->subheading_text }}</p>
                                         
                                         @if (isset($upsellTemplate->description_text))
-                                        <p class="description text-{{ $upsellTemplate->description_text_align }} fst-{{ $upsellTemplate->description_text_style }}"
+                                        <p class="description text-{{$upsellTemplate->description_text_align}} fst-{{ $upsellTemplate->description_text_style }} fw-{{$upsellTemplate->description_text_weight}} fs-{{$upsellTemplate->description_text_size}}"
                                         style="color: {{ $upsellTemplate->description_text_color }};">
                                             {{ $upsellTemplate->description_text }}
                                         </p>
@@ -73,12 +73,17 @@
                                             alt="">
                                         </div>
 
+                                        <div class="before_btn">
+                                            <p class="before_button text-{{$upsellTemplate->before_button_text_align}} fst-{{ $upsellTemplate->before_button_text_style }} fw-{{$upsellTemplate->before_button_text_weight}} fs-{{$upsellTemplate->before_button_text_size}}"
+                                                style="color: {{ $upsellTemplate->before_button_text_color }};">{{ $upsellTemplate->before_button_text }}</p>
+                                        </div>
+
                                         <div class="select-upsell-product text-center">
-                                            <p class="form-label">Click button to Add Product Package</p>
+
+
                                             <div class="call-to-action d-flex justify-content-center align-items-center">
                                                 <label for="upsell_product" class="form-label d-flex align-items-center">
-                                                    
-                                                    <span class="text-{{ $upsellTemplate->package_text_align }} fst-{{ $upsellTemplate->package_text_style }}"
+                                                    <span class="text-{{ $upsellTemplate->package_text_align }} fst-{{ $upsellTemplate->package_text_style }} fw-{{$upsellTemplate->package_text_weight}} fs-{{$upsellTemplate->package_text_size}}"
                                                     style="color: {{ $upsellTemplate->package_text_color }};">Sample Package Title =
                                                         N(Sample Package Title Price)</span>
                                                 </label>
@@ -87,8 +92,8 @@
 
                                         <div class="make-your-choice">
 
-                                            <button type="submit" class="btn w-100 p-2 upsell_submit_btn text-{{ $upsellTemplate->button_text_align }} fst-{{ $upsellTemplate->button_text_style }}"
-                                                style="background-color: #012970; color: {{ $upsellTemplate->button_text_color }};">{{ $upsellTemplate->button_text }}</button>
+                                            <button type="submit" class="btn w-100 p-2 upsell_submit_btn text-{{ $upsellTemplate->button_text_align }} fst-{{ $upsellTemplate->button_text_style }} fw-{{$upsellTemplate->button_text_weight}} fs-{{$upsellTemplate->button_text_size}}"
+                                                style="background-color: {{ $upsellTemplate->button_bg_color }}; color: {{ $upsellTemplate->button_text_color }};">{{ $upsellTemplate->button_text }}</button>
 
                                         </div>
                                         

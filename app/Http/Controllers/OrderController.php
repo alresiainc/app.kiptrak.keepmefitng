@@ -73,6 +73,18 @@ class OrderController extends Controller
         return back()->with('success', 'Agent Assigned Successfully');
     }
 
+    public function assignStaffToOrder(Request $request)
+    {
+        $data = $request->all();
+        $order_id = $data['order_id'];
+        $staff_id = $data['staff_id'];
+
+        //upd order
+        Order::where('id',$order_id)->update(['staff_assigned_id'=>$staff_id]);
+
+        return back()->with('success', 'Staff Assigned Successfully');
+    }
+
     public function cartAbandon()
     {
         $carts = CartAbandon::all();

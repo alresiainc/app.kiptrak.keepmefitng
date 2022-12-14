@@ -10,6 +10,7 @@ use App\Models\Supplier;
 use App\Models\Purchase;
 use App\Models\Product;
 use App\Models\IncomingStock;
+use App\Models\Expense;
 
 class PurchaseController extends Controller
 {
@@ -92,6 +93,18 @@ class PurchaseController extends Controller
                 $incomingStock->created_by = 1;
                 $incomingStock->status = 'true';
                 $incomingStock->save();
+
+                //expense
+                $data = $request->all();
+
+                // $expense = new Expense();
+                // $expense->expense_code = 'kpe-' . date("Ymd") . '-'. date("his");
+                // $expense->amount = $data['product_qty'][$key] * $data['unit_price'][$key];
+                // $expense->product_id = $id;
+                // $expense->note = !empty($data['note']) ? $data['note'] : null;
+                // $expense->created_by = 1;
+                // $expense->status = 'true';
+                // $expense->save();
                 
                 $purchase = new Purchase();
                 $purchase->purchase_code = $data['purchase_code'];

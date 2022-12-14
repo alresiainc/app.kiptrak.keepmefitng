@@ -65,10 +65,15 @@ class DashboardController extends Controller
             
             $sale_amount = Sale::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
             $purchase_amount = Purchase::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
-            $expense_amount = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount');
+            $profit_amount = $sale_amount - $purchase_amount;
+            $expense_amount = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount') + $purchase_amount;
+
+            //sum diff btwn columns
+            //$profit = Sale::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum(DB::raw('amount_due - amount_paid'));
             
             $yearly_sale_amount[] = number_format((float)$sale_amount, 2, '.', '');
             $yearly_purchase_amount[] = number_format((float)$purchase_amount, 2, '.', '');
+            $yearly_profit_amount[] = number_format((float)$profit_amount, 2, '.', '');
             $yearly_expense_amount[] = number_format((float)$expense_amount, 2, '.', '');
             $start = strtotime("+1 month", $start);
         }
@@ -112,7 +117,7 @@ class DashboardController extends Controller
         $recentOrders = Order::orderBy('id','DESC')->take(5)->get();
 
         return view('pages.dashboard', compact('generalSetting', 'currency', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
-        'customers_count', 'suppliers_count', 'purchases_count', 'sales_count','invoices_count', 'yearly_sale_amount', 'yearly_purchase_amount', 'yearly_expense_amount',
+        'customers_count', 'suppliers_count', 'purchases_count', 'sales_count','invoices_count', 'yearly_sale_amount', 'yearly_purchase_amount', 'yearly_profit_amount', 'yearly_expense_amount',
         'recentProducts', 'products', 'yearly_best_selling_qty', 'bestSellingProductsBulk', 'recentOrders'));
     }
 
