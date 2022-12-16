@@ -64,4 +64,10 @@ class Purchase extends Model
     {
         return $this->belongsTo(Product::class, 'product_id');  
     }
+
+    //$cat->categories as subcat
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'parent_id', 'id'); //mapping categories to its 'parent_id'
+    }
 }

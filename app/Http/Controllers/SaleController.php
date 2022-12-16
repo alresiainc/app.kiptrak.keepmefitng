@@ -25,7 +25,6 @@ class SaleController extends Controller
     public function allSale()
     {
         $sales = Sale::where('parent_id', null)->get();
-        
         return view('pages.sales.allSale', compact('sales'));
     }
 

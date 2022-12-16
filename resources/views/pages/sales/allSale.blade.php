@@ -38,74 +38,74 @@
           </div>
           <hr>
           
-          <div class="table table-responsive">
-            <table id="products-table" class="table custom-table" style="width:100%">
-              <thead>
-                  <tr>
-                      <th>Sale Code</th>
-                      <th>Customer</th>
-                      <th>Sale Status</th>
-                      <th>Amount</th>
-                      <th>Due</th>
-                      <th>Payment Status</th>
-                      <th>Date</th>
-                      <th>Action</th>
-                  </tr>
-              </thead>
-              <tbody>
-                @if (count($sales) > 0)
-                    @foreach ($sales as $sale)
-                    
-                        <tr>
-                    
-                            <td>{{ $sale->sale_code }}</td>
-                            <td>{{ $sale->customer->firstname.' '.$sale->customer->lastname }}</td>
+            <div class="table table-responsive">
+              <table id="products-table" class="table custom-table" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Sale Code</th>
+                        <th>Customer</th>
+                        <th>Sale Status</th>
+                        <th>Amount</th>
+                        <th>Due</th>
+                        <th>Payment Status</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  @if (count($sales) > 0)
+                      @foreach ($sales as $sale)
+                      
+                          <tr>
+                      
+                              <td>{{ $sale->sale_code }}</td>
+                              <td>{{ $sale->customer->firstname.' '.$sale->customer->lastname }}</td>
+                              
+                              <td>
+                                  @if($sale->status=='completed')
+                                      <span class="p-1 ms-1 bg-success text-white fw-bold" style="font-size: 10px">Completed</span>
+                                  
+                                  @elseif($sale->status=='pending')
+                                      <span class="p-1 ms-1 bg-danger text-white fw-bold" style="font-size: 10px">Pending</span>
+                                  
+                                  @endif
+                              </td>
+                              <td>{{ $sale->amountPaidAccrued($sale->sale_code) }}</td>
+                              <td>{{ $sale->amountDueAccrued($sale->sale_code) }}</td>
+                              
+                              <td>
+                                @if($sale->payment_status=='paid')
+                                <span class="p-1 ms-1 bg-success text-white fw-bold" style="font-size: 10px">Paid</span>
+
+                                @elseif($sale->payment_status=='partial')
+                                <span class="p-1 ms-1 bg-info text-white fw-bold" style="font-size: 10px">Partial</span>
+
+                                @elseif($sale->payment_status=='due')
+                                <span class="p-1 ms-1 bg-info text-secondary fw-bold" style="font-size: 10px">Partial</span>
                             
-                            <td>
-                                @if($sale->status=='completed')
-                                    <span class="p-1 ms-1 bg-success text-white fw-bold" style="font-size: 10px">Completed</span>
-                                
-                                @elseif($sale->status=='pending')
+                                @elseif($sale->payment_status=='pending')
                                     <span class="p-1 ms-1 bg-danger text-white fw-bold" style="font-size: 10px">Pending</span>
                                 
                                 @endif
-                            </td>
-                            <td>{{ $sale->amountPaidAccrued($sale->sale_code) }}</td>
-                            <td>{{ $sale->amountDueAccrued($sale->sale_code) }}</td>
-                            
-                            <td>
-                              @if($sale->payment_status=='paid')
-                              <span class="p-1 ms-1 bg-success text-white fw-bold" style="font-size: 10px">Paid</span>
-
-                              @elseif($sale->payment_status=='partial')
-                              <span class="p-1 ms-1 bg-info text-white fw-bold" style="font-size: 10px">Partial</span>
-
-                              @elseif($sale->payment_status=='due')
-                              <span class="p-1 ms-1 bg-info text-secondary fw-bold" style="font-size: 10px">Partial</span>
-                          
-                              @elseif($sale->payment_status=='pending')
-                                  <span class="p-1 ms-1 bg-danger text-white fw-bold" style="font-size: 10px">Pending</span>
+                              </td>
+          
+                              <td>{{ $sale->saleDate() }}</td>
+          
+                              <td>
+                                  <div class="d-flex">
+                                  <a href="{{ route('singleSale', $sale->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
+                                  <a href="{{ route('editSale', $sale->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                  <a class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
+                                  </div>
+                              </td>
+                          </tr>
                               
-                              @endif
-                            </td>
-        
-                            <td>{{ $sale->saleDate() }}</td>
-        
-                            <td>
-                                <div class="d-flex">
-                                <a href="{{ route('singleSale', $sale->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
-                                <a href="{{ route('editSale', $sale->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                                <a class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
-                                </div>
-                            </td>
-                        </tr>
-                            
-                    @endforeach
-                @endif
-                  
-              </tbody>
-          </table>
-          </div>
+                      @endforeach
+                  @endif
+                    
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

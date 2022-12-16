@@ -135,13 +135,10 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="" class="form-label">Select how long you want the order to be delivered *</label>
                                         <select data-name="delivery_duration" class="delivery_duration select2 form-control border @error('delivery_duration') is-invalid @enderror" id="">
-                                          <option value="1">1 day</option>
-                                          <option value="2">2 days</option>
-                                          <option value="3">3 days</option>
-                                          <option value="4">4 days</option>
-                                          <option value="5">5 days</option>
-                                          <option value="6">6 days</option>
-                                          <option value="7">7 days</option>
+                                          <option value="1">Within 1 business day (Today / Tommorrow)</option>
+                                          <option value="2">Within 2 business days from now</option>
+                                          <option value="3">Within 3 business days from now</option>
+                                          
                 
                                         </select>
                                         @error('delivery_duration')
@@ -232,7 +229,7 @@
                                                             <input type="hidden" name="orderbump_product_checkbox" id="product"
                                                             class="orderbump_product_checkbox me-3" value="{{ $formHolder->orderbump->product->id }}"/>
                                                             <span class="me-1 fw-bold">{{ $formHolder->orderbump->product->name }} =
-                                                                {{ $formHolder->orderbump->product->country->symbol }}{{ $formHolder->orderbump->product->price }}</span>
+                                                                {{ $formHolder->orderbump->product->country->symbol }}{{ $formHolder->orderbump->product->sale_price }}</span>
                                                         </label>
                                                         @error('product')
                                                             <span class="invalid-feedback" role="alert">
@@ -340,7 +337,7 @@
                                                                 
                                                                 <span class="text-{{ $formHolder->upsell->template->package_text_align }} fst-{{ $formHolder->upsell->template->package_text_style }}"
                                                                     style="color: {{ $formHolder->upsell->template->package_text_color }};">
-                                                                    {{ $formHolder->upsell->product->name }} = {{ $formHolder->upsell->product->country->symbol }}{{ $formHolder->upsell->product->price }}
+                                                                    {{ $formHolder->upsell->product->name }} = {{ $formHolder->upsell->product->country->symbol }}{{ $formHolder->upsell->product->sale_price }}
                                                                 </span>
 
                                                             </label>

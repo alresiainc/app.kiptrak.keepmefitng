@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $sales_paid = Sale::sum('amount_paid');
         $expenses = $this->shorten(Expense::sum('amount'));
 
-        $profit_val = $sales_paid - $purchases_amount_paid;
+        $profit_val = $sales_paid - ($purchases_amount_paid + Expense::sum('amount'));
         $purchases_amount_paid = $this->shorten($purchases_amount_paid);
         $sales_paid = $this->shorten($sales_paid);
 
@@ -108,7 +108,6 @@ class DashboardController extends Controller
             $bestSellingProducts['sold_qty'] = $sale->sold_qty;
 
             $bestSellingProductsBulk[] = $bestSellingProducts;
-
         }
         //return $bestSellingProductsBulk[0]['sold_qty'];
 

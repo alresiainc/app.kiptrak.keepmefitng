@@ -10,6 +10,8 @@ use App\Models\Product;
 use App\Models\IncomingStock;
 use App\Models\OutgoingStock;
 use App\Models\Country;
+use App\Models\Purchase;
+use App\Models\Sale;
 
 class ProductController extends Controller
 {
@@ -68,6 +70,7 @@ class ProductController extends Controller
         $product->size = !empty($data['size']) ? $data['size'] : null;
         $product->country_id = $data['currency']; //country_id
         $product->purchase_price = $data['purchase_price'];
+        $product->sale_price = $data['sale_price'];
 
         if (empty($data['code'])) {
             $count = Product::count() + 1;
@@ -97,7 +100,7 @@ class ProductController extends Controller
         $incomingStock->created_by = '1';
         $incomingStock->status = 'true';
         $incomingStock->save();
-
+        
         //Purchase
         $purchase = new Purchase();
         $purchase_code = 'kpa-' . date("Ymd") . '-'. date("his");
@@ -116,10 +119,9 @@ class ProductController extends Controller
 
         $purchase->created_by = 1;
         $purchase->status = 'received';
-
         $purchase->save();
 
-        $product->update(['purchase_id', $purchase->id]);
+        $product->update(['purchase_id'=>$purchase->id]);
 
         return back()->with('success', 'Product Created Successfully');
 
@@ -128,7 +130,7 @@ class ProductController extends Controller
     //allProducts
     public function allProducts()
     {
-        $products = Product::all();
+        $products = Product::orderBy('id','DESC')->get();
         return view('pages.products.allProducts', compact('products'));
     }
 

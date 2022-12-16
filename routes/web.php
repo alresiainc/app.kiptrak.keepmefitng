@@ -213,6 +213,9 @@ Route::get('/view-purchase/{unique_key}', [PurchaseController::class, 'singlePur
 Route::get('/edit-purchase/{unique_key}', [PurchaseController::class, 'editPurchase'])->name('editPurchase');
 Route::post('/edit-purchase/{unique_key}', [PurchaseController::class, 'editPurchasePost'])->name('editPurchasePost');
 
+//inventory management
+Route::get('/inventory-dashboard', [InventoryController::class, 'inventoryDashboard'])->name('inventoryDashboard'); //staffReport
+
 //sale
 Route::get('/sales', [SaleController::class, 'allSale'])->name('allSale');
 Route::get('/create-sale', [SaleController::class, 'addSale'])->name('addSale');
@@ -306,6 +309,29 @@ Route::post('/compose-email-message', [MessageController::class, 'composeEmailMe
 Route::get('/sent-email-messages', [MessageController::class, 'sentEmailMessage'])->name('sentEmailMessage'); //list
 
 Route::get('/send-sms/{phone?}', [MessageController::class, 'sendVCode'])->name('sendVCode'); //list
+
+//reports
+Route::get('/reports-product', [ReportController::class, 'productReport'])->name('productReport'); //productReport
+Route::post('/reports-product', [ReportController::class, 'productReportQuery'])->name('productReportQuery'); //productReportQuery
+
+Route::get('/reports-sale', [ReportController::class, 'saleReport'])->name('saleReport'); //saleReport
+Route::post('/reports-sale', [ReportController::class, 'saleReportQuery'])->name('saleReportQuery'); //saleReportQuery
+
+//purchaseReport
+Route::get('/reports-purchase', [ReportController::class, 'purchaseReport'])->name('purchaseReport'); //purchaseReport
+Route::post('/reports-purchase', [ReportController::class, 'purchaseReportQuery'])->name('purchaseReportQuery'); //purchaseReportQuery
+
+//customerReport
+Route::get('/reports-customer/{type?}', [ReportController::class, 'customerReport'])->name('customerReport'); //customerReport
+Route::post('/reports-customer/{type?}', [ReportController::class, 'customerReportQuery'])->name('customerReportQuery'); //customerReportQuery
+
+//supplierReport
+Route::get('/reports-supplier/{type?}', [ReportController::class, 'supplierReport'])->name('supplierReport'); //supplierReport
+Route::post('/reports-supplier/{type?}', [ReportController::class, 'supplierReportQuery'])->name('supplierReportQuery'); //supplierReportQuery
+
+//staffReport
+Route::get('/reports-staff/{type?}', [ReportController::class, 'staffReport'])->name('staffReport'); //staffReport
+Route::post('/reports-staff/{type?}', [ReportController::class, 'staffReportQuery'])->name('staffReportQuery'); //staffReportQuery
 
 });
 

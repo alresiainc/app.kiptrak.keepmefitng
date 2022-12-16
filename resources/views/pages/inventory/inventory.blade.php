@@ -1,16 +1,16 @@
 @extends('layouts.design')
-@section('title')Dashboard @endsection
+@section('title')Inventory @endsection
 @section('extra_css')@endsection
 
 @section('content')
     
 <main id="main" class="main">
   <div class="pagetitle">
-    <h1>Dashboard</h1>
+    <h1>Inventory Management</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active">Dashboard</li>
+        <li class="breadcrumb-item active">Inventory Management</li>
       </ol>
     </nav>
   </div>
@@ -43,35 +43,33 @@
 
   <section class="section m-0">
     <div class="row">
-      <!-- Sales Card -->
+
+        <!-- Total Products Card -->
       <div class="col-lg-3 col-md-6">
-        <div class="card bg-1">
-          <div class="card-body p-2">
-            <div class="d-flex justify-content-between align-items-center">
-              <div class="text-start">
-                {{-- <h2 class="fw-bold">{{ $currency }}{{ number_format((float)$purchases_amount_paid, 2, '.', ',') }}</h2> --}}
-                <h2 class="fw-bold">{{ $currency }}{{ $purchases_amount_paid }}</h2>
-                <small class="text-uppercase small pt-1 fw-bold"
-                  >Purchases</small
-                >
-              </div>
-              <div class="rounded-circle float-end">
-                <i class="bi bi-box display-1 text-light-black"></i>
-              </div>
+        <div class="card bg-4">
+            <div class="card-body p-2">
+                <div class="d-flex align-items-center justify-content-between">
+                <div class="text-start">
+                    <h2 class="fw-bold">{{ count($total_products) }}</h2>
+                    <small class="text-uppercase small pt-1 fw-bold">Total Products</small>
+                </div>
+                <div class="rounded-circle float-end">
+                    <i class="bi bi-box display-1 text-light-black"></i>
+                </div>
+                </div>
             </div>
-          </div>
         </div>
       </div>
-      <!-- End Sales Card -->
+        <!-- End Total Products Card -->
 
-      <!-- Sales Card -->
+      <!-- In-Stock-Products Card -->
       <div class="col-lg-3 col-md-6">
         <div class="card bg-2">
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
-                <h2 class="fw-bold">{{ $currency }}{{ $sales_paid }}</h2>
-                <small class="text-uppercase small pt-1 fw-bold">Sales</small
+                <h2 class="fw-bold">{{ count($total_products) - count($out_of_stock_products) }}</h2>
+                <small class="text-uppercase small pt-1 fw-bold">In-Stock Products</small
                 >
               </div>
               <div class="rounded-circle float-end">
@@ -91,8 +89,8 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
-                <h2 class="fw-bold">{{ $currency }}{{ $expenses }}</h2>
-                <small class="text-uppercase small pt-1 fw-bold">Expenses</small
+                <h2 class="fw-bold">{{ count($out_of_stock_products) }}</h2>
+                <small class="text-uppercase small pt-1 fw-bold">Out-Of-Stock Products</small
                 >
               </div>
               <div class="rounded-circle float-end">
@@ -104,33 +102,28 @@
       </div>
       <!-- End Sales Card -->
 
-      <!-- Sales Card -->
+      <!-- Warehouses Card -->
       <div class="col-lg-3 col-md-6">
-        <div class="card bg-4">
+        <div class="card bg-1">
           <div class="card-body p-2">
-            <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex justify-content-between align-items-center">
               <div class="text-start">
-                <h2 class="fw-bold">
-                  @if ($profit_val > 0)
-                  {{ $currency }}{{ $profit }}
-                  @else
-                  {{-- ({{ number_format((float)abs($profit), 2, '.', ','); }}) --}}
-                  -{{ $profit }}
-                  @endif
-                  
-                </h2>
-                <small class="text-uppercase small pt-1 fw-bold">Profit</small
+                <h2 class="fw-bold">{{ count($warehouses) }}</h2>
+                <small class="text-uppercase small pt-1 fw-bold">Warehouses</small
                 >
               </div>
               <div class="rounded-circle float-end">
-                <i class="bi bi-cash-coin display-1 text-light-black"></i>
+                <i class="bi bi-house display-1 text-light-black"></i>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <!-- End Sales Card -->
+      <!-- End Warehouses Card -->
+
+      
     </div>
+
   </section>
 
   <section class="section m-0">
@@ -141,12 +134,11 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-start">
               <div class="border rounded shadow-sm px-2 me-2">
-                <i class="bi bi-people display-1 text-light-black"></i>
+                <i class="bi bi-cash-stack display-1 text-light-black"></i>
               </div>
               <div class="text-start">
-                <h2 class="fw-bold">{{ $customers_count }}</h2>
-                <small class="text-uppercase text-muted small pt-1 fw-bold">Customers</small
-                >
+                <h2 class="fw-bold">{{ $currency }}{{ $sale_revenue }}</h2>
+                <small class="text-uppercase text-muted small pt-1 fw-bold">Revenue</small>
               </div>
             </div>
           </div>
@@ -159,11 +151,11 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-start">
               <div class="border rounded shadow-sm px-2 me-2">
-                <i class="bi bi-truck display-1 text-light-black"></i>
+                <i class="bi bi-wallet2 display-1 text-light-black"></i>
               </div>
               <div class="text-start">
-                <h2 class="fw-bold">{{ $suppliers_count }}</h2>
-                <small class="text-uppercase text-muted small pt-1 fw-bold">Suppliers</small
+                <h2 class="fw-bold">{{ $currency }}{{ $total_expenses }}</h2>
+                <small class="text-uppercase text-muted small pt-1 fw-bold">Expenses</small
                 >
               </div>
             </div>
@@ -178,11 +170,17 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-start">
               <div class="border rounded shadow-sm px-2 me-2">
-                <i class="bi bi-briefcase display-1 text-light-black"></i>
+                <i class="bi bi-cash-coin display-1 text-light-black"></i>
               </div>
               <div class="text-start">
-                <h2 class="fw-bold">{{ $purchases_count }}</h2>
-                <small class="text-uppercase text-muted small pt-1 fw-bold">Purchases</small
+                <h2 class="fw-bold">
+                    @if ($profit_val > 0)
+                  {{ $currency }}{{ $profit }}
+                  @else
+                  -{{ $profit }}
+                  @endif
+                </h2>
+                <small class="text-uppercase text-muted small pt-1 fw-bold">Profit</small
                 >
               </div>
             </div>
@@ -202,8 +200,8 @@
                 ></i>
               </div>
               <div class="text-start">
-                <h2 class="fw-bold">{{ $sales_count }}</h2>
-                <small class="text-uppercase text-muted small pt-1 fw-bold">Sales</small
+                <h2 class="fw-bold">{{ count($orders) }}</h2>
+                <small class="text-uppercase text-muted small pt-1 fw-bold">Orders</small
                 >
               </div>
             </div>
@@ -214,71 +212,87 @@
     </div>
   </section>
 
-  <hr />
-
-  <section class="section">
+  <section class="section m-0">
     <div class="row">
-      <!-- Reports -->
-      <div class="col-md-8">
-        <div class="card card-top-border border-top-success">
-          <div class="card-body">
-            <h5 class="card-title">Revenue, Expenses & Profit Chart</h5>
 
-            <!-- Line Chart -->
-            <!-- <div id="reportsChart"></div> -->
-            <div>
-              {{-- <canvas class="bar-chartcanvas"></canvas> --}}
-              <canvas class="bar-chartcanvas" data-sale_chart_value = "{{json_encode($yearly_sale_amount)}}" data-profit_chart_value = "{{json_encode($yearly_profit_amount)}}"
-              data-expense_chart_value = "{{json_encode($yearly_expense_amount)}}" data-label1="Purchase" data-label2="Sales" data-label3="Expenses"></canvas>
-              {{-- {!! $chart->container() !!} --}}
-
+        <!-- Total Suppliers Card -->
+      <div class="col-lg-3 col-md-6">
+        <div class="card" style="border-radius: 10px; background-color: #caeb11;">
+            <div class="card-body p-2">
+                <div class="d-flex align-items-center justify-content-between">
+                <div class="text-start">
+                    <h2 class="fw-bold text-white">{{ count($suppliers) }}</h2>
+                    <small class="text-uppercase text-white small pt-1 fw-bold">Suppliers</small>
+                </div>
+                <div class="rounded-circle float-end">
+                    <i class="bi bi-truck display-1 text-light-black"></i>
+                </div>
+                </div>
             </div>
+        </div>
+      </div>
+        <!-- End Total Suppliers Card -->
 
-            <!-- End Line Chart -->
+      <!-- In-Stock-Products Card -->
+      <div class="col-lg-3 col-md-6">
+        <div class="card bg-primary" style="border-radius: 10px;">
+          <div class="card-body p-2">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="text-start">
+                <h2 class="fw-bold text-white">{{ $currency }}{{ $purchase_sum }}</h2>
+                <small class="text-uppercase text-white small pt-1 fw-bold">Purchases</small>
+              </div>
+              <div class="rounded-circle float-end">
+                <i
+                  class="bi bi-credit-card display-1 text-light-black"
+                ></i>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <!-- End Reports -->
+      <!-- End Sales Card -->
 
-      <div class="col-md-4">
-        <div class="card border-top-5 border-top-warning card-top-border">
-          <div class="card-body">
-            <div class="card-title">Recently Added Items</div>
-
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">Photo</th>
-                  <th scope="col">Item</th>
-                  <th scope="col">Purchase Price</th>
-                </tr>
-              </thead>
-              <tbody>
-
-                @if (count($recentProducts) > 0)
-                  @foreach ($recentProducts as $product)
-                  <tr>
-                    <th scope="row">
-                      <a
-                        href="{{ asset('/storage/products/'.$product->image) }}"
-                        data-fancybox="gallery"
-                        data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
-                        >   
-                        <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid"
-                        alt="{{$product->name}}" style="height: 30px;"></a>
-                    </th>
-                    <td class="align-middle fw-bold" style="font-size: 10px;">{{ $product->name }}</td>
-                    <td class="align-middle">{{ $currency }}{{ $product->purchase_price }}</td>
-                  </tr>
-                  @endforeach
-                @endif
-                
-              </tbody>
-            </table>
+      <!-- Sales Card -->
+      <div class="col-lg-3 col-md-6">
+        <div class="card bg-danger" style="border-radius: 10px;">
+          <div class="card-body p-2">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="text-start">
+                <h2 class="fw-bold text-white">{{ count($customers) }}</h2>
+                <small class="text-uppercase text-white small pt-1 fw-bold">Customers</small
+                >
+              </div>
+              <div class="rounded-circle float-end">
+                <i class="bi bi-person-check display-1 text-light-black"></i>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      <!-- End Sales Card -->
+
+      <!-- Warehouses Card -->
+      <div class="col-lg-3 col-md-6">
+        <div class="card bg-success" style="border-radius: 10px;">
+          <div class="card-body p-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="text-start">
+                <h2 class="fw-bold text-white">{{ $currency }}{{ $sales_sum }}</h2>
+                <small class="text-uppercase text-white small pt-1 fw-bold">Sales</small
+                >
+              </div>
+              <div class="rounded-circle float-end">
+                <i class="bi bi-cart3 display-1 text-light-black"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End Warehouses Card -->
+
     </div>
+
   </section>
 
   <section class="section">
@@ -286,7 +300,7 @@
       <div class="col-md-12">
         <div class="card card-top-border border-top-primary">
           <div class="card-body">
-            <div class="card-title">Stock Alert</div>
+            <div class="card-title">Recently Added Products</div>
             <div class="table table-responsive">
               <table
                 id="stock-table"
@@ -295,22 +309,30 @@
               >
                 <thead>
                   <tr>
-                    <th scope="col">Item Code</th>
-                    <th scope="col">Item Name</th>
+                    <th scope="col">Product Image</th>
+                    <th scope="col">Product Name</th>
                     {{-- <th scope="col">Brand Name</th> --}}
                     <th scope="col">Stock</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @if ($products->count() > 0)
-                      @foreach ($products as $product)
-                          @if ($product->stock_available() < 10)
+                  @if ($recently_products->count() > 0)
+                      @foreach ($recently_products as $product)
+                          
                           <tr>
-                            <td>{{ $product->code }}</td>
+                            <th scope="row">
+                                <a
+                                  href="{{ asset('/storage/products/'.$product->image) }}"
+                                  data-fancybox="gallery"
+                                  data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
+                                  >   
+                                  <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid"
+                                  alt="{{$product->name}}" style="height: 30px;"></a>
+                            </th>
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->stock_available() }}</td>
                           </tr>
-                          @endif
+                          
                       @endforeach
                   @endif
                   
@@ -323,85 +345,18 @@
     </div>
   </section>
 
-  <section class="section">
-    <div class="row">
-      <!-- Reports -->
-      <div class="col-lg-6">
-        <div class="card card-top-border border-top-success">
-          <div class="card-body">
-            <h5 class="card-title">Top 5 Selling Products</h5>
+  <hr />
 
-            <!-- Line Chart -->
-            <div>
-              <canvas id="trendingItemsChart" width="100%"></canvas>
-            </div>
+  
 
-            <!-- End Line Chart -->
-          </div>
-        </div>
-      </div>
-      <!-- End Reports -->
-
-      <div class="col-lg-6">
-        <div class="card border-top-5 border-top-warning card-top-border">
-          <div class="card-body">
-            <div class="card-title">Recent Orders</div>
-
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">Order No.</th>
-                  <th scope="col">Customer</th>
-                  <th scope="col">Delivery Address</th>
-                  <th scope="col">Agent</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                @if ($recentOrders->count() > 0)
-                 @foreach ($recentOrders as $order)
-                 <tr>
-                  <td>{{ $order->orderCode($order->id) }}</td>
-                  <td>{{ $order->customer_id ? $order->customer->firstname : 'No response' }} {{ $order->customer_id ? $order->customer->lastname : '' }}</td>
-                  <td style="width: 150px;">{{ $order->customer_id ? $order->customer->delivery_address : 'No response' }}</td>
-
-                  @if (isset($order->agent_assigned_id))
-                  <td>
-                    {{ $order->agent->name }}
-                  </td>
-                  @else
-                  <td style="width: 120px">
-                    None 
-                  </td>
-                  @endif
-
-                  <td>
-                    
-                      @if (!isset($order->status) || $order->status=='pending')
-                        <span class="badge badge-danger">Pending</span>
-                      @endif
-                      
-                  </td>
-                </tr> 
-                 @endforeach
-                
-                @endif
-                
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  
 </main>
 
 @endsection
 
 @section('extra_js')
 
-
-<script>
+{{-- <script>
   $(document).ready(function () {
     $("#stock-table").DataTable({
       dom: "Bflrtip",
@@ -434,10 +389,10 @@
 
     alert("Nice, you triggered this alert message!", "danger");
   });
-</script>
+</script> --}}
 
-@if ($yearly_best_selling_qty->count() == 5)
-<script>
+{{-- @if ($yearly_best_selling_qty->count() == 5) --}}
+{{-- <script>
   //trendingItemsChart
   var trendingItemsChart = document.getElementById("trendingItemsChart");
   var _trendingItemsChart = new Chart(trendingItemsChart, {
@@ -472,12 +427,10 @@
     },
     //options
   });
-</script>
-@endif
+</script> --}}
+{{-- @endif --}}
 
-
-
-<script>
+{{-- <script>
    'use strict';
 
   window.chartColors = {
@@ -614,6 +567,6 @@
   
 
   });
-</script>
+</script> --}}
 
 @endsection

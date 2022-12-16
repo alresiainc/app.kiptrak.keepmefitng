@@ -10,7 +10,7 @@
     <!---products--->
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#products-nav" data-bs-toggle="collapse" href="#">
-        <i class="bi bi-list"></i>
+        <i class="bi bi-box"></i>
         <span>Products</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="products-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
@@ -85,6 +85,15 @@
           <a href="{{ route('allPurchase') }}"><i style="font-size: 100%!important;" class="bi bi-cart3"></i><span>View Purchases</span></a>
         </li>
       </ul>
+    </li>
+
+    <!---inventory--->
+    <li class="nav-item">
+      <a class="nav-link"href="{{ route('inventoryDashboard') }}">
+        <i class="bi bi-shop"></i>
+        <span>Inventory Management</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      
     </li>
 
     <!---sales--->
@@ -251,6 +260,35 @@
       </ul>
     </li>
 
+    <!---reports--->
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#reports-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-megaphone"></i>
+        <span>Reports</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="reports-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li>
+          <a href="{{ route('productReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Product Report</span></a>
+        </li>
+        <li>
+          <a href="{{ route('saleReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Sales Report</span></a>
+        </li>
+        <li>
+          <a href="{{ route('purchaseReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Purchase Report</span></a>
+        </li>
+        <li>
+          <a href="{{ route('customerReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Customer Report</span></a>
+        </li>
+        <li>
+          <a href="{{ route('supplierReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Supplier Report</span></a>
+        </li>
+        <li>
+          <a href="{{ route('staffReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Staff Report</span></a>
+        </li>
+        
+      </ul>
+    </li>
+
     <!---messaging--->
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#messaging-nav" data-bs-toggle="collapse" href="#">
@@ -303,3 +341,38 @@
   </ul>
 
   </aside>
+
+  @php
+      $customers = \App\Models\Customer::all();
+  @endphp
+  <div class="modal fade" id="customerReport" tabindex="-1" aria-labelledby="customerReportLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Select Customer to See Report</h1>
+                <button type="button" class="btn-close"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('customerReport') }}" method="POST" enctype="multipart/form-data">@csrf
+                <div class="modal-body">
+                    
+                    <div class="d-grid mb-2">
+                        <label for="">Select Customer</label>
+                        <select name="customer_id" data-live-search="true" class="custom-select border form-control" id="">
+                          <option value="">Nothing Selected</option>
+                          @if (count($customers))
+                              @foreach ($customers as $customer)
+                                  <option value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
+                              @endforeach
+                          @endif
+                        </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
