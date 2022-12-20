@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use App\Models\Country;
 use App\Models\GeneralSetting;
+use App\Models\Role;
 
 
 class AuthController extends Controller
@@ -210,6 +211,110 @@ class AuthController extends Controller
         
         return back()->with('success', 'Staff Updated Successfully');
     }
+
+    public function accountProfile()
+    {
+        $authUser = auth()->user();
+        $staff = User::where('unique_key', $authUser->unique_key)->first();
+        if(!isset($staff)){
+            abort(404);
+        }
+        return view('pages.auth.accountProfile', compact('staff'));
+    }
+
+    public function accountSetting()
+    {
+        $authUser = auth()->user();
+        $staff = User::where('unique_key', $authUser->unique_key)->first();
+        if(!isset($staff)){
+            abort(404);
+        }
+
+        $countries = Country::all();
+        $name = explode(' ', $staff->name);
+        $firstname = $name[0];
+        $lastname = $name[1];
+
+        $roles = Role::all();
+
+        return view('pages.auth.accountSetting', compact('staff', 'countries', 'firstname', 'lastname', 'roles'));
+    }
+
+    public function editProfilePost(Request $request)
+    {
+        $user = auth()->user();
+        if(!isset($user)){
+            abort(404);
+        }
+        $request->validate([
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email',
+            'phone_1' => 'required',
+            'phone_2' => 'nullable',
+            'country' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+        ]);
+
+        $data = $request->all();
+
+        $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->email = $data['email'];
+        $user->type = 'staff';  //customer, staff, agent, superadmin
+        $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
+        $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
+        $user->city = !empty($data['city']) ? $data['city'] : null;
+        $user->state = $data['state'];
+        $user->country_id = $data['country'];
+        $user->address = !empty($data['address']) ? $data['address'] : null;
+
+        $user->created_by = 1;
+        $user->status = 'true';
+
+        //profile_picture
+        if ($request->profile_picture) {
+            $oldImage = $user->profile_picture; //1.jpg
+            if(Storage::disk('public')->exists('staff/'.$oldImage)){
+                Storage::disk('public')->delete('staff/'.$oldImage);
+                /*
+                    Delete Multiple files this way
+                    Storage::delete(['upload/test.png', 'upload/test2.png']);
+                */
+            }
+            $imageName = time().'.'.$request->profile_picture->extension();
+            //store products in folder
+            $request->profile_picture->storeAs('staff', $imageName, 'public');
+            $user->profile_picture = $imageName;
+        }
+
+        $user->save();
+
+        return back()->with('success', 'Staff Updated Successfully');
+    }
+
+    public function editPasswordPost(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|string',
+        ]);
+
+        $user = auth()->user();
+        $hashedPassword = $user->password;
+        $data = $request->all();
+
+        // The passwords match...
+        if (!Hash::check($data['current_password'], $hashedPassword)) {
+            return back()->with('current_password_error', 'Invalid current password');
+        }
+
+        $user->password = Hash::make($data['new_password']);
+        $user->save();
+        return back()->with('success', 'Password Changed Successfully');
+    
+    }
 //-----------------AGENTS-----------------------------------------------
     
 public function allAgent()
@@ -357,6 +462,7 @@ public function editAgentPost(Request $request, $unique_key)
     
     return back()->with('success', 'Agent Updated Successfully');
 }
+
 
 //-----------------CUSTOMERS-----------------------------------------------
     

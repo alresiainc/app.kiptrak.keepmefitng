@@ -1,5 +1,34 @@
 @extends('layouts.design')
 @section('title')Employees @endsection
+@section('extra_css')
+<style>
+  /* select2 arrow */
+  select{
+      -webkit-appearance: listbox !important
+  }
+
+  .btn-light {
+      background-color: #fff !important;
+      color: #000 !important;
+  }
+
+  div.filter-option-inner-inner{
+      color: #000 !important;
+  }
+    
+  /* select2 height proper */
+  .select2-selection__rendered {
+      line-height: 31px !important;
+  }
+  .select2-container .select2-selection--single {
+      height: 35px !important;
+  }
+  .select2-selection__arrow {
+      height: 34px !important;
+  }
+  /* select2 height proper */
+</style>
+@endsection
 @section('content')
 
 <main id="main" class="main">
@@ -17,10 +46,14 @@
   
   <section class="users-list-wrapper">
     <div class="users-list-filter px-1">
-      
     </div>
-
   </section>
+
+  @if(Session::has('success'))
+    <div class="alert alert-success mb-3 text-center">
+        {{Session::get('success')}}
+    </div>
+  @endif
 
   <section>
     <div class="row">
@@ -85,9 +118,15 @@
 
                       <td>
                         @if ($staff->hasAnyRole($staff->id))
-                        {{ $staff->role($staff->id)->role->name }}
+                        {{ $staff->role($staff->id)->role->name }} <br>
+                        <span class="badge badge-success" onclick="assignRoleModal('{{ $staff->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Role"
+                          style="cursor: pointer;">
+                          <i class="bi bi-plus"></i> <span>Change Role</span></span>
                         @else
-                            No role
+                            No role <br>
+                            <span class="badge badge-dark" onclick="assignRoleModal('{{ $staff->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Role"
+                              style="cursor: pointer;">
+                              <i class="bi bi-plus"></i> <span>Assign Role</span></span>
                         @endif
                       </td>
                       
@@ -115,26 +154,46 @@
 </main><!-- End #main -->
 
 <!-- Modal -->
-<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="assignRoleModal" tabindex="-1" aria-labelledby="assignRoleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Import Product CSV File</h1>
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Assign Role to Staff</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <div>Download sample product CSV file <a href="#" class="btn btn-sm rounded-pill btn-primary"><i class="bi bi-download me-1"></i> Download</a></div>
-        <div class="mt-3">
-          <label for="formFileSm" class="form-label">Click to upload file</label>
-          <input class="form-control form-control-sm" id="formFileSm" type="file">
+      <form action="{{ route('assignRoleToUserPost') }}" method="POST">@csrf
+        <div class="modal-body">
+            
+            <input type="hidden" id="user_id" class="user_id" name="user_id" value="">
+            <div class="d-grid mb-3">
+                <label for="">Select Role</label>
+                <select name="role_id" id="changeAgentModalSelect" data-live-search="true" class="custom-select form-control border border-dark">
+                    <option value="" selected>Nothing Selected</option>
+
+                    @foreach ($roles as $role)
+                      <option value="{{ $role->id }}">{{ $role->name }}</option>
+                    @endforeach
+                    
+                </select>
+            </div>
+        
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary"><i class="bi bi-upload"></i> Upload</button>
-      </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary addAgentBtn">Assign Role</button>
+        </div>
+    </form>
+      
     </div>
   </div>
 </div>
 
+@endsection
+
+@section('extra_js')
+    <script>
+      function assignRoleModal($userId="") {
+        $('#assignRoleModal').modal("show");
+        $('.user_id').val($userId);
+      }
+    </script>
 @endsection

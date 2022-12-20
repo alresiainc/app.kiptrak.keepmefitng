@@ -195,13 +195,12 @@
                 
                     <div class="col-md-12">
         
-                        <article class="card">
+                        <div class="card">
                             <div class="card-body">
                                 {{-- <h5 class="card-title">Contact info</h5> --}}
                                 <form action="">@csrf
                                     <div class="row">
         
-                                        <!--upsell-->
                                         <div class="col-12 mb-3">
                                             <div class="d-flex justify-content-center">
                                                 <div class="content text-center p-3" style="border: 3px dashed black; background-color: #D2FFE8;">
@@ -250,8 +249,6 @@
                                             </div>
                                         </div>
                                         
-                                        
-
                                         <div class="col-12">
                                             <div class="make-your-choice d-flex justify-content-center">
     
@@ -268,7 +265,7 @@
                                     
                                 </form>
                             </div> <!-- card-body end.// -->
-                        </article>
+                        </div>
         
                     </div>
                     
@@ -323,9 +320,21 @@
                                                     
                                                     @endif
 
-                                                    <div class="upsell-product-image mb-3" style="width: 400px; height:300px;">
+                                                    <div class="upsell-product-image mb-3 d-none" style="width: 400px; height:300px;">
                                                         <img src="{{ asset('/storage/products/'.$formHolder->upsell->product->image) }}" class="img-thumbnail img-fluid"
                                                         alt="{{$formHolder->upsell->product->name}}">
+                                                    </div>
+
+                                                    <div class="row" id="product-list">
+                
+                                                        <div class="col-lg-12 col-sm-6 col-12"> 
+                                                            <div class="card card-product-grid bg-transparent border-0">
+                                                                <div class="img-wrap">  
+                                                                    <img src="{{ asset('/storage/products/'.$formHolder->upsell->product->image) }}"> 
+                                                                </div> 
+                                                                
+                                                            </div> 
+                                                        </div>
                                                     </div>
         
                                                     <div class="select-upsell-product text-center">

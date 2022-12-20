@@ -59,7 +59,7 @@
                     
                             <td>{{ $expense->expense_code }}</td>
                             <td>{{ $expense->warehouse->name }}</td>
-                            <td>{{ $expense->category->name }}</td>
+                            <td>{{ isset($expense->expense_category_id) ? $expense->category->name : '' }}</td>
                             <td>{{ $expense->amount }}</td>
                             <td>{{ $expense->expenseDate() }}</td>
         

@@ -32,8 +32,7 @@
           <div class="card">
             <div class="card-body">
               
-              <form class="row g-3 needs-validation" action="{{ route('addCustomerPost') }}" method="POST"
-              enctype="multipart/form-data">@csrf
+              <form class="row g-3 needs-validation" action="{{ route('addCustomerPost') }}" method="POST" enctype="multipart/form-data">@csrf
                 <div class="col-md-6">
                   <label for="" class="form-label">First Name</label>
                   <input type="text" name="firstname" class="form-control @error('firstname') is-invalid @enderror" id="">
@@ -53,7 +52,7 @@
                   @enderror
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <label for="" class="form-label">Email</label>
                   <input type="text" name="email" class="form-control @error('email') is-invalid @enderror" id="" >
                   @error('email')
@@ -63,7 +62,7 @@
                   @enderror
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-6 d-none">
                   <label for="" class="form-label">Password</label>
                   <input type="text" name="password" class="form-control @error('password') is-invalid @enderror" id="" >
                   @error('password')
@@ -73,19 +72,19 @@
                   @enderror
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <label for="" class="form-label">Phone 1</label>
-                  <input type="tel" name="phone_1" class="form-control @error('phone_1') is-invalid @enderror" placeholder="" >
-                  @error('phone_1')
+                  <input type="tel" name="phone_number" class="form-control @error('phone_number') is-invalid @enderror" placeholder="" >
+                  @error('phone_number')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>
                       </span>
                   @enderror
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <label for="" class="form-label">Phone 2 (Whatsapp Phone)</label>
-                  <input type="tel" name="phone_2" class="form-control @error('phone_2') is-invalid @enderror" placeholder="">
-                  @error('phone_2')
+                  <input type="tel" name="whatsapp_phone_number" class="form-control @error('whatsapp_phone_number') is-invalid @enderror" placeholder="">
+                  @error('whatsapp_phone_number')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>
                       </span>
@@ -131,8 +130,8 @@
 
                 <div class="col-md-8">
                   <label for="" class="form-label">Address</label>
-                  <input type="text" name="address" class="form-control @error('address') is-invalid @enderror" placeholder="">
-                  @error('address')
+                  <input type="text" name="delivery_address" class="form-control @error('address') is-invalid @enderror" placeholder="">
+                  @error('delivery_address')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>
                       </span>

@@ -1144,10 +1144,22 @@ class FormBuilderController extends Controller
         //     $whatsapp_phone_number = '234' . substr($customer->whatsapp_phone_number, 1);
         // }
 
-        $whatsapp_msg = "Hi ".$customer->firstname." ".$customer->lastname.", you just placed order with Invoice-id: kp-".$orderId.". We will get back to you soon";
+        //$whatsapp_msg = "Hi ".$customer->firstname." ".$customer->lastname.", you just placed order with Invoice-id: kp-".$orderId.". We will get back to you soon";
+        $whatsapp_msg = "Hi ".$customer->firstname." ".$customer->lastname.", you just placed order with Invoice-id: kp-".$orderId.". ";
+        $whatsapp_msg .= "Details:";
+        foreach($mainProducts_outgoingStocks as $main_outgoingStock):
+            $whatsapp_msg .= " [Product: ".$main_outgoingStock->product->name.". Price: ".$mainProduct_revenue.". Qty: ".$main_outgoingStock->quantity_removed."], ";
+        endforeach;
 
-        // $whatsapp_msg = Hi {{ $invoiceData['customer']->firstname }} {{ $invoiceData['customer']->lastname }},
-        //         you just placed order with Invoice-id: kp-{{ $invoiceData['orderId'] }}. We will get back to you soon
+        if($orderbump_outgoingStock != ''):
+            $whatsapp_msg .= "[Product: ".$orderbump_outgoingStock->product->name.". Price: ".$orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed.". Qty: ".$orderbump_outgoingStock->quantity_removed."], ";
+        endif;
+
+        if($upsell_outgoingStock != ''):
+            $whatsapp_msg .= "[Product: ".$upsell_outgoingStock->product->name.". Price: ".$upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed.". Qty: ".$upsell_outgoingStock->quantity_removed."]. ";
+        endif;
+
+        $whatsapp_msg .= "We will get back to you soon";
 
         // //mail user about their new order
         $invoiceData = [

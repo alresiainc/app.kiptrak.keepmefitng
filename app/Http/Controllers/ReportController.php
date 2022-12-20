@@ -26,7 +26,7 @@ class ReportController extends Controller
         $start_date = '';
         $end_date = '';
         $warehouse_selected = '';
-
+        
         return view('pages.reports.productReport', \compact('products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
     }
 
@@ -464,7 +464,7 @@ class ReportController extends Controller
                 $start_date = strtotime($data['start_date']);
                 $end_date = strtotime($data['end_date']);
                 $staff_selected = User::find($data['staff_id']);
-                $staff_purchases = Expense::where('parent_id', null)->where('created_by', $staff_selected->id)->orderBy('id', 'desc')->get();
+                $staff_purchases = Expense::where('created_by', $staff_selected->id)->orderBy('id', 'desc')->get();
             }
     
             if (!empty($data['staff_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
@@ -473,8 +473,8 @@ class ReportController extends Controller
                 $staff_selected = User::find($data['staff_id']);
                 $start_date = date('Y-m-d',$start_date);
                 $end_date = date('Y-m-d',$end_date);
-                $staff_purchases = Expense::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('parent_id', null)
-                ->where('created_by', $staff_selected->id)->orderBy('id', 'desc')->get();
+                $staff_purchases = Expense::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('created_by', $staff_selected->id)
+                ->orderBy('id', 'desc')->get();
             }
         }
 

@@ -96,6 +96,10 @@ Route::group(['middleware' => 'auth'], function() {
 
 Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/account-profile', [AuthController::class, 'accountProfile'])->name('accountProfile'); //logged in user profile
+Route::get('/account-setting', [AuthController::class, 'accountSetting'])->name('accountSetting');
+Route::post('/edit-account-profile', [AuthController::class, 'editProfilePost'])->name('editProfilePost');
+Route::post('/edit-account-password', [AuthController::class, 'editPasswordPost'])->name('editPasswordPost');
 	
 //Forms
 Route::get('/forms', [FormController::class, 'allForms'])->name('allForms');
@@ -270,6 +274,8 @@ Route::get('/general-setting', [GeneralSettingController::class, 'generalSetting
 Route::post('/general-setting', [GeneralSettingController::class, 'generalSettingPost'])->name('generalSettingPost');
 
 //generalSetting
+Route::get('/income-statement', [FinanceController::class, 'incomeStatement'])->name('incomeStatement');
+Route::post('/income-statement', [FinanceController::class, 'incomeStatementQuery'])->name('incomeStatementQuery');
 Route::get('/purchase-revenue', [FinanceController::class, 'purchaseRevenue'])->name('purchaseRevenue');
 Route::get('/sales-revenue', [FinanceController::class, 'saleRevenue'])->name('saleRevenue');
 
@@ -280,6 +286,7 @@ Route::post('/add-role', [RoleController::class, 'addRolePost'])->name('addRoleP
 Route::get('/view-role/{unique_key}', [RoleController::class, 'singleRole'])->name('singleRole');
 Route::get('/edit-role/{unique_key}', [RoleController::class, 'editRole'])->name('editRole');
 Route::post('/edit-role/{unique_key}', [RoleController::class, 'editRolePost'])->name('editRolePost');
+Route::post('/assign-role-to-user', [RoleController::class, 'assignRoleToUserPost'])->name('assignRoleToUserPost');
 
 //allAttendance
 Route::get('/all-attendances', [AttendanceController::class, 'allAttendance'])->name('allAttendance');

@@ -1,15 +1,15 @@
 @extends('layouts.design')
-@section('title')View Staff @endsection
+@section('title')View Profile @endsection
 @section('content')
 
 <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Staff Information</h1>
+      <h1>Account Profile</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-          <li class="breadcrumb-item active">Staff Information<li>
+          <li class="breadcrumb-item active">Account Profile<li>
         </ol>
       </nav>
     </div><!-- End Page Title -->

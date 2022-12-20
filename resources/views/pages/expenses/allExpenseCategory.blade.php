@@ -80,7 +80,7 @@
                                                         
                                                         <div class="d-grid mb-2">
                                                             <label for="">Category Name</label>
-                                                            <input type="text" name="name" class="form-control category_name" value="{{ $category->name }}">
+                                                            <input type="text" name="name" class="form-control edit_category_name" value="{{ $category->name }}">
                                                         </div>
 
                                                                         

@@ -9,14 +9,11 @@ use Illuminate\Support\Str;
 
 use App\Models\Role;
 use App\Models\Permission;
+use App\Models\User;
+use App\Models\UserRole;
 
 class RoleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function allRole()
     {
         $roles = Role::orderBy('id','desc')->get();
@@ -64,22 +61,11 @@ class RoleController extends Controller
         
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function singleRole($unique_key)
     {
         return '123';
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function editRole($unique_key)
     {
         $role = Role::where(['unique_key'=>$unique_key]);
@@ -94,13 +80,6 @@ class RoleController extends Controller
         return view('pages.hrm.role.editRole', compact('role', 'permissions'));
     }
 
-    /**
-     * Update the specified role with permissions.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function editRolePost(Request $request, $unique_key)
     {
         
@@ -150,15 +129,39 @@ class RoleController extends Controller
         return back()->with('success', 'Role and Permissions Updated Successfully');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    
+    public function assignRoleToUserPost(Request $request)
     {
-        //
+        $data = $request->all();
+        $user = User::find($data['user_id']);
+        
+        if(!empty($data['role_id'])){
+
+            $role = Role::find($data['role_id']);
+            $permissions = $role->permissions;
+
+            if (!$user->hasAnyRole($user->id)) {
+                $userRole = new UserRole();
+                $userRole->user_id = $user->id;
+                $userRole->role_id = $data['role_id'];
+                $userRole->save();
+                return back()->with('success', 'Staff Updated and Assigned Successfully');
+            } 
+
+            $former_role_id = $user->role($user->id)->role->id;
+            $former_role_obj = Role::find($former_role_id);
+            $former_permissions = $former_role_obj->permissions;
+
+            //update user new role
+            DB::table('user_roles')->where(['user_id'=>$user->id, 'role_id'=>$former_role_id])->update(['role_id'=>$role->id]);
+            
+            //update user new permissions
+            // if(count($permissions) > 0){
+            //     $user->permissions()->attach($permissions);
+            // }
+            
+            return back()->with('success', 'Staff Updated and Assigned Successfully');
+        }
     }
 
     /**

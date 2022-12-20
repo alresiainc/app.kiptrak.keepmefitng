@@ -34,6 +34,10 @@ class ExpenseController extends Controller
 
     public function addExpensePost(Request $request)
     {
+        $request->validate([
+            'note' => 'required|string',
+            'category' => 'required',
+        ]);
         $expense_code = 'kpe-' . date("Ymd") . '-'. date("his");
         $data = $request->all();
 

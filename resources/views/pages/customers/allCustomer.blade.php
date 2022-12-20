@@ -62,18 +62,18 @@
                             data-fancybox="gallery"
                             data-caption="{{ isset($customer->profile_picture) ? $customer->name : 'no caption' }}"
                             >   
-                            <img src="{{ asset('/storage/customer/'.$customer->profile_picture) }}" width="50" class="img-thumbnail img-fluid"
+                            <img src="{{ asset('/storage/customer/'.$customer->profile_picture) }}" width="50" class="rounded-circle img-thumbnail img-fluid"
                             alt="{{$customer->name}}"></a>
                         @else
-                        <img src="{{ asset('/storage/customer/person.png') }}" width="50" class="img-thumbnail img-fluid"
+                        <img src="{{ asset('/storage/customer/person.png') }}" width="50" class="rounded-circle img-thumbnail img-fluid"
                             alt="{{$customer->name}}">
                         @endif
                         
                       </td>
-                      <td>{{ $customer->name }}</td>
+                      <td>{{ $customer->firstname }} {{ $customer->lastname }}</td>
                       <td>{{ isset($customer->city) ? $customer->city : 'N/A' }}</td>
                       
-                      <td>{{ $customer->state }} | {{ $customer->country->name }}</td>
+                      <td>{{ $customer->state }} | {{ isset($customer->country_id) ? $customer->country->name : '' }}</td>
                       
                       <td>{{ $customer->created_at }}</td>
                       <td>

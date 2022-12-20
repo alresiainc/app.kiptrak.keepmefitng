@@ -29,6 +29,7 @@ class CustomerSeeder extends Seeder
         $customer->password = Hash::make('password');
         $customer->city = 'Ikeja';
         $customer->state = 'Lagos';
+        $customer->country_id = 1;
         $customer->delivery_address = '19 Jona Street, Adebayo Lane, Lagos';
         $customer->created_by = 1;
         $customer->status = 'true';

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Country;
 use App\Models\Role;
+use App\Models\UserRole;
 
 
 class EmployeeController extends Controller
@@ -17,7 +18,8 @@ class EmployeeController extends Controller
     public function allStaff()
     {
         $staffs = User::where('type', 'staff')->get();
-        return view('pages.hrm.employee.allEmployee', compact('staffs'));
+        $roles = Role::all();
+        return view('pages.hrm.employee.allEmployee', compact('staffs', 'roles'));
     }
     
     //add any user, like registration
@@ -178,6 +180,14 @@ class EmployeeController extends Controller
 
             $role = Role::find($data['role_id']);
             $permissions = $role->permissions;
+
+            if (!$user->hasAnyRole($user->id)) {
+                $userRole = new UserRole();
+                $userRole->user_id = $user->id;
+                $userRole->role_id = $data['role_id'];
+                $userRole->save();
+                return back()->with('success', 'Staff Updated and Assigned Successfully');
+            } 
 
             $former_role_id = $user->role($user->id)->role->id;
             $former_role_obj = Role::find($former_role_id);

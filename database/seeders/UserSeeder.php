@@ -19,6 +19,8 @@ class UserSeeder extends Seeder
         //superadmin
         $user = new User();
         $user->name = 'Super John Doe';
+        $user->firstname = 'Super John';
+        $user->lastname = 'Doe';
         $user->email = 'super@email.com';
         $user->password = Hash::make('password');
         $user->type = 'superadmin';
@@ -36,7 +38,9 @@ class UserSeeder extends Seeder
 
         //staff1
         $user = new User();
-        $user->name = 'Staff Ben Jude';
+        $user->name = 'Bruce Lee';
+        $user->firstname = 'Bruce';
+        $user->lastname = 'Lee';
         $user->email = 'staff@email.com';
         $user->password = Hash::make('password');
         $user->type = 'staff';
@@ -55,6 +59,8 @@ class UserSeeder extends Seeder
         //staff1
         $user = new User();
         $user->name = 'Ben Jude';
+        $user->firstname = 'Ben';
+        $user->lastname = 'Jude';
         $user->email = 'ben@email.com';
         $user->password = Hash::make('password');
         $user->type = 'staff';
@@ -74,6 +80,8 @@ class UserSeeder extends Seeder
         //staff2
         $user = new User();
         $user->name = 'Peter Bruce';
+        $user->firstname = 'Peter';
+        $user->lastname = 'Bruce';
         $user->email = 'peter@email.com';
         $user->password = Hash::make('password');
         $user->type = 'staff';
@@ -92,6 +100,8 @@ class UserSeeder extends Seeder
         //staff3
         $user = new User();
         $user->name = 'Max Lucado';
+        $user->firstname = 'Max';
+        $user->lastname = 'Lucado';
         $user->email = 'max@email.com';
         $user->password = Hash::make('password');
         $user->type = 'staff';
@@ -110,7 +120,9 @@ class UserSeeder extends Seeder
 
         //agent1
         $user = new User();
-        $user->name = 'Agent Tony Cruz';
+        $user->name = 'Bradd Pitt';
+        $user->firstname = 'Bradd';
+        $user->lastname = 'Pitt';
         $user->email = 'agent@email.com';
         $user->password = Hash::make('password');
         $user->type = 'agent';
@@ -129,6 +141,8 @@ class UserSeeder extends Seeder
         //agent2
         $user = new User();
         $user->name = 'Tony Cruz';
+        $user->firstname = 'Tony';
+        $user->lastname = 'Cruz';
         $user->email = 'tony@email.com';
         $user->password = Hash::make('password');
         $user->type = 'agent';
@@ -147,6 +161,8 @@ class UserSeeder extends Seeder
         //agent3
         $user = new User();
         $user->name = 'Nkem John';
+        $user->firstname = 'Nkem';
+        $user->lastname = 'John';
         $user->email = 'nkem@email.com';
         $user->password = Hash::make('password');
         $user->type = 'agent';
@@ -165,6 +181,8 @@ class UserSeeder extends Seeder
         //agent4
         $user = new User();
         $user->name = 'Amara Kara';
+        $user->firstname = 'Amara';
+        $user->lastname = 'Kara';
         $user->email = 'amara@email.com';
         $user->password = Hash::make('password');
         $user->type = 'agent';
@@ -183,6 +201,8 @@ class UserSeeder extends Seeder
         //agent4
         $user = new User();
         $user->name = 'Kelly Rowland';
+        $user->firstname = 'Kelly';
+        $user->lastname = 'Rowland';
         $user->email = 'kelly@email.com';
         $user->password = Hash::make('password');
         $user->type = 'agent';

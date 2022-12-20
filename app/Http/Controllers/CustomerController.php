@@ -7,17 +7,14 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 use App\Models\Customer;
+use App\Models\Country;
 
 class CustomerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function allCustomer()
     {
-        //
+        $customers = Customer::all();
+        return view('pages.customers.allCustomer', compact('customers'));
     }
 
     /**
@@ -27,7 +24,8 @@ class CustomerController extends Controller
      */
     public function addCustomer()
     {
-        return 'here';
+        $countries = Country::all();
+        return view('pages.customers.addCustomer', compact('countries'));
     }
 
     /**
@@ -38,6 +36,19 @@ class CustomerController extends Controller
      */
     public function addCustomerPost(Request $request)
     {
+        $request->validate([
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email',
+            'phone_number' => 'required',
+            'whatsapp_phone_number' => 'required',
+            'country' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+        ]);
+        $authUser = auth()->user();
+
         $data = $request->all();
         $customer = new Customer();
         // $customer->order_id = $order->id;
@@ -48,23 +59,33 @@ class CustomerController extends Controller
         $customer->whatsapp_phone_number = $data['whatsapp_phone_number'];
         $customer->email = $data['email'];
         $customer->password = Hash::make('password');
+        $customer->city = $data['city'];
+        $customer->state = $data['state'];
+        $customer->country_id = $data['country'];
         $customer->delivery_address = $data['delivery_address'];
-        $customer->created_by = 1;
+        $customer->created_by = $authUser->id;
         $customer->status = 'true';
+
+        if ($request->profile_picture) {
+            //image
+            $imageName = time().'.'.$request->profile_picture->extension();
+            //store products in folder
+            $request->profile_picture->storeAs('customer', $imageName, 'public');
+            $customer->profile_picture = $imageName;
+        }
+    
         $customer->save();
 
-        return back();
+        return back()->with('success', 'Customer Added Successfully');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function singleCustomer($unique_key)
     {
-        //
+        $customer = Customer::where('unique_key', $unique_key)->first();
+        if(!isset($customer)){
+            abort(404);
+        }
+        return view('pages.customers.singleCustomer', compact('customer'));
     }
 
     /**
@@ -73,9 +94,15 @@ class CustomerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function editCustomer($unique_key)
     {
-        //
+        $customer = Customer::where('unique_key', $unique_key)->first();
+        if(!isset($customer)){
+            abort(404);
+        }
+
+        $countries = Country::all();
+        return view('pages.customers.editCustomer', compact('customer', 'countries'));
     }
 
     /**
@@ -85,9 +112,58 @@ class CustomerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function editCustomerPost(Request $request, $unique_key)
     {
-        //
+        $customer = Customer::where('unique_key', $unique_key)->first();
+        if(!isset($customer)){
+            abort(404);
+        }
+        $request->validate([
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email',
+            'phone_number' => 'required',
+            'whatsapp_phone_number' => 'required',
+            'country' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+        ]);
+        $authUser = auth()->user();
+
+        $data = $request->all();
+    
+        $customer->firstname = $data['firstname'];
+        $customer->lastname = $data['lastname'];
+        $customer->phone_number = $data['phone_number'];
+        $customer->whatsapp_phone_number = $data['whatsapp_phone_number'];
+        $customer->email = $data['email'];
+        $customer->password = Hash::make('password');
+        $customer->city = $data['city'];
+        $customer->state = $data['state'];
+        $customer->country_id = $data['country'];
+        $customer->delivery_address = $data['delivery_address'];
+        $customer->status = 'true';
+
+        //profile_picture
+        if ($request->profile_picture) {
+            $oldImage = $customer->profile_picture; //1.jpg
+            if(Storage::disk('public')->exists('customer/'.$oldImage)){
+                Storage::disk('public')->delete('customer/'.$oldImage);
+                /*
+                    Delete Multiple files this way
+                    Storage::delete(['upload/test.png', 'upload/test2.png']);
+                */
+            }
+            $imageName = time().'.'.$request->profile_picture->extension();
+            //store products in folder
+            $request->profile_picture->storeAs('customer', $imageName, 'public');
+            $customer->profile_picture = $imageName;
+        }
+
+        $customer->save();
+
+        return back()->with('success', 'Customer Updated Successfully');
     }
 
     /**

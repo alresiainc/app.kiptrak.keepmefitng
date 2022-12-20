@@ -73,25 +73,26 @@
 
                     <div class="d-flex">
 
-                        <select name="category" id="addCategorySelect" class="select2 form-control border @error('category') is-invalid @enderror" id="">
-                        <option value="">{{ old('category') !== null ? old('category') : 'Nothing Selected' }}</option>
-    
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
+                        <select name="category" id="addCategorySelect" class="select2 form-control @error('category') is-invalid @enderror" id="">
+                            <option value="">{{ old('category') !== null ? old('category') : 'Nothing Selected' }}</option>
+                            
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}">
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
                             
                         </select>
-                        
-                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCategory">
-                            <i class="bi bi-plus"></i></button>
+
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCategory"><i class="bi bi-plus"></i></button>
                     </div>
-                    @error('customer')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
+
+                    {{-- @error('category')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror --}}
+                    
                 </div>
 
                 <div class="col-md-4">

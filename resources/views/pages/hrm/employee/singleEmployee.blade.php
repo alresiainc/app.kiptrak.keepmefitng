@@ -52,7 +52,7 @@
                   </div>
                 </div>
                 <div class="float-lg-end">
-                  <button class="btn btn-sm btn-success"><i class="bi bi-pencil-square"></i></button>
+                  <a href="{{ route('editStaff', $staff->unique_key) }}"><button class="btn btn-sm btn-success"><i class="bi bi-pencil-square"></i></button></a>
                 </div>
               </div>
 

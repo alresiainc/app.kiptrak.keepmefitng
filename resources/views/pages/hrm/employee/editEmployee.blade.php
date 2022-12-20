@@ -161,7 +161,7 @@
                   @enderror
                 </div>
 
-                <div class="col-md-8">
+                <div class="col-md-12">
                   <label for="" class="form-label">Address</label>
                   <input type="text" name="address" class="form-control @error('address') is-invalid @enderror" placeholder=""
                   value="{{ isset($staff->address) ? $staff->address : '' }}">
@@ -172,7 +172,7 @@
                   @enderror
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <label for="" class="form-label">Profile Picture | Optional</label>
                   <input type="file" name="profile_picture" class="form-control @error('image') is-invalid @enderror" id="">
                   @error('profile_picture')
@@ -182,12 +182,14 @@
                   @enderror
                 </div>
 
-                <div class="col-md-12">
+                <div class="col-md-6">
                   <label for="" class="form-label">Assign Role (Optional)</label>
                   <select name="role_id" id="role_id" data-live-search="true" class="custom-select form-control border @error('role_id') is-invalid @enderror" id="">
-                    @if ($staff->hasAnyRole($staff->id))
-                        <option value="{{ $staff->role($staff->id)->role->id }}" selected>{{ $staff->role($staff->id)->role->name }}</option>
-                    @endif
+                    
+                      <option value="{{ $staff->hasAnyRole($staff->id) ? $staff->role($staff->id)->role->id : '' }}">
+                        {{ $staff->hasAnyRole($staff->id) ? $staff->role($staff->id)->role->name : 'Nothing Selected' }}
+                      </option>
+                    
                     @if (count($roles) > 0)
                         @foreach($roles as $role)
                         <option value="{{ $role->id }}">{{ $role->name }}</option>
@@ -202,8 +204,6 @@
                   @enderror
                 </div>
 
-              
-                
                 <div class="text-end">
                   <button type="submit" class="btn btn-info">Update Employee</button>
                   <button type="reset" class="btn btn-secondary">Reset</button>

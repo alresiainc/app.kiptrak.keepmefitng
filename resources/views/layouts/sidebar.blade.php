@@ -241,13 +241,16 @@
       </ul>
     </li>
 
-    <!---finance--->
+    <!---Accounting--->
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#finance-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-safe-fill"></i>
-        <span>Finance System</span><i class="bi bi-chevron-down ms-auto"></i>
+        <span>Accounting System</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="finance-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li>
+          <a href="{{ route('incomeStatement') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Income Statement</span></a>
+        </li>
         <li>
           <a href="{{ route('purchaseRevenue') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Purchase Revenue</span></a>
         </li>

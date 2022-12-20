@@ -17,6 +17,8 @@ return new class extends Migration
             $table->id();
             $table->longText('unique_key')->nullable();
             $table->string('name');
+            $table->string('firstname')->nullable();
+            $table->string('lastname')->nullable();
             $table->string('email')->unique();
             $table->string('type')->nullable(); //customer, staff, agent, superadmin
             $table->string('profile_picture')->nullable();
