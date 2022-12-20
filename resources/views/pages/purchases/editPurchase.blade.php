@@ -52,7 +52,7 @@
               <form class="row g-3 needs-validation" action="{{ route('editPurchasePost', $purchase->unique_key) }}" method="POST"
               enctype="multipart/form-data">@csrf
               <div class="col-md-12 mb-3">The field labels marked with * are required input fields.</div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <label for="" class="form-label">Purchase Code *</label>
                   <input type="text" name="purchase_code" class="form-control @error('purchase_code') is-invalid @enderror" value="{{ $purchase->purchase_code }}">
                   @error('purchase_code')
@@ -61,7 +61,7 @@
                       </span>
                   @enderror
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="" class="form-label">Select Supplier *</label>
                     <select name="supplier" data-live-search="true" class="custom-select form-control border @error('supplier') is-invalid @enderror" id="">
                       <option value="{{ $purchase->supplier_id }}" selected>{{ $purchase->supplier->company_name }}</option>
@@ -80,7 +80,7 @@
                     @enderror
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-4 d-none">
                   <label for="" class="form-label">Date</label>
                   <input type="date" name="purchase_date" class="form-control @error('purchase_date') is-invalid @enderror"
                   value="{{ $purchase->purchase_date }}" >

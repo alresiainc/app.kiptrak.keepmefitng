@@ -74,7 +74,7 @@
               <thead>
                 <tr>
                   <th scope="col">#</th>
-                  <th scope="col">Form Code</th>
+                  <th scope="col">Form Name</th>
                   {{-- <th scope="col">Subheading</th> --}}
                   
                   <th scope="col">OrderId</th>
@@ -91,8 +91,8 @@
                   @foreach ($formHolders as $key=>$formHolder)
                     <tr>
                       <th scope="row">{{ ++$key }}</th>
-                      <td>{{ $formHolder->slug }} <br>
-                        <a class="btn btn-info btn-sm rounded" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">
+                      <td>{{ $formHolder->name }} <br>
+                        <a class="badge badge-info" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">
                           <i class="bi bi-pencil"></i> Edit</a>
                       </td>
                       {{-- <td>{{ $label->order_subheading }}</td> --}}
@@ -112,7 +112,7 @@
                         @endif
                       </td> --}}
                       <td>
-                        <a href="{{ route('singleOrder', $formHolder->order->unique_key) }}" class="btn btn-light border border-success rounded-pill p-1">
+                        <a href="{{ route('singleOrder', $formHolder->order->unique_key) }}" class="badge badge-dark">
                           <!-- < 10 -->
                           @if ($formHolder->order->id < 10) 0000{{ $formHolder->order->id }} @endif
                           <!-- > 10 < 100 -->
@@ -129,13 +129,13 @@
                         @if (isset($formHolder->order->staff_assigned_id))
                             <td>
                               {{ $formHolder->order->staff->name }} <br>
-                              <button class="btn btn-sm btn-dark rounded-pill" onclick="changeAgentModal('{{ $formHolder->order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Staff">
-                                <i class="bi bi-plus"></i> <span>Change Staff</span></button>
+                              <span class="badge badge-dark" onclick="changeAgentModal('{{ $formHolder->order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Staff">
+                                <i class="bi bi-plus"></i> <span>Change Staff</span></span>
                             </td>
                         @else
                         <td style="width: 120px">
-                          <button class="btn btn-sm btn-success rounded-pill" onclick="addAgentModal('{{ $formHolder->order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Staff">
-                            <i class="bi bi-plus"></i> <span>Assign Staff</span></button> 
+                          <span class="badge badge-success" onclick="addAgentModal('{{ $formHolder->order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Staff">
+                            <i class="bi bi-plus"></i> <span>Assign Staff</span></span> 
                         </td>
                         @endif
                       

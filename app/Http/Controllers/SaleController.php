@@ -51,7 +51,7 @@ class SaleController extends Controller
         $request->validate([
             'customer' => 'required|string',
             'warehouse' => 'required|string',
-            'sale_date' => 'required|string',
+            // 'sale_date' => 'required|string',
             'product' => 'required|string',
             'sale_status' => 'required|string',
             'payment_status' => 'required|string',
@@ -122,7 +122,7 @@ class SaleController extends Controller
                 $sale->parent_id = $parent_sale->exists() ? $parent_sale->first()->id : null;
                 $sale->customer_id = $data['customer'];
                 $sale->warehouse_id = $data['warehouse'];
-                $sale->sale_date = $data['sale_date'];
+                // $sale->sale_date = $data['sale_date'];
 
                 $sale->product_id = $id;
 
@@ -198,7 +198,7 @@ class SaleController extends Controller
         $request->validate([
             'customer' => 'required|string',
             'warehouse' => 'required|string',
-            'sale_date' => 'required|string',
+            // 'sale_date' => 'required|string',
             'product' => 'nullable|string',
             'sale_status' => 'required|string',
             'payment_status' => 'required|string',
@@ -266,7 +266,7 @@ class SaleController extends Controller
                     $existing_sale->update([
                         'customer_id' => $data['customer'],
                         'warehouse_id' => $data['warehouse'],
-                        'sale_date' => $data['sale_date'],
+                        // 'sale_date' => $data['sale_date'],
                         'product_id' => $id,
                         'product_qty_sold' => $data['product_qty'][$key],
                         'amount_due' => $data['payment_status'] == 'paid' ? 0 : $data['product_qty'][$key] * $data['unit_price'][$key],
@@ -316,7 +316,7 @@ class SaleController extends Controller
                     $sale->parent_id = $parent_sale->exists() ? $parent_sale->first()->id : null;
                     $sale->customer_id = $data['customer'];
                     $sale->warehouse_id = $data['warehouse'];
-                    $sale->sale_date = $data['sale_date'];
+                    // $sale->sale_date = $data['sale_date'];
 
                     $sale->product_id = $id;
 

@@ -62,7 +62,7 @@
                       </span>
                   @enderror
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="" class="form-label">Select Customer *</label>
 
                     <div class="d-flex">
@@ -88,7 +88,7 @@
                     @enderror
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="" class="form-label">Select Warehouse *</label>
                     <select name="warehouse" data-live-search="true" class="custom-select form-control border @error('warehouse') is-invalid @enderror">
                       <option value="{{ $sale->warehouse->id }}" selected>
@@ -108,7 +108,7 @@
                     @enderror
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-4 d-none">
                   <label for="" class="form-label">Date</label>
                   <input type="date" name="sale_date" class="form-control @error('sale_date') is-invalid @enderror" value="{{ $sale->sale_date }}">
                   @error('sale_date')

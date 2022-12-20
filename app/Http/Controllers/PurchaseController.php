@@ -43,7 +43,7 @@ class PurchaseController extends Controller
         $request->validate([
             'purchase_code' => 'required|string',
             'supplier' => 'required|string',
-            'purchase_date' => 'required|string',
+            // 'purchase_date' => 'required|string',
             'product' => 'required|string',
             'payment_type' => 'required|string',
             'purchase_status' => 'required|string',
@@ -110,7 +110,7 @@ class PurchaseController extends Controller
                 $purchase->purchase_code = $data['purchase_code'];
                 $purchase->parent_id = $parent_purchase->exists() ? $parent_purchase->first()->id : null;
                 $purchase->supplier_id = $data['supplier'];
-                $purchase->purchase_date = $data['purchase_date'];
+                // $purchase->purchase_date = $data['purchase_date'];
 
                 $purchase->product_id = $id;
                 $purchase->product_qty_purchased = $data['product_qty'][$key];
@@ -169,7 +169,7 @@ class PurchaseController extends Controller
         $request->validate([
             'purchase_code' => 'required|string',
             'supplier' => 'required|string',
-            'purchase_date' => 'required|string',
+            // 'purchase_date' => 'required|string',
             'product' => 'nullable|string',
             'payment_type' => 'required|string',
             'purchase_status' => 'required|string',
@@ -208,7 +208,7 @@ class PurchaseController extends Controller
                     $existing_purchase->update([
                         'purchase_code' => $data['purchase_code'],
                         'supplier_id' => $data['supplier'],
-                        'purchase_date' => $data['purchase_date'],
+                        // 'purchase_date' => $data['purchase_date'],
                         'product_id' => $id,
                         'product_qty_purchased' => $data['product_qty'][$key],
                         'amount_due' => $data['product_qty'][$key] * $data['unit_price'][$key],
@@ -250,7 +250,7 @@ class PurchaseController extends Controller
                     $purchase->purchase_code = $data['purchase_code'];
                     $purchase->parent_id = $parent_purchase->exists() ? $parent_purchase->first()->id : null;
                     $purchase->supplier_id = $data['supplier'];
-                    $purchase->purchase_date = $data['purchase_date'];
+                    // $purchase->purchase_date = $data['purchase_date'];
 
                     $purchase->product_id = $id;
                     $purchase->product_qty_purchased = $data['product_qty'][$key];

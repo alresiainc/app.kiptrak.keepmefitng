@@ -34,7 +34,7 @@ class FinanceController extends Controller
         // $expenses_by_category = Expense::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->whereDate('created_at', '>=' , date("Y").'-01-01')
         // ->whereDate('created_at', '<=' , date("Y").'-12-31')->groupBy('product_id')->orderBy('sold_qty', 'desc')->take(5)->get();
         $expenses_by_category = Expense::select(DB::raw('expense_category_id, sum(amount) as amount_spent'))->groupBy('expense_category_id')
-        ->orderBy('id', 'desc')->get();
+        ->get();
 
         return view('pages.finance.incomeStatement', compact('currency', 'start_date_info', 'end_date_info', 'start_date', 'end_date', 'sales_sum', 'purchase_sum', 'expense_sum', 'expenses_by_category', 'total_expenses',
         'net_profit'));
@@ -78,7 +78,7 @@ class FinanceController extends Controller
         // $expenses_by_category = Expense::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->whereDate('created_at', '>=' , date("Y").'-01-01')
         // ->whereDate('created_at', '<=' , date("Y").'-12-31')->groupBy('product_id')->orderBy('sold_qty', 'desc')->take(5)->get();
         $expenses_by_category = Expense::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->select(DB::raw('expense_category_id, sum(amount) as amount_spent'))->groupBy('expense_category_id')
-        ->orderBy('id', 'desc')->get();
+        ->get();
         
 
         return view('pages.finance.incomeStatement', compact('currency', 'start_date_info', 'end_date_info', 'daysDiff', 'start_date', 'end_date', 'sales_sum', 'purchase_sum', 'expense_sum', 'expenses_by_category', 'total_expenses',

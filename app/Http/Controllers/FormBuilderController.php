@@ -76,10 +76,14 @@ class FormBuilderController extends Controller
 
     public function newFormBuilderPost(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|unique:form_holders',
+        ]);
+
         $data = $request->all();
 
         $formHolder = new FormHolder();
-        $formHolder->name = 'Customer form';
+        $formHolder->name = $data['form_name'];
         $formHolder->slug = $request->form_code; //like form_code
         $formHolder->form_data = \serialize($request->except(['products', 'q', 'required', 'form_name_selected', '_token']));
         

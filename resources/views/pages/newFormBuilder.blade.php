@@ -58,11 +58,17 @@
     <section class="mt-5">
         <div class="container" id="form-field">
             <form id="form-data" action="{{ route('newFormBuilderPost') }}" method="POST">@csrf
-                <div class="row">
+                <div class="row mb-3">
                     <div class="col-md-12">
                         <div class="p-1">
                             <h5 title="Unique Form Code" class="text-center">Form Code: {{ $form_code }}</h5>
                             <input type="hidden" name="form_code" value="{{ $form_code }}">
+                            <input type="text" name="name" class="form-control @error('form_name') is-invalid @enderror" id="" placeholder="Enter Form Name">
+                            @error('form_name')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                             {{-- <h5 title="Enter Title" class="text-center" id="form-title">Fields marked * are mandatory</h5> --}}
                             {{-- <h3 contenteditable="true" title="Enter Title" class="text-center" id="form-title">Enter Title Here</h3> --}}
                             {{-- <hr class="border-primary"> --}}

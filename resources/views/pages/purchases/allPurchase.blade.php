@@ -59,16 +59,16 @@
                         <tr>
                     
                             <td>{{ $purchase->purchase_code }}</td>
-                            <td>{{ $purchase->supplier->company_name }}</td>
+                            <td>{{ isset($purchase->supplier_id) ? $purchase->supplier->company_name : '' }}</td>
                             <td>
                                 @if($purchase->status=='received')
-                                    <span class="p-1 ms-1 bg-success text-white fw-bold" style="font-size: 10px">Received</span>
+                                    <span class="badge badge-success text-white fw-bold" style="font-size: 10px">Received</span>
                                 @elseif($purchase->status=='partial')
-                                    <span class="p-1 ms-1 bg-info text-white fw-bold" style="font-size: 10px">Partial</span>
+                                    <span class="badge badge-info text-white fw-bold" style="font-size: 10px">Partial</span>
                                 @elseif($purchase->status=='pending')
-                                    <span class="p-1 ms-1 bg-danger text-white fw-bold" style="font-size: 10px">Pending</span>
+                                    <span class="badge badge-danger text-white fw-bold" style="font-size: 10px">Pending</span>
                                 @elseif($purchase->status=='ordered')
-                                    <span class="p-1 ms-1 bg-secondary text-white fw-bold" style="font-size: 10px">Ordered</span>
+                                    <span class="badge badge-secondary text-white fw-bold" style="font-size: 10px">Ordered</span>
                                 @endif
                             </td>
                             <td>{{ $purchase->amountPaidAccrued($purchase->purchase_code) }}</td>
@@ -76,9 +76,9 @@
                             
                             <td>
                                 @if($purchase->amountPaidAccrued($purchase->purchase_code) > $purchase->amountDueAccrued($purchase->purchase_code))
-                                  <span class="p-1 ms-1 bg-danger text-white fw-bold" style="font-size: 10px">Due</span>
+                                  <span class="badge badge-danger text-white fw-bold" style="font-size: 10px">Due</span>
                                 @else
-                                  <span class="p-1 ms-1 bg-success text-white fw-bold" style="font-size: 10px">Paid</span>
+                                  <span class="badge badge-success text-white fw-bold" style="font-size: 10px">Paid</span>
                                 @endif
                             </td>
         

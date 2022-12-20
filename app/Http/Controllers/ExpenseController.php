@@ -46,9 +46,9 @@ class ExpenseController extends Controller
         $expense->expense_code = $expense_code;
         $expense->expense_category_id = $data['category'];
         $expense->warehouse_id = $data['warehouse'];
-        $expense->expense_date = $data['expense_date'];
+        // $expense->expense_date = $data['expense_date'];
         $expense->amount = $data['amount'];
-        $expense->account_id = $data['account'];
+        // $expense->account_id = $data['account'];
         $expense->note = !empty($data['note']) ? $data['note'] : null;
         
         $expense->created_by = 1;
@@ -128,9 +128,9 @@ class ExpenseController extends Controller
 
         $expense->expense_category_id = $data['category'];
         $expense->warehouse_id = $data['warehouse'];
-        $expense->expense_date = $data['expense_date'];
+        // $expense->expense_date = $data['expense_date'];
         $expense->amount = $data['amount'];
-        $expense->account_id = $data['account'];
+        // $expense->account_id = $data['account'];
         $expense->note = !empty($data['note']) ? $data['note'] : null;
         
         $expense->created_by = 1;

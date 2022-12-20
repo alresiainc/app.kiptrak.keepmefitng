@@ -68,7 +68,7 @@
               <div class="col-md-12 mb-3">The field labels marked with * are required input fields.</div>
 
                 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="" class="form-label">Select Category *</label>
 
                     <div class="d-flex">
@@ -95,7 +95,7 @@
                     
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="" class="form-label">Select Warehouse *</label>
                     <select name="warehouse" class="select2 form-control border @error('warehouse') is-invalid @enderror" id="">
                       <option value="">Nothing Selected</option>
@@ -114,7 +114,7 @@
                     @enderror
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-4 d-none">
                   <label for="" class="form-label">Date</label>
                   <input type="date" name="expense_date" class="form-control @error('expense_date') is-invalid @enderror" id="" >
                   @error('expense_date')
@@ -124,7 +124,7 @@
                   @enderror
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-6 d-none">
                     <label for="" class="form-label">Select Account *</label>
 
                     <div class="d-flex">
@@ -150,7 +150,7 @@
                         @enderror
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <label for="" class="form-label">Amount</label>
                     <input type="text" name="amount" class="form-control @error('amount') is-invalid @enderror" placeholder="" >
                     @error('amount')
