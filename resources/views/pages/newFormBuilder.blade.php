@@ -63,8 +63,8 @@
                         <div class="p-1">
                             <h5 title="Unique Form Code" class="text-center">Form Code: {{ $form_code }}</h5>
                             <input type="hidden" name="form_code" value="{{ $form_code }}">
-                            <input type="text" name="name" class="form-control @error('form_name') is-invalid @enderror" id="" placeholder="Enter Form Name">
-                            @error('form_name')
+                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" id="" placeholder="Enter Form Name">
+                            @error('name')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
