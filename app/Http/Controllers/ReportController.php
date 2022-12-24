@@ -15,6 +15,7 @@ use App\Models\Customer;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Expense;
+use App\Models\ProductWarehouse;
 
 class ReportController extends Controller
 {
@@ -43,9 +44,10 @@ class ReportController extends Controller
         $end_date = '';
         $warehouse_selected = '';
 
+        //1st instance
         if (!empty($data['warehouse_id']) && empty($data['start_date']) && empty($data['end_date'])) {
             $warehouse_selected = WareHouse::find($data['warehouse_id']);
-            $products = Product::where('warehouse_id',$data['warehouse_id'])->get();
+            $products = $warehouse_selected->products;
         }
 
         if (empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
@@ -61,6 +63,7 @@ class ReportController extends Controller
 
             $products = Product::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->get();
         }
+        
 
         if (!empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
             $start_date = strtotime($data['start_date']);
@@ -75,6 +78,32 @@ class ReportController extends Controller
             $end_date = date('Y-m-d',$end_date);
 
             $products = Product::where('warehouse_id',$data['warehouse_id'])->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->get();
+        }
+        if (!empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
+            $start_date = strtotime($data['start_date']);
+            $end_date = strtotime($data['end_date']);
+            $warehouse_selected = WareHouse::find($data['warehouse_id']);
+
+            if ($start_date > $end_date) {
+                return back()->with('error', 'Start Date Cannot be greater than End Date');
+            }
+
+            $start_date = date('Y-m-d',$start_date);
+            $end_date = date('Y-m-d',$end_date);
+
+            $products1 = Product::all();
+
+            $in_stock_products = []; $products = [];
+            foreach ($products1 as $key => $product) {
+                //using dates n duplicates check
+               $product_warehouses = ProductWarehouse::where('warehouse_id', $data['warehouse_id'])->select(DB::raw('product_id, warehouse_type'))
+               ->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->groupBy('product_id', 'warehouse_type')->get();
+                if ($product_warehouses->contains('warehouse_type','minor') || $product_warehouses->contains('warehouse_type','major')) {
+                    
+                        $products[] = $product;
+                    
+                }   
+            }
         }
         
         $warehouses = WareHouse::all();

@@ -60,7 +60,7 @@
               <div class="col-md-12 mb-3">The field labels marked with * are required input fields.</div>
                 <div class="col-md-6">
                   <label for="" class="form-label">Purchase Code *</label>
-                  <input type="text" name="purchase_code" class="form-control @error('purchase_code') is-invalid @enderror" value="{{ $purchase_code }}">
+                  <input type="text" name="purchase_code" class="form-control @error('purchase_code') is-invalid @enderror" value="{{ $purchase_code }}" readonly>
                   @error('purchase_code')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
 
             $table->longText('unique_key')->nullable();
+            $table->string('type')->nullable(); //major, minor
             $table->string('agent_id')->nullable(); //user incharge
             
             $table->string('name')->nullable();

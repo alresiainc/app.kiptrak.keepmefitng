@@ -43,4 +43,8 @@ class WareHouse extends Model
     {
         return $this->belongsTo(Country::class, 'country_id');  
     }
+
+    public function products() {
+        return $this->belongsToMany(Product::class, 'product_warehouses', 'warehouse_id', 'product_id');    
+    }
 }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 use App\Models\Customer;
 use App\Models\Country;
+use App\Models\Sale;
 
 class CustomerController extends Controller
 {
@@ -164,6 +165,13 @@ class CustomerController extends Controller
         $customer->save();
 
         return back()->with('success', 'Customer Updated Successfully');
+    }
+
+    public function singleCustomerSales($unique_key)
+    {
+        $customer = Customer::where('unique_key', $unique_key)->first();
+        $sales = Sale::where('customer_id', $customer->id)->get();
+        return view('pages.customers.singleCustomerSales', compact('customer', 'sales'));
     }
 
     /**

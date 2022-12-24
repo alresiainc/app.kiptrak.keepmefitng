@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Product;
 use App\Models\Sale;
@@ -13,6 +14,7 @@ use App\Models\GeneralSetting;
 use App\Models\Order;
 use App\Models\Supplier;
 use App\Models\Customer;
+use App\Models\ProductWarehouse;
 
 
 class InventoryController extends Controller
@@ -65,6 +67,259 @@ class InventoryController extends Controller
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
     }
 
+    //by major warehouse
+    public function inStockProductsByWarehouse()
+    {
+        $products = Product::all();
+        $pro = Product::find(1);
+        // return $pro->warehouses->where('type','minor')->count();
+        // $in_stock_products = [];
+        foreach ($products as $key => $product) {
+            $product_warehouse = ProductWarehouse::where('product_id',$product->id);
+            //if ($product_warehouse->exists()) {
+            $warehouses = $product->warehouses->where('type','major');
+            if ($warehouses->count() > 0) {
+                if ($product->stock_available() > 10) {
+                    $in_stock_products[] = $product;
+                }
+            }
+            
+            // $warehouse_id = $product_warehouse->first()->warehouse_id;
+            // $warehouse = WareHouse::where('id',$warehouse_id)->first();
+            // if ($warehouse->type=='major') {
+            //     if ($product->stock_available() > 10) {
+            //         $in_stock_products[] = $product;
+            //     }
+            // }
+            //} 
+        }
+
+        $warehouses = WareHouse::where('type','major')->get();
+        $start_date = '';
+        $end_date = '';
+        $warehouse_selected = '';
+        
+        return view('pages.inventory.inStockProductsByWarehouse', \compact('products', 'in_stock_products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
+    }
+
+    public function inStockProductsByWarehouseQuery(Request $request)
+    {
+        $data = $request->all();
+
+        $start_date = '';
+        $end_date = '';
+        $warehouse_selected = '';
+
+        //1st instance
+        if (!empty($data['warehouse_id']) && empty($data['start_date']) && empty($data['end_date'])) {
+            $warehouse_selected = WareHouse::find($data['warehouse_id']);
+            $products = $warehouse_selected->products;
+        }
+
+        //2nd instance
+        if (empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
+            $start_date = strtotime($data['start_date']);
+            $end_date = strtotime($data['end_date']);
+
+            if ($start_date > $end_date) {
+                return back()->with('error', 'Start Date Cannot be greater than End Date');
+            }
+
+            $start_date = date('Y-m-d',$start_date);
+            $end_date = date('Y-m-d',$end_date);
+
+            // $products = Product::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->get();
+            $products1 = Product::all();
+
+            $in_stock_products = []; $products = [];
+            foreach ($products1 as $key => $product) {
+                //using dates n duplicates check
+               $product_warehouses = ProductWarehouse::select(DB::raw('product_id, warehouse_type'))->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])
+               ->groupBy('product_id', 'warehouse_type')->get();
+                if ($product_warehouses->contains('warehouse_type','major')) {
+                    if ($product->stock_available() > 10) {
+                        $products[] = $product;
+                    }
+                }
+                
+            }
+           // return var_dump($in_stock_products);
+        }
+
+        //3rd instance
+        if (!empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
+            $start_date = strtotime($data['start_date']);
+            $end_date = strtotime($data['end_date']);
+            $warehouse_selected = WareHouse::find($data['warehouse_id']);
+
+            if ($start_date > $end_date) {
+                return back()->with('error', 'Start Date Cannot be greater than End Date');
+            }
+
+            $start_date = date('Y-m-d',$start_date);
+            $end_date = date('Y-m-d',$end_date);
+
+            $products1 = Product::all();
+
+            $in_stock_products = []; $products = [];
+            foreach ($products1 as $key => $product) {
+                //using dates n duplicates check
+               $product_warehouses = ProductWarehouse::where('warehouse_id', $data['warehouse_id'])->select(DB::raw('product_id, warehouse_type'))
+               ->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->groupBy('product_id', 'warehouse_type')->get();
+                if ($product_warehouses->contains('warehouse_type','major')) {
+                    if ($product->stock_available() > 10) {
+                        $products[] = $product;
+                    }
+                }   
+            }
+        }
+
+        $in_stock_products = [];
+        foreach ($products as $key => $product) {
+            
+            $warehouses = $product->warehouses->where('type','major');
+            if ($warehouses->count() > 0) {
+                if ($product->stock_available() > 10) {
+                    $in_stock_products[] = $product;
+                }
+            }
+        }
+
+        
+        $warehouses = WareHouse::where('type','major')->get();
+        return view('pages.inventory.inStockProductsByWarehouse', \compact('products', 'in_stock_products','warehouses', 'start_date', 'end_date', 'warehouse_selected'));
+    }
+
+    //by minor warehouse
+    public function inStockProductsByOtherAgents()
+    {
+        $products = Product::all();
+
+        $in_stock_products = [];
+        foreach ($products as $key => $product) {
+            $product_warehouses = $product->warehouses;
+            if ($product_warehouses->contains('type','minor')) {
+                if ($product->stock_available() > 10) {
+                    $in_stock_products[] = $product;
+                }
+            }
+            
+        }
+
+        $warehouses = WareHouse::where('type','minor')->get();
+        $start_date = '';
+        $end_date = '';
+        $warehouse_selected = '';
+        
+        return view('pages.inventory.inStockProductsByOtherAgents', \compact('products', 'in_stock_products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
+    }
+
+    public function inStockProductsByOtherAgentsQuery(Request $request)
+    {
+        $data = $request->all();
+
+        $start_date = '';
+        $end_date = '';
+        $warehouse_selected = '';
+
+        //1st instance
+        if (!empty($data['warehouse_id']) && empty($data['start_date']) && empty($data['end_date'])) {
+            $warehouse_selected = WareHouse::find($data['warehouse_id']);
+            $products = $warehouse_selected->products;
+        }
+
+        //2nd instance
+        if (empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
+            $start_date = strtotime($data['start_date']);
+            $end_date = strtotime($data['end_date']);
+
+            if ($start_date > $end_date) {
+                return back()->with('error', 'Start Date Cannot be greater than End Date');
+            }
+
+            $start_date = date('Y-m-d',$start_date);
+            $end_date = date('Y-m-d',$end_date);
+
+            // $products = Product::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->get();
+            $products1 = Product::all();
+
+            $in_stock_products = []; $products = [];
+            foreach ($products1 as $key => $product) {
+                //using dates n duplicates check
+               $product_warehouses = ProductWarehouse::select(DB::raw('product_id, warehouse_type'))->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])
+               ->groupBy('product_id', 'warehouse_type')->get();
+                if ($product_warehouses->contains('warehouse_type','minor')) {
+                    if ($product->stock_available() > 10) {
+                        $products[] = $product;
+                    }
+                }
+                
+            }
+           // return var_dump($in_stock_products);
+        }
+
+        //3rd instance
+        if (!empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
+            $start_date = strtotime($data['start_date']);
+            $end_date = strtotime($data['end_date']);
+            $warehouse_selected = WareHouse::find($data['warehouse_id']);
+
+            if ($start_date > $end_date) {
+                return back()->with('error', 'Start Date Cannot be greater than End Date');
+            }
+
+            $start_date = date('Y-m-d',$start_date);
+            $end_date = date('Y-m-d',$end_date);
+
+            $products1 = Product::all();
+
+            $in_stock_products = []; $products = [];
+            foreach ($products1 as $key => $product) {
+                //using dates n duplicates check
+               $product_warehouses = ProductWarehouse::where('warehouse_id', $data['warehouse_id'])->select(DB::raw('product_id, warehouse_type'))
+               ->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->groupBy('product_id', 'warehouse_type')->get();
+                if ($product_warehouses->contains('warehouse_type','minor')) {
+                    if ($product->stock_available() > 10) {
+                        $products[] = $product;
+                    }
+                }   
+            }
+        }
+
+        $in_stock_products = [];
+        foreach ($products as $key => $product) {
+            $product_warehouse = ProductWarehouse::where('product_id',$product->id);
+            $product_warehouses = $product->warehouses;
+            if ($product_warehouses->contains('type','minor')) {
+                if ($product->stock_available() > 10) {
+                    $in_stock_products[] = $product;
+                }
+            }  
+        }
+
+        $warehouses = WareHouse::where('type','minor')->get();
+        return view('pages.inventory.inStockProductsByOtherAgents', \compact('products', 'in_stock_products','warehouses', 'start_date', 'end_date', 'warehouse_selected'));
+    }
+
+    public function allProductInventory()
+    {
+        $products = Product::all();
+        return view('pages.inventory.allProductInventory', compact('products'));
+    }
+
+    public function singleProductSales($unique_key)
+    {
+        $product = Product::where('unique_key', $unique_key)->first();
+        $sales = Sale::where('product_id', $product->id)->get();
+        return view('pages.inventory.singleProductSales', compact('product', 'sales'));
+    }
+
+    public function singleProductPurchases($unique_key)
+    {
+        $product = Product::where('unique_key', $unique_key)->first();
+        $purchases = Purchase::where('product_id', $product->id)->orderBy('id', 'ASC')->get();
+        return view('pages.inventory.singleProductPurchases', compact('product', 'purchases'));
+    }
 
     public function shorten($num, $digits = 1) {
         $num = preg_replace('/[^0-9]/','',$num);
@@ -81,51 +336,6 @@ class InventoryController extends Controller
             $num = $num . 'k';
         }
         return $num;
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
     }
 
     /**

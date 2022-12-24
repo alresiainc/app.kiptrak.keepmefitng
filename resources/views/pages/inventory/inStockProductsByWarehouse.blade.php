@@ -1,5 +1,5 @@
 @extends('layouts.design')
-@section('title')Products @endsection
+@section('title')In-Stock Products By WareHouse @endsection
 
 @section('extra_css')
 <style>
@@ -18,20 +18,71 @@
     }
 </style>
 @endsection
-
 @section('content')
 
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Products</h1>
+    <h1>In-Stock Products By WareHouse</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-        <li class="breadcrumb-item active">Products</li>
+        <li class="breadcrumb-item"><a href="{{ route('inventoryDashboard') }}">Inventory</a></li>
+        <li class="breadcrumb-item active">In-Stock Products By WareHouse</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
+
+  @if(Session::has('error'))
+  <div class="alert alert-danger mb-3 text-center">
+      {{Session::get('error')}}
+  </div>
+  @endif
+
+  <section class="users-list-wrapper">
+    <div class="users-list-filter px-1">
+      <form action="{{ route('inStockProductsByWarehouseQuery') }}" method="POST">@csrf
+        <div class="row border rounded py-2 mb-2">
+
+          <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <label for="">Start Date</label>
+            <fieldset class="form-group">
+              <input type="date" name="start_date" class="form-control" id="" value="{{ $start_date != '' ? $start_date : '' }}">
+            </fieldset>
+          </div>
+          
+          <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <label for="">End Date</label>
+            <fieldset class="form-group">
+              <input type="date" name="end_date" class="form-control" id="" value="{{ $end_date != '' ? $end_date : '' }}">
+            </fieldset>
+          </div>
+
+          <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <label for="">Select Warehouse</label>
+            <fieldset class="form-group">
+              <select data-live-search="true" class="custom-select border form-control" name="warehouse_id" id="">
+                <option value="{{ $warehouse_selected != '' ? $warehouse_selected->id : '' }}">{{ $warehouse_selected != '' ? $warehouse_selected->name : 'Nothing Selected' }}</option>
+                @if (count($warehouses))
+                    @foreach ($warehouses as $warehouse)
+                        <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
+                    @endforeach
+                @endif
+              </select>
+            </fieldset>
+          </div>
+
+          <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end mb-3">
+            <div class="d-grid w-100">
+              <button class="btn btn-primary btn-block glow users-list-clear mb-0"><i class="bx bx-plus"></i>Submit</button>
+            </div>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+  </section>
 
   <section>
     <div class="row">
@@ -39,20 +90,14 @@
         <div class="card">
           <div class="card-body pt-3">
             
-            <div class="clearfix mb-2">
-              <div class="float-start text-start">
-                  <a href="{{ route('addProduct') }}" class="btn btn-sm btn-dark rounded-pill">
-                    <i class="bi bi-plus"></i> <span>Add Product</span></a>
-                  
-              </div>
-  
-              <div class="float-end text-end">
-                <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
-                  <i class="bi bi-upload"></i> <span>Import</span></button>
-                <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
-                <button class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
-              </div>
+          <div class="clearfix mb-2">
+            <div class="float-end text-end">
+              <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
+                <i class="bi bi-upload"></i> <span>Import</span></button>
+              <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
+              <button class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
             </div>
+          </div>
           <hr>
           
           <div class="table table-responsive">
@@ -64,15 +109,15 @@
                       <th>Code</th>
                       {{-- <th>Colour</th>
                       <th>Size</th> --}}
-                      <th>Quantity</th>
+                      <th>In Stock</th>
                       <th>Price</th>
-                      <th>Added</th>
-                      <th>Action</th>
+                      <th>Date Added</th>
+                      
                   </tr>
               </thead>
               <tbody>
-                @if (count($products) > 0)
-                    @foreach ($products as $product)
+                @if (count($in_stock_products) > 0)
+                    @foreach ($in_stock_products as $product)
                     <tr>
                       <td>
                         <a
@@ -90,13 +135,7 @@
                       <td>{{ $product->stock_available() }}</td>
                       <td>{{ $product->country->symbol }}{{ $product->purchase_price }}</td>
                       <td>{{ $product->created_at }}</td>
-                      <td>
-                        <div class="d-flex">
-                          <a href="{{ route('singleProduct', $product->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
-                          <a href="{{ route('editProduct', $product->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                          <a class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
-                        </div>
-                      </td>
+                      
                   </tr>
                     @endforeach
                 @endif

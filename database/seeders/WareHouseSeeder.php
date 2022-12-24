@@ -19,6 +19,7 @@ class WareHouseSeeder extends Seeder
         $warehouse = new WareHouse();
         $warehouse->agent_id = 6;
         $warehouse->name = 'Warehouse 1';
+        $warehouse->type = 'major';
         $warehouse->city = 'Ikeja';
         $warehouse->state = 'Lagos';
         $warehouse->country_id = 1;
@@ -30,6 +31,7 @@ class WareHouseSeeder extends Seeder
         $warehouse = new WareHouse();
         $warehouse->agent_id = 7;
         $warehouse->name = 'Warehouse 2';
+        $warehouse->type = 'major';
         $warehouse->city = 'Agip';
         $warehouse->state = 'Lagos';
         $warehouse->country_id = 1;
@@ -41,6 +43,7 @@ class WareHouseSeeder extends Seeder
         $warehouse = new WareHouse();
         $warehouse->agent_id = 7;
         $warehouse->name = 'Warehouse 3';
+        $warehouse->type = 'minor';
         $warehouse->city = 'Garki';
         $warehouse->state = 'Abuja';
         $warehouse->country_id = 1;

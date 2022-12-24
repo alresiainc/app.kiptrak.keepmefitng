@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
+use Illuminate\Support\Facades\DB;
+
 class Category extends Model
 {
     use HasFactory, SoftDeletes;
@@ -29,7 +31,37 @@ class Category extends Model
             $unique_key = $string.''.$random;
             return $unique_key;
         }
-
         return $string;
+    }
+
+    public function sales($unique_key) {
+        $category = Category::where('unique_key', $unique_key)->first();
+        $products = $category->products->pluck('id'); //[1,3,4]
+        $sales = Sale::whereIn('sales.product_id', $products)->get();
+        return $sales->count();
+    }
+
+    public function purchases($unique_key) {
+        $category = Category::where('unique_key', $unique_key)->first();
+        $products = $category->products->pluck('id'); //[1,3,4]
+        $purchases = Purchase::whereIn('purchases.product_id', $products)->get();
+        return $purchases->count();
+    }
+
+    //customers by category of products bought
+    public function customers($unique_key) {
+        $category = Category::where('unique_key', $unique_key)->first();
+        $products = $category->products->pluck('id'); //[1,3,4]
+        $customers = Sale::whereIn('sales.product_id', $products)->select('customer_id')->groupBy('customer_id')->get();
+        //dd($customers);
+        return $customers->count();
+    }
+
+    public function createdBy() {
+        return $this->belongsTo(User::class, 'created_by');    
+    }
+
+    public function products() {
+        return $this->hasMany(Product::class, 'category_id');    
     }
 }

@@ -141,9 +141,13 @@
   <script>
 
     $(document).ready(function () {
-      $('.custom-table').DataTable();
+      $('.custom-table').DataTable({ "bSort" : false });
       $('.custom-select').selectpicker();
     });
+  </script>
+
+  <script>
+    
   </script>
       
 </body>

@@ -32,4 +32,19 @@ class Message extends Model
 
         return $string;
     }
+
+    //recipient users
+    public function users($recipients) {
+        $recipients = unserialize($recipients);
+        $users = User::whereIn('id', $recipients)->get();
+
+        return $users;
+    }
+
+    public function customers($recipients) {
+        $recipients = unserialize($recipients);
+        $customers = Customer::whereIn('id', $recipients)->get();
+
+        return $customers;
+    }
 }

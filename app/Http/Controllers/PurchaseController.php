@@ -32,7 +32,7 @@ class PurchaseController extends Controller
         if (!isset($purchase_last)) {
             $purchase_code = $purchase_code;
         } else {
-            $purchase_code = $purchase_code.''.$purchase_last->id+1;
+            $purchase_code = 'kppur'.'-'.$purchase_code.''.$purchase_last->id+1;
         }
         
         return view('pages.purchases.addPurchase', compact('products', 'suppliers', 'purchase_code'));

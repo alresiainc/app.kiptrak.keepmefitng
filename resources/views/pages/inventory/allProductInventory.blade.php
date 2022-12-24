@@ -24,15 +24,17 @@
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Products</h1>
+    <h1>Products Inventory</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('inventoryDashboard') }}">Inventory</a></li>
         <li class="breadcrumb-item active">Products</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
 
+  
   <section>
     <div class="row">
       <div class="col-md-12">
@@ -60,13 +62,8 @@
               <thead>
                   <tr>
                       <th>Photo</th>
-                      <th>Name</th>
                       <th>Code</th>
-                      {{-- <th>Colour</th>
-                      <th>Size</th> --}}
-                      <th>Quantity</th>
-                      <th>Price</th>
-                      <th>Added</th>
+                      <th>Name</th>
                       <th>Action</th>
                   </tr>
               </thead>
@@ -83,18 +80,17 @@
                         <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid"
                         alt="{{$product->name}}"></a>
                       </td>
-                      <td>{{ $product->name }}</td>
                       <td>{{ $product->code  }}</td>
+                      <td>{{ $product->name }}</td>
+                      
                       {{-- <td>{{ isset($product->color) ? $product->color : 'None' }}</td>
                       <td>{{ isset($product->size) ? $product->size : 'None' }}</td> --}}
-                      <td>{{ $product->stock_available() }}</td>
-                      <td>{{ $product->country->symbol }}{{ $product->purchase_price }}</td>
-                      <td>{{ $product->created_at }}</td>
+                      
+                      
                       <td>
                         <div class="d-flex">
-                          <a href="{{ route('singleProduct', $product->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
-                          <a href="{{ route('editProduct', $product->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                          <a class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
+                          <a href="{{ route('singleProductSales', $product->unique_key) }}" class="badge badge-success me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Sales">View Sales</a>
+                          <a href="{{ route('singleProductPurchases', $product->unique_key) }}" class="badge badge-primary me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Purchases">View Purchases</a>
                         </div>
                       </td>
                   </tr>

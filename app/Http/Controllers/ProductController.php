@@ -7,11 +7,14 @@ use Illuminate\Support\Facades\Storage;
 
 use App\Models\User;
 use App\Models\Product;
+use App\Models\Category;
 use App\Models\IncomingStock;
 use App\Models\OutgoingStock;
 use App\Models\Country;
 use App\Models\Purchase;
 use App\Models\Sale;
+use App\Models\WareHouse;
+use App\Models\ProductWarehouse;
 
 class ProductController extends Controller
 {
@@ -41,8 +44,11 @@ class ProductController extends Controller
             array("name" => "Item", "symbol" => "Item",),
         );
         $countries = Country::all();
-
-        return view('pages.products.addProduct', compact('countries', 'units'));
+        $categories = Category::all();
+        $warehouses = WareHouse::all();
+        $agents = User::where('type', 'agent')->get();
+        
+        return view('pages.products.addProduct', compact('countries', 'units', 'categories', 'warehouses', 'agents'));
     }
 
     public function addProductPost(Request $request)
@@ -50,34 +56,36 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string',
             'quantity' => 'required|numeric',
+            'category' => 'required',
             // 'color' => 'nullable|string',
             // 'size' => 'nullable|string',
             'currency' => 'required',
             'purchase_price' => 'required|numeric',
+            'sale_price' => 'required|numeric',
             'code' => 'nullable|string|unique:products',
             // 'features' => 'nullable|array',
             //'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
             'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
         ]);
         
-        $code = $random = rand(1000, 9000);
-
         $data = $request->all();
         $product = new Product();
         $product->name = $data['name'];
         // $product->quantity = $data['quantity']; //handled by inComingStocks
+        $product->category_id = $data['category'];
+        // $product->warehouse_id = !empty($data['warehouse']) ? $data['warehouse'] : null;
         $product->color = !empty($data['color']) ? $data['color'] : null;
         $product->size = !empty($data['size']) ? $data['size'] : null;
         $product->country_id = $data['currency']; //country_id
         $product->purchase_price = $data['purchase_price'];
         $product->sale_price = $data['sale_price'];
 
-        if (empty($data['code'])) {
-            $count = Product::count() + 1;
-            $product->code = $count.'PRD'.$code;
-        }else{
-            $product->code = $data['code'];
-        }
+        // if (empty($data['code'])) {
+        //     $count = Product::count() + 1;
+        //     $product->code = $count.'PRD'.$code;
+        // }else{
+        //     $product->code = $data['code'];
+        // }
         
         $product->features = !empty($data['features']) ? serialize($data['features']) : null;
     
@@ -91,6 +99,16 @@ class ProductController extends Controller
         $request->image->storeAs('products', $imageName, 'public');
         $product->image = $imageName;
         $product->save();
+
+        //warehouse
+        if (!empty($data['warehouse_id'])) {
+            $product_warehouse = new ProductWarehouse();
+            $warehouse = WareHouse::find($data['warehouse_id']);
+            $product_warehouse->product_id = $product->id;
+            $product_warehouse->warehouse_id = $data['warehouse_id'];
+            $product_warehouse->warehouse_type = $warehouse->type;
+            $product_warehouse->save();
+        }
         
         //incomingstocks
         $incomingStock = new IncomingStock();
@@ -226,6 +244,16 @@ class ProductController extends Controller
         //Storage::disk('public')->delete($oldImagePath);
         $product->save();
 
+        //warehouse
+        if (!empty($data['warehouse_id'])) {
+            $product_warehouse = new ProductWarehouse();
+            $warehouse = WareHouse::find($data['warehouse_id']);
+            $product_warehouse->product_id = $product->id;
+            $product_warehouse->warehouse_id = $data['warehouse_id'];
+            $product_warehouse->warehouse_type = $warehouse->type;
+            $product_warehouse->save();
+        }
+
         if(!empty($data['quantity']) && $data['quantity'] !== 0)
         {
             //incomingStock
@@ -258,17 +286,7 @@ class ProductController extends Controller
 
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+    
 
     /**
      * Remove the specified resource from storage.

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('name');
             // $table->string('quantity'); //handled in 'InomingStock' tbl
             $table->string('quantity_limit')->nullable(); //lessthan this is out-of-stock
+            $table->string('category_id')->nullable();
             $table->string('color')->nullable();
             $table->string('size')->nullable();
             $table->string('country_id')->nullable(); //will contain country_id

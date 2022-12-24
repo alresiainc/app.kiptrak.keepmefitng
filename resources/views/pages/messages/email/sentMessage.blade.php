@@ -60,13 +60,22 @@
                             <td>{{ $message->topic }}</td>
 
                             @php
-                                $recipients = unserialize($message->recipients);
-                                $users = \App\Models\User::whereIn('id', $recipients)->get();
+                                $users = $message->users($message->recipients);
+                                $customers = $message->customers($message->recipients)
                             @endphp
                             <td>
-                              @foreach ($users as $user)
-                                  <span class="badge badge-dark mr-1">{{ $user->email }}</span>
-                              @endforeach
+                              @if (isset($message->to) && $message->to=='users')
+                                @foreach ($users as $user)
+                                <span class="badge badge-dark mr-1">{{ $user->email }}</span>
+                                @endforeach
+                              @endif
+
+                              @if (isset($message->to) && $message->to=='customers')
+                                @foreach ($customers as $customers)
+                                <span class="badge badge-dark mr-1">{{ $customers->email }}</span>
+                                @endforeach
+                              @endif
+                              
                             </td>
                             <td>{{ $message->message }}</td>
                             <td>{!! $message->message_status == 'sent' ? '<span class="badge badge-success">Sent</span>' : '<span class="badge badge-dark">Draft</span>' !!}</td>

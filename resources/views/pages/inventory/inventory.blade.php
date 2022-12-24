@@ -45,9 +45,10 @@
     <div class="row">
 
         <!-- Total Products Card -->
-      <div class="col-lg-3 col-md-6">
+      <div class="col-lg-4 col-md-6">
         <div class="card bg-4">
-            <div class="card-body p-2">
+            <a href="{{ route('allProductInventory') }}" class="text-white">
+              <div class="card-body p-2">
                 <div class="d-flex align-items-center justify-content-between">
                 <div class="text-start">
                     <h2 class="fw-bold">{{ count($total_products) }}</h2>
@@ -57,34 +58,35 @@
                     <i class="bi bi-box display-1 text-light-black"></i>
                 </div>
                 </div>
-            </div>
+              </div>
+            </a>
+
         </div>
       </div>
         <!-- End Total Products Card -->
 
       <!-- In-Stock-Products Card -->
-      <div class="col-lg-3 col-md-6">
-        <div class="card bg-2">
-          <div class="card-body p-2">
-            <div class="d-flex align-items-center justify-content-between">
-              <div class="text-start">
-                <h2 class="fw-bold">{{ count($total_products) - count($out_of_stock_products) }}</h2>
-                <small class="text-uppercase small pt-1 fw-bold">In-Stock Products</small
-                >
-              </div>
-              <div class="rounded-circle float-end">
-                <i
-                  class="bi bi-calendar-minus display-1 text-light-black"
-                ></i>
+      <div class="col-lg-4 col-md-6" data-bs-toggle="modal" data-bs-target="#inStock">
+        
+          <div class="card bg-2">
+            <div class="card-body p-2">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="text-start">
+                  <h2 class="fw-bold">{{ count($total_products) - count($out_of_stock_products) }}</h2>
+                  <small class="text-uppercase small pt-1 fw-bold">In-Stock Products</small>
+                </div>
+                <div class="rounded-circle float-end">
+                  <i class="bi bi-calendar-minus display-1 text-light-black"></i>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+
       </div>
       <!-- End Sales Card -->
 
       <!-- Sales Card -->
-      <div class="col-lg-3 col-md-6">
+      <div class="col-lg-4 col-md-6">
         <div class="card bg-3">
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
@@ -103,7 +105,7 @@
       <!-- End Sales Card -->
 
       <!-- Warehouses Card -->
-      <div class="col-lg-3 col-md-6">
+      <div class="col-lg-3 col-md-6 d-none">
         <div class="card bg-1">
           <div class="card-body p-2">
             <div class="d-flex justify-content-between align-items-center">
@@ -126,7 +128,7 @@
 
   </section>
 
-  <section class="section m-0">
+  <section class="section m-0 d-none">
     <div class="row">
       <!-- Card -->
       <div class="col-lg-3 col-md-6">
@@ -212,7 +214,7 @@
     </div>
   </section>
 
-  <section class="section m-0">
+  <section class="section m-0 d-none">
     <div class="row">
 
         <!-- Total Suppliers Card -->
@@ -346,11 +348,33 @@
   </section>
 
   <hr />
-
-  
-
   
 </main>
+
+<!-- Modal -->
+<div class="modal fade" id="inStock" tabindex="-1" aria-labelledby="inStockLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h1 class="modal-title fs-5">Select Option</h1>
+              <button type="button" class="btn-close"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          
+          <div class="modal-body">
+              
+              <div class="d-grid mb-2">
+                  <a href="{{ route('inStockProductsByWarehouse') }}" class="btn btn-dark">By WareHouse (major)</a>
+              </div>
+
+              <div class="d-grid mb-2">
+                <a href="{{ route('inStockProductsByOtherAgents') }}" class="btn btn-dark">By Other Agents (minor)</a>
+            </div>
+
+          </div>
+      </div>
+  </div>
+</div>
 
 @endsection
 

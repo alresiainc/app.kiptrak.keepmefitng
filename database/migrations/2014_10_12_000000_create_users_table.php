@@ -38,6 +38,8 @@ return new class extends Migration
             $table->string('country_id')->nullable();
             $table->string('address')->nullable();
 
+            $table->string('warehouse_id')->nullable(); //where staff or agent belongs
+
             $table->string('created_by')->nullable();
             $table->string('status')->nullable(); //'true'/'false'
             $table->softDeletes();

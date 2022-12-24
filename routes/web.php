@@ -184,6 +184,22 @@ Route::post('/create-customer', [CustomerController::class, 'addCustomerPost'])-
 Route::get('/view-customer/{unique_key}', [CustomerController::class, 'singleCustomer'])->name('singleCustomer');
 Route::get('/edit-customer/{unique_key}', [CustomerController::class, 'editCustomer'])->name('editCustomer');
 Route::post('/edit-customer/{unique_key}', [CustomerController::class, 'editCustomerPost'])->name('editCustomerPost');
+Route::get('/single-customer-sales/{unique_key}', [CustomerController::class, 'singleCustomerSales'])->name('singleCustomerSales');
+
+//product category
+Route::get('/categories', [CategoryController::class, 'allCategory'])->name('allCategory');
+Route::get('/create-category', [CategoryController::class, 'addCategory'])->name('addCategory');
+Route::post('/create-category', [CategoryController::class, 'addCategoryPost'])->name('addCategoryPost');
+Route::get('/view-category/{unique_key}', [CategoryController::class, 'singleCategory'])->name('singleCategory');
+Route::get('/edit-category/{unique_key}', [CategoryController::class, 'editCategory'])->name('editCategory');
+Route::post('/edit-category/{unique_key}', [CategoryController::class, 'editCategoryPost'])->name('editCategoryPost');
+Route::get('/category-products/{unique_key}', [CategoryController::class, 'productsByCategory'])->name('productsByCategory');
+Route::get('/category-sales/{unique_key}', [CategoryController::class, 'salesByCategory'])->name('salesByCategory');
+Route::get('/category-purchases/{unique_key}', [CategoryController::class, 'purchasesByCategory'])->name('purchasesByCategory');
+Route::get('/category-customers/{unique_key}', [CategoryController::class, 'customersByCategory'])->name('customersByCategory'); //customersByCategory
+
+Route::get('/ajax-send-customer-mail', [CategoryController::class, 'ajaxSendCustomerMail'])->name('ajaxSendCustomerMail'); //ajaxSendCustomerMail
+Route::get('/ajax-create-product-category', [CategoryController::class, 'createProductCategoryAjax'])->name('createProductCategoryAjax'); //ajax
 
 //Products
 Route::get('/products', [ProductController::class, 'allProducts'])->name('allProducts');
@@ -200,6 +216,7 @@ Route::post('/create-warehouse', [WareHouseController::class, 'addWarehousePost'
 Route::get('/view-warehouse/{unique_key}', [WareHouseController::class, 'singleWarehouse'])->name('singleWarehouse');
 Route::get('/edit-warehouse/{unique_key}', [WareHouseController::class, 'editWarehouse'])->name('editWarehouse');
 Route::post('/edit-warehouse/{unique_key}', [WareHouseController::class, 'editWarehousePost'])->name('editWarehousePost');
+Route::get('/ajax-create-warehouse', [WareHouseController::class, 'addWarehouseAjax'])->name('addWarehouseAjax'); //ajax
 
 //supplier
 Route::get('/suppliers', [SupplierController::class, 'allSupplier'])->name('allSupplier');
@@ -219,6 +236,13 @@ Route::post('/edit-purchase/{unique_key}', [PurchaseController::class, 'editPurc
 
 //inventory management
 Route::get('/inventory-dashboard', [InventoryController::class, 'inventoryDashboard'])->name('inventoryDashboard'); //staffReport
+Route::get('/in-stock-products-warehouse', [InventoryController::class, 'inStockProductsByWarehouse'])->name('inStockProductsByWarehouse'); //inStockProductsByWarehouse
+Route::post('/in-stock-products-warehouse', [InventoryController::class, 'inStockProductsByWarehouseQuery'])->name('inStockProductsByWarehouseQuery'); //inStockProductsByWarehouseQuery
+Route::get('/in-stock-products-other-agents', [InventoryController::class, 'inStockProductsByOtherAgents'])->name('inStockProductsByOtherAgents'); //inStockProductsByOtherAgents
+Route::post('/in-stock-products-other-agents', [InventoryController::class, 'inStockProductsByOtherAgentsQuery'])->name('inStockProductsByOtherAgentsQuery'); //inStockProductsByOtherAgents
+Route::get('/all-products-inventory', [InventoryController::class, 'allProductInventory'])->name('allProductInventory');
+Route::get('/single-product-sales/{unique_key}', [InventoryController::class, 'singleProductSales'])->name('singleProductSales');
+Route::get('/single-product-purchases/{unique_key}', [InventoryController::class, 'singleProductPurchases'])->name('singleProductPurchases');
 
 //sale
 Route::get('/sales', [SaleController::class, 'allSale'])->name('allSale');
@@ -314,6 +338,8 @@ Route::get('/sent-sms-messages', [MessageController::class, 'sentSmsMessage'])->
 Route::get('/compose-email-message', [MessageController::class, 'composeEmailMessage'])->name('composeEmailMessage');
 Route::post('/compose-email-message', [MessageController::class, 'composeEmailMessagePost'])->name('composeEmailMessagePost');
 Route::get('/sent-email-messages', [MessageController::class, 'sentEmailMessage'])->name('sentEmailMessage'); //list
+Route::get('/mail-customers-by-category/{selectedCategory}/{recipients?}', [MessageController::class, 'mailCustomersByCategory'])->name('mailCustomersByCategory'); //mailCustomersByCategory
+Route::post('/mail-customers-by-category/{selectedCategory}/{recipients?}', [MessageController::class, 'mailCustomersByCategoryPost'])->name('mailCustomersByCategoryPost'); //mailCustomersByCategoryPost
 
 Route::get('/send-sms/{phone?}', [MessageController::class, 'sendVCode'])->name('sendVCode'); //list
 

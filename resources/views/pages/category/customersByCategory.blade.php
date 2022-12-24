@@ -1,15 +1,15 @@
 @extends('layouts.design')
-@section('title')Customer @endsection
+@section('title'){{ $category->name }} Customers @endsection
 @section('content')
 
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Customer</h1>
+    <h1>{{ $category->name }}'s Customers</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-        <li class="breadcrumb-item active">Customer</li>
+        <li class="breadcrumb-item active">{{ $category->name }} Customers</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -30,10 +30,8 @@
             
           <div class="clearfix mb-2">
             <div class="float-end text-end">
-              <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
-                <i class="bi bi-upload"></i> <span>Import</span></button>
-              <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
-              <button class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
+              <button class="btn btn-sm btn-dark rounded-pill mail_all" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Send Mail">
+                <i class="bi bi-envelope"></i> <span>Send Mail</span></button>
             </div>
           </div>
           <hr>
@@ -42,38 +40,41 @@
             <table id="products-table" class="table custom-table" style="width:100%">
               <thead>
                   <tr>
+                      <th><input type="checkbox" id="users-master"></th>
                       <th>Photo</th>
                       <th>Name</th>
-            
+                      <th>Email</th>
                       <th>City/Town</th>
-                      <th>State | Country</th>
-                      <th>Date Joined</th>
-                      <th>Action</th>
+                      <th>State</th>
+                      <th>Date Joined</th> 
+                      <th>Action</th> 
                   </tr>
               </thead>
               <tbody>
                 @if (count($customers) > 0)
                     @foreach ($customers as $customer)
                     <tr>
+                      <td><input type="checkbox" class="sub_chk" data-id="{{ $customer->id }}"></td>
                       <td>
                         @if (isset($customer->profile_picture))
                             <a
                             href="{{ asset('/storage/customer/'.$customer->profile_picture) }}"
                             data-fancybox="gallery"
-                            data-caption="{{ isset($customer->profile_picture) ? $customer->name : 'no caption' }}"
+                            data-caption="{{ isset($customer->profile_picture) ? $customer->firstname.' '.$customer->lastname : 'no caption' }}"
                             >   
                             <img src="{{ asset('/storage/customer/'.$customer->profile_picture) }}" width="50" class="rounded-circle img-thumbnail img-fluid"
-                            alt="{{$customer->name}}"></a>
+                            alt="{{$customer->firstname}} {{$customer->lastname}}"></a>
                         @else
                         <img src="{{ asset('/storage/customer/person.png') }}" width="50" class="rounded-circle img-thumbnail img-fluid"
-                            alt="{{$customer->name}}">
+                            alt="{{$customer->firstname}} {{$customer->lastname}}">
                         @endif
                         
                       </td>
                       <td>{{ $customer->firstname }} {{ $customer->lastname }}</td>
+                      <td>{{ $customer->email }} </td>
                       <td>{{ isset($customer->city) ? $customer->city : 'N/A' }}</td>
                       
-                      <td>{{ $customer->state }} | {{ isset($customer->country_id) ? $customer->country->name : '' }}</td>
+                      <td>{{ $customer->state }} </td>
                       
                       <td>{{ $customer->created_at }}</td>
                       <td>
@@ -85,20 +86,16 @@
                             <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu" x-placement="bottom-start"
                             style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 33px, 0px);">
             
-                                
                                 <a href="{{ route('singleCustomerSales', $customer->unique_key) }}">
                                     <button type="button" tabindex="0" class="dropdown-item">Products Bought</button></a>
                                 <div tabindex="-1" class="dropdown-divider"></div>
                                 
-
                             </div>
                           </div>
-                          <a href="{{ route('singleCustomer', $customer->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
-                          <a href="{{ route('editCustomer', $customer->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                          <a class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
+                          
                         </div>
                       </td>
-                  </tr>
+                    </tr>
                     @endforeach
                 @endif
                   
@@ -136,4 +133,50 @@
   </div>
 </div>
 
+@endsection
+
+@section('extra_js')
+    <script>
+        $('#users-master').on('click', function(e) {
+         if($(this).is(':checked',true))  
+         {
+            $(".sub_chk").prop('checked', true);  
+         } else {  
+            $(".sub_chk").prop('checked',false);  
+         }  
+        });
+        //////
+
+        //mail_all
+        $('.mail_all').on('click', function(e) {
+
+            var selectedCategory = "{{ $category->unique_key }}";
+            var allVals = [];  
+            $(".sub_chk:checked").each(function() {  
+                allVals.push($(this).attr('data-id')); //['1', '2']
+            });  
+
+            //check if any is checked
+            if(allVals.length <= 0)  
+            {  
+                alert("Please select customer(s) to mail.");  
+            }  else {  
+                var check = confirm("Are you sure you want to mail this user(s)?");  
+                if(check == true){  
+
+                var join_selected_values = allVals.join(","); //1,2
+                //console.log(allVals)
+
+                localStorage.setItem('allselectedUsers', allVals);
+                window.location.href = "/mail-customers-by-category/"+selectedCategory+"/"+allVals
+                //ajax end
+
+                    $.each(allVals, function( index, value ) {
+                        $('table tr').filter("[data-row-id='" + value + "']").remove();
+                    });
+                }
+                //end of true  
+            }  
+        });
+    </script>
 @endsection

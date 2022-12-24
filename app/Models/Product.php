@@ -29,11 +29,19 @@ class Product extends Model
             $string = Str::random(30);
             $randomStrings = static::where('unique_key', 'like', $string.'%')->pluck('unique_key');
 
+            $code = 'kp-' . date("his");
+            $randomCodes = static::where('code', 'like', $code.'%')->pluck('code');
+
             do {
                 $randomString = $string.rand(100000, 999999);
             } while ($randomStrings->contains($randomString));
+
+            do {
+                $randomCode = $code.rand(100000, 999999);
+            } while ($randomCodes->contains($randomCode));
     
             $model->unique_key = $randomString;
+            $model->code = $randomCode;
             // $model->url = 'order-form/'.$model->unique_key;
 
         });
@@ -89,6 +97,15 @@ class Product extends Model
     public function country()
     {
         return $this->belongsTo(Country::class, 'country_id');  
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');  
+    }
+
+    public function warehouses() {
+        return $this->belongsToMany(WareHouse::class, 'product_warehouses', 'product_id', 'warehouse_id');    
     }
 
 }

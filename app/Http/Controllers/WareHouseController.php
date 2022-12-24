@@ -113,8 +113,44 @@ class WareHouseController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function addWarehouseAjax(Request $request)
     {
-        //
+        $authUser = auth()->user();
+        $data = $request->all();
+        $warehouse = new WareHouse();
+        if ($data['agent_id'] != "" || $data['agent_id'] != null) {
+            $warehouse->agent_id = $data['agent_id'];
+        }
+        if ($data['name'] != "" || $data['name'] != null) {
+            $warehouse->name = $data['name'];
+        }
+        if ($data['type'] != "" || $data['type'] != null) {
+            $warehouse->type = $data['type'];
+        }
+        if ($data['city'] != "" || $data['city'] != null) {
+            $warehouse->city = $data['city'];
+        }
+        if ($data['state'] != "" || $data['state'] != null) {
+            $warehouse->state = $data['state'];
+        }
+        if ($data['country'] != "" || $data['country'] != null) {
+            $warehouse->country_id = $data['country'];
+        }
+        if ($data['address'] != "" || $data['address'] != null) {
+            $warehouse->address = $data['address'];
+        }
+        $warehouse->created_by = $authUser->id;
+        $warehouse->status = 'true';
+        $warehouse->save();
+
+        //store in array
+        $data['warehouse'] = $warehouse;
+
+        // $categories = ExpenseCategory::all();
+
+        return response()->json([
+            'status'=>true,
+            'data'=>$data
+        ]);
     }
 }

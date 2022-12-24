@@ -20,6 +20,9 @@
         <li>
           <a href="{{ route('allProducts') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>View Products</span></a>
         </li>
+        <li>
+          <a href="{{ route('allCategory') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>View Categories</span></a>
+        </li>
       </ul>
     </li>
 

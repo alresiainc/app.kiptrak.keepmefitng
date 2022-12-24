@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 use App\Models\Message;
 use App\Models\User;
+use App\Models\Category;
 use App\Notifications\sendUserMessageNotification;
 use Illuminate\Support\Facades\Notification;
 // use App\Traits\EbulkSmsTrait;
@@ -46,8 +49,6 @@ class MessageController extends Controller
 
     public function sendVCode($phone, $vcode="")
     {
-        
-       
         $message = '<#> Test message';
         $this->sendSMS($phone, $message);
     }
@@ -82,6 +83,7 @@ class MessageController extends Controller
             $message->recipients = $data['recipients'];
             $message->message = $data['message'];
             $message->message_status = 'sent';
+            $message->to = 'users';
             $message->created_by = 1;
             $message->status = 'true';
             $message->save();
@@ -94,6 +96,7 @@ class MessageController extends Controller
             $message->recipients = $data['recipients'];
             $message->message = $data['message'];
             $message->message_status = 'draft';
+            $message->to = 'users';
             $message->created_by = 1;
             $message->status = 'true';
             $message->save();
@@ -144,6 +147,8 @@ class MessageController extends Controller
         $data = $request->all();
         $recipients = User::whereIn('id', $data['user_id'])->get();
 
+        //return $data['user_id']; //["2","3"]
+
         if (empty($data['draftinput'])) {
             $message = new Message();
             $message->type = 'email';
@@ -151,6 +156,7 @@ class MessageController extends Controller
             $message->recipients = serialize($data['user_id']);
             $message->message = $data['message'];
             $message->message_status = 'sent';
+            $message->to = 'users';
             $message->created_by = 1;
             $message->status = 'true';
             $message->save();
@@ -165,6 +171,7 @@ class MessageController extends Controller
             $message->recipients = serialize($data['user_id']);
             $message->message = $data['message'];
             $message->message_status = 'draft';
+            $message->to = 'users';
             $message->created_by = 1;
             $message->status = 'true';
             $message->save();
@@ -184,6 +191,43 @@ class MessageController extends Controller
     {
         $messages = Message::where('type', 'email')->get();
         return view('pages.messages.email.sentMessage', compact('messages'));
+    }
+
+    public function mailCustomersByCategory($selectedCategory, $recipients="")
+    {
+        $category = Category::where('unique_key', $selectedCategory)->first();
+        $selectedCustomers = DB::table("customers")->whereIn('id',explode(",",$recipients))->get();
+        return view('pages.messages.email.mailCustomersByCategory', compact('category', 'selectedCustomers', 'recipients'));
+    }
+
+    public function mailCustomersByCategoryPost(Request $request, $selectedCategory, $recipients="")
+    {
+        $category = Category::where('unique_key', $selectedCategory)->first();
+        $customers = DB::table("customers")->whereIn('id',explode(",",$recipients));
+        $recipients_emails = $customers->pluck('email');
+        //$recipients_ids = $customers->pluck('id');
+
+        //for db record purpose
+        $recipients_ids = explode(',', $recipients);
+
+        $authUser = auth()->user();
+
+        $data = $request->all();
+
+        $message = new Message();
+        $message->type = 'email';
+        $message->topic = $data['topic'];
+        $message->recipients = serialize($recipients_ids);
+        $message->message = $data['message'];
+        $message->message_status = 'sent';
+        $message->to = 'customers';
+        $message->created_by = $authUser->id;
+        $message->status = 'true';
+        $message->save();
+
+        Notification::route('mail', $recipients_emails)->notify(new sendUserMessageNotification($message));
+
+        return back()->with('success', 'Message Sent Successfully');
     }
 
     /**
