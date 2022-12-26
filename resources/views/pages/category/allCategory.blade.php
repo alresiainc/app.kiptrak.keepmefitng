@@ -101,6 +101,7 @@
                         <tr>
                             <td>{{ $category->name }}</td>
 
+                            <!--productsByCategory-->
                             <td>
                               @if ($category->products->count() > 0)
                               <a href="{{ route('productsByCategory', $category->unique_key) }}" class="badge badge-dark">{{ $category->products->count() }}</a>
@@ -109,6 +110,7 @@
                               @endif
                             </td>
 
+                            <!--salesByCategory-->
                             <td>
                               @if ($category->products->count() > 0)
                                 @if ($category->sales($category->unique_key) > 0)
@@ -122,6 +124,7 @@
                               @endif
                             </td>
 
+                            <!--purchasesByCategory-->
                             <td>
                               @if ($category->products->count() > 0)
                                 @if ($category->purchases($category->unique_key) > 0)
@@ -135,6 +138,7 @@
                               @endif
                             </td>
 
+                            <!--customersByCategory-->
                             <td>
                               @if ($category->products->count() > 0)
                                 @if ($category->customers($category->unique_key) > 0)

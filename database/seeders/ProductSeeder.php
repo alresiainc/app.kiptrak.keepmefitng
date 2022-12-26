@@ -30,7 +30,7 @@ class ProductSeeder extends Seeder
         $product->purchase_id = 1;
         // $product->code = 'CF001';
         $product->features = !empty($features1) ? serialize($features1) : null;
-        $product->warehouse_id = '1';
+        //$product->warehouse_id = '1';
         $product->created_by = '1';
         $product->status = 'true';
         $product->image = '1.jpg';
@@ -64,7 +64,7 @@ class ProductSeeder extends Seeder
         $product->purchase_id = 2;
         // $product->code = 'CF002';
         $product->features = !empty($features2) ? serialize($features2) : null;
-        $product->warehouse_id = '1';
+        //$product->warehouse_id = '1';
         $product->created_by = '1';
         $product->status = 'true';
         $product->image = '2.jpg';
@@ -105,7 +105,7 @@ class ProductSeeder extends Seeder
         $product->purchase_id = 3;
         // $product->code = 'CF003';
         $product->features = !empty($features3) ? serialize($features3) : null;
-        $product->warehouse_id = 1;
+        //$product->warehouse_id = 1;
         $product->created_by = 1;
         $product->status = 'true';
         $product->image = '3.jpg';
@@ -134,7 +134,7 @@ class ProductSeeder extends Seeder
         $product->purchase_id = 4;
         // $product->code = 'CF004';
         $product->features = !empty($features4) ? serialize($features4) : null;
-        $product->warehouse_id = '1';
+        //$product->warehouse_id = '1';
         $product->created_by = '1';
         $product->status = 'true';
         $product->image = '4.jpg';
@@ -161,7 +161,7 @@ class ProductSeeder extends Seeder
         $product->purchase_id = 5;
         // $product->code = 'CF005';
         $product->features = !empty($features4) ? serialize($features5) : null;
-        $product->warehouse_id = '1';
+        //$product->warehouse_id = '1';
         $product->created_by = '1';
         $product->status = 'true';
         $product->image = '5.jpg';

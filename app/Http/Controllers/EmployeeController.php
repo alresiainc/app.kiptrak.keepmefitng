@@ -17,7 +17,7 @@ class EmployeeController extends Controller
 {
     public function allStaff()
     {
-        $staffs = User::where('type', 'staff')->get();
+        $staffs = User::where('type', 'staff')->orderBy('id', 'DESC')->get();
         $roles = Role::all();
         return view('pages.hrm.employee.allEmployee', compact('staffs', 'roles'));
     }
