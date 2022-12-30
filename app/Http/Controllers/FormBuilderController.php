@@ -83,7 +83,7 @@ class FormBuilderController extends Controller
         $data = $request->all();
 
         $formHolder = new FormHolder();
-        $formHolder->name = $data['form_name'];
+        $formHolder->name = $data['name'];
         $formHolder->slug = $request->form_code; //like form_code
         $formHolder->form_data = \serialize($request->except(['products', 'q', 'required', 'form_name_selected', '_token']));
         
@@ -299,12 +299,12 @@ class FormBuilderController extends Controller
         return back()->with('success', 'Form Updated Successfully');
     }
 
-    //nut used. ajax save form first time
+    //not used. ajax save form first time
     public function formBuilderSave(Request $request)
     {
         $data = $request->all();
         $result = $data['result']; //object
-        $form_name = $data['form_name'];
+        $form_name = $data['name'];
 
         if ($form_name == "" || $form_name == null) {
             $rand = \mt_rand(0, 999999);

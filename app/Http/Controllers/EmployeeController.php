@@ -78,7 +78,7 @@ class EmployeeController extends Controller
         $user->save();
 
         //add role to user
-        if(!empty($data['role_id'])){
+        if (!empty($data['role_id'])) {
 
             $role = Role::find($data['role_id']);
             $permissions = $role->permissions;

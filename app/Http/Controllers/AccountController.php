@@ -223,4 +223,6 @@ class AccountController extends Controller
         }
         return view('pages.accounts.balanceSheet', compact('accounts', 'debit', 'credit'));
     }
+
+    
 }

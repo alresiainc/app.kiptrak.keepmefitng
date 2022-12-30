@@ -95,6 +95,11 @@ Route::post('/login', [AuthController::class, 'loginPost'])->name('loginPost');
 Route::group(['middleware' => 'auth'], function() {
 
 Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
+Route::get('/today', [DashboardController::class, 'todayRecord'])->name('todayRecord');
+Route::get('/weekly', [DashboardController::class, 'weeklyRecord'])->name('weeklyRecord');
+Route::get('/monthly', [DashboardController::class, 'monthlyRecord'])->name('monthlyRecord');
+Route::get('/yearly', [DashboardController::class, 'yearlyRecord'])->name('yearlyRecord');
+
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/account-profile', [AuthController::class, 'accountProfile'])->name('accountProfile'); //logged in user profile
 Route::get('/account-setting', [AuthController::class, 'accountSetting'])->name('accountSetting');
