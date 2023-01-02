@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\PersonsImport;
 use App\Imports\UsersImport;
 use App\Imports\EmployeesImport;
+use App\Imports\SuppliersImport;
 use App\Models\User;
 
 
@@ -53,9 +54,13 @@ class ImportController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function suppliersImport(Request $request)
     {
-        //
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx|max:2048',
+        ]);
+        Excel::import(new SuppliersImport, $request->file);
+        return back()->with('success', 'Suppliers Imported Successfully');
     }
 
     /**

@@ -47,5 +47,5 @@ class Role extends Model
 
     public function hasPermissionById($permission_id) {
         return (bool) $this->permissions->where('id', $permission_id)->count();
-     }
+    }
 }

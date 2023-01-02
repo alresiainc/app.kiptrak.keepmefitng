@@ -125,6 +125,17 @@
                       </span>
                   @enderror
                 </div>
+
+                <div class="col-md-6">
+                    <label for="" class="form-label">Attendance Time</label>
+                    <input type="time" name="attendance_time" class="form-control @error('attendance_time') is-invalid @enderror"
+                    value="{{ $generalSetting != '' ? $generalSetting->attendance_time : '08:00' }}">
+                    @error('attendance_time')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
                 
                 
                 <div class="text-end">

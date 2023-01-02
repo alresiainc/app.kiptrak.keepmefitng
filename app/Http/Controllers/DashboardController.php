@@ -22,6 +22,10 @@ class DashboardController extends Controller
 {
     public function dashboard()
     {
+        //return $authUser = auth()->user()->role(auth()->user()->id)->role->permissions->contains('slug', 'view-product-list');
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
         $record = 'all';
@@ -112,13 +116,16 @@ class DashboardController extends Controller
 
         $recentOrders = Order::orderBy('id','DESC')->take(5)->get();
 
-        return view('pages.dashboard', compact('generalSetting', 'currency', 'record', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
+        return view('pages.dashboard', compact('authUser', 'user_role', 'generalSetting', 'currency', 'record', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
         'customers_count', 'suppliers_count', 'purchases_count', 'sales_count','invoices_count', 'yearly_sale_amount', 'yearly_purchase_amount', 'yearly_profit_amount', 'yearly_expense_amount',
         'recentProducts', 'products', 'yearly_best_selling_qty', 'bestSellingProductsBulk', 'recentOrders'));
     }
 
     public function todayRecord()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
         $record = 'today';
@@ -211,13 +218,15 @@ class DashboardController extends Controller
 
         $recentOrders = Order::orderBy('id','DESC')->take(5)->get();
 
-        return view('pages.dashboard', compact('generalSetting', 'currency', 'record', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
+        return view('pages.dashboard', compact('authUser', 'user_role', 'generalSetting', 'currency', 'record', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
         'customers_count', 'suppliers_count', 'purchases_count', 'sales_count','invoices_count', 'yearly_sale_amount', 'yearly_purchase_amount', 'yearly_profit_amount', 'yearly_expense_amount',
         'recentProducts', 'products', 'yearly_best_selling_qty', 'bestSellingProductsBulk', 'recentOrders'));
     }
 
     public function weeklyRecord()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
         $record = 'weekly';
@@ -310,13 +319,15 @@ class DashboardController extends Controller
 
         $recentOrders = Order::orderBy('id','DESC')->take(5)->get();
 
-        return view('pages.dashboard', compact('generalSetting', 'currency', 'record', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
+        return view('pages.dashboard', compact('authUser', 'user_role', 'generalSetting', 'currency', 'record', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
         'customers_count', 'suppliers_count', 'purchases_count', 'sales_count','invoices_count', 'yearly_sale_amount', 'yearly_purchase_amount', 'yearly_profit_amount', 'yearly_expense_amount',
         'recentProducts', 'products', 'yearly_best_selling_qty', 'bestSellingProductsBulk', 'recentOrders'));
     }
 
     public function monthlyRecord()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
         $record = 'monthly';
@@ -409,13 +420,15 @@ class DashboardController extends Controller
 
         $recentOrders = Order::orderBy('id','DESC')->take(5)->get();
 
-        return view('pages.dashboard', compact('generalSetting', 'currency', 'record', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
+        return view('pages.dashboard', compact('authUser', 'user_role', 'generalSetting', 'currency', 'record', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
         'customers_count', 'suppliers_count', 'purchases_count', 'sales_count','invoices_count', 'yearly_sale_amount', 'yearly_purchase_amount', 'yearly_profit_amount', 'yearly_expense_amount',
         'recentProducts', 'products', 'yearly_best_selling_qty', 'bestSellingProductsBulk', 'recentOrders'));
     }
 
     public function yearlyRecord()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
         $record = 'yearly';
@@ -508,7 +521,7 @@ class DashboardController extends Controller
 
         $recentOrders = Order::orderBy('id','DESC')->take(5)->get();
 
-        return view('pages.dashboard', compact('generalSetting', 'currency', 'record', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
+        return view('pages.dashboard', compact('authUser', 'user_role', 'generalSetting', 'currency', 'record', 'purchases_amount_paid', 'sales_due', 'sales_paid', 'expenses', 'profit', 'profit_val',
         'customers_count', 'suppliers_count', 'purchases_count', 'sales_count','invoices_count', 'yearly_sale_amount', 'yearly_purchase_amount', 'yearly_profit_amount', 'yearly_expense_amount',
         'recentProducts', 'products', 'yearly_best_selling_qty', 'bestSellingProductsBulk', 'recentOrders'));
     }

@@ -10,15 +10,13 @@ use App\Models\GeneralSetting;
 
 class PayrollController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function allPayroll()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $payrolls = Payroll::all();
-        return view('pages.hrm.payroll.allPayroll', compact('payrolls'));
+        return view('pages.hrm.payroll.allPayroll', compact('authUser', 'user_role', 'payrolls'));
     }
 
     /**
@@ -28,10 +26,13 @@ class PayrollController extends Controller
      */
     public function addPayroll()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $staffs = User::where('type', 'staff')->get();
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
 
-        return view('pages.hrm.payroll.addPayroll', compact('staffs', 'generalSetting'));
+        return view('pages.hrm.payroll.addPayroll', compact('authUser', 'user_role', 'staffs', 'generalSetting'));
     }
 
     /**
@@ -42,6 +43,9 @@ class PayrollController extends Controller
      */
     public function addPayrollPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $request->validate([
             'employee' => 'required|string',
             'amount' => 'required|numeric',
@@ -69,6 +73,9 @@ class PayrollController extends Controller
      */
     public function editPayroll($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $payroll = Payroll::where('unique_key', $unique_key);
         if(!$payroll->exists()){
             abort(404);
@@ -78,7 +85,7 @@ class PayrollController extends Controller
         $staffs = User::where('type', 'staff')->get();
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
 
-        return view('pages.hrm.payroll.editPayroll', compact('staffs', 'generalSetting', 'payroll'));
+        return view('pages.hrm.payroll.editPayroll', compact('authUser', 'user_role', 'staffs', 'generalSetting', 'payroll'));
     }
 
     /**

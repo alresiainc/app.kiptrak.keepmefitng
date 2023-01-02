@@ -14,8 +14,11 @@ class CustomerController extends Controller
 {
     public function allCustomer()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $customers = Customer::all();
-        return view('pages.customers.allCustomer', compact('customers'));
+        return view('pages.customers.allCustomer', compact('authUser', 'user_role', 'customers'));
     }
 
     /**
@@ -25,8 +28,11 @@ class CustomerController extends Controller
      */
     public function addCustomer()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $countries = Country::all();
-        return view('pages.customers.addCustomer', compact('countries'));
+        return view('pages.customers.addCustomer', compact('authUser', 'user_role', 'countries'));
     }
 
     /**
@@ -37,6 +43,9 @@ class CustomerController extends Controller
      */
     public function addCustomerPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'firstname' => 'required|string',
             'lastname' => 'required|string',
@@ -82,11 +91,14 @@ class CustomerController extends Controller
 
     public function singleCustomer($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $customer = Customer::where('unique_key', $unique_key)->first();
         if(!isset($customer)){
             abort(404);
         }
-        return view('pages.customers.singleCustomer', compact('customer'));
+        return view('pages.customers.singleCustomer', compact('authUser', 'user_role', 'customer'));
     }
 
     /**
@@ -97,13 +109,16 @@ class CustomerController extends Controller
      */
     public function editCustomer($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $customer = Customer::where('unique_key', $unique_key)->first();
         if(!isset($customer)){
             abort(404);
         }
 
         $countries = Country::all();
-        return view('pages.customers.editCustomer', compact('customer', 'countries'));
+        return view('pages.customers.editCustomer', compact('authUser', 'user_role', 'customer', 'countries'));
     }
 
     /**
@@ -115,6 +130,9 @@ class CustomerController extends Controller
      */
     public function editCustomerPost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $customer = Customer::where('unique_key', $unique_key)->first();
         if(!isset($customer)){
             abort(404);
@@ -169,9 +187,12 @@ class CustomerController extends Controller
 
     public function singleCustomerSales($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $customer = Customer::where('unique_key', $unique_key)->first();
         $sales = Sale::where('customer_id', $customer->id)->get();
-        return view('pages.customers.singleCustomerSales', compact('customer', 'sales'));
+        return view('pages.customers.singleCustomerSales', compact('authUser', 'user_role', 'customer', 'sales'));
     }
 
     /**

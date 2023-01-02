@@ -16,18 +16,24 @@ class RoleController extends Controller
 {
     public function allRole()
     {
-        $roles = Role::orderBy('id','desc')->get();
-        return view('pages.hrm.role.allRole', compact('roles'));
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        $roles = Role::all();
+        return view('pages.hrm.role.allRole', compact('authUser', 'user_role', 'roles'));
     }
 
     public function addRole()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $permissions = Permission::where('parent_id',null)->get();
-        return view('pages.hrm.role.addRole', compact('permissions'));
+        return view('pages.hrm.role.addRole', compact('authUser', 'user_role', 'permissions'));
     }
 
     public function addRolePost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $request->validate([
             'role_name' => 'required|string',
         ]);
@@ -42,7 +48,7 @@ class RoleController extends Controller
         $role = new Role();
         $role->name = $data['role_name'];
         $role->slug = Str::slug($data['role_name']);
-        $role->created_by = 1;
+        $role->created_by = $authUser->id;
         $role->save();
 
         //added checked perms
@@ -68,6 +74,9 @@ class RoleController extends Controller
 
     public function editRole($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $role = Role::where(['unique_key'=>$unique_key]);
         if(!$role->exists()){
             return back()->with('role_error', 'Bad request');
@@ -77,12 +86,14 @@ class RoleController extends Controller
         
         $permissions = Permission::where('parent_id', null)->get();
 
-        return view('pages.hrm.role.editRole', compact('role', 'permissions'));
+        return view('pages.hrm.role.editRole', compact('authUser', 'user_role', 'role', 'permissions'));
     }
 
     public function editRolePost(Request $request, $unique_key)
     {
-        
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $role = Role::where(['unique_key'=>$unique_key]);
         if(!$role->exists()){
             return back()->with('role_error', 'Bad request');
@@ -91,7 +102,7 @@ class RoleController extends Controller
         $role = $role->first();
         // $users = $role->users;
         $data = $request->all();
-        // $authUser = auth()->user();
+        
         $perms_unchecked = $data['perms_unchecked'];
 
         //remove unchecked perms, frm role & users
@@ -132,6 +143,8 @@ class RoleController extends Controller
     
     public function assignRoleToUserPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $data = $request->all();
         $user = User::find($data['user_id']);
         

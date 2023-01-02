@@ -17,17 +17,21 @@ class EmployeeController extends Controller
 {
     public function allStaff()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $staffs = User::where('type', 'staff')->orderBy('id', 'DESC')->get();
         $roles = Role::all();
-        return view('pages.hrm.employee.allEmployee', compact('staffs', 'roles'));
+        return view('pages.hrm.employee.allEmployee', compact('authUser', 'user_role', 'staffs', 'roles'));
     }
     
     //add any user, like registration
     public function addStaff()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $countries = Country::all();
         $roles = Role::all();
-        return view('pages.hrm.employee.addEmployee', compact('countries', 'roles'));
+        return view('pages.hrm.employee.addEmployee', compact('authUser', 'user_role', 'countries', 'roles'));
     }
 
     /**
@@ -37,6 +41,9 @@ class EmployeeController extends Controller
      */
     public function addStaffPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $request->validate([
             'firstname' => 'required|string',
             'lastname' => 'required|string',
@@ -64,7 +71,7 @@ class EmployeeController extends Controller
         $user->country_id = $data['country'];
         $user->address = !empty($data['address']) ? $data['address'] : null;
 
-        $user->created_by = 1;
+        $user->created_by = $authUser->id;
         $user->status = 'true';
 
         if ($request->profile_picture) {
@@ -100,15 +107,19 @@ class EmployeeController extends Controller
 
     public function singleStaff($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $staff = User::where('unique_key', $unique_key)->first();
         if(!isset($staff)){
             abort(404);
         }
-        return view('pages.hrm.employee.singleEmployee', compact('staff'));
+        return view('pages.hrm.employee.singleEmployee', compact('authUser', 'user_role', 'staff'));
     }
 
     public function editStaff($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $staff = User::where('unique_key', $unique_key)->first();
         if(!isset($staff)){
             abort(404);
@@ -121,11 +132,13 @@ class EmployeeController extends Controller
 
         $roles = Role::all();
 
-        return view('pages.hrm.employee.editEmployee', compact('staff', 'countries', 'firstname', 'lastname', 'roles'));
+        return view('pages.hrm.employee.editEmployee', compact('authUser', 'user_role', 'staff', 'countries', 'firstname', 'lastname', 'roles'));
     }
 
     public function editStaffPost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $user = User::where('unique_key', $unique_key)->first();
         if(!isset($user)){
             abort(404);
@@ -210,15 +223,19 @@ class EmployeeController extends Controller
     
 public function allAgent()
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $agents = User::where('type', 'agent')->get();
-    return view('pages.agents.allAgent', compact('agents'));
+    return view('pages.agents.allAgent', compact('authUser', 'user_role', 'agents'));
 }
 
 //add any user, like registration
 public function addAgent()
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $countries = Country::all();
-    return view('pages.agents.addAgent', compact('countries'));
+    return view('pages.agents.addAgent', compact('authUser', 'user_role', 'countries'));
 }
 
 /**
@@ -228,6 +245,8 @@ public function addAgent()
  */
 public function addAgentPost(Request $request)
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $request->validate([
         'firstname' => 'required|string',
         'lastname' => 'required|string',
@@ -255,7 +274,7 @@ public function addAgentPost(Request $request)
     $user->country_id = $data['country'];
     $user->address = !empty($data['address']) ? $data['address'] : null;
 
-    $user->created_by = 1;
+    $user->created_by = $authUser->id;
     $user->status = 'true';
 
     if ($request->profile_picture) {
@@ -275,15 +294,19 @@ public function addAgentPost(Request $request)
 
 public function singleAgent($unique_key)
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $agent = User::where('unique_key', $unique_key)->first();
     if(!isset($agent)){
         abort(404);
     }
-    return view('pages.agents.singleAgent', compact('agent'));
+    return view('pages.agents.singleAgent', compact('authUser', 'user_role', 'agent'));
 }
 
 public function editAgent($unique_key)
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $agent = User::where('unique_key', $unique_key)->first();
     if(!isset($agent)){
         abort(404);
@@ -294,11 +317,13 @@ public function editAgent($unique_key)
     $firstname = $name[0];
     $lastname = $name[1];
 
-    return view('pages.agents.editAgent', compact('agent', 'countries', 'firstname', 'lastname'));
+    return view('pages.agents.editAgent', compact('authUser', 'user_role', 'agent', 'countries', 'firstname', 'lastname'));
 }
 
 public function editAgentPost(Request $request, $unique_key)
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $user = User::where('unique_key', $unique_key)->first();
     if(!isset($user)){
         abort(404);
@@ -326,8 +351,6 @@ public function editAgentPost(Request $request, $unique_key)
     $user->state = $data['state'];
     $user->country_id = $data['country'];
     $user->address = !empty($data['address']) ? $data['address'] : null;
-
-    $user->created_by = 1;
     $user->status = 'true';
 
     //profile_picture
@@ -355,14 +378,18 @@ public function editAgentPost(Request $request, $unique_key)
     
 public function allCustomer()
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $customers = User::where('type', 'customer')->get();
-    return view('pages.customers.allCustomer', compact('customers'));
+    return view('pages.customers.allCustomer', compact('authUser', 'user_role', 'customers'));
 }
 
 public function addCustomer()
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $countries = Country::all();
-    return view('pages.customers.addCustomer', compact('countries'));
+    return view('pages.customers.addCustomer', compact('authUser', 'user_role', 'countries'));
 }
 
 /**
@@ -372,6 +399,8 @@ public function addCustomer()
  */
 public function addCustomerPost(Request $request)
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $request->validate([
         'firstname' => 'required|string',
         'lastname' => 'required|string',
@@ -399,7 +428,7 @@ public function addCustomerPost(Request $request)
     $user->country_id = $data['country'];
     $user->address = !empty($data['address']) ? $data['address'] : null;
 
-    $user->created_by = 1;
+    $user->created_by = $authUser->id;
     $user->status = 'true';
 
     if ($request->profile_picture) {
@@ -419,15 +448,19 @@ public function addCustomerPost(Request $request)
 
 public function singleCustomer($unique_key)
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $customer = User::where('unique_key', $unique_key)->first();
     if(!isset($customer)){
         abort(404);
     }
-    return view('pages.customers.singleCustomer', compact('customer'));
+    return view('pages.customers.singleCustomer', compact('authUser', 'user_role', 'customer'));
 }
 
 public function editCustomer($unique_key)
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $customer = User::where('unique_key', $unique_key)->first();
     if(!isset($customer)){
         abort(404);
@@ -438,11 +471,13 @@ public function editCustomer($unique_key)
     $firstname = $name[0];
     $lastname = $name[1];
 
-    return view('pages.customers.editCustomer', compact('customer', 'countries', 'firstname', 'lastname'));
+    return view('pages.customers.editCustomer', compact('authUser', 'user_role', 'customer', 'countries', 'firstname', 'lastname'));
 }
 
 public function editCustomerPost(Request $request, $unique_key)
 {
+    $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
     $user = User::where('unique_key', $unique_key)->first();
     if(!isset($user)){
         abort(404);

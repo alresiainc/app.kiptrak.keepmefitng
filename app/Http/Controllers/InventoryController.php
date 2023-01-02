@@ -22,6 +22,9 @@ class InventoryController extends Controller
     
     public function inventoryDashboard()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
 
@@ -63,13 +66,16 @@ class InventoryController extends Controller
 
         $recently_products = Product::take(5)->get();
         
-        return view('pages.inventory.inventory', \compact('currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
+        return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
     }
 
     //by major warehouse
     public function inStockProductsByWarehouse()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $products = Product::all();
         $pro = Product::find(1);
         // return $pro->warehouses->where('type','minor')->count();
@@ -99,11 +105,14 @@ class InventoryController extends Controller
         $end_date = '';
         $warehouse_selected = '';
         
-        return view('pages.inventory.inStockProductsByWarehouse', \compact('products', 'in_stock_products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
+        return view('pages.inventory.inStockProductsByWarehouse', \compact('authUser', 'user_role', 'products', 'in_stock_products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
     }
 
     public function inStockProductsByWarehouseQuery(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $start_date = '';
@@ -187,12 +196,15 @@ class InventoryController extends Controller
 
         
         $warehouses = WareHouse::where('type','major')->get();
-        return view('pages.inventory.inStockProductsByWarehouse', \compact('products', 'in_stock_products','warehouses', 'start_date', 'end_date', 'warehouse_selected'));
+        return view('pages.inventory.inStockProductsByWarehouse', \compact('authUser', 'user_role', 'products', 'in_stock_products','warehouses', 'start_date', 'end_date', 'warehouse_selected'));
     }
 
     //by minor warehouse
     public function inStockProductsByOtherAgents()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $products = Product::all();
 
         $in_stock_products = [];
@@ -211,11 +223,14 @@ class InventoryController extends Controller
         $end_date = '';
         $warehouse_selected = '';
         
-        return view('pages.inventory.inStockProductsByOtherAgents', \compact('products', 'in_stock_products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
+        return view('pages.inventory.inStockProductsByOtherAgents', \compact('authUser', 'user_role', 'products', 'in_stock_products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
     }
 
     public function inStockProductsByOtherAgentsQuery(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $start_date = '';
@@ -298,27 +313,36 @@ class InventoryController extends Controller
         }
 
         $warehouses = WareHouse::where('type','minor')->get();
-        return view('pages.inventory.inStockProductsByOtherAgents', \compact('products', 'in_stock_products','warehouses', 'start_date', 'end_date', 'warehouse_selected'));
+        return view('pages.inventory.inStockProductsByOtherAgents', \compact('authUser', 'user_role', 'products', 'in_stock_products','warehouses', 'start_date', 'end_date', 'warehouse_selected'));
     }
 
     public function allProductInventory()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $products = Product::all();
-        return view('pages.inventory.allProductInventory', compact('products'));
+        return view('pages.inventory.allProductInventory', compact('authUser', 'user_role', 'products'));
     }
 
     public function singleProductSales($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $product = Product::where('unique_key', $unique_key)->first();
         $sales = Sale::where('product_id', $product->id)->get();
-        return view('pages.inventory.singleProductSales', compact('product', 'sales'));
+        return view('pages.inventory.singleProductSales', compact('authUser', 'user_role', 'product', 'sales'));
     }
 
     public function singleProductPurchases($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $product = Product::where('unique_key', $unique_key)->first();
         $purchases = Purchase::where('product_id', $product->id)->orderBy('id', 'ASC')->get();
-        return view('pages.inventory.singleProductPurchases', compact('product', 'purchases'));
+        return view('pages.inventory.singleProductPurchases', compact('authUser', 'user_role', 'product', 'purchases'));
     }
 
     public function shorten($num, $digits = 1) {
@@ -346,6 +370,9 @@ class InventoryController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 }

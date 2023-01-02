@@ -17,6 +17,9 @@ class GeneralSettingController extends Controller
      */
     public function generalSetting()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $generalSetting = '';
         $row = GeneralSetting::where('id', '>', 0);
         if ($row->exists()) {
@@ -25,7 +28,7 @@ class GeneralSettingController extends Controller
 
         $countries = Country::all();
 
-        return view('pages.settings.generalSetting.generalSetting', compact('generalSetting', 'countries'));
+        return view('pages.settings.generalSetting.generalSetting', compact('authUser', 'user_role', 'generalSetting', 'countries'));
     }
 
     /**
@@ -35,6 +38,9 @@ class GeneralSettingController extends Controller
      */
     public function generalSettingPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         if (empty($data['generalSetting'])) {
@@ -65,6 +71,7 @@ class GeneralSettingController extends Controller
         $generalSetting->currency = $data['currency'];
         $generalSetting->developed_by = 'Ugo Sunday Raphael';
         $generalSetting->official_notification_email = $data['official_notification_email'];
+        $generalSetting->attendance_time = $data['attendance_time'];
         $generalSetting->created_by = 1;
         $generalSetting->status = 'true';
         
@@ -98,6 +105,9 @@ class GeneralSettingController extends Controller
      */
     public function store(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -109,6 +119,9 @@ class GeneralSettingController extends Controller
      */
     public function show($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -120,6 +133,9 @@ class GeneralSettingController extends Controller
      */
     public function edit($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -132,6 +148,9 @@ class GeneralSettingController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -143,6 +162,9 @@ class GeneralSettingController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 }

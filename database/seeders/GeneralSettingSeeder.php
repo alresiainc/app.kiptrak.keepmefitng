@@ -22,6 +22,7 @@ class GeneralSettingSeeder extends Seeder
         $generalSetting->currency = 1;
         $generalSetting->developed_by = 'Ugo Sunday Raphael';
         $generalSetting->official_notification_email = 'ralphsunny114@gmail.com';
+        $generalSetting->attendance_time = '08:00';
         $generalSetting->created_by = 1;
         $generalSetting->status = 'true';
         $generalSetting->save();

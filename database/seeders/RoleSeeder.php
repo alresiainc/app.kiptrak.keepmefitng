@@ -19,20 +19,32 @@ class RoleSeeder extends Seeder
     public function run()
     {
         $role = new Role();
-        $role->name = 'Manager';
-        $role->slug = Str::slug('Manager');
+        $role->name = 'Dashboard Manager';
+        $role->slug = Str::slug('Dashboard Manager');
         $role->created_by = 1;
         $role->save();
 
         $role = new Role();
-        $role->name = 'Human Resource';
-        $role->slug = Str::slug('Human Resource');
+        $role->name = 'Product Manager';
+        $role->slug = Str::slug('Product Manager');
         $role->created_by = 1;
         $role->save();
 
         $role = new Role();
-        $role->name = 'Sales Manager';
-        $role->slug = Str::slug('Sales Manager');
+        $role->name = 'Form Builder Manager';
+        $role->slug = Str::slug('Form Builder Manager');
+        $role->created_by = 1;
+        $role->save();
+
+        $role = new Role();
+        $role->name = 'Order Manager';
+        $role->slug = Str::slug('Order Manager');
+        $role->created_by = 1;
+        $role->save();
+
+        $role = new Role();
+        $role->name = 'Warehouse Manager';
+        $role->slug = Str::slug('Warehouse Manager');
         $role->created_by = 1;
         $role->save();
 
@@ -43,11 +55,76 @@ class RoleSeeder extends Seeder
         $role->save();
 
         $role = new Role();
-        $role->name = 'Orders Manager';
-        $role->slug = Str::slug('Orders Manager');
+        $role->name = 'Inventory Manager';
+        $role->slug = Str::slug('Inventory Manager');
         $role->created_by = 1;
         $role->save();
 
+        $role = new Role();
+        $role->name = 'Sale Manager';
+        $role->slug = Str::slug('Sales Manager');
+        $role->created_by = 1;
+        $role->save();
+
+        $role = new Role();
+        $role->name = 'Expense Manager';
+        $role->slug = Str::slug('Expense Manager');
+        $role->created_by = 1;
+        $role->save();
+
+        $role = new Role();
+        $role->name = 'Human Resource Manager';
+        $role->slug = Str::slug('Human Resource Manager');
+        $role->created_by = 1;
+        $role->save();
+
+        $role = new Role();
+        $role->name = 'Supplier Manager';
+        $role->slug = Str::slug('Supplier Manager');
+        $role->created_by = 1;
+        $role->save();
+
+        $role = new Role();
+        $role->name = 'Agent Manager';
+        $role->slug = Str::slug('Agent Manager');
+        $role->created_by = 1;
+        $role->save();
+        
+        $role = new Role();
+        $role->name = 'Customer Manager';
+        $role->slug = Str::slug('Customer Manager');
+        $role->created_by = 1;
+        $role->save();
+        
+        $role = new Role();
+        $role->name = 'Accounting Manager';
+        $role->slug = Str::slug('Accounting Manager');
+        $role->created_by = 1;
+        $role->save();
+        
+        $role = new Role();
+        $role->name = 'Report Manager';
+        $role->slug = Str::slug('Report Manager');
+        $role->created_by = 1;
+        $role->save();
+
+        $role = new Role();
+        $role->name = 'Messaging Manager';
+        $role->slug = Str::slug('Messaging Manager');
+        $role->created_by = 1;
+        $role->save();
+
+        $role = new Role();
+        $role->name = 'Referral Manager';
+        $role->slug = Str::slug('Referral Manager');
+        $role->created_by = 1;
+        $role->save();
+
+        $role = new Role();
+        $role->name = 'Setting Manager';
+        $role->slug = Str::slug('Setting Manager');
+        $role->created_by = 1;
+        $role->save();
         
     }
 }

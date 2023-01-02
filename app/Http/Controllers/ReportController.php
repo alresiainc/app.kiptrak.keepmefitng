@@ -22,13 +22,16 @@ class ReportController extends Controller
     
     public function productReport()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $products = Product::all();
         $warehouses = WareHouse::all();
         $start_date = '';
         $end_date = '';
         $warehouse_selected = '';
         
-        return view('pages.reports.productReport', \compact('products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
+        return view('pages.reports.productReport', \compact('authUser', 'user_role', 'products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
     }
 
     /**
@@ -38,6 +41,9 @@ class ReportController extends Controller
      */
     public function productReportQuery(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $start_date = '';
@@ -107,11 +113,14 @@ class ReportController extends Controller
         }
         
         $warehouses = WareHouse::all();
-        return view('pages.reports.productReport', \compact('products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
+        return view('pages.reports.productReport', \compact('authUser', 'user_role', 'products', 'warehouses', 'start_date', 'end_date', 'warehouse_selected'));
     }
 
     public function saleReport()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $warehouses = WareHouse::all();
         $start_date = '';
         $end_date = '';
@@ -134,12 +143,15 @@ class ReportController extends Controller
 
         //return $bestSellingProductsBulk;
 
-        return view('pages.reports.saleReport', \compact('warehouses', 'start_date', 'end_date', 'warehouse_selected', 'sellingProductsBulk'));
+        return view('pages.reports.saleReport', \compact('authUser', 'user_role', 'warehouses', 'start_date', 'end_date', 'warehouse_selected', 'sellingProductsBulk'));
     }
 
     
     public function saleReportQuery(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $start_date = '';
@@ -217,12 +229,15 @@ class ReportController extends Controller
         }
         
         $warehouses = WareHouse::all();
-        return view('pages.reports.saleReport', \compact('warehouses', 'start_date', 'end_date', 'warehouse_selected',  'sellingProductsBulk'));
+        return view('pages.reports.saleReport', \compact('authUser', 'user_role', 'warehouses', 'start_date', 'end_date', 'warehouse_selected',  'sellingProductsBulk'));
     }
 
     //purchaseReport
     public function purchaseReport()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $warehouses = WareHouse::all();
         $start_date = '';
         $end_date = '';
@@ -241,11 +256,14 @@ class ReportController extends Controller
             $purchasingProductsBulk[] = $purchasingProducts;
         }
 
-        return view('pages.reports.purchaseReport', \compact('warehouses', 'start_date', 'end_date', 'warehouse_selected', 'purchasingProductsBulk'));
+        return view('pages.reports.purchaseReport', \compact('authUser', 'user_role', 'warehouses', 'start_date', 'end_date', 'warehouse_selected', 'purchasingProductsBulk'));
     }
 
     public function purchaseReportQuery(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $start_date = '';
@@ -325,12 +343,15 @@ class ReportController extends Controller
         }
         
         $warehouses = WareHouse::all();
-        return view('pages.reports.purchaseReport', \compact('warehouses', 'start_date', 'end_date', 'warehouse_selected',  'purchasingProductsBulk'));
+        return view('pages.reports.purchaseReport', \compact('authUser', 'user_role', 'warehouses', 'start_date', 'end_date', 'warehouse_selected',  'purchasingProductsBulk'));
     }
 
     //customerReport
     public function customerReport($type="")
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $customers = Customer::all();
         $start_date = '';
         $end_date = '';
@@ -340,11 +361,14 @@ class ReportController extends Controller
 
         $customer_sales = Sale::where('parent_id', null)->where('customer_id', $customer_selected->id)->orderBy('id', 'desc')->get();
 
-        return view('pages.reports.customerReport', \compact('customers', 'start_date', 'end_date', 'customer_selected', 'customer_sales'));
+        return view('pages.reports.customerReport', \compact('authUser', 'user_role', 'customers', 'start_date', 'end_date', 'customer_selected', 'customer_sales'));
     }
 
     public function customerReportQuery(Request $request, $type="")
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         $customers = Customer::all();
         $start_date = '';
@@ -369,12 +393,15 @@ class ReportController extends Controller
             ->where('customer_id', $customer_selected->id)->orderBy('id', 'desc')->get();
         }
 
-        return view('pages.reports.customerReport', \compact('customers', 'start_date', 'end_date', 'customer_selected', 'customer_sales'));
+        return view('pages.reports.customerReport', \compact('authUser', 'user_role', 'customers', 'start_date', 'end_date', 'customer_selected', 'customer_sales'));
     }
 
     //supplierReport
     public function supplierReport($type="")
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $suppliers = Supplier::all();
         $start_date = '';
         $end_date = '';
@@ -383,11 +410,14 @@ class ReportController extends Controller
         $supplier_selected = Supplier::inRandomOrder()->where('id', '>', 0)->first();
         $supplier_purchases = Purchase::where('parent_id', null)->where('supplier_id', $supplier_selected->id)->orderBy('id', 'desc')->get();
 
-        return view('pages.reports.supplierReport', \compact('suppliers', 'start_date', 'end_date', 'supplier_selected', 'supplier_purchases'));
+        return view('pages.reports.supplierReport', \compact('authUser', 'user_role', 'suppliers', 'start_date', 'end_date', 'supplier_selected', 'supplier_purchases'));
     }
 
     public function supplierReportQuery(Request $request, $type="")
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         $suppliers = Supplier::all();
         $start_date = '';
@@ -411,12 +441,15 @@ class ReportController extends Controller
             ->where('supplier_id', $supplier_selected->id)->orderBy('id', 'desc')->get();
         }
 
-        return view('pages.reports.supplierReport', \compact('suppliers', 'start_date', 'end_date', 'supplier_selected', 'supplier_purchases'));
+        return view('pages.reports.supplierReport', \compact('authUser', 'user_role', 'suppliers', 'start_date', 'end_date', 'supplier_selected', 'supplier_purchases'));
     }
 
     //staffReport
     public function staffReport($type="")
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $authUser = auth()->user();
         $aspect = 'Sales';
         $staffs = User::where('type','staff')->orWhere('isSuperAdmin', true)->get();
@@ -429,11 +462,14 @@ class ReportController extends Controller
 
         $staff_sales = Sale::where('parent_id', null)->where('created_by', $staff_selected->id)->orderBy('id', 'desc')->get();
 
-        return view('pages.reports.staffReport', \compact('staffs', 'start_date', 'end_date', 'staff_selected', 'staff_sales', 'aspect', 'staff_purchases', 'staff_expenses'));
+        return view('pages.reports.staffReport', \compact('authUser', 'user_role', 'staffs', 'start_date', 'end_date', 'staff_selected', 'staff_sales', 'aspect', 'staff_purchases', 'staff_expenses'));
     }
 
     public function staffReportQuery(Request $request, $type="")
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         $authUser = auth()->user();
         $aspect = $data['aspect'];
@@ -507,7 +543,7 @@ class ReportController extends Controller
             }
         }
 
-        return view('pages.reports.staffReport', \compact('staffs', 'start_date', 'end_date', 'staff_selected', 'staff_sales', 'aspect', 'staff_purchases', 'staff_expenses'));
+        return view('pages.reports.staffReport', \compact('authUser', 'user_role', 'staffs', 'start_date', 'end_date', 'staff_selected', 'staff_sales', 'aspect', 'staff_purchases', 'staff_expenses'));
     }
 
     public function soldAmount($product_id){
@@ -524,6 +560,9 @@ class ReportController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 }

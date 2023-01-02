@@ -1,5 +1,5 @@
 @extends('layouts.design')
-@section('title')Products @endsection
+@section('title')Products Report @endsection
 
 @section('extra_css')
 <style>
@@ -23,11 +23,11 @@
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Products</h1>
+    <h1>Products Report</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-        <li class="breadcrumb-item active">Products</li>
+        <li class="breadcrumb-item active">Products Report</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -90,7 +90,7 @@
           <div class="card-body pt-3">
             
           <div class="clearfix mb-2">
-            <div class="float-end text-end">
+            <div class="float-end text-end d-none">
               <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                 <i class="bi bi-upload"></i> <span>Import</span></button>
               <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>

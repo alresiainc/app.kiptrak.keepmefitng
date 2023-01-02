@@ -25,14 +25,20 @@ class OrderController extends Controller
      */
     public function allOrders()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $orders = Order::all();
         $agents = User::where('type','agent')->get();
-        return view('pages.orders.allOrders', compact('orders', 'agents'));
+        return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents'));
     }
 
     //orderForm
     public function singleOrder($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         
         $order = Order::where('unique_key', $unique_key);
         if(!$order->exists()) {
@@ -58,11 +64,14 @@ class OrderController extends Controller
             $packages[] = $products;
         }
 
-        return view('pages.orders.singleOrder', compact('url', 'order', 'packages', 'gross_revenue', 'currency'));
+        return view('pages.orders.singleOrder', compact('authUser', 'user_role', 'url', 'order', 'packages', 'gross_revenue', 'currency'));
     }
 
     public function assignAgentToOrder(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         $order_id = $data['order_id'];
         $agent_id = $data['agent_id'];
@@ -75,6 +84,9 @@ class OrderController extends Controller
 
     public function assignStaffToOrder(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         $order_id = $data['order_id'];
         $staff_id = $data['staff_id'];
@@ -87,6 +99,9 @@ class OrderController extends Controller
 
     public function cartAbandon()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $carts = CartAbandon::all();
         $contacts = [];
         $packages = [];
@@ -123,11 +138,14 @@ class OrderController extends Controller
         $final_cart = array_merge($customer_holder, $products, $cart_ids);
 
         $agents = User::where('type','agent')->get();
-        return view('pages.orders.cartAbandon', compact('carts', 'agents', 'final_cart'));
+        return view('pages.orders.cartAbandon', compact('authUser', 'user_role', 'carts', 'agents', 'final_cart'));
     }
 
     public function singleCartAbandon($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $cart = CartAbandon::where('unique_key', $unique_key)->first();
         $customer_info = \unserialize($cart->customer_info)['inputValueName'];
         $package_info = \unserialize($cart->package_info)['product_package']; //wat customer clicked
@@ -151,7 +169,7 @@ class OrderController extends Controller
             $packages[] = $products;
         }
         
-        return view('pages.orders.singleCartAbandon', compact('cart', 'customer_info', 'package_info', 'order', 'packages', 'gross_revenue', 'currency'));
+        return view('pages.orders.singleCartAbandon', compact('authUser', 'user_role', 'cart', 'customer_info', 'package_info', 'order', 'packages', 'gross_revenue', 'currency'));
     }
 
     /**

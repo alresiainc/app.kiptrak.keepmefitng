@@ -143,7 +143,10 @@
 
       <li class="nav-item dropdown pe-3">
         <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-          <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->name }}</span>
+          <span class="d-none d-md-block dropdown-toggle ps-2">
+            @if($authUser->isSuperAdmin) Super Admin | @elseif($user_role !== false) {{ $user_role->name }} |  @endif
+            {{ Auth::user()->name }}
+          </span>
           <span class="text-muted">|</span>
           @if (isset(Auth::user()->profile_picture))
             <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle" /> 

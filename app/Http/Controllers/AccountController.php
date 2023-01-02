@@ -12,18 +12,27 @@ class AccountController extends Controller
 {
     public function allAccount()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $accounts = Account::all();
-        return view('pages.accounts.allAccount', compact('accounts'));
+        return view('pages.accounts.allAccount', compact('authUser', 'user_role', 'accounts'));
     }
 
     public function addAccount()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $account_no = 'kpa-' . date("Ymd") . '-'. date("his");
-        return view('pages.accounts.addAccount', compact('account_no'));
+        return view('pages.accounts.addAccount', compact('authUser', 'user_role', 'account_no'));
     }
 
     public function addAccountPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'account_no' => 'required|string|unique:accounts',
             'account_name' => 'required|string',
@@ -40,7 +49,7 @@ class AccountController extends Controller
         $account->amount_added = $data['amount_added'];
         $account->total_balance = 0;
         $account->note = !empty($data['note']) ? $data['note'] : null;
-        $account->created_by = 1;
+        $user->created_by = $authUser->id;
         $account->status = 'true';
         $account->save();
 
@@ -55,6 +64,9 @@ class AccountController extends Controller
      */
     public function addAccountAjaxPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         $account = new Account();
         $account->account_no = $data['account_no'];
@@ -74,7 +86,7 @@ class AccountController extends Controller
             $account->note = $data['note'];
         }
          
-        $account->created_by = 1;
+        $user->created_by = $authUser->id;
         $account->status = 'true';
         $account->save();
 
@@ -94,16 +106,22 @@ class AccountController extends Controller
      */
     public function editAccount($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $account = Account::where('unique_key', $unique_key)->first();
         if (!isset($account)) {
             abort(404);
         }
 
-        return view('pages.accounts.editAccount', compact('account'));
+        return view('pages.accounts.editAccount', compact('authUser', 'user_role', 'account'));
     }
 
     public function editAccountPost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $account = Account::where('unique_key', $unique_key)->first();
         if (!isset($account)) {
             abort(404);
@@ -125,7 +143,7 @@ class AccountController extends Controller
         $account->amount_added = $data['amount'];
         $account->total_balance = 0;
         $account->note = !empty($data['note']) ? $data['note'] : null;
-        $account->created_by = 1;
+        $user->created_by = $authUser->id;
         $account->status = 'true';
         $account->save();
 
@@ -140,6 +158,9 @@ class AccountController extends Controller
      */
     public function allMoneyTransfer()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $transfers = MoneyTransfer::all();
         //code
         $string = 'kpm-' . date("Ymd") . '-'. date("his");
@@ -152,7 +173,7 @@ class AccountController extends Controller
         //code
 
         $accounts = Account::all();
-        return view('pages.accounts.allMoneyTransfer', compact('transfers', 'code', 'accounts'));
+        return view('pages.accounts.allMoneyTransfer', compact('authUser', 'user_role', 'transfers', 'code', 'accounts'));
     }
 
     /**
@@ -164,6 +185,9 @@ class AccountController extends Controller
     //from acct to acct
     public function addMoneyTransferPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $fromAccount = Account::where('id', $data['from_account'])->first();
@@ -202,6 +226,9 @@ class AccountController extends Controller
     //handeld by modal
     public function balanceSheet()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $accounts = Account::all();
         $debit = [];
         $credit = [];
@@ -221,7 +248,7 @@ class AccountController extends Controller
             /*$credit[] = $payment_recieved + $return_purchase + $account->initial_balance;
             $debit[] = $payment_sent + $returns + $expenses + $payrolls;*/
         }
-        return view('pages.accounts.balanceSheet', compact('accounts', 'debit', 'credit'));
+        return view('pages.accounts.balanceSheet', compact('authUser', 'user_role', 'accounts', 'debit', 'credit'));
     }
 
     

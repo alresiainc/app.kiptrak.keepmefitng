@@ -20,6 +20,9 @@ class ProductController extends Controller
 {
     public function addProduct()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         // $pro = Product::find('1');
         // return unserialize($pro->features) == [null] ? 'noting' : 'yes';
         // $currencies = array(
@@ -48,11 +51,14 @@ class ProductController extends Controller
         $warehouses = WareHouse::all();
         $agents = User::where('type', 'agent')->get();
         
-        return view('pages.products.addProduct', compact('countries', 'units', 'categories', 'warehouses', 'agents'));
+        return view('pages.products.addProduct', compact('authUser', 'user_role', 'countries', 'units', 'categories', 'warehouses', 'agents'));
     }
 
     public function addProductPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'name' => 'required|string',
             'quantity' => 'required|numeric',
@@ -148,13 +154,19 @@ class ProductController extends Controller
     //allProducts
     public function allProducts()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $products = Product::orderBy('id','DESC')->get();
-        return view('pages.products.allProducts', compact('products'));
+        return view('pages.products.allProducts', compact('authUser', 'user_role', 'products'));
     }
 
     //singleProduct
     public function singleProduct($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $product = Product::where('unique_key', $unique_key)->first();
         if(!isset($product)){
             abort(404);
@@ -166,12 +178,15 @@ class ProductController extends Controller
         //stock_available
         $stock_available = $product->stock_available();
         
-        return view('pages.products.singleProduct', compact('product', 'currency_symbol', 'features', 'stock_available'));
+        return view('pages.products.singleProduct', compact('authUser', 'user_role', 'product', 'currency_symbol', 'features', 'stock_available'));
     }
 
     //editProduct
     public function editProduct($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $product = Product::where('unique_key', $unique_key)->first();
         if(!isset($product)){
             abort(404);
@@ -186,12 +201,15 @@ class ProductController extends Controller
         //stock_available
         $stock_available = $product->stock_available();
 
-        return view('pages.products.editProduct', compact('product', 'currency_symbol', 'features',
+        return view('pages.products.editProduct', compact('authUser', 'user_role', 'product', 'currency_symbol', 'features',
         'currencies', 'currency_nationality', 'stock_available'));
     }
 
     public function editProductPost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $product = Product::where('unique_key', $unique_key)->first();
         if(!isset($product)){
             abort(404);
@@ -296,6 +314,9 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 }

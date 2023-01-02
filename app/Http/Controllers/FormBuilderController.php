@@ -38,11 +38,17 @@ class FormBuilderController extends Controller
      */
     public function formBuilder()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         return view('pages.formBuilder');
     }
 
     public function newFormBuilder()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $products = Product::all();
         $staffs = User::where('type','staff')->get();
         // $products_jqueryArray = \json_encode($products);
@@ -71,11 +77,14 @@ class FormBuilderController extends Controller
         $staff_select .='</select>';
 
 
-        return view('pages.newFormBuilder', compact('products', 'package_select', 'form_code', 'staff_select'));
+        return view('pages.newFormBuilder', compact('authUser', 'user_role', 'products', 'package_select', 'form_code', 'staff_select'));
     }
 
     public function newFormBuilderPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'name' => 'required|string|unique:form_holders',
         ]);
@@ -87,7 +96,7 @@ class FormBuilderController extends Controller
         $formHolder->slug = $request->form_code; //like form_code
         $formHolder->form_data = \serialize($request->except(['products', 'q', 'required', 'form_name_selected', '_token']));
         
-        $formHolder->created_by = 1;
+        $formHolder->created_by = $authUser->id;
         $formHolder->status = 'true';
         $formHolder->save();
 
@@ -111,7 +120,7 @@ class FormBuilderController extends Controller
                 $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
                 $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
                 $outgoingStock->quantity_returned = 0; //by default
-                $outgoingStock->created_by = 1;
+                $outgoingStock->created_by = $authUser->id;
                 $outgoingStock->status = 'true';
                 $outgoingStock->save();
                 
@@ -129,6 +138,9 @@ class FormBuilderController extends Controller
 
     public function allNewFormBuilders()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $formHolds = FormHolder::all();
         $formHolders = [];
         foreach ($formHolds as $key => $formHolder) {
@@ -140,12 +152,15 @@ class FormBuilderController extends Controller
         $products = Product::where('status', 'true')->get();
         $upsellTemplates = UpsellSetting::all();
         $staffs = User::where('type','staff')->get();
-        return view('pages.allFormBuilders', compact('formHolders', 'products', 'upsellTemplates', 'staffs'));
+        return view('pages.allFormBuilders', compact('authUser', 'user_role', 'formHolders', 'products', 'upsellTemplates', 'staffs'));
         
     }
 
     public function editNewFormBuilder ($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $formHolder = FormHolder::where('unique_key', $unique_key)->first();
         if (!isset($formHolder)) {
             abort(404);
@@ -232,12 +247,15 @@ class FormBuilderController extends Controller
         
         // return $products;
 
-        return view('pages.editNewFormBuilder', compact('formHolder', 'products', 'package_select', 'form_code', 'formContact', 'packages', 'package_select_edit'));
+        return view('pages.editNewFormBuilder', compact('authUser', 'user_role', 'formHolder', 'products', 'package_select', 'form_code', 'formContact', 'packages', 'package_select_edit'));
 
     }
 
     public function editNewFormBuilderPost (Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         
         $formHolder = FormHolder::where('unique_key', $unique_key)->first();
@@ -251,7 +269,7 @@ class FormBuilderController extends Controller
         
         $formHolder->form_data = \serialize($request->except(['products', 'q', 'required', 'form_name_selected', '_token', 'former_packages']));
         
-        //$formHolder->created_by = 1;
+        //$formHolder->created_by = $authUser->id;
         $formHolder->status = 'true';
         $formHolder->save();
 
@@ -283,7 +301,7 @@ class FormBuilderController extends Controller
                 $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
                 $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
                 $outgoingStock->quantity_returned = 0; //by default
-                $outgoingStock->created_by = 1;
+                $outgoingStock->created_by = $authUser->id;
                 $outgoingStock->status = 'true';
                 $outgoingStock->save();
                 
@@ -302,6 +320,9 @@ class FormBuilderController extends Controller
     //not used. ajax save form first time
     public function formBuilderSave(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         $result = $data['result']; //object
         $form_name = $data['name'];
@@ -332,7 +353,7 @@ class FormBuilderController extends Controller
             $formHolder->name = $form_name;
             $formHolder->contact = serialize($contacts);
             $formHolder->package = serialize($packages);
-            $formHolder->created_by = 1;
+            $formHolder->created_by = $authUser->id;
             $formHolder->status = 'true';
             $formHolder->save();
     
@@ -355,7 +376,7 @@ class FormBuilderController extends Controller
                     $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
                     $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
                     $outgoingStock->quantity_returned = 0; //by default
-                    $outgoingStock->created_by = 1;
+                    $outgoingStock->created_by = $authUser->id;
                     $outgoingStock->status = 'true';
                     $outgoingStock->save();
                 }
@@ -382,6 +403,9 @@ class FormBuilderController extends Controller
     
     public function allFormBuilders()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $formHolds = FormHolder::all();
         $formHolders = [];
         foreach ($formHolds as $key => $formHolder) {
@@ -392,11 +416,14 @@ class FormBuilderController extends Controller
         // return $formHolders;
 
         $products = Product::where('status', 'true')->get();
-        return view('pages.allFormBuilders', compact('formHolders', 'products'));
+        return view('pages.allFormBuilders', compact('authUser', 'user_role', 'formHolders', 'products'));
     }
 
     public function addOrderbumpToForm(Request $request, $form_unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'orderbump_product' => 'required',
         ]);
@@ -414,7 +441,7 @@ class FormBuilderController extends Controller
         $orderbump->order_id = $formHolder->order->id;
         $orderbump->product_expected_quantity_to_be_sold = 1;
         $orderbump->product_expected_amount = 0;
-        // $outgoingStock->created_by = 1;
+        // $outgoingStock->created_by = $authUser->id;
         $orderbump->status = 'true';
         $orderbump->save();
 
@@ -428,7 +455,7 @@ class FormBuilderController extends Controller
         $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
         $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
         $outgoingStock->quantity_returned = 0; //by default
-        $outgoingStock->created_by = 1;
+        $outgoingStock->created_by = $authUser->id;
         $outgoingStock->status = 'true';
         $outgoingStock->save();
 
@@ -440,6 +467,9 @@ class FormBuilderController extends Controller
 
     public function editOrderbumpToForm(Request $request, $form_unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'orderbump_product' => 'required',
         ]);
@@ -457,7 +487,7 @@ class FormBuilderController extends Controller
         $orderbump->order_id = $formHolder->order->id;
         $orderbump->product_expected_quantity_to_be_sold = 1;
         $orderbump->product_expected_amount = 0;
-        // $outgoingStock->created_by = 1;
+        // $outgoingStock->created_by = $authUser->id;
         $orderbump->status = 'true';
         $orderbump->save();
 
@@ -471,7 +501,7 @@ class FormBuilderController extends Controller
         $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
         $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
         $outgoingStock->quantity_returned = 0; //by default
-        $outgoingStock->created_by = 1;
+        $outgoingStock->created_by = $authUser->id;
         $outgoingStock->status = 'true';
         $outgoingStock->save();
 
@@ -483,6 +513,9 @@ class FormBuilderController extends Controller
 
     public function addUpsellToForm(Request $request, $form_unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'upsell_product' => 'required',
         ]);
@@ -501,7 +534,7 @@ class FormBuilderController extends Controller
         $upsell->order_id = $formHolder->order->id;
         $upsell->product_expected_quantity_to_be_sold = 1;
         $upsell->product_expected_amount = 0;
-        // $upsell->created_by = 1;
+        // $upsell->created_by = $authUser->id;
         $upsell->status = 'true';
         $upsell->save();
 
@@ -515,7 +548,7 @@ class FormBuilderController extends Controller
         $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
         $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
         $outgoingStock->quantity_returned = 0; //by default
-        $outgoingStock->created_by = 1;
+        $outgoingStock->created_by = $authUser->id;
         $outgoingStock->status = 'true';
         $outgoingStock->save();
 
@@ -527,6 +560,9 @@ class FormBuilderController extends Controller
 
     public function editUpsellToForm(Request $request, $form_unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'upsell_product' => 'required',
         ]);
@@ -545,7 +581,7 @@ class FormBuilderController extends Controller
         $upsell->order_id = $formHolder->order->id;
         $upsell->product_expected_quantity_to_be_sold = 1;
         $upsell->product_expected_amount = 0;
-        // $upsell->created_by = 1;
+        // $upsell->created_by = $authUser->id;
         $upsell->status = 'true';
         $upsell->save();
 
@@ -559,7 +595,7 @@ class FormBuilderController extends Controller
         $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
         $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
         $outgoingStock->quantity_returned = 0; //by default
-        $outgoingStock->created_by = 1;
+        $outgoingStock->created_by = $authUser->id;
         $outgoingStock->status = 'true';
         $outgoingStock->save();
 
@@ -572,6 +608,9 @@ class FormBuilderController extends Controller
     //for external webpages
     public function formEmbedded($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $formHolder = FormHolder::where('unique_key', $unique_key)->first();
         if (!isset($formHolder)) {
             \abort(404);
@@ -599,12 +638,15 @@ class FormBuilderController extends Controller
         //     }
         // ]
         
-        return view('pages.formEmbedded', compact('unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products'));
+        return view('pages.formEmbedded', compact('authUser', 'user_role', 'unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products'));
     }
 
     //like single newFormBuilder
     public function newFormLink($unique_key, $stage="")
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $formHolder = FormHolder::where('unique_key', $unique_key)->first();
         if (!isset($formHolder)) {
             \abort(404);
@@ -724,7 +766,7 @@ class FormBuilderController extends Controller
             // event(new TestEvent($invoiceData));
         }
         
-        return view('pages.newFormLink', compact('unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products',
+        return view('pages.newFormLink', compact('authUser', 'user_role', 'unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products',
         'mainProducts_outgoingStocks', 'order', 'orderId', 'mainProduct_revenue', 'orderbump_outgoingStock', 'orderbumpProduct_revenue', 'upsell_outgoingStock',
         'upsellProduct_revenue', 'customer', 'qty_total', 'order_total_amount', 'grand_total', 'stage'));
     }
@@ -732,6 +774,9 @@ class FormBuilderController extends Controller
     //newFormLinkPost//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public function newFormLinkPost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'first-name' => 'required',
             'last-name' => 'required',
@@ -808,7 +853,7 @@ class FormBuilderController extends Controller
         $customer->whatsapp_phone_number = $data['whatsapp-phone-number'];
         $customer->email = $data['email'];
         $customer->delivery_address = $data['delivery-address'];
-        $customer->created_by = 1;
+        $customer->created_by = $authUser->id;
         $customer->status = 'true';
         $customer->save();
 
@@ -830,6 +875,9 @@ class FormBuilderController extends Controller
     //after clicking first main btn
     public function saveNewFormFromCustomer(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
@@ -866,7 +914,7 @@ class FormBuilderController extends Controller
         $customer->state = $data['state'];
         $customer->delivery_address = $data['address'];
         $customer->delivery_duration = $data['delivery_duration'];
-        $customer->created_by = 1;
+        $customer->created_by = $authUser->id;
         $customer->status = 'true';
         $customer->save();
 
@@ -895,6 +943,9 @@ class FormBuilderController extends Controller
     //saveNewFormOrderBumpFromCustomer
     public function saveNewFormOrderBumpFromCustomer(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
@@ -933,6 +984,9 @@ class FormBuilderController extends Controller
     //saveNewFormOrderBumpFromCustomer
     public function saveNewFormUpSellFromCustomer(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
@@ -964,6 +1018,9 @@ class FormBuilderController extends Controller
     //declined orderbump
     public function saveNewFormOrderBumpRefusalFromCustomer(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
@@ -992,6 +1049,9 @@ class FormBuilderController extends Controller
     //declined upsell
     public function saveNewFormUpSellRefusalFromCustomer(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
@@ -1020,6 +1080,9 @@ class FormBuilderController extends Controller
     //cart abandon. gets cleared once submit btn is clicked
     public function cartAbandonContact(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         $contact_data = $request->except(['unique_key']);
         
@@ -1050,6 +1113,9 @@ class FormBuilderController extends Controller
 
     public function cartAbandonPackage(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         $package_data = $request->except(['unique_key']);
         
@@ -1081,6 +1147,9 @@ class FormBuilderController extends Controller
     //callback for notifying admin abt new order
     public function invoiceData($formHolder, $customer, $order)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
 
         //mainProduct_revenue
         $mainProduct_revenue = 0;  //price * qty
@@ -1194,6 +1263,9 @@ class FormBuilderController extends Controller
     //not used
     public function formLink($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $formHolder = FormHolder::where('unique_key', $unique_key)->first();
         if (!isset($formHolder)) {
             \abort(404);
@@ -1280,7 +1352,7 @@ class FormBuilderController extends Controller
 
         //end thankyou part
         
-        return view('pages.formLink', compact('unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products',
+        return view('pages.formLink', compact('authUser', 'user_role', 'unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products',
         'mainProducts_outgoingStocks', 'order', 'orderId', 'mainProduct_revenue', 'orderbump_outgoingStock', 'upsell_outgoingStock',
         'customer', 'qty_total', 'order_total_amount', 'grand_total'));
     }
@@ -1288,6 +1360,9 @@ class FormBuilderController extends Controller
     //not used formLinkPost
     public function formLinkPost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'first-name' => 'required',
             'last-name' => 'required',
@@ -1361,7 +1436,7 @@ class FormBuilderController extends Controller
         $customer->whatsapp_phone_number = $data['whatsapp-phone-number'];
         $customer->email = $data['email'];
         $customer->delivery_address = $data['delivery-address'];
-        $customer->created_by = 1;
+        $customer->created_by = $authUser->id;
         $customer->status = 'true';
         $customer->save();
 
@@ -1383,6 +1458,9 @@ class FormBuilderController extends Controller
     //not used
     public function formLinkUpsellPost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $formHolder = FormHolder::where('unique_key', $unique_key)->first();
         if (!isset($formHolder)) {
             \abort(404);
@@ -1407,6 +1485,9 @@ class FormBuilderController extends Controller
     //not used
     public function editFormHolder($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $formLabel = OrderLabel::where('unique_key', $unique_key)->first();
         $order_id = $formLabel->order_id;
 
@@ -1414,7 +1495,7 @@ class FormBuilderController extends Controller
         $orderBump_product = OrderBump::where('order_id', $order_id)->first();
         $upSell_product = OrderBump::where('order_id', $order_id)->first();
 
-        return view('pages.forms.editForm', compact('formLabel', 'orderProducts', 'orderBump_product', 'upSell_product'));
+        return view('pages.forms.editForm', compact('authUser', 'user_role', 'formLabel', 'orderProducts', 'orderBump_product', 'upSell_product'));
     }
 
     public function productById($id){
@@ -1429,6 +1510,9 @@ class FormBuilderController extends Controller
      */
     public function test()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         return view('pages.test');
     }
 
@@ -1441,6 +1525,9 @@ class FormBuilderController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 

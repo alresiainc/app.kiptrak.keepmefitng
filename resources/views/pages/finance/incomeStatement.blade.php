@@ -1,16 +1,16 @@
 @extends('layouts.design')
-@section('title')Inventory @endsection
+@section('title')Account: Income Statement @endsection
 @section('extra_css')@endsection
 
 @section('content')
     
 <main id="main" class="main">
   <div class="pagetitle">
-    <h1>Inventory Management</h1>
+    <h1>Income Statement</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active">Inventory Management</li>
+        <li class="breadcrumb-item active">Income Statement</li>
       </ol>
     </nav>
   </div>

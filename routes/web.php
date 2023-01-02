@@ -375,11 +375,16 @@ Route::post('/reports-staff/{type?}', [ReportController::class, 'staffReportQuer
 Route::post('/persons-import', [ImportController::class, 'personsImport'])->name('personsImport'); //personsImport //avoid on live
 Route::post('/users-import', [ImportController::class, 'usersImport'])->name('usersImport'); //personsImport //avoid on live
 Route::post('/employees-import', [ImportController::class, 'employeesImport'])->name('employeesImport'); //employeesImport
+Route::post('/suppliers-import', [ImportController::class, 'suppliersImport'])->name('suppliersImport'); //employeesImport
 
 //exports
 Route::get('/users-export', [ExportController::class, 'usersExport'])->name('usersExport'); //usersExport //avoid on live
 Route::get('/users-export-sample', [ExportController::class, 'sampleUsersExport'])->name('sampleUsersExport'); //sampleUsersExport
 Route::get('/employees-export', [ExportController::class, 'employeesExport'])->name('employeesExport'); //employeesExport
+
+//suppliers exports
+Route::get('/suppliers-export-sample', [ExportController::class, 'suppliersSampleExport'])->name('suppliersSampleExport'); //suppliersSampleExport
+Route::get('/suppliers-export', [ExportController::class, 'suppliersExport'])->name('suppliersExport'); //suppliersExport
 
 });
 

@@ -11,19 +11,28 @@ use App\Models\Supplier;
 class SupplierController extends Controller
 {
     public function allSupplier()
-{
-    $suppliers = Supplier::all();
-    return view('pages.suppliers.allSupplier', compact('suppliers'));
-}
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $suppliers = Supplier::orderBy('id', 'DESC')->get();
+        return view('pages.suppliers.allSupplier', compact('authUser', 'user_role', 'suppliers'));
+    }
 
 public function addSupplier()
 {
+    $authUser = auth()->user();
+    $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
     $countries = Country::all();
-    return view('pages.suppliers.addSupplier', compact('countries'));
+    return view('pages.suppliers.addSupplier', compact('authUser', 'user_role', 'countries'));
 }
 
 public function addSupplierPost(Request $request)
 {
+    $authUser = auth()->user();
+    $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
     $request->validate([
         'company_name' => 'required|string',
         'supplier_name' => 'required|string',
@@ -39,7 +48,7 @@ public function addSupplierPost(Request $request)
     $supplier->supplier_name = $data['supplier_name'];
     $supplier->email = $data['email'];
     $supplier->phone_number = $data['phone_number'];
-    $supplier->created_by = 1;
+    $supplier->created_by = $authUser->id;
     $supplier->status = 'true';
     
     if ($request->company_logo) {
@@ -59,18 +68,24 @@ public function addSupplierPost(Request $request)
 
 public function editSupplier($unique_key)
 {
+    $authUser = auth()->user();
+    $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
     $supplier = Supplier::where('unique_key', $unique_key)->first();
     if(!isset($supplier)){
         abort(404);
     }
-    
+
     $countries = Country::all();
 
-    return view('pages.suppliers.editSupplier', compact('supplier', 'countries'));
+    return view('pages.suppliers.editSupplier', compact('authUser', 'user_role', 'supplier', 'countries'));
 }
 
 public function editSupplierPost(Request $request, $unique_key)
 {
+    $authUser = auth()->user();
+    $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
     $supplier = Supplier::where('unique_key', $unique_key)->first();
     if(!isset($supplier)){
         abort(404);
@@ -89,7 +104,6 @@ public function editSupplierPost(Request $request, $unique_key)
     $supplier->supplier_name = $data['supplier_name'];
     $supplier->email = $data['email'];
     $supplier->phone_number = $data['phone_number'];
-    $supplier->created_by = 1;
     $supplier->status = 'true';
 
     //profile_picture
@@ -115,12 +129,15 @@ public function editSupplierPost(Request $request, $unique_key)
 
 public function singleSupplier($unique_key)
 {
+    $authUser = auth()->user();
+    $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
     $supplier = Supplier::where('unique_key', $unique_key)->first();
     if(!isset($supplier)){
         abort(404);
     }
     
-    return view('pages.suppliers.singleSupplier', compact('supplier'));
+    return view('pages.suppliers.singleSupplier', compact('authUser', 'user_role', 'supplier'));
 }
 
 

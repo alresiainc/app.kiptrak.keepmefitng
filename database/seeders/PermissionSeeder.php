@@ -143,6 +143,27 @@ class PermissionSeeder extends Seeder
         $permission->created_by = 1;
         $permission->save();
 
+        //----------Inventory---Id-19--------------------
+        $permission = new Permission();
+        $permission->name = 'Inventory';
+        $permission->slug = Str::slug('Inventory');
+        $permission->created_by = 1;
+        $permission->save();
+
+        //----------Accounting---Id-20--------------------
+        $permission = new Permission();
+        $permission->name = 'Accounting';
+        $permission->slug = Str::slug('Accounting');
+        $permission->created_by = 1;
+        $permission->save();
+
+        //----------Accounting---Id-21--------------------
+        $permission = new Permission();
+        $permission->name = 'Report';
+        $permission->slug = Str::slug('Report');
+        $permission->created_by = 1;
+        $permission->save();
+
         //////////////////////////////////////////////////////////////////////////////////////////////////
         $permission = new Permission();
         $permission->name = 'View Dashboard';
@@ -694,6 +715,128 @@ class PermissionSeeder extends Seeder
         $permission->created_by = 1;
         $permission->save();
 
+        //----------Inventory---Id-19--------------------------
+        $permission = new Permission();
+        $permission->name = 'View Inventory Dashboard';
+        $permission->slug = Str::slug('View Inventory Dashboard');
+        $permission->parent_id = 19;
+        $permission->created_by = 1;
+        $permission->save();
+
+        //----------Accounting---Id-20--------------------
+        $permission = new Permission();
+        $permission->name = 'View Accounting Menu';
+        $permission->slug = Str::slug('View Accounting Menu');
+        $permission->parent_id = 20;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Income Statement';
+        $permission->slug = Str::slug('View Income Statement');
+        $permission->parent_id = 20;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Purchase Revenue';
+        $permission->slug = Str::slug('View Purchase Revenue');
+        $permission->parent_id = 20;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Sale Revenue';
+        $permission->slug = Str::slug('View Sale Revenue');
+        $permission->parent_id = 20;
+        $permission->created_by = 1;
+        $permission->save();
+
+        //----------Report---Id-21--------------------
+        $permission = new Permission();
+        $permission->name = 'View Report Menu';
+        $permission->slug = Str::slug('View Report Menu');
+        $permission->parent_id = 21;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Product Report';
+        $permission->slug = Str::slug('View Product Report');
+        $permission->parent_id = 21;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Sale Report';
+        $permission->slug = Str::slug('View Sale Report');
+        $permission->parent_id = 21;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Purchase Report';
+        $permission->slug = Str::slug('View Purchase Report');
+        $permission->parent_id = 21;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Customer Report';
+        $permission->slug = Str::slug('View Customer Report');
+        $permission->parent_id = 21;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Supplier Report';
+        $permission->slug = Str::slug('View Supplier Report');
+        $permission->parent_id = 21;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Staff Report';
+        $permission->slug = Str::slug('View Staff Report');
+        $permission->parent_id = 21;
+        $permission->created_by = 1;
+        $permission->save();
+
+        //----------productcategory---Id-2--------------------
+        $permission = new Permission();
+        $permission->name = 'View Product Category List';
+        $permission->slug = Str::slug('View Product Category List');
+        $permission->parent_id = 2;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'Create Product Category';
+        $permission->slug = Str::slug('View Product Category');
+        $permission->parent_id = 2;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Product Category';
+        $permission->slug = Str::slug('View Product Category');
+        $permission->parent_id = 2;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'Edit Product Category';
+        $permission->slug = Str::slug('Edit Product Category');
+        $permission->parent_id = 2;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'Disable Product Category';
+        $permission->slug = Str::slug('Disable Product Category');
+        $permission->parent_id = 2;
+        $permission->created_by = 1;
+        $permission->save();
 
     }
 }

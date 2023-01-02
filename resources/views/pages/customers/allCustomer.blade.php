@@ -29,11 +29,16 @@
           <div class="card-body pt-3">
             
           <div class="clearfix mb-2">
+            <div class="float-start text-start">
+              <a href="{{ route('addCustomer') }}" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Add Agent">
+                <i class="bi bi-plus"></i> <span>Add Customer</span></a>
+            </div>
+
             <div class="float-end text-end">
               <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                 <i class="bi bi-upload"></i> <span>Import</span></button>
               <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
-              <button class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
+              <button class="btn btn-sm btn-danger rounded-pill d-none" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
             </div>
           </div>
           <hr>
@@ -85,12 +90,10 @@
                             <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu" x-placement="bottom-start"
                             style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 33px, 0px);">
             
-                                
                                 <a href="{{ route('singleCustomerSales', $customer->unique_key) }}">
                                     <button type="button" tabindex="0" class="dropdown-item">Products Bought</button></a>
                                 <div tabindex="-1" class="dropdown-divider"></div>
                                 
-
                             </div>
                           </div>
                           <a href="{{ route('singleCustomer', $customer->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>

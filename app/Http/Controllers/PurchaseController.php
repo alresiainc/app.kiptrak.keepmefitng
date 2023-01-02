@@ -17,14 +17,20 @@ class PurchaseController extends Controller
     
     public function allPurchase()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $purchases = Purchase::where('parent_id', null)->get();
         
-        return view('pages.purchases.allPurchase', compact('purchases'));
+        return view('pages.purchases.allPurchase', compact('authUser', 'user_role', 'purchases'));
     }
 
     
     public function addPurchase()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $products = Product::all();
         $suppliers = Supplier::all();
         $purchase_code = time();
@@ -35,11 +41,14 @@ class PurchaseController extends Controller
             $purchase_code = 'kppur'.'-'.$purchase_code.''.$purchase_last->id+1;
         }
         
-        return view('pages.purchases.addPurchase', compact('products', 'suppliers', 'purchase_code'));
+        return view('pages.purchases.addPurchase', compact('authUser', 'user_role', 'products', 'suppliers', 'purchase_code'));
     }
 
     public function addPurchasePost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'purchase_code' => 'required|string',
             'supplier' => 'required|string',
@@ -90,7 +99,7 @@ class PurchaseController extends Controller
                 $incomingStock->product_id = $id;
                 $incomingStock->quantity_added = $data['product_qty'][$key];
                 $incomingStock->reason_added = 'as_purchase'; //as_new_product, as_returned_product, as_purchase
-                $incomingStock->created_by = 1;
+                $incomingStock->created_by = $authUser->id;
                 $incomingStock->status = 'true';
                 $incomingStock->save();
 
@@ -125,7 +134,7 @@ class PurchaseController extends Controller
 
                 $purchase->attached_document = $imageName == '' ? null : $imageName;
 
-                $purchase->created_by = 1;
+                $purchase->created_by = $authUser->id;
                 $purchase->status = $data['purchase_status'];
 
                 $purchase->save();
@@ -141,11 +150,17 @@ class PurchaseController extends Controller
     
     public function singlePurchase($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         return '123';
     }
 
     public function editPurchase($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $purchase = Purchase::where('unique_key', $unique_key);
         $purchase_code = $purchase->first()->purchase_code;
         if(!$purchase->exists()){
@@ -156,11 +171,14 @@ class PurchaseController extends Controller
         $purchases = Purchase::where('purchase_code', $purchase_code)->get();
         $purchase = $purchase->first();
         
-        return view('pages.purchases.editPurchase', compact('products', 'suppliers', 'purchase', 'purchases'));
+        return view('pages.purchases.editPurchase', compact('authUser', 'user_role', 'products', 'suppliers', 'purchase', 'purchases'));
     }
 
     public function editPurchasePost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $purchase = Purchase::where('unique_key', $unique_key);
         if(!$purchase->exists()){
             abort(404);
@@ -241,7 +259,7 @@ class PurchaseController extends Controller
                     $incomingStock->product_id = $id;
                     $incomingStock->quantity_added = $data['product_qty'][$key];
                     $incomingStock->reason_added = 'as_new_product'; //as_new_product, as_returned_product, as_administrative
-                    $incomingStock->created_by = 1;
+                    $incomingStock->created_by = $authUser->id;
                     $incomingStock->status = 'true';
                     $incomingStock->save();
                     
@@ -263,7 +281,7 @@ class PurchaseController extends Controller
 
                     $purchase->attached_document = $imageName == '' ? null : $imageName;
 
-                    $purchase->created_by = 1;
+                    $purchase->created_by = $authUser->id;
                     $purchase->status = $data['purchase_status'];
 
                     $purchase->save();
@@ -287,6 +305,9 @@ class PurchaseController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 }

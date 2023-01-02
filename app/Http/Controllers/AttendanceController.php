@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 use App\Models\User;
 use App\Models\Attendance;
@@ -16,8 +17,11 @@ class AttendanceController extends Controller
      */
     public function allAttendance()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $attendances = Attendance::all();
-        return view('pages.hrm.attendance.allAttendance', compact('attendances'));
+        return view('pages.hrm.attendance.allAttendance', compact('authUser', 'user_role', 'attendances'));
     }
 
     /**
@@ -27,8 +31,11 @@ class AttendanceController extends Controller
      */
     public function addAttendance()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $staffs = User::where('type', 'staff')->get();
-        return view('pages.hrm.attendance.addAttendance', compact('staffs'));
+        return view('pages.hrm.attendance.addAttendance', compact('authUser', 'user_role', 'staffs'));
     }
 
     /**
@@ -39,6 +46,9 @@ class AttendanceController extends Controller
      */
     public function addAttendancePost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $request->validate([
             'employee' => 'required|string',
             'check_in' => 'required|string',
@@ -48,26 +58,49 @@ class AttendanceController extends Controller
 
         $data = $request->all();
 
+        $dt = Carbon::now();
+        $already_checked_in = Attendance::where('employee_id', $data['employee'])->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])
+        ->exists();
+
+        if ($already_checked_in) {
+            return back()->with('info', 'Staff Already Checked-In Today');
+        }
+
+        $check_in = strtotime($data['check_in']); //1672513500
+        $check_in_24h_format = strtotime(date("G:i", $check_in)); //1672513500
+        $expected_check_in = strtotime('08:00 AM'); //1672473600
+
+        $daily_status = 'present';
+        if ($check_in > $expected_check_in) {
+            $daily_status = 'late';
+        }
+        if ($expected_check_in == $check_in) {
+            $daily_status = 'present';
+        }
+
         $attendance = new Attendance();
         $attendance->employee_id = $data['employee'];
         $attendance->check_in = !empty($data['check_in']) ? $data['check_in'] : null;
         $attendance->check_out = !empty($data['check_out']) ? $data['check_out'] : null;
-        $attendance->daily_status = 'present'; //absent, late
+        $attendance->daily_status = $daily_status; //absent, late
         $attendance->note = !empty($data['note']) ? $data['note'] : null;
         $attendance->save();
 
         return back()->with('success', 'Attendance Saved Successfully');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    //for exit
+    public function editAttendance($unique_key)
     {
-        //
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $attendance = Attendance::where('unique_key', $unique_key)->first();
+        if (!isset($attendance)) {
+            abort(404);
+        }
+
+        return view('pages.hrm.attendance.exitAttendance', compact('authUser', 'user_role', 'attendance'));
     }
 
     /**
@@ -76,9 +109,30 @@ class AttendanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function editAttendancePost(Request $request, $unique_key)
     {
-        //
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $attendance = Attendance::where('unique_key', $unique_key)->first();
+        if (!isset($attendance)) {
+            abort(404);
+        }
+
+        $request->validate([
+            'employee' => 'required|string',
+            'check_out' => 'required|string',
+            'note' => 'nullable|string',
+        ]);
+
+        $data = $request->all();
+
+        $attendance->check_out = !empty($data['check_out']) ? $data['check_out'] : null;
+        $attendance->daily_status = 'present'; //absent, late
+        $attendance->note = !empty($data['note']) ? $data['note'] : null;
+        $attendance->save();
+
+        return back()->with('success', 'Checkout Attendance Updated Successfully');
     }
 
     /**

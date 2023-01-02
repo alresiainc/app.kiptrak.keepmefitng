@@ -7,14 +7,18 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UsersExport;
 use App\Exports\SampleUsersExport;
+
+use App\Exports\SuppliersExport;
+use App\Exports\SuppliersSampleExport;
 use App\Models\User;
 
 
 class ExportController extends Controller
 {
+    //employees
     public function sampleUsersExport()
     {
-        return Excel::download(new SampleUsersExport, 'staffsample.xlsx');
+        return Excel::download(new SampleUsersExport, 'sample_staff.xlsx');
     }
 
     public function usersExport()
@@ -22,17 +26,17 @@ class ExportController extends Controller
         return Excel::download(new UsersExport, 'users.xlsx');
     }
 
-    
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    //suppliers
+    public function suppliersSampleExport()
     {
-        //
+        return Excel::download(new SuppliersSampleExport, 'suppliers_sample.xlsx');
     }
+
+    public function suppliersExport()
+    {
+        return Excel::download(new SuppliersExport, 'suppliers.xlsx');
+    }  //
+    
 
     /**
      * Store a newly created resource in storage.

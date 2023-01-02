@@ -17,21 +17,30 @@ class WareHouseController extends Controller
      */
     public function allWarehouse()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $warehouses = WareHouse::all();
-        return view('pages.warehouses.allWarehouse', compact('warehouses'));
+        return view('pages.warehouses.allWarehouse', compact('authUser', 'user_role', 'warehouses'));
     }
 
     //add
     public function addWarehouse()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $agents = User::where('type', 'agent')->get();
         $countries = Country::all();
-        return view('pages.warehouses.addWarehouse', compact('agents', 'countries'));
+        return view('pages.warehouses.addWarehouse', compact('authUser', 'user_role', 'agents', 'countries'));
     }
 
     //addpost
     public function addWarehousePost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'name' => 'required|string',
             'state' => 'required|string',
@@ -46,7 +55,7 @@ class WareHouseController extends Controller
         $warehouse->state = !empty($data['state']) ? $data['state'] : null;
         $warehouse->country_id = !empty($data['country']) ? $data['country'] : null;
         $warehouse->address = !empty($data['address']) ? $data['address'] : null;
-        $warehouse->created_by = 1;
+        $warehouse->created_by = $authUser->id;
         $warehouse->status = 'true';
         $warehouse->save();
 
@@ -55,11 +64,14 @@ class WareHouseController extends Controller
 
     public function singleWarehouse($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $warehouse = WareHouse::where('unique_key', $unique_key)->first();
         if(!isset($warehouse)){
             abort(404);
         }
-        return view('pages.warehouses.singleWarehouse', compact('warehouse'));
+        return view('pages.warehouses.singleWarehouse', compact('authUser', 'user_role', 'warehouse'));
     }
 
     /**
@@ -70,18 +82,24 @@ class WareHouseController extends Controller
      */
     public function editWarehouse($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $warehouse = WareHouse::where('unique_key', $unique_key)->first();
         if(!isset($warehouse)){
             abort(404);
         }
         $agents = User::where('type', 'agent')->get();
         $countries = Country::all();
-        return view('pages.warehouses.editWarehouse', compact('warehouse', 'agents', 'countries'));
+        return view('pages.warehouses.editWarehouse', compact('authUser', 'user_role', 'warehouse', 'agents', 'countries'));
     }
 
     
     public function editWarehousePost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $warehouse = WareHouse::where('unique_key', $unique_key)->first();
         if(!isset($warehouse)){
             abort(404);
@@ -100,7 +118,6 @@ class WareHouseController extends Controller
         $warehouse->state = !empty($data['state']) ? $data['state'] : null;
         $warehouse->country_id = !empty($data['country']) ? $data['country'] : null;
         $warehouse->address = !empty($data['address']) ? $data['address'] : null;
-        $warehouse->created_by = 1;
         $warehouse->status = 'true';
         $warehouse->save();
 
@@ -115,6 +132,9 @@ class WareHouseController extends Controller
      */
     public function addWarehouseAjax(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $authUser = auth()->user();
         $data = $request->all();
         $warehouse = new WareHouse();

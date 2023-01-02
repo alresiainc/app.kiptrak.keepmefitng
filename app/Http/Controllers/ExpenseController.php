@@ -17,23 +17,32 @@ class ExpenseController extends Controller
      */
     public function allExpense ()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $expenses = Expense::where('product_id', null)->get();
-        return view('pages.expenses.allExpense', compact('expenses'));
+        return view('pages.expenses.allExpense', compact('authUser', 'user_role', 'expenses'));
     }
 
     public function addExpense()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $categories = ExpenseCategory::all();
         $accounts = Account::all();
         $warehouses = WareHouse::all();
 
         $account_no = 'kpa-' . date("Ymd") . '-'. date("his");
         
-        return view('pages.expenses.addExpense', compact('categories', 'accounts', 'warehouses', 'account_no'));
+        return view('pages.expenses.addExpense', compact('authUser', 'user_role', 'categories', 'accounts', 'warehouses', 'account_no'));
     }
 
     public function addExpensePost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $request->validate([
             'note' => 'required|string',
             'category' => 'required',
@@ -51,7 +60,7 @@ class ExpenseController extends Controller
         // $expense->account_id = $data['account'];
         $expense->note = !empty($data['note']) ? $data['note'] : null;
         
-        $expense->created_by = 1;
+        $expense->created_by = $authUser->id;
         $expense->status = 'true';
         $expense->save();
 
@@ -60,13 +69,16 @@ class ExpenseController extends Controller
 
     public function addExpenseCategoryPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $category_code = 'kpecat-' . date("Ymd") . '-'. date("his");
         $data = $request->all();
         $category = new ExpenseCategory();
         $category->category_code = $category_code;
         $category->name = $data['name'];
        
-        $category->created_by = 1;
+        $category->created_by = $authUser->id;
         $category->status = 'true';
         $category->save();
 
@@ -76,13 +88,16 @@ class ExpenseController extends Controller
     //ajax
     public function addExpenseCategoryAjaxPost(Request $request)
     {
+        $authUser = auth()->user();
+        //$user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $category_code = 'kpecat-' . date("Ymd") . '-'. date("his");
         $data = $request->all();
         $category = new ExpenseCategory();
         $category->category_code = $category_code;
         $category->name = $data['category_name'];
        
-        $category->created_by = 1;
+        $category->created_by = $authUser->id;
         $category->status = 'true';
         $category->save();
         //store in array
@@ -104,6 +119,9 @@ class ExpenseController extends Controller
 
     public function editExpense($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $expense = Expense::where('unique_key', $unique_key)->first();
         if (!isset($expense)) {
             abort(404);
@@ -113,7 +131,7 @@ class ExpenseController extends Controller
         $accounts = Account::all();
         $warehouses = WareHouse::all();
 
-        return view('pages.expenses.editExpense', compact('expense', 'account_no','categories', 'accounts', 'warehouses'));
+        return view('pages.expenses.editExpense', compact('authUser', 'user_role', 'expense', 'account_no','categories', 'accounts', 'warehouses'));
     
     }
 
@@ -148,8 +166,11 @@ class ExpenseController extends Controller
      */
     public function allExpenseCategory()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
         $categories = ExpenseCategory::all();
-        return view('pages.expenses.allExpenseCategory', compact('categories'));
+        return view('pages.expenses.allExpenseCategory', compact('authUser', 'user_role', 'categories'));
     }
 
     

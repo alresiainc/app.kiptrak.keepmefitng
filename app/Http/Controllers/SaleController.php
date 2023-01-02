@@ -24,19 +24,24 @@ class SaleController extends Controller
     
     public function allSale()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $sales = Sale::where('parent_id', null)->get();
-        return view('pages.sales.allSale', compact('sales'));
+        return view('pages.sales.allSale', compact('authUser', 'user_role', 'sales'));
     }
 
-    
     public function addSale()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $products = Product::all();
         $customers = Customer::all();
         $warehouses = WareHouse::all();
         $sale_code = 'kps-' . date("Ymd") . '-'. date("his");
         
-        return view('pages.sales.addSale', compact('products', 'customers', 'sale_code', 'warehouses'));
+        return view('pages.sales.addSale', compact('authUser', 'user_role', 'products', 'customers', 'sale_code', 'warehouses'));
     }
 
     /**
@@ -48,6 +53,9 @@ class SaleController extends Controller
     
     public function addSalePost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'customer' => 'required|string',
             'warehouse' => 'required|string',
@@ -168,11 +176,17 @@ class SaleController extends Controller
 
     public function singleSale($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         return '123';
     }
 
     public function editSale($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $sale = Sale::where('unique_key', $unique_key);
         // $sale_code = $sale->first()->sale_code;
         if(!$sale->exists()){
@@ -185,11 +199,14 @@ class SaleController extends Controller
         $sales = Sale::where('sale_code', $sale_code)->get();
         $sale = $sale->first();
         
-        return view('pages.sales.editSale', compact('products', 'customers', 'warehouses', 'sale', 'sales'));
+        return view('pages.sales.editSale', compact('authUser', 'user_role', 'products', 'customers', 'warehouses', 'sale', 'sales'));
     }
 
     public function editSalePost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $sale = Sale::where('unique_key', $unique_key);
         if(!$sale->exists()){
             abort(404);
@@ -375,6 +392,9 @@ class SaleController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -386,6 +406,9 @@ class SaleController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 }

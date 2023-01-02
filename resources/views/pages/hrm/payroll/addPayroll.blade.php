@@ -45,6 +45,14 @@
     </div>
     @endif
 
+    <section class="section dashboard mb-3">
+      <div class="row">
+        <div class="col-md-12">
+          <a href="{{ route('allPayroll') }}" class="badge badge-dark">Payroll List</a>
+        </div>
+      </div>
+    </section>
+
     <section>
       <div class="row">
         <div class="col-md-12">

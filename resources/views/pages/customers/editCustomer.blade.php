@@ -9,6 +9,7 @@
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allCustomer') }}">Customers</a></li>
           <li class="breadcrumb-item active">Add Customer</li>
         </ol>
       </nav>

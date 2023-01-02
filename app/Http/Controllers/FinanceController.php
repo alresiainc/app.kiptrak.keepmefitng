@@ -15,6 +15,9 @@ class FinanceController extends Controller
     
     public function incomeStatement()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
 
@@ -36,12 +39,15 @@ class FinanceController extends Controller
         $expenses_by_category = Expense::select(DB::raw('expense_category_id, sum(amount) as amount_spent'))->groupBy('expense_category_id')
         ->get();
 
-        return view('pages.finance.incomeStatement', compact('currency', 'start_date_info', 'end_date_info', 'start_date', 'end_date', 'sales_sum', 'purchase_sum', 'expense_sum', 'expenses_by_category', 'total_expenses',
+        return view('pages.finance.incomeStatement', compact('authUser', 'user_role', 'currency', 'start_date_info', 'end_date_info', 'start_date', 'end_date', 'sales_sum', 'purchase_sum', 'expense_sum', 'expenses_by_category', 'total_expenses',
         'net_profit'));
     }
 
     public function incomeStatementQuery(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'start_date' => 'required',
             'end_date' => 'required',
@@ -81,22 +87,28 @@ class FinanceController extends Controller
         ->get();
         
 
-        return view('pages.finance.incomeStatement', compact('currency', 'start_date_info', 'end_date_info', 'daysDiff', 'start_date', 'end_date', 'sales_sum', 'purchase_sum', 'expense_sum', 'expenses_by_category', 'total_expenses',
+        return view('pages.finance.incomeStatement', compact('authUser', 'user_role', 'currency', 'start_date_info', 'end_date_info', 'daysDiff', 'start_date', 'end_date', 'sales_sum', 'purchase_sum', 'expense_sum', 'expenses_by_category', 'total_expenses',
         'net_profit'));
         
     }
 
     public function purchaseRevenue()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $purchases = Purchase::all();
-        return view('pages.finance.purchaseRevenue', compact('purchases'));
+        return view('pages.finance.purchaseRevenue', compact('authUser', 'user_role', 'purchases'));
     }
 
     //
     public function saleRevenue()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $sales = Sale::all();
-        return view('pages.finance.saleRevenue', compact('sales'));
+        return view('pages.finance.saleRevenue', compact('authUser', 'user_role', 'sales'));
     }
 
     /**
@@ -107,6 +119,9 @@ class FinanceController extends Controller
      */
     public function store(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -118,6 +133,9 @@ class FinanceController extends Controller
      */
     public function show($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -129,6 +147,9 @@ class FinanceController extends Controller
      */
     public function edit($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -141,6 +162,9 @@ class FinanceController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -152,6 +176,9 @@ class FinanceController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 }

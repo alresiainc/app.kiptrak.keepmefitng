@@ -45,6 +45,20 @@
     </div>
     @endif
 
+    @if(Session::has('info'))
+    <div class="alert alert-info mb-3 text-center">
+        {{Session::get('info')}}
+    </div>
+    @endif
+
+    <section class="section dashboard mb-3">
+      <div class="row">
+        <div class="col-md-12">
+          <a href="{{ route('allAttendance') }}" class="badge badge-dark">Attendance List</a>
+        </div>
+      </div>
+    </section>
+
     <section>
       <div class="row">
         <div class="col-md-12">
@@ -80,7 +94,7 @@
                   @enderror
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-12">
                   <label for="" class="form-label">Check-In</label>
                   <input type="time" name="check_in" class="form-control @error('check_in') is-invalid @enderror" id="" >
                   @error('check_in')
@@ -90,7 +104,7 @@
                   @enderror
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-6 d-none">
                     <label for="" class="form-label">Check-Out</label>
                     <input type="time" name="check_out" class="form-control @error('check_out') is-invalid @enderror" id="" >
                     @error('check_out')

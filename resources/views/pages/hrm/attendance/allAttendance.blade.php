@@ -32,10 +32,13 @@
 
               <div class="float-start text-start">
                   <a href="{{ route('addAttendance') }}"><button data-bs-target="#addMoneyTransfer" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
-                    <i class="bi bi-plus"></i> <span>Add Attendance</span></button></a>
+                    <i class="bi bi-arrow-up"></i> <span>On Arrival</span></button></a>
+
+                    <a href="{{ route('addAttendance') }}" class="d-none"><button data-bs-target="#addMoneyTransfer" class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
+                      <i class="bi bi-arrow-down"></i> <span>On Exit</span></button></a>
               </div>
   
-              <div class="float-end text-end">
+              <div class="float-end text-end d-none">
                 <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                   <i class="bi bi-upload"></i> <span>Import</span></button>
                 <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
@@ -55,32 +58,39 @@
                       <th>Check-Out</th>
 
                       <th>Status</th>
-                      <th>Created By</th>
+                      <th>Action</th>
                   </tr>
               </thead>
               <tbody>
                 @if (count($attendances) > 0)
                     @foreach ($attendances as $attendance)
                     <tr>
-                      
-                      <td>{{ $attendance->created_at->format('Y-m-d') }}</td>
+                      {{-- $date = Carbon::parse('2016-11-24 11:59:56')->addHour(); --}}
+                      <td>{{ $attendance->created_at->format('D, M j, Y') }}</td>
                       <td>{{ $attendance->employee->name }}</td>
                       
-                      <td>{{ $attendance->check_in }} </td>
+                      <td>{{ $attendance->check_in }} <br> <span class="badge badge-dark">{{ \Carbon\Carbon::parse($attendance->created_at->addHour(1))->format('H:i') }}</span> </td>
 
                       <td>
+                        @if (isset($attendance->check_out))                           
                         {{ $attendance->check_out }}
+                        <br> <span class="badge badge-danger">{{ \Carbon\Carbon::parse($attendance->updated_at->addHour(1))->format('H:i') }}</span>
+                        @endif
                       </td>
                       
                       <td>
                         @if ( $attendance->daily_status == 'present' )
-                            <span class="badge badge-success">Present</span>
+                          <span class="badge badge-success">Present</span>
+                        @elseif( $attendance->daily_status == 'late' )
+                          <span class="badge badge-danger">Late</span>
                         @endif
                       </td>
+
                       <td>
-                        Ugo Sunday
+                        <a href="{{ route('editAttendance', $attendance->unique_key) }}"><button data-bs-target="#addMoneyTransfer" class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
+                          <i class="bi bi-arrow-down"></i> <span>On Exit</span></button></a>
                       </td>
-                  </tr>
+                    </tr>
                     @endforeach
                 @endif
                   

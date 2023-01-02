@@ -14,9 +14,11 @@
       </nav>
     </div><!-- End Page Title -->
 
-    <section class="section dashboard">
+    <section class="section dashboard mb-3">
       <div class="row">
-
+        <div class="col-md-12">
+          <a href="{{ route('allRole') }}" class="badge badge-dark">Role List</a>
+        </div>
       </div>
     </section>
 

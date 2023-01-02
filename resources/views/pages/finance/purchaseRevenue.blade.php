@@ -1,5 +1,5 @@
 @extends('layouts.design')
-@section('title')Purchase Revenue @endsection
+@section('title')Account: Purchase Revenue @endsection
 @section('content')
 
 <main id="main" class="main">
@@ -29,7 +29,7 @@
           <div class="card-body pt-3">
             
           <div class="clearfix mb-2">
-            <div class="float-end text-end">
+            <div class="float-end text-end d-none">
               <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                 <i class="bi bi-upload"></i> <span>Import</span></button>
               <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>

@@ -31,6 +31,9 @@ class MessageController extends Controller
     //Send SMS
     public function sendSMS($recipient, $message)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $flash = 0;
         $message = substr($message, 0, 160); //Limit this message to one page.
         $Ebulksms = new EbulkSmsApi();
@@ -49,6 +52,9 @@ class MessageController extends Controller
 
     public function sendVCode($phone, $vcode="")
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $message = '<#> Test message';
         $this->sendSMS($phone, $message);
     }
@@ -57,7 +63,10 @@ class MessageController extends Controller
 
     public function composeSmsMessage()
     {
-        return view('pages.messages.sms.composeMessage');
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        return view('pages.messages.sms.composeMessage', compact('authUser', 'user_role'));
     }
 
     /**
@@ -67,6 +76,9 @@ class MessageController extends Controller
      */
     public function composeSmsMessagePost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'topic' => 'required|string',
             'recipients' => 'required|string',
@@ -114,8 +126,11 @@ class MessageController extends Controller
      */
     public function sentSmsMessage()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $messages = Message::where('type', 'sms')->get();
-        return view('pages.messages.sms.sentMessage', compact('messages'));
+        return view('pages.messages.sms.sentMessage', compact('authUser', 'user_role', 'messages'));
     }
 
     /**
@@ -126,18 +141,19 @@ class MessageController extends Controller
      */
     public function composeEmailMessage()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $users = User::where('isSuperAdmin', false)->get();
-        return view('pages.messages.email.composeMessage', compact('users'));
+        return view('pages.messages.email.composeMessage', compact('authUser', 'user_role', 'users'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    
     public function composeEmailMessagePost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $request->validate([
             'topic' => 'required|string',
             'message' => 'required|string',
@@ -180,28 +196,30 @@ class MessageController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function sentEmailMessage()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $messages = Message::where('type', 'email')->get();
-        return view('pages.messages.email.sentMessage', compact('messages'));
+        return view('pages.messages.email.sentMessage', compact('authUser', 'user_role', 'messages'));
     }
 
     public function mailCustomersByCategory($selectedCategory, $recipients="")
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $category = Category::where('unique_key', $selectedCategory)->first();
         $selectedCustomers = DB::table("customers")->whereIn('id',explode(",",$recipients))->get();
-        return view('pages.messages.email.mailCustomersByCategory', compact('category', 'selectedCustomers', 'recipients'));
+        return view('pages.messages.email.mailCustomersByCategory', compact('authUser', 'user_role', 'category', 'selectedCustomers', 'recipients'));
     }
 
     public function mailCustomersByCategoryPost(Request $request, $selectedCategory, $recipients="")
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $category = Category::where('unique_key', $selectedCategory)->first();
         $customers = DB::table("customers")->whereIn('id',explode(",",$recipients));
         $recipients_emails = $customers->pluck('email');
@@ -238,6 +256,9 @@ class MessageController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 }

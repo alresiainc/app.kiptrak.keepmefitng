@@ -114,3 +114,31 @@
 </main><!-- End #main -->
 
 @endsection
+
+@section('extra_js')
+
+<!--observe checked n unchecked perms--->
+<script>
+    $(".check-demo").click(function(){
+    if($(this).is(':not(:checked)')){
+    
+        var id_checked = $(this).attr("data-id");
+        //alert($(this).val());   
+        var perms_unchecked = $("input[data-unchecked-id='" + id_checked +"']");
+        // console.log(perms_unchecked.attr("data-id"));
+        unchecked_val = perms_unchecked.val(id_checked);
+        // console.log(unchecked_val); 
+    }
+     if($(this).is(":checked")) {
+    
+        var id_checked = $(this).attr("data-id");
+        //alert($(this).val());   
+        var perms_unchecked = $("input[data-unchecked-id='" + id_checked +"']");
+        // console.log(perms_unchecked.attr("data-id"));
+        unchecked_val = perms_unchecked.val('');
+        // console.log(unchecked_val);
+       }
+    });
+</script>
+
+@endsection

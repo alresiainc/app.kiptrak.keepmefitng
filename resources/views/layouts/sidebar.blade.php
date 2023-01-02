@@ -2,95 +2,145 @@
 
   <ul class="sidebar-nav" id="sidebar-nav">
       
+    <!---dashboard--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'dashboard-manager' || $user_role->permissions->contains('slug', 'view-dashboard')) ))
     <li class="nav-item"><a class="nav-link" data-bs-target="#dashboard-nav" href="/">
       <i class="bi bi-grid"></i><span>Dashboard</span></a>
       <ul id="dashboard-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav"></ul>
     </li>
+    @endif
 
     <!---products--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'product-manager' || $user_role->permissions->contains('slug', 'view-product-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#products-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-box"></i>
         <span>Products</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="products-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-product')) ))
         <li>
           <a href="{{ route('addProduct') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Add Product</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-product-list')) ))
         <li>
           <a href="{{ route('allProducts') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>View Products</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-product-category-list')) ))
         <li>
           <a href="{{ route('allCategory') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>View Categories</span></a>
         </li>
+        @endif
       </ul>
     </li>
+    @endif
 
     <!---form-builder--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'form-builder-manager' || $user_role->permissions->contains('slug', 'view-form-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-textarea-resize"></i>
         <span>Form Builder</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="forms-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-form')) ))
         <li>
           <a href="{{ route('newFormBuilder') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Build Form</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-form')) ))
         <li>
           <a href="{{ route('allNewFormBuilders') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>View Forms</span></a>
         </li>
+        @endif
       </ul>
     </li>
+    @endif
 
     <!---orders--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'order-manager' || $user_role->permissions->contains('slug', 'view-order-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#orders-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-cart3"></i>
         <span>Orders</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="orders-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-order-list')) ))
         <li>
           <a href="{{ route('allOrders') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>View Orders</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-order-list')) ))
         <li>
           <a href="{{ route('cartAbandon') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Cart Abandoned</span></a>
         </li>
+        @endif
       </ul>
     </li>
+    @endif
 
     <!---warehouse--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'warehouse-manager' || $user_role->permissions->contains('slug', 'view-warehouse-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#warehouse-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-house"></i>
         <span>Warehouse</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="warehouse-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-warehouse')) ))
         <li>
           <a href="{{ route('addWarehouse') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Add Warehouse</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-warehouse-list')) ))
         <li>
           <a href="{{ route('allWarehouse') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>View Warehouse</span></a>
         </li>
+        @endif
       </ul>
     </li>
+    @endif
 
     <!---purchases--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'purchase-manager' || $user_role->permissions->contains('slug', 'view-purchase-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#purchases-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-credit-card"></i>
         <span>Purchases</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="purchases-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-purchase-list')) ))
         <li>
           <a href="{{ route('addPurchase') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Add Purchase</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-purchase')) ))
         <li>
           <a href="{{ route('allPurchase') }}"><i style="font-size: 100%!important;" class="bi bi-cart3"></i><span>View Purchases</span></a>
         </li>
+        @endif
       </ul>
     </li>
+    @endif
 
     <!---inventory--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'inventory-manager' || $user_role->permissions->contains('slug', 'view-inventory-dashboard')) ))
     <li class="nav-item">
       <a class="nav-link"href="{{ route('inventoryDashboard') }}">
         <i class="bi bi-shop"></i>
@@ -98,45 +148,65 @@
       </a>
       
     </li>
+    @endif
 
     <!---sales--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'sale-manager' || $user_role->permissions->contains('slug', 'view-sale-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#sales-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-cart3"></i>
         <span>Sales</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="sales-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-sale')) ))
         <li>
           <a href="{{ route('addSale') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Add Sale</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-sale-list')) ))
         <li>
           <a href="{{ route('allSale') }}"><i style="font-size: 100%!important;" class="bi bi-cart3"></i><span>View Sales</span></a>
         </li>
+        @endif
       </ul>
     </li>
+    @endif
 
     <!---expenses--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'expense-manager' || $user_role->permissions->contains('slug', 'view-expense-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#expenses-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-credit-card-2-back"></i>
         <span>Expenses</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="expenses-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-expense')) ))
         <li>
           <a href="{{ route('addExpense') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Add Expense</span></a>
         </li>
+        @endif
         
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-expense-list')) ))
         <li>
           <a href="{{ route('allExpense') }}"><i style="font-size: 100%!important;" class="bi bi-cart3"></i><span>View Expenses</span></a>
         </li>
+        @endif
 
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-expense-category-list')) ))
         <li>
           <a href="{{ route('allExpenseCategory') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Expense Category</span></a>
         </li>
+        @endif
+
       </ul>
     </li>
+    @endif
 
-    <!---accounts--->
+    <!---not-used accounts--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && $user_role->slug == 'account-manager' ))
     <li class="nav-item d-none">
       <a class="nav-link collapsed" data-bs-target="#accounts-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-bank"></i>
@@ -157,44 +227,67 @@
         </li>
       </ul>
     </li>
+    @endif
 
     <!---Human Resource Mgt--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'human-resource-manager' || $user_role->permissions->contains('slug', 'view-hrm-menu')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#hrm-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-people"></i>
         <span>HRM</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="hrm-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-expense-list')) ))
         <li>
           <a href="{{ route('allRole') }}"><i style="font-size: 100%!important;" class="bi bi-list"></i><span>Roles & Permissions</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-employee-list')) ))
         <li>
           <a href="{{ route('allStaff') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Employee</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-attendance-list')) ))
         <li>
           <a href="{{ route('allAttendance') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Attendance</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-payroll-list')) ))
         <li>
           <a href="{{ route('allPayroll') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Payroll</span></a>
         </li>
+        @endif
       </ul>
     </li>
+    @endif
 
     <!---suppliers--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'supplier-manager' || $user_role->permissions->contains('slug', 'view-supplier-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#suppliers-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-truck"></i>
         <span>Suppliers</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="suppliers-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-supplier')) ))
         <li>
           <a href="{{ route('addSupplier') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Add Supplier</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-supplier-list')) ))
         <li>
           <a href="{{ route('allSupplier') }}"><i style="font-size: 100%!important;" class="bi bi-cart3"></i><span>View Suppliers</span></a>
         </li>
+        @endif
       </ul>
     </li>
+    @endif
     
     <!---staff--->
     <li class="nav-item d-none">
@@ -211,91 +304,141 @@
         </li>
       </ul>
     </li>
-
+    
     <!---agents--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'agent-manager' || $user_role->permissions->contains('slug', 'view-agent-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#agents-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-person-workspace"></i>
         <span>Agents</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="agents-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-agent')) ))
         <li>
           <a href="{{ route('addAgent') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Add Agent</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-agent-list')) ))
         <li>
           <a href="{{ route('allAgent') }}"><i style="font-size: 100%!important;" class="bi bi-cart3"></i><span>View Agent</span></a>
         </li>
+        @endif
       </ul>
     </li>
+    @endif
 
     <!---customers--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'customer-manager' || $user_role->permissions->contains('slug', 'view-customer-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#customers-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-person-check"></i>
         <span>Customers</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="customers-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-customer')) ))
         <li>
           <a href="{{ route('addCustomer') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Add Customer</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-customer-list')) ))
         <li>
           <a href="{{ route('allCustomer') }}"><i style="font-size: 100%!important;" class="bi bi-cart3"></i><span>View Customer</span></a>
         </li>
+        @endif
       </ul>
     </li>
+    @endif
 
     <!---Accounting--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'accounting-manager' || $user_role->permissions->contains('slug', 'view-accounting-menu')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#finance-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-safe-fill"></i>
         <span>Accounting System</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="finance-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-income-statement')) ))
         <li>
           <a href="{{ route('incomeStatement') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Income Statement</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-purchase-revenue')) ))
         <li>
           <a href="{{ route('purchaseRevenue') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Purchase Revenue</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-sale-revenue')) ))
         <li>
           <a href="{{ route('saleRevenue') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Sales Revenue</span></a>
         </li>
+        @endif
+
         <li class="d-none">
           <a href="{{ route('allProducts') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Gross Profit</span></a>
         </li>
       </ul>
     </li>
+    @endif
 
     <!---reports--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'report-manager' || $user_role->permissions->contains('slug', 'view-report-menu')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#reports-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-megaphone"></i>
         <span>Reports</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="reports-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-product-report')) ))
         <li>
           <a href="{{ route('productReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Product Report</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-sale-report')) ))
         <li>
           <a href="{{ route('saleReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Sales Report</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-purchase-report')) ))
         <li>
           <a href="{{ route('purchaseReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Purchase Report</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-customer-report')) ))
         <li>
           <a href="{{ route('customerReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Customer Report</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-supplier-report')) ))
         <li>
           <a href="{{ route('supplierReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Supplier Report</span></a>
         </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-staff-report')) ))
         <li>
           <a href="{{ route('staffReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Staff Report</span></a>
         </li>
+        @endif
         
       </ul>
     </li>
+    @endif
 
     <!---messaging--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'messaging-manager' || $user_role->permissions->contains('slug', 'view-message-menu')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#messaging-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-chat-left"></i>
@@ -310,8 +453,10 @@
         </li>
       </ul>
     </li>
+    @endif
 
     <!---referral--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && $user_role->slug == 'referral-manager' ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#referral-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-link"></i>
@@ -326,7 +471,11 @@
         </li>
       </ul>
     </li>
+    @endif
 
+    <!---settings--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'settings-manager' || $user_role->permissions->contains('slug', 'view-setting-menu')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#setting-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-gear-fill"></i>
@@ -341,44 +490,10 @@
         </li>
       </ul>
     </li>
-
-    
+    @endif
 
   </ul>
 
   </aside>
 
-  @php
-      $customers = \App\Models\Customer::all();
-  @endphp
-  <div class="modal fade" id="customerReport" tabindex="-1" aria-labelledby="customerReportLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Select Customer to See Report</h1>
-                <button type="button" class="btn-close"
-                    data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ route('customerReport') }}" method="POST" enctype="multipart/form-data">@csrf
-                <div class="modal-body">
-                    
-                    <div class="d-grid mb-2">
-                        <label for="">Select Customer</label>
-                        <select name="customer_id" data-live-search="true" class="custom-select border form-control" id="">
-                          <option value="">Nothing Selected</option>
-                          @if (count($customers))
-                              @foreach ($customers as $customer)
-                                  <option value="{{ $customer->id }}">{{ $customer->firstname }} {{ $customer->lastname }}</option>
-                              @endforeach
-                          @endif
-                        </select>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+  

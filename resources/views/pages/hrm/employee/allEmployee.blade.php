@@ -63,10 +63,12 @@
             
             <div class="clearfix mb-2">
 
+              @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-employee')) ))
               <div class="float-start text-start">
                   <a href="{{ route('addStaff') }}"><button data-bs-target="#addMoneyTransfer" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                     <i class="bi bi-plus"></i> <span>Add Employee</span></button></a>
               </div>
+              @endif
   
               <div class="float-end text-end">
                 <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data">

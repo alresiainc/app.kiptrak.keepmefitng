@@ -11,12 +11,18 @@ class UpsellSettingController extends Controller
     //allUpsellTemplates
     public function allUpsellTemplates()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $upsellTemplates = UpsellSetting::all();
-        return view('pages.settings.upsell.allUpsellTemplates', \compact('upsellTemplates'));
+        return view('pages.settings.upsell.allUpsellTemplates', \compact('authUser', 'user_role', 'upsellTemplates'));
     }
 
     public function singleUpsellTemplate($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $upsellTemplate = UpsellSetting::where('unique_key', $unique_key);
         // $sale_code = $sale->first()->sale_code;
         if(!$upsellTemplate->exists()){
@@ -24,12 +30,15 @@ class UpsellSettingController extends Controller
         }
         $upsellTemplate = $upsellTemplate->first();
 
-        return view('pages.settings.upsell.singleUpsellTemplate', \compact('upsellTemplate'));
+        return view('pages.settings.upsell.singleUpsellTemplate', \compact('authUser', 'user_role', 'upsellTemplate'));
     }
 
     //allUpsellTemplates
     public function addUpsellTemplate()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $string = 'kpups-' . date("Ymd") . '-'. date("his");
         $randomStrings = UpsellSetting::where('template_code', 'like', $string.'%')->pluck('template_code');
 
@@ -38,7 +47,7 @@ class UpsellSettingController extends Controller
         } while ($randomStrings->contains($randomString));
     
         $template_code = $randomString;
-        return view('pages.settings.upsell.addUpsellTemplate', \compact('template_code'));
+        return view('pages.settings.upsell.addUpsellTemplate', \compact('authUser', 'user_role', 'template_code'));
     }
 
     /**
@@ -49,6 +58,9 @@ class UpsellSettingController extends Controller
      */
     public function addUpsellTemplatePost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
         $request->validate([
             'heading_text' => 'required|string',
@@ -128,6 +140,9 @@ class UpsellSettingController extends Controller
      */
     public function editUpsellTemplate($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $upsellTemplate = UpsellSetting::where('unique_key', $unique_key);
         // $sale_code = $sale->first()->sale_code;
         if(!$upsellTemplate->exists()){
@@ -136,7 +151,7 @@ class UpsellSettingController extends Controller
         $upsellTemplate = $upsellTemplate->first();
 
 
-        return view('pages.settings.upsell.editUpsellTemplate', \compact('upsellTemplate'));
+        return view('pages.settings.upsell.editUpsellTemplate', \compact('authUser', 'user_role', 'upsellTemplate'));
     }
 
     /**
@@ -147,6 +162,9 @@ class UpsellSettingController extends Controller
      */
     public function editUpsellTemplatePost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $upsellTemplate = UpsellSetting::where('unique_key', $unique_key);
         if(!$upsellTemplate->exists()){
             abort(404);
@@ -213,6 +231,9 @@ class UpsellSettingController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -224,6 +245,9 @@ class UpsellSettingController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 }

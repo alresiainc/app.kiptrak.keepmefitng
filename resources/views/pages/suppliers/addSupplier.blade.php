@@ -26,6 +26,14 @@
     </div>
     @endif
 
+    <section class="section dashboard mb-3">
+      <div class="row">
+        <div class="col-md-12">
+          <a href="{{ route('allSupplier') }}" class="badge badge-dark">Suppliers List</a>
+        </div>
+      </div>
+    </section>
+
     <section>
       <div class="row">
         <div class="col-md-12">

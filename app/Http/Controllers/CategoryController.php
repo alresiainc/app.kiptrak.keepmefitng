@@ -14,12 +14,18 @@ class CategoryController extends Controller
 {
     public function allCategory()
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $categories = Category::orderBy('id', 'DESC')->get();
-        return view('pages.category.allCategory', compact('categories'));
+        return view('pages.category.allCategory', compact('authUser', 'user_role', 'categories'));
     }
 
     public function addCategoryPost(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $authUser = auth()->user();
         $data = $request->all();
 
@@ -34,49 +40,67 @@ class CategoryController extends Controller
 
     public function singleCategory($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
 
     }
 
     public function editCategory($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
 
     }
 
     public function productsByCategory($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $category = Category::where('unique_key', $unique_key)->first();
         if(!isset($category)){
             abort(404);
         }
         $products = $category->products;
-        return view('pages.category.productsByCategory', compact('category', 'products'));
+        return view('pages.category.productsByCategory', compact('authUser', 'user_role', 'category', 'products'));
     }
 
     public function salesByCategory($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $category = Category::where('unique_key', $unique_key)->first();
         if(!isset($category)){
             abort(404);
         }
         $products = $category->products->pluck('id'); //[1,3,4]
         $sales = Sale::whereIn('sales.product_id', $products)->get();
-        return view('pages.category.salesByCategory', compact('category', 'sales'));
+        return view('pages.category.salesByCategory', compact('authUser', 'user_role', 'category', 'sales'));
     }
 
     public function purchasesByCategory($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $category = Category::where('unique_key', $unique_key)->first();
         if(!isset($category)){
             abort(404);
         }
         $products = $category->products->pluck('id'); //[1,3,4]
         $purchases = Purchase::whereIn('purchases.product_id', $products)->get();
-        return view('pages.category.purchasesByCategory', compact('category', 'purchases'));
+        return view('pages.category.purchasesByCategory', compact('authUser', 'user_role', 'category', 'purchases'));
     }
 
     //customers by category of products bought
     public function customersByCategory($unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $category = Category::where('unique_key', $unique_key)->first();
         if(!isset($category)){
             abort(404);
@@ -89,16 +113,22 @@ class CategoryController extends Controller
             $customers[] = $customer;
         }
         //return $customers;
-        return view('pages.category.customersByCategory', compact('category', 'customers'));
+        return view('pages.category.customersByCategory', compact('authUser', 'user_role', 'category', 'customers'));
     }
 
     public function ajaxSendCustomerMail(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $data = $request->all();
     }
 
     public function createProductCategoryAjax(Request $request)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         $authUser = auth()->user();
         $data = $request->all();
         $category = new Category();
@@ -127,6 +157,9 @@ class CategoryController extends Controller
      */
     public function edit($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -139,6 +172,9 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 
@@ -150,6 +186,9 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
         //
     }
 }

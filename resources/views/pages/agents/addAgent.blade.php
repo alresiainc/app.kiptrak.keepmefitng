@@ -8,7 +8,8 @@
       <h1>Add Agent</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allAgent') }}">Agents</a></li>
           <li class="breadcrumb-item active">Add Agent</li>
         </ol>
       </nav>
