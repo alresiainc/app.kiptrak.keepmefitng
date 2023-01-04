@@ -29,11 +29,16 @@
           <div class="card-body pt-3">
             
           <div class="clearfix mb-2">
-            <div class="float-end text-end d-none">
-              <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
+            <div class="float-start text-start">
+              <a href="{{ route('addPurchase') }}" class="btn btn-sm btn-dark rounded-pill">
+                <i class="bi bi-plus"></i> <span>Add Purchase</span></a>
+            </div>
+            <div class="float-end text-end">
+              <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill d-none" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                 <i class="bi bi-upload"></i> <span>Import</span></button>
-              <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
-              <button class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
+              <a href="{{ route('purchasesExport') }}"><button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
+                <i class="bi bi-download"></i> <span>Export</span></button></a>
+              <button class="btn btn-sm btn-danger rounded-pill d-none" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
             </div>
           </div>
           <hr>
@@ -58,7 +63,8 @@
             
                         <tr>
                     
-                            <td>{{ $purchase->purchase_code }}</td>
+                            <td>{{ $purchase->purchase_code }}
+                            @if($purchase->purchases->count() > 0) <br> <span class="badge badge-info">{{ $purchase->purchases->count()+1 }} set</span> @endif</td>
                             <td>{{ isset($purchase->supplier_id) ? $purchase->supplier->company_name : '' }}</td>
                             <td>
                                 @if($purchase->status=='received')
@@ -82,7 +88,7 @@
                                 @endif
                             </td>
         
-                            <td>{{ $purchase->purchaseDate() }}</td>
+                            <td>{{ $purchase->created_at }}</td>
         
                             <td>
                                 <div class="d-flex">

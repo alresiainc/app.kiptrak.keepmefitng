@@ -8,7 +8,8 @@
       <h1>Warehouse Information</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allWarehouse') }}">Warehouses</a></li>
           <li class="breadcrumb-item active">Warehouse Information<li>
         </ol>
       </nav>
@@ -38,7 +39,7 @@
                   </div>
                 </div>
                 <div class="float-lg-end">
-                  <button class="btn btn-sm btn-success"><i class="bi bi-pencil-square"></i></button>
+                  <a href="{{ route('editWarehouse', $warehouse->unique_key) }}"><button class="btn btn-sm btn-success"><i class="bi bi-pencil-square"></i></button></a>
                 </div>
               </div>
 

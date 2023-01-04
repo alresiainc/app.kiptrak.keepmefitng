@@ -8,7 +8,8 @@
       <h1>Agent Information</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allAgent') }}">Agents</a></li>
           <li class="breadcrumb-item active">Agent Information<li>
         </ol>
       </nav>
@@ -52,7 +53,7 @@
                   </div>
                 </div>
                 <div class="float-lg-end">
-                  <button class="btn btn-sm btn-success"><i class="bi bi-pencil-square"></i></button>
+                  <a href="{{ route('editAgent', $agent->unique_key) }}"><button class="btn btn-sm btn-success"><i class="bi bi-pencil-square"></i></button></a>
                 </div>
               </div>
 

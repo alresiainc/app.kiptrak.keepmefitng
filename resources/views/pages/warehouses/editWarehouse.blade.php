@@ -12,8 +12,9 @@
       <h1>Edit Product</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-          <li class="breadcrumb-item active">Edit Product</li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allWarehouse') }}">Warehouses</a></li>
+          <li class="breadcrumb-item active">Edit Warehouse</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
@@ -47,9 +48,11 @@
                     <div class="col-md-3">
                       <label for="" class="form-label">Select Agent | optional</label>
                       <select name="agent_id" class="custom-select form-control border" id="">
-                        @if (isset($warehouse->agent_id))
-                            <option value="{{ $warehouse->agent_id }}" selected>{{ $warehouse->agent->name }}</option>
-                        @endif
+                        
+                        <option value="{{ isset($warehouse->agent_id) ? $warehouse->agent_id : '' }}" selected>
+                          {{ isset($warehouse->agent_id) ? $warehouse->agent->name : 'Nothing Selected' }}
+                        </option>
+                        
                         
                         @if (count($agents) > 0)
                             @foreach ($agents as $agent)

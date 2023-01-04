@@ -25,7 +25,8 @@
       <h1>Add Purchase</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allPurchase') }}">Purchases</a></li>
           <li class="breadcrumb-item active">Add Purchase</li>
         </ol>
       </nav>

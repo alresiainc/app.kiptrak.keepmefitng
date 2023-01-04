@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
 
             $table->longText('unique_key')->nullable();
+            $table->string('code')->unique()->nullable();
 
             $table->string('name');
             // $table->string('quantity'); //handled in 'InomingStock' tbl
@@ -33,7 +34,7 @@ return new class extends Migration
             $table->string('sale_id')->nullable();
 
             $table->string('price')->nullable(); //might not be in use
-            $table->string('code')->unique()->nullable();
+            
             $table->longText('features')->nullable(); //serialized
 
             $table->string('warehouse_id')->nullable();

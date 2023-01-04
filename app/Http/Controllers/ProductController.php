@@ -202,7 +202,7 @@ class ProductController extends Controller
         $stock_available = $product->stock_available();
 
         return view('pages.products.editProduct', compact('authUser', 'user_role', 'product', 'currency_symbol', 'features',
-        'currencies', 'currency_nationality', 'stock_available'));
+        'countries', 'currency_nationality', 'stock_available'));
     }
 
     public function editProductPost(Request $request, $unique_key)

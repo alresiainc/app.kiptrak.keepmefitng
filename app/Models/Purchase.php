@@ -17,21 +17,45 @@ class Purchase extends Model
     {
         parent::boot();
 
+        // static::creating(function ($model) {
+        //     $model->unique_key = $model->createUniqueKey(Str::random(30));
+        // });
+
         static::creating(function ($model) {
-            $model->unique_key = $model->createUniqueKey(Str::random(30));
+            // $model->unique_key = $model->createUniqueKey(Str::random(30));
+            // $model->url = 'order-form/'.$model->unique_key;
+            // $model->save();
+
+            $string = Str::random(30);
+            $randomStrings = static::where('unique_key', 'like', $string.'%')->pluck('unique_key');
+
+            $code = 'kp-' . date("his");
+            $randomCodes = static::where('purchase_code', 'like', $code.'%')->pluck('purchase_code');
+
+            do {
+                $randomString = $string.rand(100000, 999999);
+            } while ($randomStrings->contains($randomString));
+
+            do {
+                $randomCode = $code.rand(100000, 999999);
+            } while ($randomCodes->contains($randomCode));
+    
+            $model->unique_key = $randomString;
+            $model->purchase_code = $randomCode;
+
         });
     }
 
     //check if unique_key exists
-    private function createUniqueKey($string){
-        if (static::whereUniqueKey($unique_key = $string)->exists()) {
-            $random = rand(1000, 9000);
-            $unique_key = $string.''.$random;
-            return $unique_key;
-        }
+    // private function createUniqueKey($string){
+    //     if (static::whereUniqueKey($unique_key = $string)->exists()) {
+    //         $random = rand(1000, 9000);
+    //         $unique_key = $string.''.$random;
+    //         return $unique_key;
+    //     }
 
-        return $string;
-    }
+    //     return $string;
+    // }
 
     public function purchaseDate(){
         $time = strtotime($this->purchase_date);
@@ -40,12 +64,24 @@ class Purchase extends Model
     }
 
     public function amountPaidAccrued($purchase_code){
-        $amountPaid = $this->where('purchase_code', $purchase_code)->sum('amount_paid');
+        // $amountPaid = $this->where('purchase_code', $purchase_code)->sum('amount_paid');
+        $purchase = $this->where('purchase_code', $purchase_code);
+        $amountPaid = $purchase->sum('amount_paid');
+
+        if ($purchase->first()->purchases->count() > 0) {
+            $amountPaid += $purchase->first()->purchases->sum('amount_paid');
+        }
         return $amountPaid;
     }
 
     public function amountDueAccrued($purchase_code){
-        $amountDue = $this->where('purchase_code', $purchase_code)->sum('amount_due');
+        //$amountDue = $this->where('purchase_code', $purchase_code)->sum('amount_due');
+        $purchase = $this->where('purchase_code', $purchase_code);
+        $amountDue = $purchase->sum('amount_due');
+
+        if ($purchase->first()->purchases->count() > 0) {
+            $amountDue += $purchase->first()->purchases->sum('amount_due');
+        }
         return $amountDue;
     }
 
@@ -55,6 +91,10 @@ class Purchase extends Model
     // {
     //     return $this->hasMany(Purchase::class, 'parent_id', 'id'); //mapping categories to its 'parent_id'
     // }
+    public function createdBy() {
+        return $this->belongsTo(User::class, 'created_by');    
+    }
+    
     public function supplier()
     {
         return $this->belongsTo(Supplier::class, 'supplier_id');  

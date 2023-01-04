@@ -34,6 +34,10 @@ class WareHouse extends Model
         return $string;
     }
 
+    public function createdBy() {
+        return $this->belongsTo(User::class, 'created_by');    
+    }
+
     public function agent()
     {
         return $this->belongsTo(User::class, 'agent_id');  

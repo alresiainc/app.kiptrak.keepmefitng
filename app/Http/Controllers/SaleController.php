@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use DB;
+use Illuminate\Support\Facades\Session;
 
 use App\Models\Country;
 use App\Models\Supplier;
@@ -108,50 +109,100 @@ class SaleController extends Controller
         //for stocking
         foreach ($data['product_id'] as $key => $id) {
             if(!empty($id)){
-                $parent_sale = Sale::where('sale_code', $data['sale_code']);
+                if($key==0){
+                    //$parent_sale = Sale::where('sale_code', $data['sale_code']);
 
-                $grand_total += $data['product_qty'][$key] * $data['unit_price'][$key];
+                    $grand_total += $data['product_qty'][$key] * $data['unit_price'][$key];
+    
+                    //update product stock
+                    $outgoingStock = new OutgoingStock();
+                    $outgoingStock->product_id = $id;
+                    $outgoingStock->order_id = $order->id;
+                    $outgoingStock->quantity_removed = $data['product_qty'][$key];
+                    $outgoingStock->customer_acceptance_status = 'accepted';
+                    $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
+                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    $outgoingStock->quantity_returned = 0; //by default
+                    $outgoingStock->created_by = 1;
+                    $outgoingStock->status = 'true';
+                    $outgoingStock->save();
+                    
+                    $sale = new Sale();
+                    $sale->sale_code = $data['sale_code'];
+                    // $sale->parent_id = $parent_sale->exists() ? $parent_sale->first()->id : null;
+                    $sale->customer_id = $data['customer'];
+                    $sale->warehouse_id = $data['warehouse'];
+                    // $sale->sale_date = $data['sale_date'];
+    
+                    $sale->product_id = $id;
+    
+                    $sale->product_qty_sold = $data['product_qty'][$key];
+                    $sale->product_selling_price = $data['unit_price'][$key];
+                    $sale->outgoing_stock_id = $outgoingStock->id;
+                    $sale->amount_due = $data['payment_status'] == 'paid' ? 0 : $data['product_qty'][$key] * $data['unit_price'][$key];
+                    $sale->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key];
+    
+                    $sale->payment_status = $data['payment_status'];
+                    $sale->note = !empty($data['note']) ? $data['note'] : null;
+    
+                    $sale->attached_document = $imageName == '' ? null : $imageName;
+    
+                    $sale->created_by = 1;
+                    $sale->status = $data['sale_status'];
+    
+                    $sale->save();
 
-                //update product stock
-                $outgoingStock = new OutgoingStock();
-                $outgoingStock->product_id = $id;
-                $outgoingStock->order_id = $order->id;
-                $outgoingStock->quantity_removed = $data['product_qty'][$key];
-                $outgoingStock->customer_acceptance_status = 'accepted';
-                $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
-                $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-                $outgoingStock->quantity_returned = 0; //by default
-                $outgoingStock->created_by = 1;
-                $outgoingStock->status = 'true';
-                $outgoingStock->save();
+                    $parent_sale_id = Session::put('parent_sale_id', $sale->id); //for grouping sales
+                    
+                    //update product <price></price>
+                    Product::where(['id'=>$id])->update(['sale_id'=>$sale->id,'sale_price'=>$data['unit_price'][$key]]);
+                }else{
+                    //$parent_sale = Sale::where('sale_code', $data['sale_code']);
+
+                    $grand_total += $data['product_qty'][$key] * $data['unit_price'][$key];
+    
+                    //update product stock
+                    $outgoingStock = new OutgoingStock();
+                    $outgoingStock->product_id = $id;
+                    $outgoingStock->order_id = $order->id;
+                    $outgoingStock->quantity_removed = $data['product_qty'][$key];
+                    $outgoingStock->customer_acceptance_status = 'accepted';
+                    $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
+                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    $outgoingStock->quantity_returned = 0; //by default
+                    $outgoingStock->created_by = 1;
+                    $outgoingStock->status = 'true';
+                    $outgoingStock->save();
+                    
+                    $sale = new Sale();
+                    $sale->sale_code = $data['sale_code'];
+                    $sale->parent_id = Session::get('parent_sale_id');
+                    $sale->customer_id = $data['customer'];
+                    $sale->warehouse_id = $data['warehouse'];
+                    // $sale->sale_date = $data['sale_date'];
+    
+                    $sale->product_id = $id;
+    
+                    $sale->product_qty_sold = $data['product_qty'][$key];
+                    $sale->product_selling_price = $data['unit_price'][$key];
+                    $sale->outgoing_stock_id = $outgoingStock->id;
+                    $sale->amount_due = $data['payment_status'] == 'paid' ? 0 : $data['product_qty'][$key] * $data['unit_price'][$key];
+                    $sale->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key];
+    
+                    $sale->payment_status = $data['payment_status'];
+                    $sale->note = !empty($data['note']) ? $data['note'] : null;
+    
+                    $sale->attached_document = $imageName == '' ? null : $imageName;
+    
+                    $sale->created_by = 1;
+                    $sale->status = $data['sale_status'];
+    
+                    $sale->save();
+
+                    //update product <price></price>
+                    Product::where(['id'=>$id])->update(['sale_id'=>$sale->id,'sale_price'=>$data['unit_price'][$key]]);
+                }
                 
-                $sale = new Sale();
-                $sale->sale_code = $data['sale_code'];
-                $sale->parent_id = $parent_sale->exists() ? $parent_sale->first()->id : null;
-                $sale->customer_id = $data['customer'];
-                $sale->warehouse_id = $data['warehouse'];
-                // $sale->sale_date = $data['sale_date'];
-
-                $sale->product_id = $id;
-
-                $sale->product_qty_sold = $data['product_qty'][$key];
-                $sale->product_selling_price = $data['unit_price'][$key];
-                $sale->outgoing_stock_id = $outgoingStock->id;
-                $sale->amount_due = $data['payment_status'] == 'paid' ? 0 : $data['product_qty'][$key] * $data['unit_price'][$key];
-                $sale->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key];
-
-                $sale->payment_status = $data['payment_status'];
-                $sale->note = !empty($data['note']) ? $data['note'] : null;
-
-                $sale->attached_document = $imageName == '' ? null : $imageName;
-
-                $sale->created_by = 1;
-                $sale->status = $data['sale_status'];
-
-                $sale->save();
-
-                //update product <price></price>
-                Product::where(['id'=>$id])->update(['sale_id'=>$sale->id,'sale_price'=>$data['unit_price'][$key]]);
 
             }
         }
@@ -179,7 +230,13 @@ class SaleController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        return '123';
+        $sale = Sale::where('unique_key', $unique_key);
+        if(!$sale->exists()){
+            abort(404);
+        }
+        $sale = $sale->first();
+
+        return view('pages.sales.singleSale', compact('authUser', 'user_role', 'sale'));
     }
 
     public function editSale($unique_key)

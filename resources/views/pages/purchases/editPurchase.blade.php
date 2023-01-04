@@ -25,7 +25,8 @@
       <h1>Edit Purchase</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allPurchase') }}">Purchases</a></li>
           <li class="breadcrumb-item active">Edit Purchase</li>
         </ol>
       </nav>
@@ -64,7 +65,7 @@
                 <div class="col-md-6">
                     <label for="" class="form-label">Select Supplier *</label>
                     <select name="supplier" data-live-search="true" class="custom-select form-control border @error('supplier') is-invalid @enderror" id="">
-                      <option value="{{ $purchase->supplier_id }}" selected>{{ $purchase->supplier->company_name }}</option>
+                      <option value="{{ isset($purchase->supplier_id) ? $purchase->supplier_id : '' }}" selected>{{ isset($purchase->supplier_id) ? $purchase->supplier->company_name : '' }}</option>
   
                       @foreach ($suppliers as $supplier)
                           <option value="{{ $supplier->id }}">
@@ -136,9 +137,9 @@
                                         value='{{ $purchase->product_qty_purchased }}'>
                                     </td>
                                     <td style='width:150px'><input type='number' name='unit_price[]' class='form-control unit-price'
-                                        value='{{ $purchase->product->price }}'>
+                                        value='{{ $purchase->product_purchase_price }}'>
                                     </td>
-                                    <td class="total">{{ $purchase->product->price * $purchase->product_qty_purchased }}</td>
+                                    <td class="total">{{ $purchase->product_purchase_price * $purchase->product_qty_purchased }}</td>
                                     <td class='btnDelete btn btn-danger btn-sm mt-1 mb-1'>Remove</td>
                                 </tr>
                             @endforeach

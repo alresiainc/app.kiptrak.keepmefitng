@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 use App\Models\Product;
 use App\Models\Sale;
@@ -27,6 +28,7 @@ class InventoryController extends Controller
         
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
+        $record = 'all';
 
         $total_products = Product::all();
 
@@ -66,7 +68,223 @@ class InventoryController extends Controller
 
         $recently_products = Product::take(5)->get();
         
-        return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
+        return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
+        'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
+    }
+
+    //today
+    public function inventoryDashboardToday()
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency = $generalSetting->country->symbol;
+        $record = 'today';
+        /////////////////////////////////////////////////////
+        $dt = Carbon::now();
+
+        $total_products = Product::all();
+
+        $out_of_stock_products = [];
+        foreach ($total_products as $key => $product) {
+            if ($product->stock_available() < 10) {
+                $out_of_stock_products[] = $product;
+            } 
+        }
+
+        $warehouses = WareHouse::all();
+
+        $sales_sum = Sale::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount_paid'); 
+        $sale_revenue = $this->shorten($sales_sum);
+        
+        $purchase_sum = Purchase::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount_paid');
+        $expense_sum = Expense::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount');
+
+        $total_expenses = $this->shorten($purchase_sum + $expense_sum);
+
+        $profit_val = $sales_sum - ($purchase_sum + $expense_sum);
+
+        if ($profit_val > 0) {
+            $profit = $this->shorten($profit_val);
+        } else {
+            $profit = $this->shorten($profit_val);
+        }
+
+        $orders = Order::all();
+
+        $suppliers = Supplier::all();
+
+        $purchase_sum = $this->shorten($purchase_sum);
+        $sales_sum = $this->shorten($sales_sum);
+
+        $customers = Customer::all();
+
+        $recently_products = Product::take(5)->get();
+        
+        return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
+        'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
+    }
+
+    //weekly
+    public function inventoryDashboardWeekly()
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency = $generalSetting->country->symbol;
+        $record = 'weekly';
+        /////////////////////////////////////////////////////
+        $dt = Carbon::now();
+
+        $total_products = Product::all();
+
+        $out_of_stock_products = [];
+        foreach ($total_products as $key => $product) {
+            if ($product->stock_available() < 10) {
+                $out_of_stock_products[] = $product;
+            } 
+        }
+
+        $warehouses = WareHouse::all();
+
+        $sales_sum = Sale::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount_paid'); 
+        $sale_revenue = $this->shorten($sales_sum);
+        
+        $purchase_sum = Purchase::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount_paid');
+        $expense_sum = Expense::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount');
+
+        $total_expenses = $this->shorten($purchase_sum + $expense_sum);
+
+        $profit_val = $sales_sum - ($purchase_sum + $expense_sum);
+
+        if ($profit_val > 0) {
+            $profit = $this->shorten($profit_val);
+        } else {
+            $profit = $this->shorten($profit_val);
+        }
+
+        $orders = Order::all();
+
+        $suppliers = Supplier::all();
+
+        $purchase_sum = $this->shorten($purchase_sum);
+        $sales_sum = $this->shorten($sales_sum);
+
+        $customers = Customer::all();
+
+        $recently_products = Product::take(5)->get();
+        
+        return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
+        'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
+    }
+
+    //monthly
+    public function inventoryDashboardMonthly()
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency = $generalSetting->country->symbol;
+        $record = 'monthly';
+        /////////////////////////////////////////////////////
+        $dt = Carbon::now();
+
+        $total_products = Product::all();
+
+        $out_of_stock_products = [];
+        foreach ($total_products as $key => $product) {
+            if ($product->stock_available() < 10) {
+                $out_of_stock_products[] = $product;
+            } 
+        }
+
+        $warehouses = WareHouse::all();
+
+        $sales_sum = Sale::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount_paid'); 
+        $sale_revenue = $this->shorten($sales_sum);
+        
+        $purchase_sum = Purchase::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount_paid');
+        $expense_sum = Expense::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount');
+
+        $total_expenses = $this->shorten($purchase_sum + $expense_sum);
+
+        $profit_val = $sales_sum - ($purchase_sum + $expense_sum);
+
+        if ($profit_val > 0) {
+            $profit = $this->shorten($profit_val);
+        } else {
+            $profit = $this->shorten($profit_val);
+        }
+
+        $orders = Order::all();
+
+        $suppliers = Supplier::all();
+
+        $purchase_sum = $this->shorten($purchase_sum);
+        $sales_sum = $this->shorten($sales_sum);
+
+        $customers = Customer::all();
+
+        $recently_products = Product::take(5)->get();
+        
+        return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
+        'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
+    }
+
+    //yearly
+    public function inventoryDashboardYearly()
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency = $generalSetting->country->symbol;
+        $record = 'yearly';
+        /////////////////////////////////////////////////////
+        $dt = Carbon::now();
+
+        $total_products = Product::all();
+
+        $out_of_stock_products = [];
+        foreach ($total_products as $key => $product) {
+            if ($product->stock_available() < 10) {
+                $out_of_stock_products[] = $product;
+            } 
+        }
+
+        $warehouses = WareHouse::all();
+
+        $sales_sum = Sale::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount_paid'); 
+        $sale_revenue = $this->shorten($sales_sum);
+        
+        $purchase_sum = Purchase::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount_paid');
+        $expense_sum = Expense::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount');
+
+        $total_expenses = $this->shorten($purchase_sum + $expense_sum);
+
+        $profit_val = $sales_sum - ($purchase_sum + $expense_sum);
+
+        if ($profit_val > 0) {
+            $profit = $this->shorten($profit_val);
+        } else {
+            $profit = $this->shorten($profit_val);
+        }
+
+        $orders = Order::all();
+
+        $suppliers = Supplier::all();
+
+        $purchase_sum = $this->shorten($purchase_sum);
+        $sales_sum = $this->shorten($sales_sum);
+
+        $customers = Customer::all();
+
+        $recently_products = Product::take(5)->get();
+        
+        return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
     }
 

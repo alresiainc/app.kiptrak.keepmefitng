@@ -22,7 +22,7 @@ class AuthController extends Controller
     //login
     public function login()
     {
-        return view('pages.auth.login', compact('authUser', 'user_role'));
+        return view('pages.auth.login');
     }
 
     public function loginPost(Request $request)
@@ -349,7 +349,7 @@ class AuthController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        $agents = User::where('type', 'agent')->get();
+        $agents = User::where('type', 'agent')->orderBy('id', 'DESC')->get();
         return view('pages.agents.allAgent', compact('authUser', 'user_role', 'agents'));
     }
 
@@ -418,7 +418,6 @@ class AuthController extends Controller
         
         return back()->with('success', 'Agent Created Successfully');
 
-        
     }
 
     public function singleAgent($unique_key)

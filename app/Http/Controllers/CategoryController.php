@@ -25,6 +25,10 @@ class CategoryController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $request->validate([
+            'category' => 'required',
+        ]);
         
         $authUser = auth()->user();
         $data = $request->all();

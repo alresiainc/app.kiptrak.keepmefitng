@@ -8,7 +8,8 @@
       <h1>Product Information</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allProducts') }}">Products</a></li>
           <li class="breadcrumb-item active">Product Information<li>
         </ol>
       </nav>
@@ -23,13 +24,19 @@
               <div class="card-title clearfix">
                 <div class="d-lg-flex d-grid align-items-center float-start">
                   <div>
+                    @if (isset($product->image))
                     <a
                     href="{{ asset('/storage/products/'.$product->image) }}"
                     data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
                     data-fancybox
                     > 
-                    <img src="{{ asset('/storage/products/'.$product->image) }}" width="100" class="img-thumbnail img-fluid"
+                    <img src="{{ asset('/storage/products/'.$product->image) }}" style="width: 100px; height: 100px;" class="img-thumbnail img-fluid"
                     alt="Photo"></a>
+
+                    @else
+                      <img src="{{ asset('/storage/products/default.png') }}" width="50" class="rounded-circle img-thumbnail img-fluid"
+                      alt="{{$product->name}}"></a> 
+                    @endif
                   </div>
                   <div class="d-grid ms-lg-3">
                     <div class="display-6">{{ $product->name }}</div>
@@ -46,7 +53,7 @@
                   </div>
                 </div>
                 <div class="float-lg-end">
-                  <button class="btn btn-sm btn-success"><i class="bi bi-pencil-square"></i></button>
+                  <a href="{{ route('editProduct', $product->unique_key) }}"><button class="btn btn-sm btn-success"><i class="bi bi-pencil-square"></i></button></a>
                 </div>
               </div>
 

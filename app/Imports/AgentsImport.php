@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
-
-class EmployeesImport implements ToCollection, WithHeadingRow
+class AgentsImport implements ToCollection, WithHeadingRow
 {
     /**
     * @param Collection $collection
@@ -42,11 +41,8 @@ class EmployeesImport implements ToCollection, WithHeadingRow
                 'city' => $row['city'],
                 'state' => $row['state'],
                 'address' => $row['address'],
+                'type' => 'agent',
                 'country_id' => 1,
-                'type' => 'staff',
-                'created_by' => auth()->user()->id,
-                'status' => 'true',
-                
             ]);
         }
     }

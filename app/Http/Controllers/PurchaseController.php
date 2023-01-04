@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use DB;
+use Illuminate\Support\Facades\Session;
 
 use App\Models\Country;
 use App\Models\Supplier;
@@ -89,63 +90,94 @@ class PurchaseController extends Controller
         foreach ($data['product_id'] as $key => $id) {
             if(!empty($id)){
 
-                $parent_purchase = Purchase::where('purchase_code', $data['purchase_code']); //for grouping purchases
+                if($key==0){
+                    // $parent_purchase = Purchase::where('purchase_code', $data['purchase_code']); //for grouping purchases
 
-                //update product purchase price currently
-                Product::where(['id'=>$id])->update(['purchase_price'=>$data['unit_price'][$key]]);
+                    //update product purchase price currently
+                    Product::where(['id'=>$id])->update(['purchase_price'=>$data['unit_price'][$key]]);
+    
+                    //update product stock
+                    $incomingStock = new IncomingStock();
+                    $incomingStock->product_id = $id;
+                    $incomingStock->quantity_added = $data['product_qty'][$key];
+                    $incomingStock->reason_added = 'as_purchase'; //as_new_product, as_returned_product, as_purchase
+                    $incomingStock->created_by = $authUser->id;
+                    $incomingStock->status = 'true';
+                    $incomingStock->save();
+    
+                    //purchase
+                    
+                    $purchase = new Purchase();
+                    $purchase->purchase_code = $data['purchase_code'];
+                    // $purchase->parent_id = $parent_purchase->exists() ? $parent_purchase->first()->id : null;
+                    $purchase->supplier_id = $data['supplier'];
+                    // $purchase->purchase_date = $data['purchase_date'];
+    
+                    $purchase->product_id = $id;
+                    $purchase->product_qty_purchased = $data['product_qty'][$key];
+                    $purchase->incoming_stock_id = $incomingStock->id;
+    
+                    $purchase->product_purchase_price = $data['unit_price'][$key];
+                    $purchase->amount_due = $data['product_qty'][$key] * $data['unit_price'][$key];
+                    $purchase->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key]; //u cant owe as d admin
+    
+                    $purchase->payment_type = $data['payment_type'];
+                    $purchase->note = !empty($data['note']) ? $data['note'] : null;
+    
+                    $purchase->attached_document = $imageName == '' ? null : $imageName;
+    
+                    $purchase->created_by = $authUser->id;
+                    $purchase->status = $data['purchase_status'];
+    
+                    $purchase->save();
+                    $parent_purchase_id = Session::put('parent_purchase_id', $purchase->id); //for grouping purchases
+                }else{
+                    //$parent_purchase = Purchase::where('purchase_code', $data['purchase_code']); //for grouping purchases
 
-                //update product stock
-                $incomingStock = new IncomingStock();
-                $incomingStock->product_id = $id;
-                $incomingStock->quantity_added = $data['product_qty'][$key];
-                $incomingStock->reason_added = 'as_purchase'; //as_new_product, as_returned_product, as_purchase
-                $incomingStock->created_by = $authUser->id;
-                $incomingStock->status = 'true';
-                $incomingStock->save();
-
-                //expense
-                $data = $request->all();
-
-                // $expense = new Expense();
-                // $expense->expense_code = 'kpe-' . date("Ymd") . '-'. date("his");
-                // $expense->amount = $data['product_qty'][$key] * $data['unit_price'][$key];
-                // $expense->product_id = $id;
-                // $expense->note = !empty($data['note']) ? $data['note'] : null;
-                // $expense->created_by = 1;
-                // $expense->status = 'true';
-                // $expense->save();
-                
-                $purchase = new Purchase();
-                $purchase->purchase_code = $data['purchase_code'];
-                $purchase->parent_id = $parent_purchase->exists() ? $parent_purchase->first()->id : null;
-                $purchase->supplier_id = $data['supplier'];
-                // $purchase->purchase_date = $data['purchase_date'];
-
-                $purchase->product_id = $id;
-                $purchase->product_qty_purchased = $data['product_qty'][$key];
-                $purchase->incoming_stock_id = $incomingStock->id;
-
-                $purchase->product_purchase_price = $data['unit_price'][$key];
-                $purchase->amount_due = $data['product_qty'][$key] * $data['unit_price'][$key];
-                $purchase->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key]; //u cant owe as d admin
-
-                $purchase->payment_type = $data['payment_type'];
-                $purchase->note = !empty($data['note']) ? $data['note'] : null;
-
-                $purchase->attached_document = $imageName == '' ? null : $imageName;
-
-                $purchase->created_by = $authUser->id;
-                $purchase->status = $data['purchase_status'];
-
-                $purchase->save();
-
-                
+                    //update product purchase price currently
+                    Product::where(['id'=>$id])->update(['purchase_price'=>$data['unit_price'][$key]]);
+    
+                    //update product stock
+                    $incomingStock = new IncomingStock();
+                    $incomingStock->product_id = $id;
+                    $incomingStock->quantity_added = $data['product_qty'][$key];
+                    $incomingStock->reason_added = 'as_purchase'; //as_new_product, as_returned_product, as_purchase
+                    $incomingStock->created_by = $authUser->id;
+                    $incomingStock->status = 'true';
+                    $incomingStock->save();
+    
+                    //expense
+                    
+    
+                    $purchase = new Purchase();
+                    $purchase->purchase_code = $data['purchase_code'];
+                    //$purchase->parent_id = $parent_purchase->exists() ? $parent_purchase->first()->id : null;
+                    $purchase->parent_id = Session::get('parent_purchase_id');
+                    $purchase->supplier_id = $data['supplier'];
+                    // $purchase->purchase_date = $data['purchase_date'];
+    
+                    $purchase->product_id = $id;
+                    $purchase->product_qty_purchased = $data['product_qty'][$key];
+                    $purchase->incoming_stock_id = $incomingStock->id;
+    
+                    $purchase->product_purchase_price = $data['unit_price'][$key];
+                    $purchase->amount_due = $data['product_qty'][$key] * $data['unit_price'][$key];
+                    $purchase->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key]; //u cant owe as d admin
+    
+                    $purchase->payment_type = $data['payment_type'];
+                    $purchase->note = !empty($data['note']) ? $data['note'] : null;
+    
+                    $purchase->attached_document = $imageName == '' ? null : $imageName;
+    
+                    $purchase->created_by = $authUser->id;
+                    $purchase->status = $data['purchase_status'];
+    
+                    $purchase->save();
+                }   
             }
         }
 
         return back()->with('success', 'Purchase Saved Successfully');
-
-        
     }
     
     public function singlePurchase($unique_key)
@@ -153,7 +185,13 @@ class PurchaseController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        return '123';
+        $purchase = Purchase::where('unique_key', $unique_key);
+        if(!$purchase->exists()){
+            abort(404);
+        }
+        $purchase = $purchase->first();
+
+        return view('pages.purchases.singlePurchase', compact('authUser', 'user_role', 'purchase'));
     }
 
     public function editPurchase($unique_key)
@@ -162,14 +200,13 @@ class PurchaseController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
         $purchase = Purchase::where('unique_key', $unique_key);
-        $purchase_code = $purchase->first()->purchase_code;
         if(!$purchase->exists()){
             abort(404);
         }
+        $purchase = $purchase->first();
+        $purchases = Purchase::where('id', $purchase->id)->orWhere('parent_id', $purchase->id)->get();
         $products = Product::all();
         $suppliers = Supplier::all();
-        $purchases = Purchase::where('purchase_code', $purchase_code)->get();
-        $purchase = $purchase->first();
         
         return view('pages.purchases.editPurchase', compact('authUser', 'user_role', 'products', 'suppliers', 'purchase', 'purchases'));
     }

@@ -1,3 +1,8 @@
+<?php
+//$url = url()->current(); 
+$routeName = \Route::currentRouteName();
+//dd($routeName);
+?>
 <aside id="sidebar" class="sidebar">
 
   <ul class="sidebar-nav" id="sidebar-nav">
@@ -5,8 +10,10 @@
     <!---dashboard--->
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'dashboard-manager' || $user_role->permissions->contains('slug', 'view-dashboard')) ))
-    <li class="nav-item"><a class="nav-link" data-bs-target="#dashboard-nav" href="/">
-      <i class="bi bi-grid"></i><span>Dashboard</span></a>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-target="#dashboard-nav" href="/"
+      @if($routeName=='dashboard')
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif><i class="bi bi-grid"></i><span>Dashboard</span></a>
       <ul id="dashboard-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav"></ul>
     </li>
     @endif
@@ -15,7 +22,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'product-manager' || $user_role->permissions->contains('slug', 'view-product-list')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#products-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#products-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allProducts') || ($routeName=='addProduct') || ($routeName=='singleProduct') || ($routeName=='editProduct') || ($routeName=='allCategory'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-box"></i>
         <span>Products</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -45,7 +54,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'form-builder-manager' || $user_role->permissions->contains('slug', 'view-form-list')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='formBuilder') || ($routeName=='newFormBuilder') || ($routeName=='allNewFormBuilders') || ($routeName=='editNewFormBuilder'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-textarea-resize"></i>
         <span>Form Builder</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -70,7 +81,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'order-manager' || $user_role->permissions->contains('slug', 'view-order-list')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#orders-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#orders-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allOrders') || ($routeName=='addOrder') || ($routeName=='singleOrder'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-cart3"></i>
         <span>Orders</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -82,7 +95,7 @@
         @endif
 
         @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-order-list')) ))
-        <li>
+        <li class="d-none">
           <a href="{{ route('cartAbandon') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Cart Abandoned</span></a>
         </li>
         @endif
@@ -94,7 +107,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'warehouse-manager' || $user_role->permissions->contains('slug', 'view-warehouse-list')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#warehouse-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#warehouse-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allWarehouse') || ($routeName=='addWarehouse') || ($routeName=='singleWarehouse') || ($routeName=='editWarehousePost'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-house"></i>
         <span>Warehouse</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -118,7 +133,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'purchase-manager' || $user_role->permissions->contains('slug', 'view-purchase-list')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#purchases-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#purchases-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allPurchase') || ($routeName=='addPurchase') || ($routeName=='singlePurchase') || ($routeName=='editPurchase'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-credit-card"></i>
         <span>Purchases</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -142,7 +159,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'inventory-manager' || $user_role->permissions->contains('slug', 'view-inventory-dashboard')) ))
     <li class="nav-item">
-      <a class="nav-link"href="{{ route('inventoryDashboard') }}">
+      <a class="nav-link"href="{{ route('inventoryDashboard') }}"
+      @if(($routeName=='inventoryDashboard') || ($routeName=='inStockProductsByWarehouse') || ($routeName=='inStockProductsByWarehouseQuery') || ($routeName=='inStockProductsByOtherAgents') || ($routeName=='allProductInventory') || ($routeName=='singleProductSales') || ($routeName=='singleProductPurchases'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-shop"></i>
         <span>Inventory Management</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -154,7 +173,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'sale-manager' || $user_role->permissions->contains('slug', 'view-sale-list')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#sales-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#sales-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allSale') || ($routeName=='addSale') || ($routeName=='singleSale') || ($routeName=='editSale'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-cart3"></i>
         <span>Sales</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -178,7 +199,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'expense-manager' || $user_role->permissions->contains('slug', 'view-expense-list')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#expenses-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#expenses-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allExpense') || ($routeName=='addExpense') || ($routeName=='singleExpense') || ($routeName=='editExpense') || ($routeName=='allExpenseCategory') || ($routeName=='addExpenseCategory') || ($routeName=='singleExpenseCategory') || ($routeName=='editExpenseCategory'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-credit-card-2-back"></i>
         <span>Expenses</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -233,7 +256,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'human-resource-manager' || $user_role->permissions->contains('slug', 'view-hrm-menu')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#hrm-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#hrm-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allRole') || ($routeName=='addRole') || ($routeName=='singleRole') || ($routeName=='editRole') || ($routeName=='allAttendance') || ($routeName=='addAttendance') || ($routeName=='singleAttendance') || ($routeName=='editAttendance'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-people"></i>
         <span>HRM</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -269,7 +294,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'supplier-manager' || $user_role->permissions->contains('slug', 'view-supplier-list')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#suppliers-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#suppliers-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allSupplier') || ($routeName=='addSupplier') || ($routeName=='singleSupplier') || ($routeName=='editSupplier'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-truck"></i>
         <span>Suppliers</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -309,7 +336,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'agent-manager' || $user_role->permissions->contains('slug', 'view-agent-list')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#agents-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#agents-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allAgent') || ($routeName=='addAgent') || ($routeName=='singleAgent') || ($routeName=='editAgent'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-person-workspace"></i>
         <span>Agents</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -333,7 +362,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'customer-manager' || $user_role->permissions->contains('slug', 'view-customer-list')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#customers-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#customers-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allCustomer') || ($routeName=='addCustomer') || ($routeName=='singleCustomer') || ($routeName=='editCustomer') || ($routeName=='singleCustomerSales'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-person-check"></i>
         <span>Customers</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -357,7 +388,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'accounting-manager' || $user_role->permissions->contains('slug', 'view-accounting-menu')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#finance-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#finance-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='allAccount') || ($routeName=='addAccount') || ($routeName=='singleAccount') || ($routeName=='editAccount') || ($routeName=='allMoneyTransfer') || ($routeName=='balanceSheet'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-safe-fill"></i>
         <span>Accounting System</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -391,7 +424,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'report-manager' || $user_role->permissions->contains('slug', 'view-report-menu')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#reports-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#reports-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='productReport') || ($routeName=='saleReport') || ($routeName=='purchaseReport') || ($routeName=='customerReport') || ($routeName=='supplierReport') || ($routeName=='staffReport'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-megaphone"></i>
         <span>Reports</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -440,7 +475,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'messaging-manager' || $user_role->permissions->contains('slug', 'view-message-menu')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#messaging-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#messaging-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='composeSmsMessage') || ($routeName=='sentSmsMessage') || ($routeName=='composeEmailMessage') || ($routeName=='sentEmailMessage') || ($routeName=='mailCustomersByCategory'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-chat-left"></i>
         <span>Messaging System</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -477,7 +514,9 @@
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'settings-manager' || $user_role->permissions->contains('slug', 'view-setting-menu')) ))
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#setting-nav" data-bs-toggle="collapse" href="#">
+      <a class="nav-link collapsed" data-bs-target="#setting-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='generalSetting') || ($routeName=='allUpsellTemplates') || ($routeName=='addUpsellTemplate') || ($routeName=='editUpsellTemplate'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-gear-fill"></i>
         <span>Settings</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>

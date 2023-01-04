@@ -240,7 +240,11 @@ Route::get('/edit-purchase/{unique_key}', [PurchaseController::class, 'editPurch
 Route::post('/edit-purchase/{unique_key}', [PurchaseController::class, 'editPurchasePost'])->name('editPurchasePost');
 
 //inventory management
-Route::get('/inventory-dashboard', [InventoryController::class, 'inventoryDashboard'])->name('inventoryDashboard'); //staffReport
+Route::get('/inventory-dashboard', [InventoryController::class, 'inventoryDashboard'])->name('inventoryDashboard'); //inventoryDashboard
+Route::get('/inventory-dashboard-today', [InventoryController::class, 'inventoryDashboardToday'])->name('inventoryDashboardToday'); //inventoryDashboardToday
+Route::get('/inventory-dashboard-weekly', [InventoryController::class, 'inventoryDashboardWeekly'])->name('inventoryDashboardWeekly'); //inventoryDashboardWeekly
+Route::get('/inventory-dashboard-monthly', [InventoryController::class, 'inventoryDashboardMonthly'])->name('inventoryDashboardMonthly'); //inventoryDashboardMonthly
+Route::get('/inventory-dashboard-yearly', [InventoryController::class, 'inventoryDashboardYearly'])->name('inventoryDashboardYearly'); //inventoryDashboardYearly
 Route::get('/in-stock-products-warehouse', [InventoryController::class, 'inStockProductsByWarehouse'])->name('inStockProductsByWarehouse'); //inStockProductsByWarehouse
 Route::post('/in-stock-products-warehouse', [InventoryController::class, 'inStockProductsByWarehouseQuery'])->name('inStockProductsByWarehouseQuery'); //inStockProductsByWarehouseQuery
 Route::get('/in-stock-products-other-agents', [InventoryController::class, 'inStockProductsByOtherAgents'])->name('inStockProductsByOtherAgents'); //inStockProductsByOtherAgents
@@ -376,6 +380,10 @@ Route::post('/persons-import', [ImportController::class, 'personsImport'])->name
 Route::post('/users-import', [ImportController::class, 'usersImport'])->name('usersImport'); //personsImport //avoid on live
 Route::post('/employees-import', [ImportController::class, 'employeesImport'])->name('employeesImport'); //employeesImport
 Route::post('/suppliers-import', [ImportController::class, 'suppliersImport'])->name('suppliersImport'); //employeesImport
+Route::post('/products-import', [ImportController::class, 'productsImport'])->name('productsImport'); //productsImport
+Route::post('/warehouses-import', [ImportController::class, 'warehousesImport'])->name('warehousesImport'); //warehousesImport
+Route::post('/agents-import', [ImportController::class, 'agentsImport'])->name('agentsImport'); //agentsImport
+Route::post('/customers-import', [ImportController::class, 'customersImport'])->name('customersImport'); //customersImport
 
 //exports
 Route::get('/users-export', [ExportController::class, 'usersExport'])->name('usersExport'); //usersExport //avoid on live
@@ -385,6 +393,28 @@ Route::get('/employees-export', [ExportController::class, 'employeesExport'])->n
 //suppliers exports
 Route::get('/suppliers-export-sample', [ExportController::class, 'suppliersSampleExport'])->name('suppliersSampleExport'); //suppliersSampleExport
 Route::get('/suppliers-export', [ExportController::class, 'suppliersExport'])->name('suppliersExport'); //suppliersExport
+
+//wareHouses export
+Route::get('/warehouses-export-sample', [ExportController::class, 'warehousesSampleExport'])->name('warehousesSampleExport');//warehousesSampleExport
+Route::get('/warehouses-export', [ExportController::class, 'warehousesExport'])->name('warehousesExport');//warehousesExport
+
+//products export
+Route::get('/products-export-sample', [ExportController::class, 'productsSampleExport'])->name('productsSampleExport'); //ProductsSampleExport
+Route::get('/products-export', [ExportController::class, 'productsExport'])->name('productsExport'); //productsExport
+
+//purchase export
+Route::get('/purchases-export', [ExportController::class, 'purchasesExport'])->name('purchasesExport'); //purchasesExport
+
+//sale export
+Route::get('/sales-export', [ExportController::class, 'salesExport'])->name('salesExport'); //salesExport
+
+//agents export
+Route::get('/agents-export-sample', [ExportController::class, 'agentsSampleExport'])->name('agentsSampleExport'); //agentsSampleExport
+Route::get('/agents-export', [ExportController::class, 'agentsExport'])->name('agentsExport'); //agentsExport
+
+//customers export
+Route::get('/customers-export-sample', [ExportController::class, 'customersSampleExport'])->name('customersSampleExport'); //customersSampleExport
+Route::get('/customers-export', [ExportController::class, 'customersExport'])->name('customersExport'); //customersExport
 
 });
 

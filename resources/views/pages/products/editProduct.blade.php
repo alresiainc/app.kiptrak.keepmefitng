@@ -12,7 +12,8 @@
       <h1>Edit Product</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allProducts') }}">Products</a></li>
           <li class="breadcrumb-item active">Edit Product</li>
         </ol>
       </nav>
@@ -33,12 +34,23 @@
               
                 <form class="row g-3" action="{{ route('editProductPost', $product->unique_key) }}"
                     method="POST" enctype="multipart/form-data">@csrf
-                
+
                     <div class="gallery-uploader-wrap">
                         <label for="" class="form-label">Image</label>
                         <br>
                         <label class="uploader-img">
-                          <img src="{{ asset('/storage/products/'.$product->image) }}" width="100" class="img-fluid" alt="Upload Photo"> 
+                          @if (isset($product->image))
+                          <a
+                            href="{{ asset('/storage/products/'.$product->image) }}"
+                            data-fancybox="gallery"
+                            data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
+                          >  
+                          <img src="{{ asset('/storage/products/'.$product->image) }}" width="100" class="img-fluid" alt="Upload Photo"></a>
+                          
+                          @else
+                            <img src="{{ asset('/storage/products/default.png') }}" width="50" class="rounded-circle img-thumbnail img-fluid"
+                            alt="{{$product->name}}"></a> 
+                          @endif
                         </label>
                     </div>
 

@@ -29,11 +29,17 @@
           <div class="card-body pt-3">
             
           <div class="clearfix mb-2">
+            <div class="float-start text-start">
+              <a href="{{ route('addSale') }}" class="btn btn-sm btn-dark rounded-pill">
+                <i class="bi bi-plus"></i> <span>Add Sale</span></a>
+            </div>
+
             <div class="float-end text-end">
-              <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
+              <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill d-none" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                 <i class="bi bi-upload"></i> <span>Import</span></button>
-              <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
-              <button class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
+              <a href="{{ route('salesExport') }}"><button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
+                <i class="bi bi-download"></i> <span>Export</span></button></a>
+              <button class="btn btn-sm btn-danger rounded-pill d-none" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
             </div>
           </div>
           <hr>
@@ -58,7 +64,8 @@
                       
                           <tr>
                       
-                              <td>{{ $sale->sale_code }}</td>
+                              <td>{{ $sale->sale_code }}
+                                @if($sale->sales->count() > 0) <br> <span class="badge badge-info">{{ $sale->sales->count()+1 }} set</span> @endif</td>
                               <td>{{ $sale->customer->firstname.' '.$sale->customer->lastname }}</td>
                               
                               <td>
@@ -89,7 +96,7 @@
                                 @endif
                               </td>
           
-                              <td>{{ $sale->saleDate() }}</td>
+                              <td>{{ $sale->created_at }}</td>
           
                               <td>
                                   <div class="d-flex">

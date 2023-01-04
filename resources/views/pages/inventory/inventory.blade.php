@@ -19,24 +19,29 @@
   <!-- Alert -->
   <div id="liveAlertPlaceholder d-none"></div>
   <!-- /Alert -->
-
+  
   <div class="text-lg-end text-center mb-3">
     <div class="btn-group" role="group" aria-label="Basic example">
-      <button type="button" class="btn btn-sm btn-light-success active">
-        Today
-      </button>
-      <button type="button" class="btn btn-sm btn-light-success">
-        Weekly
-      </button>
-      <button type="button" class="btn btn-sm btn-light-success">
-        Monthly
-      </button>
-      <button type="button" class="btn btn-sm btn-light-success">
-        Yearly
-      </button>
-      <button type="button" class="btn btn-sm btn-light-success">
+      <a href="/"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'all' ? 'active' : '' }}">
         All
-      </button>
+      </button></a>
+
+      <a href="{{ route('inventoryDashboardToday') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'today' ? 'active' : '' }}">
+        Today
+      </button></a>
+
+      <a href="{{ route('inventoryDashboardWeekly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'weekly' ? 'active' : '' }}">
+        Weekly
+      </button></a>
+
+      <a href="{{ route('inventoryDashboardMonthly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'monthly' ? 'active' : '' }}">
+        Monthly
+      </button></a>
+
+      <a href="{{ route('inventoryDashboardYearly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'yearly' ? 'active' : '' }}">
+        Yearly
+      </button></a>
+      
     </div>
   </div>
   <hr />

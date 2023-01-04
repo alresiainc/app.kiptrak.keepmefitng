@@ -55,7 +55,7 @@
       </li>
       <!-- End Notification Nav -->
 
-      <li class="nav-item dropdown">
+      <li class="nav-item dropdown d-none">
         <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
           <i class="bi bi-bell"></i>
           <span class="badge bg-primary badge-number">3</span> </a

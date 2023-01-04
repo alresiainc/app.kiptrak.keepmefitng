@@ -71,7 +71,7 @@
                   <i class="bi bi-plus"></i> <span>Add Category</span></button>
             </div>
 
-            <div class="float-end text-end">
+            <div class="float-end text-end d-none">
               <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                 <i class="bi bi-upload"></i> <span>Import</span></button>
               <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
@@ -215,7 +215,12 @@
                     
                     <div class="d-grid mb-3">
                         <label for="">Category Name</label>
-                        <input type="text" name="category" id="" class="form-control">
+                        <input type="text" name="category" id="" class="form-control @error('category') is-invalid @enderror">
+                        @error('category')
+                          <span class="invalid-feedback" role="alert">
+                              <strong>{{ $message }}</strong>
+                          </span>
+                        @enderror
                     </div>               
                 </div>
                 <div class="modal-footer">
@@ -225,5 +230,17 @@
         </div>
     </div>
 </div>
+
+@endsection
+
+@section('extra_js')
+  
+  <?php if(count($errors) > 0) : ?>
+    <script>
+        $( document ).ready(function() {
+            $('#addCategory').modal('show');
+        });
+    </script>
+  <?php endif ?>
 
 @endsection

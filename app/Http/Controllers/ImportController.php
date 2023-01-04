@@ -9,6 +9,10 @@ use App\Imports\PersonsImport;
 use App\Imports\UsersImport;
 use App\Imports\EmployeesImport;
 use App\Imports\SuppliersImport;
+use App\Imports\ProductsImport;
+use App\Imports\WarehousesImport;
+use App\Imports\AgentsImport;
+use App\Imports\CustomersImport;
 use App\Models\User;
 
 
@@ -63,26 +67,40 @@ class ImportController extends Controller
         return back()->with('success', 'Suppliers Imported Successfully');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function productsImport(Request $request)
     {
-        //
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx|max:2048',
+        ]);
+        Excel::import(new ProductsImport, $request->file);
+        return back()->with('success', 'Products Imported Successfully');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function warehousesImport(Request $request)
     {
-        //
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx|max:2048',
+        ]);
+        Excel::import(new WarehousesImport, $request->file);
+        return back()->with('success', 'Warehouses Imported Successfully');
+    }
+
+    public function agentsImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx|max:2048',
+        ]);
+        Excel::import(new AgentsImport, $request->file);
+        return back()->with('success', 'Agents Imported Successfully');
+    }
+
+    public function customersImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx|max:2048',
+        ]);
+        Excel::import(new CustomersImport, $request->file);
+        return back()->with('success', 'Customers Imported Successfully');
     }
 
     /**

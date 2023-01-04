@@ -17,7 +17,7 @@ class CustomerController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        $customers = Customer::all();
+        $customers = Customer::orderBy('id', 'DESC')->get();
         return view('pages.customers.allCustomer', compact('authUser', 'user_role', 'customers'));
     }
 
