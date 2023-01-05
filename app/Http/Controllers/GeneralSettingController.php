@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 
 use App\Models\GeneralSetting;
 use App\Models\Country;
+use App\Models\FAQ;
 
 class GeneralSettingController extends Controller
 {
@@ -103,12 +104,46 @@ class GeneralSettingController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function faq()
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $faqs = FAQ::all();
+
+        return view('pages.faq.faq', compact('authUser', 'user_role', 'faqs'));
+    }
+
+    public function faqPost(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $request->validate([
+            'question' => 'required|string',
+            'answer' => 'required|string'
+        ]);
+
+        $data = $request->all();
+
+        if (empty($data['faq_id'])) {
+            $faq = new FAQ;
+            $faq->question = $data['question'];
+            $faq->answer = $data['answer'];
+            $faq->created_by = $authUser->id;
+            $faq->status = 'true';
+            $faq->save();
+    
+            return back()->with('success', 'FAQ Added Successfully');
+        } else {
+            $faq = FAQ::where('id', $data['faq_id'])->first();
+            $faq->question = $data['question'];
+            $faq->answer = $data['answer'];
+            $faq->save();
+    
+            return back()->with('success', 'FAQ Updated Successfully');
+        }
         
-        //
     }
 
     /**
@@ -117,12 +152,18 @@ class GeneralSettingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function deleteFaq($unique_key)
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        //
+        $faq = FAQ::where('unique_key', $unique_key);
+        if(!$faq->exists()){
+            abort(404);
+        }
+
+        $faq->first()->delete();
+        return back()->with('success', 'FAQ Deleted Successfully');
     }
 
     /**

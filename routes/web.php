@@ -306,7 +306,12 @@ Route::post('/edit-upsell-templates/{unique_key}', [UpsellSettingController::cla
 Route::get('/general-setting', [GeneralSettingController::class, 'generalSetting'])->name('generalSetting');
 Route::post('/general-setting', [GeneralSettingController::class, 'generalSettingPost'])->name('generalSettingPost');
 
-//generalSetting
+//faqs
+Route::get('/faqs', [GeneralSettingController::class, 'faq'])->name('faq');
+Route::post('/faqs', [GeneralSettingController::class, 'faqPost'])->name('faqPost');
+Route::get('/delete-faq/{unique_key}', [GeneralSettingController::class, 'deleteFaq'])->name('deleteFaq');
+
+//incomeStatement
 Route::get('/income-statement', [FinanceController::class, 'incomeStatement'])->name('incomeStatement');
 Route::post('/income-statement', [FinanceController::class, 'incomeStatementQuery'])->name('incomeStatementQuery');
 Route::get('/purchase-revenue', [FinanceController::class, 'purchaseRevenue'])->name('purchaseRevenue');
