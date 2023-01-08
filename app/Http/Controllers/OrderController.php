@@ -23,14 +23,43 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function allOrders()
+    public function allOrders($status="")
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
-        $orders = Order::all();
         $agents = User::where('type','agent')->get();
-        return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents'));
+
+        $orders = Order::all();
+        if ($status=="") {
+            $orders = Order::all();
+        }
+        if ($status=="new") {
+            $orders = Order::where('status', 'new')->get();
+        }
+        if ($status=="pending") {
+            $orders = Order::where('status', 'pending')->get();
+        }
+        if ($status=="cancelled") {
+            $orders = Order::where('status', 'cancelled')->get();
+        }
+        if ($status=="delivered_not_remitted") {
+            $orders = Order::where('status', 'delivered_not_remitted')->get();
+        }
+        if ($status=="delivered_and_remitted") {
+            $orders = Order::where('status', 'delivered_and_remitted')->get();
+        }
+
+        return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents', 'status'));
+    }
+
+    public function updateOrderStatus($unique_key, $status)
+    {
+        $order = Order::where('unique_key', $unique_key);
+        if(!$order->exists()) {
+            abort(404);
+        }
+        $order->update(['status'=>$status]);
+        return back()->with('success', 'Order Updated Successfully!');
     }
 
     //orderForm
@@ -45,6 +74,8 @@ class OrderController extends Controller
             abort(404);
         }
         $order = $order->first();
+        $status = $order->status;
+
         $url = env('APP_URL').'/'.$order->url;
         $orderedProducts = unserialize($order->products);
         $products = [];
@@ -54,6 +85,7 @@ class OrderController extends Controller
         //return $packages;
         
         $outgoingStocks = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted'])->get();
+        $packages = [];
         foreach ($outgoingStocks as $key => $product) {
             $products['product'] = $this->productById($product->product_id);
             $products['quantity_removed'] = $product->quantity_removed;
@@ -64,7 +96,7 @@ class OrderController extends Controller
             $packages[] = $products;
         }
 
-        return view('pages.orders.singleOrder', compact('authUser', 'user_role', 'url', 'order', 'packages', 'gross_revenue', 'currency'));
+        return view('pages.orders.singleOrder', compact('authUser', 'user_role', 'url', 'order', 'packages', 'gross_revenue', 'currency', 'status'));
     }
 
     public function assignAgentToOrder(Request $request)

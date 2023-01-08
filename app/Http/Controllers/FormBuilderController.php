@@ -104,6 +104,7 @@ class FormBuilderController extends Controller
         $order = new Order();
         $order->form_holder_id = $formHolder->id;
         $order->source_type = 'form_holder_module';
+        $order->status = 'new';
         $order->save();
 
         //outgoingStock, in place of orderProduct
@@ -361,6 +362,7 @@ class FormBuilderController extends Controller
             $order = new Order();
             $order->form_holder_id = $formHolder->id;
             $order->source_type = 'form_holder_module';
+            $order->status = 'new';
             $order->save();
     
             //outgoingStock, in place of orderProduct
@@ -920,7 +922,7 @@ class FormBuilderController extends Controller
 
         //update order status
         $order->customer_id = $customer->id;
-        $order->status = 'pending';
+        $order->status = 'new';
         $order->save();
         //$order = $order->update(['customer_id'=>$customer->id, 'status'=>'pending']);
 
@@ -1441,7 +1443,7 @@ class FormBuilderController extends Controller
         $customer->save();
 
         //update order status
-        $order->update(['customer_id'=>$customer->id, 'status'=>'pending']);
+        $order->update(['customer_id'=>$customer->id, 'status'=>'new']);
 
         //to activate psell & thankyou part
         if ($request->upsell_available != '') {

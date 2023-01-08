@@ -16,6 +16,7 @@ use App\Models\Order;
 use App\Models\Supplier;
 use App\Models\Customer;
 use App\Models\ProductWarehouse;
+use App\Models\Category;
 
 
 class InventoryController extends Controller
@@ -29,6 +30,9 @@ class InventoryController extends Controller
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
         $record = 'all';
+
+        $purchases_amount_paid = $this->shorten(Purchase::sum('amount_paid'));
+        $sales_paid = $this->shorten(Sale::sum('amount_paid'));
 
         $total_products = Product::all();
 
@@ -66,10 +70,12 @@ class InventoryController extends Controller
 
         $customers = Customer::all();
 
-        $recently_products = Product::take(5)->get();
+        $recently_products = Product::take(100)->get();
+
+        $categories = Category::all();
         
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
-        'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
+        'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products', 'purchases_amount_paid', 'sales_paid', 'categories'));
     }
 
     //today
@@ -534,13 +540,14 @@ class InventoryController extends Controller
         return view('pages.inventory.inStockProductsByOtherAgents', \compact('authUser', 'user_role', 'products', 'in_stock_products','warehouses', 'start_date', 'end_date', 'warehouse_selected'));
     }
 
-    public function allProductInventory()
+    public function allProductInventory($stock="")
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
         $products = Product::all();
-        return view('pages.inventory.allProductInventory', compact('authUser', 'user_role', 'products'));
+        
+        return view('pages.inventory.allProductInventory', compact('authUser', 'user_role', 'products', 'stock'));
     }
 
     public function singleProductSales($unique_key)

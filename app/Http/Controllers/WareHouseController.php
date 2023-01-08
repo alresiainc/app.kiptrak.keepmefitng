@@ -71,6 +71,14 @@ class WareHouseController extends Controller
         if(!isset($warehouse)){
             abort(404);
         }
+
+        $products = $warehouse->products;
+        if (count($products) > 0) {
+            foreach ($products as $key => $product) {
+                # code...
+            }
+        }
+
         return view('pages.warehouses.singleWarehouse', compact('authUser', 'user_role', 'warehouse'));
     }
 
@@ -94,7 +102,6 @@ class WareHouseController extends Controller
         return view('pages.warehouses.editWarehouse', compact('authUser', 'user_role', 'warehouse', 'agents', 'countries'));
     }
 
-    
     public function editWarehousePost(Request $request, $unique_key)
     {
         $authUser = auth()->user();

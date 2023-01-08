@@ -24,7 +24,7 @@
               <div class="card-title clearfix">
                 <div class="d-lg-flex d-grid align-items-center float-start">
                   
-                  <div class="d-grid ms-lg-3">
+                  <div class="d-grid ms-lg-3" style="padding-right: 10px; border-right: 1px solid;">
                     <div class="display-6">{{ $warehouse->name }}</div>
                     <h5>{{ $warehouse->state }} | {{ $warehouse->country->name }}</h5>
 
@@ -36,6 +36,11 @@
                       <small class="text-danger">Inactive</small>
                     @endif
                     
+                  </div>
+
+                  <div class="d-grid ms-lg-3">
+                    <div class="display-7">Total Products</div>
+                    <h5 class="text-center">{{ count($warehouse->products) }}</h5>
                   </div>
                 </div>
                 <div class="float-lg-end">
@@ -74,6 +79,37 @@
                 
                 
                 
+              </div>
+
+              <hr>
+
+              <div class="row g-3">
+                <div class="col-lg-12"><strong>Products</strong></div>
+                @if (count($warehouse->products) > 0)
+
+                @foreach ($warehouse->products as $product)
+                <div class="col-lg-3">
+                  <label for="">Code</label>
+                  <div class="lead" style="font-size: 14px;">{{ $product->code }}</div>
+                </div>
+                <div class="col-lg-3">
+                  <label for="">Name</label>
+                  <div class="lead" style="font-size: 14px;">{{ $product->name }}</div>
+                </div>
+                <div class="col-lg-3">
+                  <label for="">Stock</label>
+                  <div class="lead">{{ $product->stock_available() }}</div>
+                </div>
+                <div class="col-lg-3">
+                  <label for="">Purchase Price</label>
+                  <div class="lead">{{ $product->purchase_price }}</div>
+                </div>
+                @endforeach
+                
+                @else
+                <div class="col-lg-12 text-center">No Products here at the moment</div>
+                @endif
+
               </div>
 
               

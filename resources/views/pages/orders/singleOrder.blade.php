@@ -5,10 +5,13 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Order Information</h1>
+      <h1>@if (!isset($status) || $status=='new') New @elseif($status=='pending') Pending
+        @elseif($status=='cancelled') Cancelled @elseif($status=='delivered_not_remitted') Delivered not Remitted
+        @elseif($status=='delivered_and_remitted') Delivered and Remitted @endif Order Information</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allOrders') }}">Orders</a></li>
           <li class="breadcrumb-item active">Order Information<li>
         </ol>
       </nav>
@@ -61,6 +64,7 @@
                 </div>
             </div>
 
+            @if (count($packages) > 0)
             @foreach ($packages as $package)
             <hr>
             <div class="row g-3 m-1">
@@ -87,6 +91,13 @@
             
             </div>
             @endforeach
+            
+            @else
+                <div class="row">
+                    <div class="col-lg-12 text-center">Awaiting Customer Response</div>
+                </div>
+            @endif
+            
             
 
               <!--features-->

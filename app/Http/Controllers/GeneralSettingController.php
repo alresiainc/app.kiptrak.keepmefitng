@@ -172,12 +172,12 @@ class GeneralSettingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function dashboardDocs()
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
-        //
+
+        return view('docs.pages.dashboard', compact('authUser', 'user_role'));
     }
 
     /**
@@ -187,12 +187,12 @@ class GeneralSettingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function companyStructure()
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        //
+        return view('pages.settings.generalSetting.companyStructure', compact('authUser', 'user_role'));
     }
 
     /**
@@ -206,6 +206,5 @@ class GeneralSettingController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        //
     }
 }

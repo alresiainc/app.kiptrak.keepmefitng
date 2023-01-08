@@ -37,8 +37,6 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.3/css/intlTelInput.min.css" />
 
-  <link rel="stylesheet" href="https://cdn.datatables.net/datetime/1.2.0/css/dataTables.dateTime.min.css">
-
   <!-- Template Main CSS File -->
   <link href="{{asset('/assets/css/style.css')}}" rel="stylesheet">
   <link href="{{asset('/assets/css/colors.css')}}" rel="stylesheet" />
@@ -123,9 +121,6 @@
   {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.3/js/intlTelInput.min.js"></script> --}}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"></script>
-<script src="https://cdn.datatables.net/datetime/1.2.0/js/dataTables.dateTime.min.js"></script>
-
   <!-- Template Main JS File -->
   <script src="{{asset('/assets/js/main.js')}}"></script>
   <script src="{{asset('/assets/js/navigation.js')}}"></script>
@@ -146,24 +141,7 @@
   <script>
 
     $(document).ready(function () {
-      //disable default alpha
-      // Create date inputs
-    minDate = new DateTime($('#min'), {
-        format: 'MMMM Do YYYY'
-    });
-    maxDate = new DateTime($('#max'), {
-        format: 'MMMM Do YYYY'
-    });
- 
-    // DataTables initialisation
-    var table = $('.custom-table').DataTable({ "bSort" : false });
- 
-    // Refilter the table
-    $('#min, #max').on('change', function () {
-        table.draw();
-    });
-
-
+      $('.custom-table').DataTable({ "bSort" : false });
       $('.custom-select').selectpicker();
     });
   </script>

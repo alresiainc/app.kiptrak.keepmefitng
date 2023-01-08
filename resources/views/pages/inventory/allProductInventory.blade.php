@@ -16,6 +16,10 @@
     div.filter-option-inner-inner{
         color: #000 !important;
     }
+    .product_img {
+      width: 50px !important;
+      height: 50px !important;
+    }
 </style>
 @endsection
 
@@ -24,7 +28,7 @@
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Products Inventory</h1>
+    <h1>@if ($stock=="in_stock") In Stock @elseif($stock=="out_of_stock") Out Of Stock @endif Products Inventory</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
@@ -48,7 +52,7 @@
                   
               </div>
   
-              <div class="float-end text-end">
+              <div class="float-end text-end d-none">
                 <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                   <i class="bi bi-upload"></i> <span>Import</span></button>
                 <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
@@ -69,6 +73,7 @@
               </thead>
               <tbody>
                 @if (count($products) > 0)
+                  @if ($stock=="")
                     @foreach ($products as $product)
                     <tr>
                       <td>
@@ -77,7 +82,7 @@
                         data-fancybox="gallery"
                         data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
                         >   
-                        <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid"
+                        <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid product_img"
                         alt="{{$product->name}}"></a>
                       </td>
                       <td>{{ $product->code  }}</td>
@@ -93,8 +98,71 @@
                           <a href="{{ route('singleProductPurchases', $product->unique_key) }}" class="badge badge-primary me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Purchases">View Purchases</a>
                         </div>
                       </td>
-                  </tr>
+                    </tr>
                     @endforeach
+                  @endif
+
+                  @if ($stock=="in_stock")
+                  @foreach ($products as $product)
+                  @if ($product->stock_available() > 10)
+                  <tr>
+                    <td>
+                      <a
+                      href="{{ asset('/storage/products/'.$product->image) }}"
+                      data-fancybox="gallery"
+                      data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
+                      >   
+                      <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid product_img"
+                      alt="{{$product->name}}"></a>
+                    </td>
+                    <td>{{ $product->code  }}</td>
+                    <td>{{ $product->name }}</td>
+                    
+                    {{-- <td>{{ isset($product->color) ? $product->color : 'None' }}</td>
+                    <td>{{ isset($product->size) ? $product->size : 'None' }}</td> --}}
+                    
+                    <td>
+                      <div class="d-flex">
+                        <a href="{{ route('singleProductSales', $product->unique_key) }}" class="badge badge-success me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Sales">View Sales</a>
+                        <a href="{{ route('singleProductPurchases', $product->unique_key) }}" class="badge badge-primary me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Purchases">View Purchases</a>
+                      </div>
+                    </td>
+                  </tr>
+                  @endif
+                  @endforeach
+                  @endif
+
+                  @if ($stock=="out_of_stock")
+                  @foreach ($products as $product)
+                  @if ($product->stock_available() < 10)
+                  <tr>
+                    <td>
+                      <a
+                      href="{{ asset('/storage/products/'.$product->image) }}"
+                      data-fancybox="gallery"
+                      data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
+                      >   
+                      <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid product_img"
+                      alt="{{$product->name}}"></a>
+                    </td>
+                    <td>{{ $product->code  }}</td>
+                    <td>{{ $product->name }}</td>
+                    
+                    {{-- <td>{{ isset($product->color) ? $product->color : 'None' }}</td>
+                    <td>{{ isset($product->size) ? $product->size : 'None' }}</td> --}}
+                    
+                    
+                    <td>
+                      <div class="d-flex">
+                        <a href="{{ route('singleProductSales', $product->unique_key) }}" class="badge badge-success me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Sales">View Sales</a>
+                        <a href="{{ route('singleProductPurchases', $product->unique_key) }}" class="badge badge-primary me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Purchases">View Purchases</a>
+                      </div>
+                    </td>
+                  </tr>
+                  @endif
+                  @endforeach
+                  @endif
+                        
                 @endif
                   
               </tbody>

@@ -1,6 +1,38 @@
 @extends('layouts.design')
 @section('title')Inventory @endsection
-@section('extra_css')@endsection
+
+@section('extra_css')
+<style>
+  /* select2 arrow */
+  select{
+      -webkit-appearance: listbox !important
+  }
+
+  /* custom-select border & inline edit */
+  .btn-light {
+      background-color: #fff !important;
+      color: #000 !important;
+  }
+  div.filter-option-inner-inner{
+      color: #000 !important;
+  }
+  /* custom-select border & inline edit */
+
+  /* select2 height proper */
+  .select2-selection__rendered {
+      line-height: 31px !important;
+  }
+  .select2-container .select2-selection--single {
+      height: 35px !important;
+  }
+  .select2-selection__arrow {
+      height: 34px !important;
+  }
+  /* select2 height proper */
+</style>
+@endsection
+
+
 
 @section('content')
     
@@ -22,24 +54,25 @@
   
   <div class="text-lg-end text-center mb-3">
     <div class="btn-group" role="group" aria-label="Basic example">
-      <a href="/"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'all' ? 'active' : '' }}">
-        All
-      </button></a>
-
+      
       <a href="{{ route('inventoryDashboardToday') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'today' ? 'active' : '' }}">
         Today
       </button></a>
 
       <a href="{{ route('inventoryDashboardWeekly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'weekly' ? 'active' : '' }}">
-        Weekly
+        This Week
       </button></a>
 
       <a href="{{ route('inventoryDashboardMonthly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'monthly' ? 'active' : '' }}">
-        Monthly
+        This Month
       </button></a>
 
       <a href="{{ route('inventoryDashboardYearly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'yearly' ? 'active' : '' }}">
-        Yearly
+        This Year
+      </button></a>
+
+      <a href="/"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'all' ? 'active' : '' }}">
+        All
       </button></a>
       
     </div>
@@ -49,8 +82,8 @@
   <section class="section m-0">
     <div class="row">
 
-        <!-- Total Products Card -->
-      <div class="col-lg-4 col-md-6">
+      <!-- Total Products Card -->
+      <div class="col-lg-3 col-md-6">
         <div class="card bg-4">
             <a href="{{ route('allProductInventory') }}" class="text-white">
               <div class="card-body p-2">
@@ -68,12 +101,13 @@
 
         </div>
       </div>
-        <!-- End Total Products Card -->
+      <!-- Total Products Card -->
 
       <!-- In-Stock-Products Card -->
-      <div class="col-lg-4 col-md-6" data-bs-toggle="modal" data-bs-target="#inStock">
+      <div class="col-lg-3 col-md-6" data-bs-toggle="modal" data-bs-target="#inStock" style="cursor: pointer;">
         
           <div class="card bg-2">
+            
             <div class="card-body p-2">
               <div class="d-flex align-items-center justify-content-between">
                 <div class="text-start">
@@ -85,14 +119,16 @@
                 </div>
               </div>
             </div>
+            
           </div>
 
       </div>
-      <!-- End Sales Card -->
+      <!-- In-Stock-Products Card -->
 
-      <!-- Sales Card -->
-      <div class="col-lg-4 col-md-6">
+      <!-- Out-Of-Stock-Products Card -->
+      <div class="col-lg-3 col-md-6" style="cursor: pointer;">
         <div class="card bg-3">
+          <a href="{{ route('allProductInventory', 'out_of_stock') }}" class="text-white">
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
@@ -105,9 +141,47 @@
               </div>
             </div>
           </div>
+          </a>
         </div>
       </div>
-      <!-- End Sales Card -->
+      <!-- Out-Of-Stock-Products Card -->
+
+      <!-- Purchases & Sales Card -->
+      <div class="col-lg-3 col-md-6" style="cursor: pointer;">
+        <div class="card bg-1">
+          <a href="{{ route('allProductInventory', 'out_of_stock') }}" class="text-white">
+          <div class="card-body p-2">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="text-start">
+                <small class="text-uppercase small pt-1 fw-bold">Total Purchases</small>
+              </div>
+
+              <div class="text-end">
+                {{ $purchases_amount_paid }}
+              </div>
+            </div>
+          </div>
+          
+          </a>
+        </div>
+        <div class="card bg-2">
+          <a href="{{ route('allProductInventory', 'out_of_stock') }}" class="text-white">
+          <div class="card-body p-2">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="text-start">
+                <small class="text-uppercase small pt-1 fw-bold">Total Sales</small>
+              </div>
+
+              <div class="text-end">
+                {{ $sales_paid }}
+              </div>
+            </div>
+          </div>
+          
+          </a>
+        </div>
+      </div>
+      <!-- Out-Of-Stock-Products Card -->
 
       <!-- Warehouses Card -->
       <div class="col-lg-3 col-md-6 d-none">
@@ -308,18 +382,47 @@
         <div class="card card-top-border border-top-primary">
           <div class="card-body">
             <div class="card-title">Recently Added Products</div>
+
+            <div class="row mb-3">
+              <div class="col-lg-3 col-md-6">
+                <label for="">Start Date</label>
+                <input type="text" name="start_date" id="min" class="form-control filter">
+              </div>
+
+              <div class="col-lg-3 col-md-6">
+                <label for="">End Date</label>
+                <input type="text" name="end_date" id="max" class="form-control filter">
+              </div>
+
+              <div class="col-lg-3 col-md-6">
+                <label for="">Category</label>
+                <select id="filter-categoryname" type="select" class="custom-select border form-control filter">
+                  <option value="">Nothing Selected</option>
+                  @if (count($categories))
+                      @foreach ($categories as $category)
+                      <option value="{{ $category->name }}">{{ $category->name }}</option>
+                      @endforeach
+                  @endif
+                  
+    
+                </select>
+              </div>
+
+              
+            </div>
+
             <div class="table table-responsive">
-              <table
-                id="stock-table"
-                class="table table-striped"
-                style="width: 100%"
-              >
+              <table id="stock-table" class="table custom-table table-striped" style="width:100%">
                 <thead>
                   <tr>
                     <th scope="col">Product Image</th>
                     <th scope="col">Product Name</th>
-                    {{-- <th scope="col">Brand Name</th> --}}
-                    <th scope="col">Stock</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Qty Added</th>
+                    <th scope="col">Qty Sold</th>
+                    <th scope="col">Qty Remaining(Stock)</th>
+                    <th scope="col">Date Added</th>
+                    
                   </tr>
                 </thead>
                 <tbody>
@@ -337,7 +440,11 @@
                                   alt="{{$product->name}}" style="height: 30px;"></a>
                             </th>
                             <td>{{ $product->name }}</td>
+                            <td data-categoryname="{{ $product->category->name }}" class="categoryname">{{ $product->category->name }}</td>
+                            <td>{{ $product->purchases->sum('product_qty_purchased') }}</td>
+                            <td>{{ $product->sales->sum('product_qty_sold') }}</td>
                             <td>{{ $product->stock_available() }}</td>
+                            <td>{{ $product->created_at->format('Y-m-d') }}</td>
                           </tr>
                           
                       @endforeach
@@ -346,6 +453,7 @@
                 </tbody>
               </table>
             </div>
+
           </div>
         </div>
       </div>
@@ -374,7 +482,7 @@
 
               <div class="d-grid mb-2">
                 <a href="{{ route('inStockProductsByOtherAgents') }}" class="btn btn-dark">By Other Agents (minor)</a>
-            </div>
+              </div>
 
           </div>
       </div>
@@ -383,219 +491,111 @@
 
 @endsection
 
+
+
 @section('extra_js')
 
-{{-- <script>
-  $(document).ready(function () {
-    $("#stock-table").DataTable({
-      dom: "Bflrtip",
-      buttons: {
-        buttons: [
-          { extend: "copy", className: "btn btn-teal btn-sm" },
-          { extend: "excel", className: "btn btn-teal btn-sm" },
-          { extend: "pdf", className: "btn btn-teal btn-sm" },
-          { extend: "print", className: "btn btn-teal btn-sm" },
-          { extend: "csv", className: "btn btn-teal btn-sm" },
-        ],
-      },
+
+<script>
+  $('.filter').change(function(){
+        filter_function();
+        //calling filter function each select box value change
     });
 
-    const alertPlaceholder = document.getElementById(
-      "liveAlertPlaceholder"
-    );
+    $('table tbody tr').show(); //intially all rows will be shown
 
-    const alert = (message, type) => {
-      const wrapper = document.createElement("div");
-      wrapper.innerHTML = [
-        `<div class="alert alert-${type} alert-dismissible" role="alert">`,
-        `   <div>${message}</div>`,
-        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
-        "</div>",
-      ].join("");
+    function filter_function(){
+        $('table tbody tr').hide(); //hide all rows
 
-      alertPlaceholder.append(wrapper);
-    };
+        var categorynameFlag = 0;
+        var categorynameValue = $('#filter-categoryname').val();
 
-    alert("Nice, you triggered this alert message!", "danger");
-  });
-</script> --}}
+        //date
+        // var rangeFlag = 0;
+        // var rangeValue = $('#filter-range').val();
+        // var rangeminValue = $('#filter-range').find(':selected').attr('data-min');
+        // var rangemaxValue = $('#filter-range').find(':selected').attr('data-max');
 
-{{-- @if ($yearly_best_selling_qty->count() == 5) --}}
-{{-- <script>
-  //trendingItemsChart
-  var trendingItemsChart = document.getElementById("trendingItemsChart");
-  var _trendingItemsChart = new Chart(trendingItemsChart, {
-    type: 'doughnut',
-    data: {
-      labels: [
-        "{{ $bestSellingProductsBulk[0]['product_name'] }}",
-        "{{ $bestSellingProductsBulk[1]['product_name'] }}",
-        "{{ $bestSellingProductsBulk[2]['product_name'] }}",
-        "{{ $bestSellingProductsBulk[3]['product_name'] }}",
-        "{{ $bestSellingProductsBulk[4]['product_name'] }}",
-        // "Colgate toothpaste",
-        // "Redmi Note 10-64GB",
-      ],
-      datasets: [{
-          label: 'Top Items',
-          data: ["{{ $yearly_best_selling_qty[0]->sold_qty }}", "{{ $yearly_best_selling_qty[1]->sold_qty }}", "{{ $yearly_best_selling_qty[2]->sold_qty }}",
-          "{{ $yearly_best_selling_qty[3]->sold_qty }}", "{{ $yearly_best_selling_qty[4]->sold_qty }}"],
-          // data: [{{ $bestSellingProductsBulk[0]['sold_qty'] }}, {{ $bestSellingProductsBulk[1]['sold_qty'] }}, {{ $bestSellingProductsBulk[2]['sold_qty'] }},
-          // {{ $bestSellingProductsBulk[3]['sold_qty'] }}, {{ $bestSellingProductsBulk[4]['sold_qty'] }}],
-          backgroundColor: [
-          'rgb(102, 102, 255)',
-          'rgb(255, 51, 153)',
-          'rgb(0, 204, 153)',
-          'rgb(204, 204, 0)',
-          'rgb(37, 195, 72)',
-          // 'rgb(31, 161, 212, 1)',
-          // 'rgb(238, 27, 37, 1)'
-          ],
-          hoverOffset: 4
-      }]
-    },
-    //options
-  });
-</script> --}}
-{{-- @endif --}}
+        //setting intial values and flags needed
 
-{{-- <script>
-   'use strict';
+        //traversing each row one by one
+        $('table tr').each(function() {  
 
-  window.chartColors = {
-    red: "rgb(255, 50, 10)",
-    orange: "rgb(255, 102, 64)",
-    yellow: "rgb(230, 184, 0)",
-    green: "rgb(0, 179, 0)",
-    blue: "rgb(0, 0, 230)",
-    purple: "rgb(134, 0, 179)",
-    grey: "rgb(117, 117, 163)",
-  };
-
-  var MONTHS = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  var COLORS = [
-    "#4dc9f6",
-    "#f67019",
-    "#f53794",
-    "#537bc4",
-    "#acc236",
-    "#166a8f",
-    "#00a950",
-    "#58595b",
-    "#8549ba",
-  ];
-
-  //BAR CHART, YEARLY REPORT, PURCHASE, SALES, EXPENSES
-  $(function () {
-    //get the bar chart canvas
-    var ctx = $(".bar-chartcanvas");
-
-    var yearly_profit_amount = ctx.data('profit_chart_value');
-    var yearly_sale_amount = ctx.data('sale_chart_value');
-    var yearly_expense_amount = ctx.data('expense_chart_value');
-    var label1 = ctx.data('label1');
-    var label2 = ctx.data('label2');
-
-    //bar chart data
-    var data = {
-      labels: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
-      datasets: [
-        {
-          label: "Revenue",
-          data: [ yearly_sale_amount[0], yearly_sale_amount[1], yearly_sale_amount[2], yearly_sale_amount[3], yearly_sale_amount[4], yearly_sale_amount[5],
-                  yearly_sale_amount[6], yearly_sale_amount[7], yearly_sale_amount[8], yearly_sale_amount[9], yearly_sale_amount[10], yearly_sale_amount[11],
-                  0],
-          borderColor: window.chartColors.blue,
-          backgroundColor: window.chartColors.blue,
-          borderWidth: 1,
-        },
-        {
-          label: "Expense",
-          data: [ yearly_expense_amount[0], yearly_expense_amount[1], yearly_expense_amount[2], yearly_expense_amount[3], yearly_expense_amount[4], yearly_expense_amount[5],
-                  yearly_expense_amount[6], yearly_expense_amount[7], yearly_expense_amount[8], yearly_expense_amount[9], yearly_expense_amount[10], yearly_expense_amount[11],
-                  0],
-          borderColor: window.chartColors.red,
-          backgroundColor: window.chartColors.red,
-          borderWidth: 1,
-        },
-        {
-          label: "Profit",
-          data: [ yearly_profit_amount[0], yearly_profit_amount[1], yearly_profit_amount[2], yearly_profit_amount[3], yearly_profit_amount[4], yearly_profit_amount[5],
-          yearly_profit_amount[6], yearly_profit_amount[7], yearly_profit_amount[8], yearly_profit_amount[9], yearly_profit_amount[10], yearly_profit_amount[11],
-                  0],
-          borderColor: window.chartColors.green,
-          backgroundColor: window.chartColors.green,
-          borderWidth: 1,
-        },
+            if(categorynameValue == 0){   //if no value then display row
+                categorynameFlag = 1;
+            }
+            else if(categorynameValue == $(this).find('td.categoryname').data('categoryname')){ 
+                categorynameFlag = 1;       //if value is same display row
+            }
+            else{
+                categorynameFlag = 0;
+            }
         
-        
-      ],
-    };
-
-    //options
-    var options = {
-      responsive: true,
-      title: {
-        display: true,
-        position: "top",
-        fontSize: 18,
-        fontColor: "#111",
-      },
-      legend: {
-        display: true,
-        position: "top",
-        labels: {
-          fontColor: "#333",
-          fontSize: 16,
-        },
-      },
-      scales: {
-        yAxes: [
-          {
-            ticks: {
-              min: 0,
-            },
-          },
-        ],
-      },
-    };
-    //create Chart class object
-    var chart = new Chart(ctx, {
-      type: "bar",
-      data: data,
-      options: options,
-    });
-    //end-bar-chartcanvas
+            // if(rangeValue == 0){
+            // rangeFlag = 1;
+            // }
+            // //condition to display rows for a range
+            // else if((rangeminValue <= $(this).find('td.range').data('min') && rangemaxValue >  $(this).find('td.range').data('min')) ||  (
+            //     rangeminValue < $(this).find('td.range').data('max') &&
+            //     rangemaxValue >= $(this).find('td.range').data('max'))){
+            //     rangeFlag = 1;
+            // }
+            // else{
+            //     rangeFlag = 0;
+            // }
+    
+            // console.log(rangeminValue +' '+rangemaxValue);
+            // console.log($(this).find('td.range').data('min') +' '+$(this).find('td.range').data('max'));
   
+  
+        if(categorynameFlag){
+        $(this).show();  //displaying row which satisfies all conditions
+        }
 
-  });
-</script> --}}
+        });
 
+    }
+</script>
+
+
+<script>
+  var minDate, maxDate;
+ 
+ // Custom filtering function which will search data in column four between two values
+ $.fn.dataTable.ext.search.push(
+     function( settings, data, dataIndex ) {
+         var min = minDate.val();
+         var max = maxDate.val();
+         var date = new Date( data[6] );
+  
+         if (
+             ( min === null && max === null ) ||
+             ( min === null && date <= max ) ||
+             ( min <= date   && max === null ) ||
+             ( min <= date   && date <= max )
+         ) {
+             return true;
+         }
+         return false;
+     }
+ );
+
+  // $(document).ready(function() {
+  //   // Create date inputs
+  //   minDate = new DateTime($('#min'), {
+  //       format: 'MMMM Do YYYY'
+  //   });
+  //   maxDate = new DateTime($('#max'), {
+  //       format: 'MMMM Do YYYY'
+  //   });
+ 
+  //   // DataTables initialisation
+  //   var table = $('.custom-table').DataTable({ "bSort" : false });
+ 
+  //   // Refilter the table
+  //   $('#min, #max').on('change', function () {
+  //       table.draw();
+  //   });
+  // });
+</script>
 @endsection

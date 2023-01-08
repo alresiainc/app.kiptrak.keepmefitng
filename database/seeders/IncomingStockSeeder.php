@@ -125,7 +125,7 @@ class IncomingStockSeeder extends Seeder
         $purchase = new Purchase();
         $purchase_code = 'kppur-' . date("Ymd") . '-'. date("his");
         $purchase->purchase_code = $purchase_code;
-        $purchase->product_id = 4;
+        $purchase->product_id = 5;
         $purchase->product_qty_purchased = 50;
         $purchase->incoming_stock_id = $incomingStock->id;
         $purchase->product_purchase_price = 1000; //per unit

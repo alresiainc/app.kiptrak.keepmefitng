@@ -90,22 +90,7 @@ $routeName = \Route::currentRouteName();
       <ul id="orders-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
         @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-order-list')) ))
         <li>
-          <a href="{{ route('allOrders', 'new') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>New Orders</span></a>
-        </li>
-        <li>
-          <a href="{{ route('allOrders', 'pending') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Pending Orders</span></a>
-        </li>
-        <li>
-          <a href="{{ route('allOrders', 'delivered_not_remitted') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Delivered Not Remitted Orders</span></a>
-        </li>
-        <li>
-          <a href="{{ route('allOrders', 'delivered_and_remitted') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Delivered & Remitted Orders</span></a>
-        </li>
-        <li>
-          <a href="{{ route('allOrders', 'cancelled') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Cancelled Orders</span></a>
-        </li>
-        <li>
-          <a href="{{ route('allOrders') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>All Orders</span></a>
+          <a href="{{ route('allOrders') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>View Orders</span></a>
         </li>
         @endif
 
@@ -537,16 +522,10 @@ $routeName = \Route::currentRouteName();
       </a>
       <ul id="setting-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
         <li>
-          <a href="{{ route('generalSetting') }}"><i style="font-size: 100%!important;" class="bi bi-list"></i><span>Company Structure</span></a>
-        </li>
-        <li>
           <a href="{{ route('allUpsellTemplates') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Upsell Templates</span></a>
         </li>
         <li>
           <a href="{{ route('generalSetting') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>General Settings</span></a>
-        </li>
-        <li>
-          <a href="{{ route('dashboardDocs') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Documentation</span></a>
         </li>
       </ul>
     </li>

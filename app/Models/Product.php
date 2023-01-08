@@ -108,4 +108,14 @@ class Product extends Model
         return $this->belongsToMany(WareHouse::class, 'product_warehouses', 'product_id', 'warehouse_id');    
     }
 
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'product_id');  
+    }
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class, 'product_id');  
+    }
+
 }

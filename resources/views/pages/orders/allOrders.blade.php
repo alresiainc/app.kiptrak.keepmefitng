@@ -28,6 +28,15 @@
             height: 34px !important;
         }
         /* select2 height proper */
+
+        table .dropdown-menu{
+          position: fixed !important;
+          top: 50% !important;
+          left:92% !important;
+          transform: translate(-92%, -50%) !important;
+        }
+
+        
     </style>
 @endsection
 @section('content')
@@ -35,11 +44,16 @@
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Orders</h1>
+    <h1>Orders @if (!isset($status) || $status=='new') New @elseif($status=='pending') Pending
+      @elseif($status=='cancelled') Cancelled @elseif($status=='delivered_not_remitted') Delivered not Remitted
+      @elseif($status=='delivered_and_remitted') Delivered and Remitted @endif</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-        <li class="breadcrumb-item active">Orders</li>
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('allOrders') }}">Orders</a></li>
+        <li class="breadcrumb-item active">@if (!isset($status) || $status=='new') New @elseif($status=='pending') Pending
+          @elseif($status=='cancelled') Cancelled @elseif($status=='delivered_not_remitted') Delivered not Remitted
+          @elseif($status=='delivered_and_remitted') Delivered and Remitted @endif</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -104,7 +118,7 @@
 
                       @if (isset($order->agent_assigned_id))
                       <td>
-                        {{ $order->agent->name }}
+                        {{ $order->agent->name }} <br>
                         <button class="btn btn-sm btn-dark rounded-pill" onclick="changeAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Agent">
                           <i class="bi bi-plus"></i> <span>Change Agent</span></button>
                       </td>
@@ -120,23 +134,44 @@
                       <td>
     
                         <div class="btn-group">
-                          @if (!isset($order->status) || $order->status=='pending')
+                          @if (!isset($order->status) || $order->status=='new')
+                          <button type="button" class="btn btn-info btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
+                            <span>new</span>
+                          </button>
+                          @elseif($order->status=='pending')
                           <button type="button" class="btn btn-danger btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
                             <span>pending</span>
                           </button>
+                          @elseif($order->status=='cancelled')
+                          <button type="button" class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
+                            <span>cancelled</span>
+                          </button>
+                          @elseif($order->status=='delivered_not_remitted')
+                          <button type="button" class="btn btn-warning btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
+                            <span>delivered not remitted</span>
+                          </button>
+                          @elseif($order->status=='delivered_and_remitted')
+                          <button type="button" class="btn btn-success btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
+                            <span>delivered & remitted</span>
+                          </button>
+                          
+
                           @endif
                           <ul class="dropdown-menu">
+
+                            <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'new']) }}">New</a></li>
+                            <li><hr class="dropdown-divider"></li>
                               
-                            <li><a class="dropdown-item" href="">Pending</a></li>
+                            <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'pending']) }}">Pending</a></li>
                             <li><hr class="dropdown-divider"></li>
 
-                            <li><a class="dropdown-item" href="">Cancelled</a></li>
+                            <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'cancelled']) }}">Cancelled</a></li>
                             <li><hr class="dropdown-divider"></li>
 
-                            <li><a class="dropdown-item" href="">Delivered Not Remitted</a></li>
+                            <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_not_remitted']) }}">Delivered Not Remitted</a></li>
                             <li><hr class="dropdown-divider"></li>
 
-                            <li><a class="dropdown-item" href="">Delivered & Remitted</a></li>
+                            <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_and_remitted']) }}">Delivered & Remitted</a></li>
                             <li><hr class="dropdown-divider"></li>
 
                           </ul>

@@ -158,7 +158,8 @@ Route::get('/cart-abandon-package', [FormBuilderController::class, 'cartAbandonP
 
 
 //Orders
-Route::get('/orders', [OrderController::class, 'allOrders'])->name('allOrders');
+Route::get('/orders/{status?}', [OrderController::class, 'allOrders'])->name('allOrders');
+Route::get('/update-order-status/{unique_key}/{status}', [OrderController::class, 'updateOrderStatus'])->name('updateOrderStatus');
 Route::get('/create-order', [OrderController::class, 'addOrder'])->name('addOrder');
 Route::post('/create-order', [OrderController::class, 'addOrderPost'])->name('addOrderPost');
 Route::get('/view-order/{unique_key}', [OrderController::class, 'singleOrder'])->name('singleOrder'); //viewed by admin
@@ -249,9 +250,9 @@ Route::get('/in-stock-products-warehouse', [InventoryController::class, 'inStock
 Route::post('/in-stock-products-warehouse', [InventoryController::class, 'inStockProductsByWarehouseQuery'])->name('inStockProductsByWarehouseQuery'); //inStockProductsByWarehouseQuery
 Route::get('/in-stock-products-other-agents', [InventoryController::class, 'inStockProductsByOtherAgents'])->name('inStockProductsByOtherAgents'); //inStockProductsByOtherAgents
 Route::post('/in-stock-products-other-agents', [InventoryController::class, 'inStockProductsByOtherAgentsQuery'])->name('inStockProductsByOtherAgentsQuery'); //inStockProductsByOtherAgents
-Route::get('/all-products-inventory', [InventoryController::class, 'allProductInventory'])->name('allProductInventory');
+Route::get('/all-products-inventory/{stock?}', [InventoryController::class, 'allProductInventory'])->name('allProductInventory');
 Route::get('/single-product-sales/{unique_key}', [InventoryController::class, 'singleProductSales'])->name('singleProductSales');
-Route::get('/single-product-purchases/{unique_key}', [InventoryController::class, 'singleProductPurchases'])->name('singleProductPurchases');
+Route::get('/single-product-purchases/{unique_key}', [InventoryController::class, 'singleProductPurchases'])->name('singleProductPurchases');//singleProductPurchases
 
 //sale
 Route::get('/sales', [SaleController::class, 'allSale'])->name('allSale');
@@ -306,10 +307,16 @@ Route::post('/edit-upsell-templates/{unique_key}', [UpsellSettingController::cla
 Route::get('/general-setting', [GeneralSettingController::class, 'generalSetting'])->name('generalSetting');
 Route::post('/general-setting', [GeneralSettingController::class, 'generalSettingPost'])->name('generalSettingPost');
 
+//companyStructure
+Route::get('/company-structure', [GeneralSettingController::class, 'companyStructure'])->name('companyStructure');
+
 //faqs
 Route::get('/faqs', [GeneralSettingController::class, 'faq'])->name('faq');
 Route::post('/faqs', [GeneralSettingController::class, 'faqPost'])->name('faqPost');
 Route::get('/delete-faq/{unique_key}', [GeneralSettingController::class, 'deleteFaq'])->name('deleteFaq');
+
+//docs
+Route::get('docs-dashboard', [GeneralSettingController::class, 'dashboardDocs'])->name('dashboardDocs');
 
 //incomeStatement
 Route::get('/income-statement', [FinanceController::class, 'incomeStatement'])->name('incomeStatement');
