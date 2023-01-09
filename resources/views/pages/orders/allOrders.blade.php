@@ -100,6 +100,7 @@
                   <tr>
                     <th>Order Code</th>
                     <th>Customer</th>
+                    <th>Delivery Due Date</th>
                     <th>Delivery Address</th>
                     <th>Agent</th>
                     <th>Date Created</th>
@@ -114,6 +115,16 @@
                     <tr>
                       <th>{{ $order->orderCode($order->id) }}</th>
                       <td>{{ $order->customer_id ? $order->customer->firstname : 'No response' }} {{ $order->customer_id ? $order->customer->lastname : '' }}</td>
+                      
+                      <td>
+                        @if (isset($order->customer->delivery_duration))
+                        {{ \Carbon\Carbon::parse($order->customer->created_at->addDays($order->customer->delivery_duration))->format('D, jS M Y') }}
+                        
+                        @else
+                         No reponse   
+                        @endif
+                        
+                      </td>
                       <td>{{ $order->customer_id ? $order->customer->delivery_address : 'No response' }}</td>
 
                       @if (isset($order->agent_assigned_id))

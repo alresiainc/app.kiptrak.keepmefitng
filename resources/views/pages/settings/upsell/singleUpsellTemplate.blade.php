@@ -26,7 +26,8 @@
       <h1>Upsell Template</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('allUpsellTemplates') }}">Upsell Templates</a></li>
           <li class="breadcrumb-item active">Upsell Template<li>
         </ol>
       </nav>

@@ -61,7 +61,7 @@
 
     <body class="">
 
-        <!-- will be shown in singlelink-->
+    <!-- will be shown in singlelink-->
     <nav class="navbar bg-light sticky-top">
         <div class="container">
             <a class="navbar-brand" href="/">
@@ -545,249 +545,312 @@
         </div>
     </footer>
 
-        <!-- Vendor JS Files -->
-        <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
-        <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js')}}"></script> -->
-        <script src="{{asset('/customerform/assets/vendor/apexcharts/apexcharts.min.js')}}"></script>
-        <script src="{{asset('/customerform/assets/vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
-        <script src="{{asset('/customerform/assets/vendor/chart.js/chart.min.js')}}"></script>
-        <script src="{{asset('/customerform/assets/vendor/echarts/echarts.min.js')}}"></script>
-        <script src="{{asset('/customerform/assets/vendor/quill/quill.min.js')}}"></script>
-        <script src="{{asset('/customerform/assets/vendor/simple-datatables/simple-datatables.js')}}"></script>
-        <script src="{{asset('/customerform/assets/vendor/tinymce/tinymce.min.js')}}"></script>
-        <script src="{{asset('/customerform/assets/vendor/php-email-form/validate.js')}}"></script>
+    <!-- Vendor JS Files -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js')}}"></script> -->
+    <script src="{{asset('/customerform/assets/vendor/apexcharts/apexcharts.min.js')}}"></script>
+    <script src="{{asset('/customerform/assets/vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+    <script src="{{asset('/customerform/assets/vendor/chart.js/chart.min.js')}}"></script>
+    <script src="{{asset('/customerform/assets/vendor/echarts/echarts.min.js')}}"></script>
+    <script src="{{asset('/customerform/assets/vendor/quill/quill.min.js')}}"></script>
+    <script src="{{asset('/customerform/assets/vendor/simple-datatables/simple-datatables.js')}}"></script>
+    <script src="{{asset('/customerform/assets/vendor/tinymce/tinymce.min.js')}}"></script>
+    <script src="{{asset('/customerform/assets/vendor/php-email-form/validate.js')}}"></script>
 
 
-        <!-- Latest compiled and minified JavaScript -->
-        <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js')}}"></script> -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js')}}"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/0.9.0rc1/jspdf.min.js"></script>
-        <!-- upsell->Template Main JS File -->
-        <script src="{{asset('/customerform/assets/js/main.js?v=42')}}"></script>
-        <script src="{{asset('/customerform/assets/js/navigation.js?v=4')}}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/0.9.0rc1/jspdf.min.js"></script>
+    <!-- upsell->Template Main JS File -->
+    <script src="{{asset('/customerform/assets/js/main.js?v=42')}}"></script>
+    <script src="{{asset('/customerform/assets/js/navigation.js?v=4')}}"></script>
 
-        <!-- submit main form -->
+    <!-- submit main form -->
         
-        @if ($stage == "")
-        <script>
-            var main_stage = localStorage.hasOwnProperty('main_stage') ? localStorage.getItem('main_stage') : '';
-            var orderbump_stage = localStorage.hasOwnProperty('orderbump_stage') ? localStorage.getItem('orderbump_stage') : '';
-            var upsell_stage = localStorage.hasOwnProperty('upsell_stage') ? localStorage.getItem('upsell_stage') : '';
-            var thankyou_stage = localStorage.hasOwnProperty('thankyou_stage') ? localStorage.getItem('thankyou_stage') : '';
-              $("#thankyou-section").show()
-            // }
+    @if ($stage == "")
+    <script>
+        var main_stage = localStorage.hasOwnProperty('main_stage') ? localStorage.getItem('main_stage') : '';
+        var orderbump_stage = localStorage.hasOwnProperty('orderbump_stage') ? localStorage.getItem('orderbump_stage') : '';
+        var upsell_stage = localStorage.hasOwnProperty('upsell_stage') ? localStorage.getItem('upsell_stage') : '';
+        var thankyou_stage = localStorage.hasOwnProperty('thankyou_stage') ? localStorage.getItem('thankyou_stage') : '';
+            $("#thankyou-section").show()
+        // }
 
-            /** SET VIEWS */
-            let currentView; //initialise currentView
-            const setView = (viewId) => {
-                var views = document.querySelectorAll('.view');
-                        
-                for (let i = 0; i < views.length; i++) {
-                    const view = views[i];
+        /** SET VIEWS */
+        let currentView; //initialise currentView
+        const setView = (viewId) => {
+            var views = document.querySelectorAll('.view');
                     
-                    view.style.display = 'none';            
-                }
+            for (let i = 0; i < views.length; i++) {
+                const view = views[i];
                 
-                document.getElementById(viewId).style.display = 'block';
-
-                currentView = viewId;
+                view.style.display = 'none';            
             }
-            //initialise view
-            setView('main-section');
-            /** END SET VIEWS */
-
-            //cart abandoned
-            var contacts = [];
-            $("input.contact-input").click(function() {
-                // console.log($(this).val())
-                var parentC = $(this).parent().prev();
-                var unique_key = $(".formholder_unique_key").val();
-
-                //if prev exist, incase firstinput is typed, eg(firstname)
-                if ( parentC.length > 0 ) {
-                    var prev = parentC.find('.contact-input');
-                    
-                    if (prev.val() == '' || prev.val() == null) {
-                        var inputName = prev.attr('data-name');
-                        //console.log(label)
-                        var msg = inputName+' '+'must be filled';
-                        alert(msg)
-                    } else {
-                        //store prev value
-                        var prevVal = prev.val();
-                        var inputName = prev.attr('data-name');
-                        var inputVal = prevVal+'|'+inputName;
-
-                        contacts.push( inputVal ) //store in array
-                        //check for duplicates
-                        var contact_copy = unique(contacts)
-                        console.log(contact_copy)
-                        
-                        $.ajax({
-                            type:'get',
-                            url:'/cart-abandon-contact',
-                            data:{unique_key:unique_key, inputValueName:contact_copy, 
-                                },
-                            success:function(resp){
-                                console.log(resp)
-        
             
-                            },error:function(){
-                                alert("Error");
-                            }
-                        });
-                    }
-                } 
+            document.getElementById(viewId).style.display = 'block';
+
+            currentView = viewId;
+        }
+        //initialise view
+        setView('main-section');
+        /** END SET VIEWS */
+
+        //cart abandoned
+        var contacts = [];
+        $("input.contact-input").click(function() {
+            // console.log($(this).val())
+            var parentC = $(this).parent().prev();
+            var unique_key = $(".formholder_unique_key").val();
+
+            //if prev exist, incase firstinput is typed, eg(firstname)
+            if ( parentC.length > 0 ) {
+                var prev = parentC.find('.contact-input');
                 
+                if (prev.val() == '' || prev.val() == null) {
+                    var inputName = prev.attr('data-name');
+                    //console.log(label)
+                    var msg = inputName+' '+'must be filled';
+                    alert(msg)
+                } else {
+                    //store prev value
+                    var prevVal = prev.val();
+                    var inputName = prev.attr('data-name');
+                    var inputVal = prevVal+'|'+inputName;
+
+                    contacts.push( inputVal ) //store in array
+                    //check for duplicates
+                    var contact_copy = unique(contacts)
+                    console.log(contact_copy)
+                    
+                    $.ajax({
+                        type:'get',
+                        url:'/cart-abandon-contact',
+                        data:{unique_key:unique_key, inputValueName:contact_copy, 
+                            },
+                        success:function(resp){
+                            console.log(resp)
+    
+        
+                        },error:function(){
+                            alert("Error");
+                        }
+                    });
+                }
+            } 
+            
+        });
+
+        //remove dups
+        function unique(list) {
+            var result = [];
+            $.each(list, function(i, e) {
+                if ($.inArray(e, result) == -1) result.push(e);
+            });
+            return result;
+        }
+
+        //cart-abandon-package
+        var packages = [];
+        $(".product-package").click(function() {
+
+            var unique_key = $(".formholder_unique_key").val();
+            var product_packsge = $(this).val();
+            var package_field_type = $(this).attr('type');
+
+            if (package_field_type=='radio') {
+                if (packages.length > 0) {
+                    packages = []
+                }
+                packages.push( product_packsge ) //store in array
+                //check for duplicates
+                var packages_copy = unique(packages)
+                console.log(packages_copy)
+            } else {
+                packages.push( product_packsge ) //store in array
+                //check for duplicates
+                var packages_copy = unique(packages)
+                console.log(packages_copy)
+            }
+
+            $.ajax({
+                type:'get',
+                url:'/cart-abandon-package',
+                data:{unique_key:unique_key, product_package:packages_copy, 
+                    },
+                success:function(resp){
+                    console.log(resp)
+
+
+                },error:function(){
+                    alert("Error");
+                }
+            });
+        })
+        
+        //main package
+        $('.main_package_submit_btn').click(function (e) {
+            e.preventDefault();
+
+            var firstname = $(".first-name").val();
+            var lastname = $(".last-name").val();
+            var phone_number = $(".phone-number").val();
+            var whatsapp_phone_number = $(".whatsapp-phone-number").val();
+            var active_email = $(".active-email").val();
+            var state = $(".state").val();
+            var city = $(".city").val();
+            var address = $(".address").val();
+            var delivery_duration = $(".delivery_duration").val();
+            var product_package = $(".product-package").val();
+
+            if (firstname == "" || firstname == null) {
+                alert("First name must be filled");
+                return false;
+            }   
+            if (lastname == "" || lastname == null) {
+                alert("Last name must be filled");
+                return false;
+            }
+            if (phone_number == "" || phone_number == null) {
+                alert("Phone number must be filled");
+                return false;
+            }
+            if (whatsapp_phone_number == "" || whatsapp_phone_number == null) {
+                alert("Phone number must be filled");
+                return false;
+            }
+            // if (active_email == "" || active_email == null) {
+            //     alert("Email address must be filled");
+            //     return false;
+            // }
+            if (state == "" || state == null) {
+                alert("Your State must be filled");
+                return false;
+            }
+            if (city == "" || city == null) {
+                alert("City or Town must be filled");
+                return false;
+            }
+            if (address == "" || address == null) {
+                alert("Your Address must be selected");
+                return false;
+            }
+            if (product_package == "" || product_package == null) {
+                alert("Your Product Package must be filled");
+                return false;
+            }
+
+            var unique_key = $(".formholder_unique_key").val();
+            var product_packages = $('input[name^="product_packages[]"]').map(function () {
+                if ($(this).is(':checked')) {
+                    return $(this).val();
+                }
+            }).get();
+
+            var has_orderbump = $(".has_orderbump").val();
+            var has_upsell = $(".has_upsell").val();
+
+            //ajax start
+            $.ajax({
+                type:'get',
+                url:'/ajax-save-new-form-link',
+                data:{unique_key:unique_key, firstname:firstname, lastname:lastname, phone_number:phone_number, whatsapp_phone_number:whatsapp_phone_number,
+                    active_email:active_email, state:state, city:city, address:address, delivery_duration:delivery_duration, product_packages:product_packages, 
+                    },
+                success:function(resp){
+                    console.log(resp)
+                    $(".main_stage").val('done')
+                    localStorage.setItem('main_stage', 'done');
+                    if (resp.data.has_orderbump) {
+                        setView('orderbump-section')
+                        
+                    } else if (resp.data.has_upsell) {
+                        setView('upsell-section')
+                        
+                    } else {
+                        $('.main_package_submit_btn').text('Please wait...')
+                        window.location.href = "/new-form-link/"+unique_key+"/thankYou"
+                        setView('thankyou-section')
+                    }
+
+                },error:function(){
+                    alert("Error");
+                }
             });
 
-            //remove dups
-            function unique(list) {
-                var result = [];
-                $.each(list, function(i, e) {
-                    if ($.inArray(e, result) == -1) result.push(e);
-                });
-                return result;
-            }
+            //ajax end
 
-            //cart-abandon-package
-            var packages = [];
-            $(".product-package").click(function() {
+        })
 
-                var unique_key = $(".formholder_unique_key").val();
-                var product_packsge = $(this).val();
-                var package_field_type = $(this).attr('type');
-
-                if (package_field_type=='radio') {
-                    if (packages.length > 0) {
-                        packages = []
-                    }
-                    packages.push( product_packsge ) //store in array
-                    //check for duplicates
-                    var packages_copy = unique(packages)
-                    console.log(packages_copy)
-                } else {
-                    packages.push( product_packsge ) //store in array
-                    //check for duplicates
-                    var packages_copy = unique(packages)
-                    console.log(packages_copy)
-                }
+        //orderbump_stage
+        $('.orderbump_submit_btn').click(function(e){
+            e.preventDefault();
+            var unique_key = $(".formholder_unique_key").val();
+            var orderbump_product_checkbox = ''
+            if ($('.orderbump_product_checkbox').val() != '') {
+                var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
 
                 $.ajax({
                     type:'get',
-                    url:'/cart-abandon-package',
-                    data:{unique_key:unique_key, product_package:packages_copy, 
-                        },
+                    url:'/ajax-save-new-form-link-orderbump',
+                    data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox },
                     success:function(resp){
                         console.log(resp)
-
-    
-                    },error:function(){
-                        alert("Error");
-                    }
-                });
-            })
-            
-            
-            $('.main_package_submit_btn').click(function (e) {
-                e.preventDefault();
-
-                var firstname = $(".first-name").val();
-                var lastname = $(".last-name").val();
-                var phone_number = $(".phone-number").val();
-                var whatsapp_phone_number = $(".whatsapp-phone-number").val();
-                var active_email = $(".active-email").val();
-                var state = $(".state").val();
-                var city = $(".city").val();
-                var address = $(".address").val();
-                var delivery_duration = $(".delivery_duration").val();
-                var product_package = $(".product-package").val();
-
-                
-
-                if (firstname == "" || firstname == null) {
-                    alert("First name must be filled");
-                    return false;
-                }   
-                if (lastname == "" || lastname == null) {
-                    alert("Last name must be filled");
-                    return false;
-                }
-                if (phone_number == "" || phone_number == null) {
-                    alert("Phone number must be filled");
-                    return false;
-                }
-                if (whatsapp_phone_number == "" || whatsapp_phone_number == null) {
-                    alert("Phone number must be filled");
-                    return false;
-                }
-                // if (active_email == "" || active_email == null) {
-                //     alert("Email address must be filled");
-                //     return false;
-                // }
-                if (state == "" || state == null) {
-                    alert("Your State must be filled");
-                    return false;
-                }
-                if (city == "" || city == null) {
-                    alert("City or Town must be filled");
-                    return false;
-                }
-                if (address == "" || address == null) {
-                    alert("Your Address must be selected");
-                    return false;
-                }
-                if (product_package == "" || product_package == null) {
-                    alert("Your Product Package must be filled");
-                    return false;
-                }
-
-                var unique_key = $(".formholder_unique_key").val();
-                var product_packages = $('input[name^="product_packages[]"]').map(function () {
-                    if ($(this).is(':checked')) {
-                        return $(this).val();
-                    }
-                }).get();
-
-                var has_orderbump = $(".has_orderbump").val();
-                var has_upsell = $(".has_upsell").val();
-
-                //ajax start
-                $.ajax({
-                    type:'get',
-                    url:'/ajax-save-new-form-link',
-                    data:{unique_key:unique_key, firstname:firstname, lastname:lastname, phone_number:phone_number, whatsapp_phone_number:whatsapp_phone_number,
-                        active_email:active_email, state:state, city:city, address:address, delivery_duration:delivery_duration, product_packages:product_packages, 
-                        },
-                    success:function(resp){
-                        console.log(resp)
-                        $(".main_stage").val('done')
-                        localStorage.setItem('main_stage', 'done');
-                        if (resp.data.has_orderbump) {
-                            setView('orderbump-section')
-                            
-                        } else if (resp.data.has_upsell) {
+                        localStorage.setItem('orderbump_stage', 'done');
+                        if (resp.data.has_upsell) {
                             setView('upsell-section')
                             
                         } else {
-                            window.location.href = "/new-form-link/"+unique_key+"/thankYou"
-                            setView('thankyou-section')
+                        $('.orderbump_submit_btn').text('Please wait...')
+                        window.location.href = "/new-form-link/"+unique_key+"/thankYou"
+                        setView('thankyou-section')
+                    
                         }
-
-    
+                            
                     },error:function(){
                         alert("Error");
                     }
                 });
+            
+            } else {
+                alert('Error: Something went wrong')
+            }
+        });
 
-                //ajax end
+        //upsell_stage
+        $('.upsell_submit_btn').click(function(e){
+            e.preventDefault();
+            var unique_key = $(".formholder_unique_key").val();
+            var upsell_product_checkbox = ''
+            if ($('.upsell_product_checkbox').val() != '') {
+                var upsell_product_checkbox = $('.upsell_product_checkbox').val();
 
-            })
+                $.ajax({
+                    type:'get',
+                    url:'/ajax-save-new-form-link-upsell',
+                    data:{ unique_key:unique_key, upsell_product_checkbox:upsell_product_checkbox },
+                    success:function(resp){
+                        console.log(resp)
+                        localStorage.setItem('upsell_stage', 'done');
+                        $('.upsell_submit_btn').text('Please wait...')
+                        window.location.href = "/new-form-link/"+unique_key+"/thankYou"
+                        setView('thankyou-section')
+                            
+                    },error:function(){
+                        alert("Error");
+                    }
+                });
+            
+            } else {
+                alert('Error: Something went wrong')
+            }
+        });
 
-            //orderbump_stage
-            $('.orderbump_submit_btn').click(function(e){
-                e.preventDefault();
+        //orderbump_refusal
+        $('.orderbump_refusal').click(function(){
+            if ($(this).is(':checked')) {
+                
                 var unique_key = $(".formholder_unique_key").val();
                 var orderbump_product_checkbox = ''
                 if ($('.orderbump_product_checkbox').val() != '') {
@@ -795,7 +858,7 @@
 
                     $.ajax({
                         type:'get',
-                        url:'/ajax-save-new-form-link-orderbump',
+                        url:'/ajax-save-new-form-link-orderbump-refusal',
                         data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox },
                         success:function(resp){
                             console.log(resp)
@@ -804,8 +867,8 @@
                                 setView('upsell-section')
                                 
                             } else {
-                            window.location.href = "/new-form-link/"+unique_key+"/thankYou"
-                            setView('thankyou-section')
+                                window.location.href = "/new-form-link/"+unique_key+"/thankYou"
+                                setView('thankyou-section')
                         
                             }
                                 
@@ -817,11 +880,15 @@
                 } else {
                     alert('Error: Something went wrong')
                 }
-            });
 
-            //upsell_stage
-            $('.upsell_submit_btn').click(function(e){
-                e.preventDefault();
+            } 
+            
+        });
+
+        //upsell_refusal
+        $('.upsell_refusal').click(function(){
+            if ($(this).is(':checked')) {
+                
                 var unique_key = $(".formholder_unique_key").val();
                 var upsell_product_checkbox = ''
                 if ($('.upsell_product_checkbox').val() != '') {
@@ -829,13 +896,14 @@
 
                     $.ajax({
                         type:'get',
-                        url:'/ajax-save-new-form-link-upsell',
+                        url:'/ajax-save-new-form-link-upsell-refusal',
                         data:{ unique_key:unique_key, upsell_product_checkbox:upsell_product_checkbox },
                         success:function(resp){
                             console.log(resp)
                             localStorage.setItem('upsell_stage', 'done');
-                            window.location.href = "/new-form-link/"+unique_key+"/thankYou"
-                            setView('thankyou-section')
+                                // location.reload()
+                                window.location.href = "/new-form-link/"+unique_key+"/thankYou"
+                                setView('thankyou-section')
                                 
                         },error:function(){
                             alert("Error");
@@ -845,131 +913,61 @@
                 } else {
                     alert('Error: Something went wrong')
                 }
-            });
 
-            //orderbump_refusal
-            $('.orderbump_refusal').click(function(){
-                if ($(this).is(':checked')) {
-                    
-                    var unique_key = $(".formholder_unique_key").val();
-                    var orderbump_product_checkbox = ''
-                    if ($('.orderbump_product_checkbox').val() != '') {
-                        var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
+            } 
+            
+        });
+    </script>
+    @endif
 
-                        $.ajax({
-                            type:'get',
-                            url:'/ajax-save-new-form-link-orderbump-refusal',
-                            data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox },
-                            success:function(resp){
-                                console.log(resp)
-                                localStorage.setItem('orderbump_stage', 'done');
-                                if (resp.data.has_upsell) {
-                                    setView('upsell-section')
-                                    
-                                } else {
-                                    window.location.href = "/new-form-link/"+unique_key+"/thankYou"
-                                    setView('thankyou-section')
-                            
-                                }
-                                    
-                            },error:function(){
-                                alert("Error");
-                            }
-                        });
-                    
-                    } else {
-                        alert('Error: Something went wrong')
-                    }
-
-                } 
-                
-            });
-
-            //upsell_refusal
-            $('.upsell_refusal').click(function(){
-                if ($(this).is(':checked')) {
-                    
-                    var unique_key = $(".formholder_unique_key").val();
-                    var upsell_product_checkbox = ''
-                    if ($('.upsell_product_checkbox').val() != '') {
-                        var upsell_product_checkbox = $('.upsell_product_checkbox').val();
-
-                        $.ajax({
-                            type:'get',
-                            url:'/ajax-save-new-form-link-upsell-refusal',
-                            data:{ unique_key:unique_key, upsell_product_checkbox:upsell_product_checkbox },
-                            success:function(resp){
-                                console.log(resp)
-                                localStorage.setItem('upsell_stage', 'done');
-                                    // location.reload()
-                                    window.location.href = "/new-form-link/"+unique_key+"/thankYou"
-                                    setView('thankyou-section')
-                                    
-                            },error:function(){
-                                alert("Error");
-                            }
-                        });
-                    
-                    } else {
-                        alert('Error: Something went wrong')
-                    }
-
-                } 
-                
-            });
-        </script>
-        @endif
+    <script>
+        //not in use
+        $(".cta-check").click(function(){
+            if($(this).is(':checked')){
+                $(".select-product").show();
+            } else {
+                $(".select-product").hide();
+            }
+            
+        });
 
         
-        <script>
+    </script>
 
-        </script>
+    <!---validate number only in phone-number field-->
+    <script>
+        $(document).on("input", ".phone-number", function() {
+            this.value = this.value.replace(/\D/g,'');
+        });
+    </script>
 
-        <script>
-            //not in use
-            $(".cta-check").click(function(){
-                if($(this).is(':checked')){
-                    $(".select-product").show();
-                } else {
-                    $(".select-product").hide();
-                }
-                
+    <!---validate number only in whatsapp-phone-number field-->
+    <script>
+        $(document).on("input", ".whatsapp-phone-number", function() {
+            this.value = this.value.replace(/\D/g,'');
+        });
+    </script>
+
+    <!---not in use PDF--->
+    <script>
+        var doc = new jsPDF();
+        var specialElementHandlers = {
+            '#pdf-renderer': function (element, renderer) {
+                return true;
+            }
+        };
+
+        $('#generate-pdf').click(function () {   
+            $('#pdf-content').show();
+            doc.fromHTML($('#pdf-content').html(), 15, 15, {
+                'width': 170,
+                    'elementHandlers': specialElementHandlers
             });
+            doc.save('sample-file.pdf');
+            $('#pdf-content').hide();
+        });
 
-            
-        </script>
-
-        <script>
-            $(document).on("input", ".phone-number", function() {
-                this.value = this.value.replace(/\D/g,'');
-            });
-        </script>
-
-        <script>
-            $(document).on("input", ".whatsapp-phone-number", function() {
-                this.value = this.value.replace(/\D/g,'');
-            });
-        </script>
-
-        <script>
-            var doc = new jsPDF();
-            var specialElementHandlers = {
-                '#pdf-renderer': function (element, renderer) {
-                    return true;
-                }
-            };
-
-            $('#generate-pdf').click(function () {   
-                $('#pdf-content').show();
-                doc.fromHTML($('#pdf-content').html(), 15, 15, {
-                    'width': 170,
-                        'elementHandlers': specialElementHandlers
-                });
-                doc.save('sample-file.pdf');
-                $('#pdf-content').hide();
-            });
-
-        </script>
+    </script>
 
         
     </body>

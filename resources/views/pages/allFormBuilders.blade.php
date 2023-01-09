@@ -76,12 +76,13 @@
                   <th scope="col">#</th>
                   <th scope="col">Form Name</th>
                   {{-- <th scope="col">Subheading</th> --}}
-                  
-                  <th scope="col">OrderId</th>
+                   
+                  {{-- <th scope="col">OrderId</th><!--remove--> --}}
                   <th scope="col">Staff Assigned</th>
                   <th scope="col">OrderBump</th>
                   <th scope="col">UpSell</th>
                   <th scope="col">Customer</th>
+                  {{-- <th scope="col">Delivery Duration</th><!--remove--> --}}
                   <th scope="col">Actions</th>
                 </tr>
               </thead>
@@ -92,39 +93,10 @@
                     <tr>
                       <th scope="row">{{ ++$key }}</th>
                       <td>{{ $formHolder->name }} <br>
-                        <a class="badge badge-info" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">
-                          <i class="bi bi-pencil"></i> Edit</a>
+                        <a class="badge badge-info" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">Edit</a>
+                        <a class="badge badge-dark" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">Entries</a>
                       </td>
-                      {{-- <td>{{ $label->order_subheading }}</td> --}}
-                      {{-- <td>
-                        @if ($label->order->hasOrderbump())
-                          <span class="text-success">Yes</span>
-                        @else
-                          <span class="text-danger">No</span>
-                        @endif
-                        
-                      </td> --}}
-                      {{-- <td>
-                        @if ($label->order->hasUpsell())
-                          <span class="text-success">Yes</span>
-                        @else
-                        <span class="text-danger">No</span>
-                        @endif
-                      </td> --}}
-                      <td>
-                        <a href="{{ route('singleOrder', $formHolder->order->unique_key) }}" class="badge badge-dark">
-                          <!-- < 10 -->
-                          @if ($formHolder->order->id < 10) 0000{{ $formHolder->order->id }} @endif
-                          <!-- > 10 < 100 -->
-                          @if (($formHolder->order->id > 10) && ($formHolder->order->id < 100)) 000{{ $formHolder->order->id }} @endif
-                          <!-- > 100 < 1000 -->
-                          @if (($formHolder->order->id) > 100 && ($formHolder->order->id < 100)) 00{{ $formHolder->order->id }} @endif
-                          <!-- > 1000 < 10000++ -->
-                          @if (($formHolder->order->id) > 100 && ($formHolder->order->id < 100)) 0{{ $formHolder->order->id }} @endif
-                          
-                        </a>
-                      </td>
-
+                      
                       
                         @if (isset($formHolder->order->staff_assigned_id))
                             <td>
@@ -522,7 +494,10 @@
 
                       @endif
 
-                      <td><span>{{ $formHolder->order->customer_id ? $formHolder->order->customer->firstname : 'No response' }} {{ $formHolder->order->customer_id ? $formHolder->order->customer->lastname : '' }}</span></td>
+                      <td><span>{{ isset($formHolder->order->customer_id) ? $formHolder->order->customer->firstname : 'No response' }} {{ $formHolder->order->customer_id ? $formHolder->order->customer->lastname : '' }}</span></td>
+                      
+                      
+
                       <td>
                         {{-- <input type="hidden" id="foo" value="https://github.com/zenorocha/clipboard.js.git"> --}}
                         <div class="d-flex">

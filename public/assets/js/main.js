@@ -12,7 +12,7 @@
   /** Initialize Business Name  */
   const projectName = document.querySelectorAll('.project-name');
   for (let i = 0; i < projectName.length; i++) {
-    projectName[i].innerHTML = "KipTrak";
+    projectName[i].innerHTML = "";
   }  
   
   /** Initialize Currency  */

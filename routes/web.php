@@ -428,6 +428,9 @@ Route::get('/agents-export', [ExportController::class, 'agentsExport'])->name('a
 Route::get('/customers-export-sample', [ExportController::class, 'customersSampleExport'])->name('customersSampleExport'); //customersSampleExport
 Route::get('/customers-export', [ExportController::class, 'customersExport'])->name('customersExport'); //customersExport
 
+//soundNotification
+Route::get('/sound-notification', [SoundNotificationController::class, 'soundNotification'])->name('soundNotification'); //soundNotification
+
 });
 
 

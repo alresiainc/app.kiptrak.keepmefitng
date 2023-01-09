@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('unique_key')->nullable();
+            $table->string('parent_id')->nullable();
             $table->string('order_id')->nullable();
 
             $table->string('name');

@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <title>@yield('title') :: CRM</title>
   <meta content="" name="description">
@@ -143,33 +144,59 @@
     $(".select2").select2();
   </script>
 
+  <!---start & end date field -->
   <script>
 
     $(document).ready(function () {
       //disable default alpha
       // Create date inputs
-    minDate = new DateTime($('#min'), {
-        format: 'MMMM Do YYYY'
-    });
-    maxDate = new DateTime($('#max'), {
-        format: 'MMMM Do YYYY'
-    });
- 
-    // DataTables initialisation
-    var table = $('.custom-table').DataTable({ "bSort" : false });
- 
-    // Refilter the table
-    $('#min, #max').on('change', function () {
+      minDate = new DateTime($('#min'), {
+          format: 'MMMM Do YYYY'
+      });
+      maxDate = new DateTime($('#max'), {
+          format: 'MMMM Do YYYY'
+      });
+  
+      // DataTables initialisation
+      var table = $('.custom-table').DataTable({ "bSort" : false });
+  
+      // Refilter the table
+      $('#min, #max').on('change', function () {
         table.draw();
-    });
-
+      });
 
       $('.custom-select').selectpicker();
     });
   </script>
 
+  <!---soundNotification -->
   <script>
-    
+    var timeInterval = 1000;
+    var soundNotification = function() {
+      $.ajax({
+        url: "{{ route('soundNotification') }}",
+        type: 'GET',
+        dataType: 'json',
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(resp) {
+          if(resp.status){
+            $('.alarm_count').text(resp.count)
+          } else {
+            console.log('no')
+          }
+        },
+        error: function(data){
+          console.log(data);
+        }
+      });
+    }
+
+    soundNotification();
+    let interval = setInterval(() => {
+      soundNotification();
+    }, timeInterval);
   </script>
       
 </body>

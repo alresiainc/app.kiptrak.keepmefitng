@@ -1,7 +1,7 @@
 <header id="header" class="header fixed-top d-flex align-items-center">
   <div class="d-flex align-items-center justify-content-between">
     <a href="{{ url('/') }}" class="logo d-flex align-items-center">
-      <img src="assets/img/logo.png" alt="" />
+      <img src="{{asset('/assets/img/logo.png')}}" alt="" />
       <span class="d-none d-lg-block project-name"></span>
     </a>
     <i class="bi bi-list toggle-sidebar-btn d-none d-md-block"></i>
@@ -55,15 +55,15 @@
       </li>
       <!-- End Notification Nav -->
 
-      <li class="nav-item dropdown d-none">
+      <li class="nav-item dropdown">
         <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
           <i class="bi bi-bell"></i>
-          <span class="badge bg-primary badge-number">3</span> </a
+          <span id="sound_alarm" class="badge bg-primary badge-number alarm_count"></span> </a
         ><!-- End Messages Icon -->
 
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
           <li class="dropdown-header">
-            You have 3 new messages
+            You have <span class="alarm_count"></span> new messages
             <a href="#"><span class="badge rounded-pill bg-primary p-2 ms-2">View all</span></a>
           </li>
           <li>
@@ -191,9 +191,7 @@
 
           <li>
             <a
-              class="dropdown-item d-flex align-items-center"
-              href="{{ route('faq') }}"
-            >
+              class="dropdown-item d-flex align-items-center" href="{{ route('faq') }}">
               <i class="bi bi-question-circle"></i>
               <span>Need Help?</span>
             </a>

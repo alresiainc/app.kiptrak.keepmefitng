@@ -27,6 +27,7 @@ use App\Models\Customer;
 use App\Models\CartAbandon;
 use App\Models\UpsellSetting;
 use App\Models\GeneralSetting;
+use App\Models\SoundNotification;
 
 
 class FormBuilderController extends Controller
@@ -860,7 +861,7 @@ class FormBuilderController extends Controller
         $customer->save();
 
         //update order status
-        $order->update(['customer_id'=>$customer->id, 'delivery_duration'=>$data['delivery_duration'], 'status'=>'pending']);
+        $order->update(['customer_id'=>$customer->id, 'delivery_duration'=>$data['delivery_duration'], 'status'=>'new']);
 
         //to activate psell & thankyou part
         if ($request->upsell_available != '') {
@@ -1139,7 +1140,6 @@ class FormBuilderController extends Controller
             
         }
         
-        
         return response()->json([
             'status'=>true,
             'data'=>$data,
@@ -1151,8 +1151,16 @@ class FormBuilderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
 
+        //create soundNotification
+        $soundNotification = new SoundNotification();
+        $soundNotification->type = 'Order';
+        $soundNotification->topic = 'New Order';
+        $soundNotification->content = 'Customer placed an order';
+        $soundNotification->link = 'order-form/'.$order->unique_key;
+        $soundNotification->status = 'new';
+        $soundNotification->save();
+        
         //mainProduct_revenue
         $mainProduct_revenue = 0;  //price * qty
         $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase', 'customer_acceptance_status'=>'accepted'])->get();
@@ -1163,7 +1171,7 @@ class FormBuilderController extends Controller
             }
         }
 
-        //orderbump
+        
         //orderbump
         $orderbumpProduct_revenue = 0; //price * qty
         $orderbump_outgoingStock = '';
@@ -1220,8 +1228,8 @@ class FormBuilderController extends Controller
         // }
 
         //$whatsapp_msg = "Hi ".$customer->firstname." ".$customer->lastname.", you just placed order with Invoice-id: kp-".$orderId.". We will get back to you soon";
-        $whatsapp_msg = "Hi ".$customer->firstname." ".$customer->lastname.", you just placed order with Invoice-id: kp-".$orderId.". ";
-        $whatsapp_msg .= "Details:";
+        $whatsapp_msg = "Hello ".$customer->firstname." ".$customer->lastname.". My name is".$authUser->name.", I am contacting you from KeepMeFit and I am the Customer Service Representative incharge of the order you placed for ";
+        $whatsapp_msg .= "";
         foreach($mainProducts_outgoingStocks as $main_outgoingStock):
             $whatsapp_msg .= " [Product: ".$main_outgoingStock->product->name.". Price: ".$mainProduct_revenue.". Qty: ".$main_outgoingStock->quantity_removed."], ";
         endforeach;
@@ -1234,7 +1242,11 @@ class FormBuilderController extends Controller
             $whatsapp_msg .= "[Product: ".$upsell_outgoingStock->product->name.". Price: ".$upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed.". Qty: ".$upsell_outgoingStock->quantity_removed."]. ";
         endif;
 
-        $whatsapp_msg .= "We will get back to you soon";
+        $whatsapp_msg .= "I am reaching out to you to confirm your order and to let you know the delivery person will call you to deliver your order. Kindly confirm if the details you sent are correct ";
+
+        $whatsapp_msg .= "[Phone Number: ".$customer->phone_number.". Whatsapp Phone Number: ".$customer->whatsapp_phone_number.". Delivery Address: ".$customer->delivery_address."]. ";
+
+        $whatsapp_msg .= "Please kindly let me know when we can deliver your order. Thank you!";
 
         // //mail user about their new order
         $invoiceData = [
