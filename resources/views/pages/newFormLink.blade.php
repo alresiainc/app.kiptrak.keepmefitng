@@ -751,6 +751,8 @@
             var has_orderbump = $(".has_orderbump").val();
             var has_upsell = $(".has_upsell").val();
 
+            $(this).text('Please wait...')
+
             //ajax start
             $.ajax({
                 type:'get',
@@ -769,7 +771,7 @@
                         setView('upsell-section')
                         
                     } else {
-                        $('.main_package_submit_btn').text('Please wait...')
+                        
                         window.location.href = "/new-form-link/"+unique_key+"/thankYou"
                         setView('thankyou-section')
                     }
@@ -791,6 +793,8 @@
             if ($('.orderbump_product_checkbox').val() != '') {
                 var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
 
+                $(this).text('Please wait...')
+
                 $.ajax({
                     type:'get',
                     url:'/ajax-save-new-form-link-orderbump',
@@ -802,7 +806,7 @@
                             setView('upsell-section')
                             
                         } else {
-                        $('.orderbump_submit_btn').text('Please wait...')
+                        //$('.orderbump_submit_btn').text('Please wait...')
                         window.location.href = "/new-form-link/"+unique_key+"/thankYou"
                         setView('thankyou-section')
                     
@@ -825,6 +829,7 @@
             var upsell_product_checkbox = ''
             if ($('.upsell_product_checkbox').val() != '') {
                 var upsell_product_checkbox = $('.upsell_product_checkbox').val();
+                $(this).text('Please wait...')
 
                 $.ajax({
                     type:'get',
@@ -833,7 +838,7 @@
                     success:function(resp){
                         console.log(resp)
                         localStorage.setItem('upsell_stage', 'done');
-                        $('.upsell_submit_btn').text('Please wait...')
+                        //$('.upsell_submit_btn').text('Please wait...')
                         window.location.href = "/new-form-link/"+unique_key+"/thankYou"
                         setView('thankyou-section')
                             
@@ -855,6 +860,7 @@
                 var orderbump_product_checkbox = ''
                 if ($('.orderbump_product_checkbox').val() != '') {
                     var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
+                    $(this).text('Please wait...')
 
                     $.ajax({
                         type:'get',
@@ -893,6 +899,7 @@
                 var upsell_product_checkbox = ''
                 if ($('.upsell_product_checkbox').val() != '') {
                     var upsell_product_checkbox = $('.upsell_product_checkbox').val();
+                    $(this).text('Please wait...')
 
                     $.ajax({
                         type:'get',

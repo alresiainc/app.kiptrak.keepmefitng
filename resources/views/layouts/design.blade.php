@@ -1,3 +1,6 @@
+@php
+   // $ids = \App\Models\SoundNotification::where('status', 'new')->pluck('id')
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 
@@ -55,6 +58,15 @@
 
 <body>
 
+  {{-- <audio id="sound_notification" src="{{ asset('/assets/audio/sound_notification.mp3') }}" muted></audio> --}}
+
+  {{-- <audio id="sound_notification">
+    <source src="{{ asset('/assets/audio/sound_notification.ogg') }}" type="audio/ogg">
+    <source src="{{ asset('/assets/audio/sound_notification.mp3') }}" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio> --}}
+  
+
   <!-- ======= Header ======= -->
   @include('layouts.header')
   <!-- End Header -->
@@ -95,25 +107,13 @@
 
   <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script><!--imp-->
   <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/buttons/2.2.3/js/buttons.bootstrap5.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-    
-    <script
-      type="text/javascript"
-      charset="utf8"
-      src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"
-    ></script>
-    <script
-      type="text/javascript"
-      charset="utf8"
-      src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"
-    ></script>
-    <script
-      type="text/javascript"
-      charset="utf8"
-      src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.colVis.min.js"
-    ></script>
+  <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+  
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.colVis.min.js"></script>
 
   <!--my files-->
   {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script> --}}
@@ -158,7 +158,13 @@
       });
   
       // DataTables initialisation
-      var table = $('.custom-table').DataTable({ "bSort" : false });
+      var table = $('.custom-table').DataTable({
+        "bSort" : false,
+        dom: 'Bfrtip',
+        buttons: [
+          'pdf', 'print', 'excel', 'csv', 'copy' 
+        ] 
+      });
   
       // Refilter the table
       $('#min, #max').on('change', function () {
@@ -171,7 +177,9 @@
 
   <!---soundNotification -->
   <script>
-    var timeInterval = 1000;
+    var timeInterval = 300000; //5mins
+    var sound_notification = "{{ asset('/assets/audio/sound_notification.mp3') }}";
+    
     var soundNotification = function() {
       $.ajax({
         url: "{{ route('soundNotification') }}",
@@ -182,7 +190,26 @@
         },
         success: function(resp) {
           if(resp.status){
-            $('.alarm_count').text(resp.count)
+            $('.alarm_count').text(resp.count);
+            console.log(resp.data)
+            var notes = resp.data;
+
+            $("ul.messages notes").html('');
+
+            $('ul.messages').append('<li class="dropdown-header">You have <span class="alarm_count">'+resp.count+'</span> new messages<a href="/orders/new_from_alarm"><span class="badge rounded-pill bg-primary p-2 ms-2">View all</span></a></li><li><hr class="dropdown-divider" /></li>')
+
+              $.each(notes,function(key,note){
+                
+                  $('ul.messages').append('<li class="message-item" onclick="deleteNotification('+note.id+')"><div><h4>'+note.topic+' #000'+note.order_id+'</h4><p>'+note.content+'</p><p>'+momentsAgo(note.created_at)+'</p></div></li><li><hr class="dropdown-divider"/></li>');
+              });
+
+              
+            var audio = new Audio(sound_notification);
+
+            $("body").hover(function(){
+              // audio.play();
+            });
+
           } else {
             console.log('no')
           }
@@ -192,11 +219,58 @@
         }
       });
     }
-
+    
     soundNotification();
     let interval = setInterval(() => {
       soundNotification();
     }, timeInterval);
+
+    function momentsAgo(datetime) {
+      //return moment(datetime, 'YYYY-MM-DD HH:mm:ss').format('MM/DD/YY h:mm A');
+      return moment(datetime).fromNow();
+    }
+
+    
+
+// var globalAjaxResponseStatus="";
+// var int=self.setInterval("CheckData()",1000);
+
+// function CheckData()
+// {
+//   if(globalAjaxResponseStatus=="completed")
+//   {
+//      globalAjaxResponseStatus=""
+//      $.ajax({
+//         url: "{{ route('soundNotification') }}",
+//         type: 'GET',
+//         dataType: 'json',
+//         headers: {
+//           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+//         },
+//            success: function(resp){
+//               globalAjaxResponseStatus="completed"
+//               if(resp.status){
+//                 $('.alarm_count').text(resp.count);
+//                 console.log(resp.data)
+//                 var audio = new Audio(sound_notification);
+//                 // audio.play();
+//               } else {
+//                 console.log('no')
+//               }
+//               //Do what you want with the response
+//              }
+//           });
+
+//   }
+
+// }
+
+    // function playAlert() {
+    //     var x = document.getElementById("sound_notification"); 
+    //     document.body.addEventListener("mousemove", function () {
+    //     x.play()
+    //   })
+    // }
   </script>
       
 </body>

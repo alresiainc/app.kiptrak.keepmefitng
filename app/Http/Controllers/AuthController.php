@@ -65,7 +65,7 @@ class AuthController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        Auth::logout($user);
+        Auth::logout($authUser);
         Session::flush();
 
         return redirect()->route('login');

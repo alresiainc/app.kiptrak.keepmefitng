@@ -30,4 +30,18 @@ class SoundNotification extends Model
 
         });
     }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id');  
+    }
+
+    // public function getCreatedAtAttribute($value)
+    // {
+    //     return $date = (int) $value;
+    //     $start_date = date('Y-m-d', );
+    //     return $start_date;
+        
+    //     // return \Carbon\Carbon::parse($value->created_at)->diffForHumans();
+    // }
 }

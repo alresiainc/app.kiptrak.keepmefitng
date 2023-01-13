@@ -53,6 +53,22 @@ class FormHolder extends Model
         return $string;
     }
 
+    public function entries() {
+        $formHolders = $this->formHolders;
+        $entries_count = 0;
+        foreach ($formHolders as $key => $formHolder) {
+            if (isset($formHolder->order->customer_id)) {
+                $entries_count += 1;
+            }
+        }
+
+        //if parent form has entry
+        if (isset($this->order->customer_id)) {
+            $entries_count += 1;
+        }
+        return $entries_count;
+    }
+
     public function order() {
         return $this->belongsTo(Order::class, 'order_id');  
     }
@@ -63,5 +79,11 @@ class FormHolder extends Model
 
     public function upsell() {
         return $this->belongsTo(UpSell::class, 'upsell_id');  
+    }
+
+    //$cat->categories as subcat
+    public function formHolders()
+    {
+        return $this->hasMany(FormHolder::class, 'parent_id', 'id'); //mapping categories to its 'parent_id'
     }
 }

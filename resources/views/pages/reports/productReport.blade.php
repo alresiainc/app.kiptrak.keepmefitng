@@ -38,7 +38,7 @@
   </div>
   @endif
 
-  <section class="users-list-wrapper">
+  <section class="users-list-wrapper noprint">
     <div class="users-list-filter px-1">
       <form action="{{ route('productReportQuery') }}" method="POST">@csrf
         <div class="row border rounded py-2 mb-2">
@@ -90,20 +90,18 @@
           <div class="card-body pt-3">
             
           <div class="clearfix mb-2">
-            <div class="float-end text-end d-none">
-              <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
-                <i class="bi bi-upload"></i> <span>Import</span></button>
-              <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
-              <button class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
+            <div class="float-end text-end">
+              <button class="btn btn-sm btn-secondary rounded-pill d-none" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
+              <button class="btn btn-sm btn-danger rounded-pill d-none" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
             </div>
           </div>
           <hr>
           
-          <div class="table table-responsive">
+          <div id="printContent" class="table table-responsive">
             <table id="products-table" class="table custom-table" style="width:100%">
               <thead>
                   <tr>
-                      <th>Photo</th>
+                
                       <th>Name</th>
                       <th>Code</th>
                       {{-- <th>Colour</th>
@@ -118,15 +116,7 @@
                 @if (count($products) > 0)
                     @foreach ($products as $product)
                     <tr>
-                      <td>
-                        <a
-                        href="{{ asset('/storage/products/'.$product->image) }}"
-                        data-fancybox="gallery"
-                        data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
-                        >   
-                        <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid"
-                        alt="{{$product->name}}"></a>
-                      </td>
+                      
                       <td>{{ $product->name }}</td>
                       <td>{{ $product->code  }}</td>
                       {{-- <td>{{ isset($product->color) ? $product->color : 'None' }}</td>
@@ -142,6 +132,8 @@
               </tbody>
           </table>
           </div>
+
+          <div id="printHtmlReceiver"></div>
           </div>
         </div>
       </div>
@@ -172,5 +164,9 @@
     </div>
   </div>
 </div>
+
+@endsection
+
+@section('extra_js')
 
 @endsection

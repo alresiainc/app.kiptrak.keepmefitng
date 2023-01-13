@@ -111,8 +111,9 @@ Route::get('/forms', [FormController::class, 'allForms'])->name('allForms');
 Route::get('/create-form', [FormController::class, 'addForm'])->name('addForm');
 Route::post('/create-form', [FormController::class, 'addFormPost'])->name('addFormPost');
 Route::get('/edit-form/{unique_id}', [FormController::class, 'editForm'])->name('editForm');
-Route::get('/edit-form/{unique_id}', [FormController::class, 'editForm'])->name('editForm');
 Route::post('/edit-form/{unique_id}', [FormController::class, 'editFormPost'])->name('editFormPost');
+
+
 
 Route::get('/form/{unique_id}', [FormController::class, 'singleForm'])->name('singleForm'); //viewed by admin
 Route::get('/order-form/{unique_id}', [FormController::class, 'customerOrderForm'])->name('customerOrderForm'); //sent to customer
@@ -131,6 +132,10 @@ Route::get('/all-new-form-builder', [FormBuilderController::class, 'allNewFormBu
 Route::get('/edit-new-form-builder/{unique_key}', [FormBuilderController::class, 'editNewFormBuilder'])->name('editNewFormBuilder'); //edit by admin
 Route::post('/edit-new-form-builder/{unique_key}', [FormBuilderController::class, 'editNewFormBuilderPost'])->name('editNewFormBuilderPost'); //edit by admin
 
+//duplicateForm, unique_id is id of form copied
+Route::get('/duplicate-form/{unique_id}', [FormBuilderController::class, 'duplicateForm'])->name('duplicateForm');
+Route::post('/duplicate-form/{unique_id}', [FormBuilderController::class, 'duplicateFormPost'])->name('duplicateFormPost');
+
 Route::get('/form-embedded/{unique_key}', [FormBuilderController::class, 'formEmbedded'])->name('formEmbedded');
 Route::get('/form-link/{unique_key}', [FormBuilderController::class, 'formLink'])->name('formLink'); //like singleform
 Route::post('/form-link/{unique_key}/{stage?}', [FormBuilderController::class, 'formLinkPost'])->name('formLinkPost');
@@ -145,10 +150,10 @@ Route::get('/ajax-save-new-form-link-orderbump-refusal', [FormBuilderController:
 Route::get('/ajax-save-new-form-link-upsell-refusal', [FormBuilderController::class, 'saveNewFormUpSellRefusalFromCustomer'])->name('saveNewFormUpSellRefusalFromCustomer'); //ajax
 
 Route::get('/forms-list', [FormBuilderController::class, 'allFormBuilders'])->name('allFormBuilders');
-Route::post('/add-orderbump/{form_unique_key}', [FormBuilderController::class, 'addOrderbumpToForm'])->name('addOrderbumpToForm');
-Route::post('/edit-orderbump/{form_unique_key}', [FormBuilderController::class, 'editOrderbumpToForm'])->name('editOrderbumpToForm');
-Route::post('/add-upsell/{form_unique_key}', [FormBuilderController::class, 'addUpsellToForm'])->name('addUpsellToForm');
-Route::post('/edit-upsell/{form_unique_key}', [FormBuilderController::class, 'editUpsellToForm'])->name('editUpsellToForm');
+Route::post('/add-orderbump', [FormBuilderController::class, 'addOrderbumpToForm'])->name('addOrderbumpToForm');
+Route::post('/edit-orderbump', [FormBuilderController::class, 'editOrderbumpToForm'])->name('editOrderbumpToForm');
+Route::post('/add-upsell', [FormBuilderController::class, 'addUpsellToForm'])->name('addUpsellToForm');
+Route::post('/edit-upsell', [FormBuilderController::class, 'editUpsellToForm'])->name('editUpsellToForm');
 
 //cart abandoned
 Route::get('/carts', [OrderController::class, 'cartAbandon'])->name('cartAbandon');

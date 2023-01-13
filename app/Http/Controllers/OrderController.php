@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Validator;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Order;
 use App\Models\OrderLabel;
@@ -14,6 +15,8 @@ use App\Models\Product;
 use App\Models\OutgoingStock;
 use App\Models\User;
 use App\Models\CartAbandon;
+use App\Models\FormHolder;
+use App\Models\SoundNotification;
 
 
 class OrderController extends Controller
@@ -36,6 +39,10 @@ class OrderController extends Controller
         if ($status=="new") {
             $orders = Order::where('status', 'new')->get();
         }
+        if ($status=="new_from_alarm") {
+            DB::table('sound_notifications')->update(['status'=>'seen']);
+            $orders = Order::where('status', 'new')->get();
+        }
         if ($status=="pending") {
             $orders = Order::where('status', 'pending')->get();
         }
@@ -49,7 +56,18 @@ class OrderController extends Controller
             $orders = Order::where('status', 'delivered_and_remitted')->get();
         }
 
-        return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents', 'status'));
+        $entries = false; $formHolder = '';
+        if ($status !== "") {
+            $formHolder = FormHolder::where('unique_key', $status);
+            if($formHolder->exists()) {
+                $formHolder = $formHolder->first();
+                $formHolders = $formHolder->formHolders;
+                $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->get();
+                $entries = true;
+            }
+        }
+
+        return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents', 'status', 'entries', 'formHolder'));
     }
 
     public function updateOrderStatus($unique_key, $status)

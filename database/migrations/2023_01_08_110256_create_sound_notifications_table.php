@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('content')->nullable(); //content
             $table->string('link')->nullable(); //link
 
+            $table->string('order_id')->nullable();
+
             $table->string('updated_by')->nullable(); //staff that attended to the notification
             $table->string('status')->nullable(); //new, pending, confirmed
             $table->softDeletes();

@@ -43,6 +43,19 @@
 
 <main id="main" class="main">
 
+  @if ($entries)
+  <div class="pagetitle">
+    <h1>Order Entries for Form: {{ $formHolder->name }}</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('allOrders') }}">Orders</a></li>
+        <li class="breadcrumb-item active">Entries for Form: {{ $formHolder->name }}</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->  
+  @else
+    
   <div class="pagetitle">
     <h1>Orders @if (!isset($status) || $status=='new') New @elseif($status=='pending') Pending
       @elseif($status=='cancelled') Cancelled @elseif($status=='delivered_not_remitted') Delivered not Remitted
@@ -58,7 +71,8 @@
     </nav>
   </div><!-- End Page Title -->
 
-  
+  @endif
+
   <section class="users-list-wrapper">
     <div class="users-list-filter px-1">
       
@@ -98,7 +112,7 @@
             <table id="products-table" class="table custom-table" style="width:100%">
               <thead>
                   <tr>
-                    <th>Order Code</th>
+                    @if (!$entries)<th>Order Code</th>@endif
                     <th>Customer</th>
                     <th>Delivery Due Date</th>
                     <th>Delivery Address</th>
@@ -113,7 +127,7 @@
                 @if (count($orders) > 0)
                   @foreach ($orders as $key=>$order)
                     <tr>
-                      <th>{{ $order->orderCode($order->id) }}</th>
+                      @if (!$entries)<th>{{ $order->orderCode($order->id) }}</th>@endif
                       <td>{{ $order->customer_id ? $order->customer->firstname : 'No response' }} {{ $order->customer_id ? $order->customer->lastname : '' }}</td>
                       
                       <td>
@@ -130,13 +144,13 @@
                       @if (isset($order->agent_assigned_id))
                       <td>
                         {{ $order->agent->name }} <br>
-                        <button class="btn btn-sm btn-dark rounded-pill" onclick="changeAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Agent">
-                          <i class="bi bi-plus"></i> <span>Change Agent</span></button>
+                        <span class="badge badge-dark" onclick="changeAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Agent">
+                          <i class="bi bi-plus"></i> <span>Change Agent</span></span>
                       </td>
                       @else
                       <td style="width: 120px">
-                        <button class="btn btn-sm btn-success rounded-pill" onclick="addAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Agent">
-                          <i class="bi bi-plus"></i> <span>Assign Agent</span></button> 
+                        <span class="badge badge-success" onclick="addAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Agent">
+                          <i class="bi bi-plus"></i> <span>Assign Agent</span></span> 
                       </td>
                       @endif
 

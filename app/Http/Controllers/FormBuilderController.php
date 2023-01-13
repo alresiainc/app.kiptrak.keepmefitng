@@ -158,6 +158,158 @@ class FormBuilderController extends Controller
         
     }
 
+    //duplicateForm
+    public function duplicateForm ($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $formHolder = FormHolder::where('unique_key', $unique_key)->first();
+        if (!isset($formHolder)) {
+            abort(404);
+        }
+
+        //form code
+        $string = 'kpf-' . date("his");
+        $randomStrings = FormHolder::where('slug', 'like', $string.'%')->pluck('slug');
+
+        do {
+            $randomString = $string.rand(100000, 999999);
+        } while ($randomStrings->contains($randomString));
+    
+        $form_code = $randomString;
+
+        //data to show/edit
+        $formData = \unserialize($formHolder->form_data);
+        
+        $formContactInfo = [];
+        $formPackage = [];
+        $form_names = $formData['form_names'];
+        $form_labels = $formData['form_labels'];
+        $form_types = $formData['form_types'];
+        $packages = $formData['packages']; //["1", "2"]
+
+        $products = Product::all();
+
+        foreach($packages as $key=>$package):
+        $package_select_edit[] =
+        '<div class="row w-100">
+            <div class="col-sm-1 rem-on-display" onclick="$(this).closest(\'.row\').remove()">
+                <button class="btn btn-sm btn-default" type="button"><span class="bi bi-x-lg"></span></button>
+            </div>
+            <div class="col-sm-11 d-flex align-items-center">
+                <div class="mb-3 q-fc w-100">';
+                $package_select_edit[] .=
+                '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
+                    <option value="'.$package.'" selected> '.$this->productById($package)->name.' </option>';
+                    foreach($products as $product):
+                        $package_select_edit[] .= '<option value="'. $product->id.'"> '.$product->name.'</option>';
+                    endforeach;
+                $package_select_edit[] .=
+                '</select>
+                <input type="hidden" name="former_packages[]" value="'.$package.'">
+                </div>
+            </div>
+        </div>';
+        endforeach;
+
+        //return $package_select_edit;
+
+        //for cloning
+        $package_select = '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
+        <option value=""> --Select Product-- </option>';
+        foreach($products as $product):
+            $package_select .= '<option value="'. $product->id.'"> '.$product->name.'</option>' ;
+        endforeach;
+        $package_select .='</select>';
+
+        //cos form_names are not determind by staff in form-building
+        foreach ( $form_names as $key => $form_name ) {
+            //$formContact[Str::slug($form_name)] = [ Str::slug($form_name), $form_labels[$key], $form_types[$key] ];
+            $formContactInfo['form_name'] = $form_name;
+            $formContactInfo['form_label'] = $form_labels[$key];
+            $formContactInfo['form_type'] = $form_types[$key];
+            $formContact[] = $formContactInfo;
+        }
+        // return $formContact;
+
+        //extract products
+        foreach ($formContact as $key => $formProduct) {
+            if ($formProduct['form_name'] == 'Product Package') {
+                $package_form_name = $formProduct['form_name'];
+                $package_form_label = $formProduct['form_label'];
+                $package_form_type = $formProduct['form_type'];
+            }
+        }
+        
+        // return $products;
+
+        return view('pages.duplicateForm', compact('authUser', 'user_role', 'formHolder', 'products', 'package_select', 'form_code', 'formContact', 'packages', 'package_select_edit'));
+
+    }
+
+    public function duplicateFormPost(Request $request, $unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $request->validate([
+            'name' => 'required|string|unique:form_holders',
+        ]);
+
+        $formHolder_former = FormHolder::where('unique_key', $unique_key)->first();
+        if (!isset($formHolder_former)) {
+            abort(404);
+        }
+
+        $data = $request->all();
+
+        $formHolder = new FormHolder();
+        $formHolder->name = $data['name'];
+        $formHolder->parent_id = $formHolder_former->id; //like form_code
+        $formHolder->slug = $request->form_code; //like form_code
+        $formHolder->form_data = \serialize($request->except(['products', 'q', 'required', 'form_name_selected', '_token']));
+        
+        $formHolder->created_by = $authUser->id;
+        $formHolder->status = 'true';
+        $formHolder->save();
+
+        //save Order
+        $order = new Order();
+        $order->form_holder_id = $formHolder->id;
+        $order->source_type = 'form_holder_module';
+        $order->status = 'new';
+        $order->save();
+
+        //outgoingStock, in place of orderProduct
+        $product_ids = [];
+        foreach ($data['packages'] as $package) {
+            if (!empty($package)) {
+                
+                $product = Product::where('id', $package)->first();
+                $product_ids[] = $product->id;
+                $outgoingStock = new OutgoingStock();
+                $outgoingStock->product_id = $product->id;
+                $outgoingStock->order_id = $order->id;
+                $outgoingStock->quantity_removed = 1;
+                $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                $outgoingStock->quantity_returned = 0; //by default
+                $outgoingStock->created_by = $authUser->id;
+                $outgoingStock->status = 'true';
+                $outgoingStock->save();
+                
+            }  
+        }
+
+        //update formHolder
+        $formHolder->update(['order_id'=>$order->id]);
+        $order->update(['products'=>serialize($product_ids)]);
+
+        return back()->with('success', 'Duplicate Form Created Successfully');
+        
+    }
+
     public function editNewFormBuilder ($unique_key)
     {
         $authUser = auth()->user();
@@ -307,9 +459,7 @@ class FormBuilderController extends Controller
                 $outgoingStock->status = 'true';
                 $outgoingStock->save();
                 
-            }
-            
-            
+            }  
         }
 
         //update formHolder, no need
@@ -422,7 +572,7 @@ class FormBuilderController extends Controller
         return view('pages.allFormBuilders', compact('authUser', 'user_role', 'formHolders', 'products'));
     }
 
-    public function addOrderbumpToForm(Request $request, $form_unique_key)
+    public function addOrderbumpToForm(Request $request)
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
@@ -430,11 +580,13 @@ class FormBuilderController extends Controller
         $request->validate([
             'orderbump_product' => 'required',
         ]);
-        $formHolder = FormHolder::where('unique_key', $form_unique_key)->first();
+
+        $data = $request->all();
+        $formHolder = FormHolder::where('unique_key', $data['form_unique_key'])->first();
         if (!isset($formHolder)) {
             abort(404);
         }
-        $data = $request->all();
+        
 
         //orderbump
         $orderbump = new OrderBump();
@@ -468,7 +620,7 @@ class FormBuilderController extends Controller
         return back()->with('success', 'Order bump Added Successfully');
     }
 
-    public function editOrderbumpToForm(Request $request, $form_unique_key)
+    public function editOrderbumpToForm(Request $request)
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
@@ -476,11 +628,12 @@ class FormBuilderController extends Controller
         $request->validate([
             'orderbump_product' => 'required',
         ]);
-        $formHolder = FormHolder::where('unique_key', $form_unique_key)->first();
+        $data = $request->all();
+        $formHolder = FormHolder::where('unique_key', $data['editOrderbump_form_unique_key'])->first();
         if (!isset($formHolder)) {
             abort(404);
         }
-        $data = $request->all();
+        
 
         //orderbump
         $orderbump = OrderBump::where('id', $formHolder->orderbump->id)->first();
@@ -514,7 +667,7 @@ class FormBuilderController extends Controller
         return back()->with('success', 'OrderBump Updated Added Successfully');
     }
 
-    public function addUpsellToForm(Request $request, $form_unique_key)
+    public function addUpsellToForm(Request $request)
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
@@ -522,12 +675,13 @@ class FormBuilderController extends Controller
         $request->validate([
             'upsell_product' => 'required',
         ]);
-        $formHolder = FormHolder::where('unique_key', $form_unique_key)->first();
+
+        $data = $request->all();
+        $formHolder = FormHolder::where('unique_key', $data['addUpsell_form_unique_key'])->first();
         if (!isset($formHolder)) {
             abort(404);
         }
-        $data = $request->all();
-
+        
         //upsell
         $upsell = new UpSell();
         $upsell->upsell_heading = !empty($data['upsell_heading']) ? $data['upsell_heading'] : 'Wait, One More Chance';
@@ -561,7 +715,7 @@ class FormBuilderController extends Controller
         return back()->with('success', 'UpSell Added Successfully');
     }
 
-    public function editUpsellToForm(Request $request, $form_unique_key)
+    public function editUpsellToForm(Request $request)
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
@@ -569,7 +723,8 @@ class FormBuilderController extends Controller
         $request->validate([
             'upsell_product' => 'required',
         ]);
-        $formHolder = FormHolder::where('unique_key', $form_unique_key)->first();
+        $data = $request->all();
+        $formHolder = FormHolder::where('unique_key', $data['editUpsell_form_unique_key'])->first();
         if (!isset($formHolder)) {
             abort(404);
         }
@@ -1158,6 +1313,7 @@ class FormBuilderController extends Controller
         $soundNotification->topic = 'New Order';
         $soundNotification->content = 'Customer placed an order';
         $soundNotification->link = 'order-form/'.$order->unique_key;
+        $soundNotification->order_id = $order->id;
         $soundNotification->status = 'new';
         $soundNotification->save();
         

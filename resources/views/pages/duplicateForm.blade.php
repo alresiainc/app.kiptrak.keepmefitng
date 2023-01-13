@@ -1,5 +1,5 @@
 @extends('layouts.design')
-@section('title')Edit Form Builder @endsection
+@section('title')Duplicate Form Builder @endsection
 
 @section('extra_css')
 <style>
@@ -35,7 +35,7 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Edit Form Builder</h1>
+        <h1>Duplicate Form Builder</h1>
         <nav>
           <div class="d-flex justify-content-between align-items-center">
               <ol class="breadcrumb">
@@ -58,12 +58,18 @@
 
     <section class="mt-5">
         <div class="container" id="form-field">
-            <form id="form-data" action="{{ route('editNewFormBuilderPost', $formHolder->unique_key) }}" method="POST">@csrf
+            <form id="form-data" action="{{ route('duplicateFormPost', $formHolder->unique_key) }}" method="POST">@csrf
                 <div class="row">
                     <div class="col-md-12">
                         <div class="p-1">
                             <h5 title="Unique Form Code" class="text-center">Form Code: {{ $form_code }}</h5>
                             <input type="hidden" name="form_code" value="{{ $form_code }}">
+                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" id="" placeholder="Enter Form Name" value="{{ $formHolder->name.'-'.$formHolder->id+1 }}">
+                            @error('name')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                             {{-- <h5 title="Enter Title" class="text-center" id="form-title">Fields marked * are mandatory</h5> --}}
                             {{-- <h3 contenteditable="true" title="Enter Title" class="text-center" id="form-title">Enter Title Here</h3> --}}
                             {{-- <hr class="border-primary"> --}}

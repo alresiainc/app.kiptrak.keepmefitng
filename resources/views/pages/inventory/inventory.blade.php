@@ -442,7 +442,7 @@
                             <td>{{ $product->name }}</td>
                             <td data-categoryname="{{ $product->category->name }}" class="categoryname">{{ $product->category->name }}</td>
                             <td>{{ $product->purchases->sum('product_qty_purchased') }}</td>
-                            <td>{{ $product->sales->sum('product_qty_sold') }}</td>
+                            <td>{{ $product->purchases->sum('product_qty_purchased') - $product->stock_available() }}</td>
                             <td>{{ $product->stock_available() }}</td>
                             <td>{{ $product->created_at->format('Y-m-d') }}</td>
                           </tr>

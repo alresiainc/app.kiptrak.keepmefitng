@@ -76,7 +76,8 @@
 
                 <div class="col-lg-3">
                     <label for="" class="fw-bolder">Quantity Ordered</label>
-                    <div class="text-dark" style="font-size: 14px;">{{ $package['quantity_removed'].' @'. $package['product']->price }}</div>
+                    <div class="text-dark d-none" style="font-size: 14px;">{{ $package['quantity_removed'].' @'. $package['product']->price }}</div>
+                    <div class="text-dark" style="font-size: 14px;">{{ $package['quantity_removed'] }}</div>
                 </div>
                 
                 <div class="col-lg-3">
