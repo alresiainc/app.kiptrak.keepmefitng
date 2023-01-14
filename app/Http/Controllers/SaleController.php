@@ -40,9 +40,10 @@ class SaleController extends Controller
         $products = Product::all();
         $customers = Customer::all();
         $warehouses = WareHouse::all();
+        $countries = Country::all();
         $sale_code = 'kps-' . date("Ymd") . '-'. date("his");
         
-        return view('pages.sales.addSale', compact('authUser', 'user_role', 'products', 'customers', 'sale_code', 'warehouses'));
+        return view('pages.sales.addSale', compact('authUser', 'user_role', 'products', 'customers', 'sale_code', 'warehouses', 'countries'));
     }
 
     /**

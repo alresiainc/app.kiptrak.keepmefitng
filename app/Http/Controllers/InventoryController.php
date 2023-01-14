@@ -301,9 +301,9 @@ class InventoryController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
         $products = Product::all();
-        $pro = Product::find(1);
+        //$pro = Product::find(1);
         // return $pro->warehouses->where('type','minor')->count();
-        // $in_stock_products = [];
+        $in_stock_products = [];
         foreach ($products as $key => $product) {
             $product_warehouse = ProductWarehouse::where('product_id',$product->id);
             //if ($product_warehouse->exists()) {

@@ -195,6 +195,61 @@ class CustomerController extends Controller
         return view('pages.customers.singleCustomerSales', compact('authUser', 'user_role', 'customer', 'sales'));
     }
 
+    //add by ajax
+    public function addCustomerAjax(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $request->validate([
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email',
+            'phone_number' => 'required',
+            'whatsapp_phone_number' => 'required',
+            'country' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+        ]);
+        $authUser = auth()->user();
+
+        $data = $request->all();
+        $customer = new Customer();
+        // $customer->order_id = $order->id;
+        // $customer->form_holder_id = $formHolder->id;
+        $customer->firstname = $data['firstname'];
+        $customer->lastname = $data['lastname'];
+        $customer->phone_number = $data['phone_number'];
+        $customer->whatsapp_phone_number = $data['whatsapp_phone_number'];
+        $customer->email = $data['email'];
+        $customer->password = Hash::make('password');
+        $customer->city = $data['city'];
+        $customer->state = $data['state'];
+        $customer->country_id = $data['country'];
+        $customer->delivery_address = $data['delivery_address'];
+        $customer->created_by = $authUser->id;
+        $customer->status = 'true';
+
+        if ($request->profile_picture) {
+            //image
+            $imageName = time().'.'.$request->profile_picture->extension();
+            //store products in folder
+            $request->profile_picture->storeAs('customer', $imageName, 'public');
+            $customer->profile_picture = $imageName;
+        }
+    
+        $customer->save();
+
+        //store in array
+        $data['customer'] = $customer;
+
+        return response()->json([
+            'status'=>true,
+            'data'=>$data
+        ]);
+    }
+
     /**
      * Remove the specified resource from storage.
      *

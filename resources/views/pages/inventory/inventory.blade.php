@@ -149,7 +149,7 @@
       <!-- Purchases & Sales Card -->
       <div class="col-lg-3 col-md-6" style="cursor: pointer;">
         <div class="card bg-1">
-          <a href="{{ route('allProductInventory', 'out_of_stock') }}" class="text-white">
+          <a href="javascript:void(0);" class="text-white">
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
@@ -165,7 +165,7 @@
           </a>
         </div>
         <div class="card bg-2">
-          <a href="{{ route('allProductInventory', 'out_of_stock') }}" class="text-white">
+          <a href="javascript:void(0);" class="text-white">
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">

@@ -165,7 +165,7 @@
                     <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addWarehouse">
                         <i class="bi bi-plus"></i></button>
                 </div>
-                @error('category')
+                @error('warehouse')
                   <span class="invalid-feedback" role="alert">
                       <strong>{{ $message }}</strong>
                   </span>
@@ -242,7 +242,7 @@
 
 </main><!-- End #main -->
 
-<!-- Modal -->
+<!-- ModalCategory -->
 <div class="modal fade" id="addCategory" tabindex="-1" aria-labelledby="addCategoryLabel" aria-hidden="true">
   <div class="modal-dialog">
       <div class="modal-content">
@@ -251,14 +251,13 @@
               <button type="button" class="btn-close"
                   data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form action="">@csrf
+          <form id="addCategoryForm" action="">@csrf
               <div class="modal-body">
                   
                   <div class="d-grid mb-2">
                       <label for="">Category Name</label>
-                      <input type="text" name="name" class="form-control category_name" placeholder="">
+                      <input type="text" name="category_name" class="form-control category_name" placeholder="">
                   </div>
-
                                   
               </div>
               <div class="modal-footer">
@@ -386,7 +385,7 @@
 
   <script>
     //addCategory Modal
-   $('.addCategoryBtn').click(function(e){
+   $('#addCategoryForm').submit(function(e){
         e.preventDefault();
         var category_name = $("form .category_name").val();
         // alert(category_name)
@@ -396,7 +395,8 @@
             $.ajax({
                 type:'get',
                 url:'/ajax-create-product-category',
-                data:{ category_name:category_name },
+                // data:{ category_name:category_name },
+                data: $(this).serialize(),
                 success:function(resp){
                     
                     if (resp.status) {
@@ -424,50 +424,50 @@
    });
   </script>
 
-<script>
-  //addWarehouse Modal
- $('.addWarehouseBtn').click(function(e){
-      e.preventDefault();
-      var name = $("form .name").val();
-      var type = $('form .type').find(":selected").val();
-      var agent_id = $('form .agent_id').find(":selected").val();
-      var city = $("form .city").val();
-      var state = $("form .state").val();
-      var country = $("form .country").val();
-      var address = $("form .address").val();
+  <script>
+    //addWarehouse Modal
+    $('.addWarehouseBtn').click(function(e){
+          e.preventDefault();
+          var name = $("form .name").val();
+          var type = $('form .type').find(":selected").val();
+          var agent_id = $('form .agent_id').find(":selected").val();
+          var city = $("form .city").val();
+          var state = $("form .state").val();
+          var country = $("form .country").val();
+          var address = $("form .address").val();
 
-      // alert(category_name)
-      if (name != '') {
-          $('#addWarehouse').modal('hide');
+          // alert(category_name)
+          if (name != '') {
+              $('#addWarehouse').modal('hide');
 
-          $.ajax({
-              type:'get',
-              url:'/ajax-create-warehouse',
-              data:{ name:name, type:type, agent_id:agent_id, city:city, state:state, country:country, address:address },
-              success:function(resp){
-                  
-                  if (resp.status) {
-                      console.log(resp.data.warehouse)
-                      var datas = {
-                          id: resp.data.warehouse.id,
-                          text: resp.data.warehouse.name
-                      };
-                      var newOption = new Option(datas.text, datas.id, false, false);
-                      $('#addWarehouseSelect').prepend(newOption).trigger('change');
+              $.ajax({
+                  type:'get',
+                  url:'/ajax-create-warehouse',
+                  data:{ name:name, type:type, agent_id:agent_id, city:city, state:state, country:country, address:address },
+                  success:function(resp){
                       
-                      //$('#addCategorySelect').prepend('<option value='+resp.data.category.id+'>'+resp.data.category.name+'</option>')
-                      alert('Warehouse Added Successfully')
-                      // return false;
-                  } 
-                      
-              },error:function(){
-                  alert("Error");
-              }
-          });
-      
-      } else {
-          alert('Error: Something went wrong')
-      }
- });
-</script>
+                      if (resp.status) {
+                          console.log(resp.data.warehouse)
+                          var datas = {
+                              id: resp.data.warehouse.id,
+                              text: resp.data.warehouse.name
+                          };
+                          var newOption = new Option(datas.text, datas.id, false, false);
+                          $('#addWarehouseSelect').prepend(newOption).trigger('change');
+                          
+                          //$('#addCategorySelect').prepend('<option value='+resp.data.category.id+'>'+resp.data.category.name+'</option>')
+                          alert('Warehouse Added Successfully')
+                          // return false;
+                      } 
+                          
+                  },error:function(){
+                      alert("Error");
+                  }
+              });
+          
+          } else {
+              alert('Error: Something went wrong')
+          }
+    });
+  </script>
 @endsection

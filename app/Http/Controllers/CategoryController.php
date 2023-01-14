@@ -135,6 +135,7 @@ class CategoryController extends Controller
         
         $authUser = auth()->user();
         $data = $request->all();
+        
         $category = new Category();
         $category->name = $data['category_name'];
        

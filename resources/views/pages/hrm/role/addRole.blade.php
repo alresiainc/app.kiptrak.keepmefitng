@@ -8,7 +8,8 @@
       <h1>Add Role</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allRole') }}">Role List</a></li>
           <li class="breadcrumb-item active">Add Role</li>
         </ol>
       </nav>
@@ -17,7 +18,7 @@
     <section class="section dashboard mb-3">
       <div class="row">
         <div class="col-md-12">
-          <a href="{{ route('allRole') }}" class="badge badge-dark">Role List</a>
+          <a href="" class="badge badge-dark"></a>
         </div>
       </div>
     </section>

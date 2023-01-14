@@ -1,21 +1,34 @@
 @extends('layouts.design')
 @section('title')Add Sale @endsection
 @section('extra_css')
-    <style>
-        select{
+<style>
+    /* select2 arrow */
+    select{
         -webkit-appearance: listbox !important
-        }
-        .btn-light {
-            background-color: #fff !important;
-            color: #000 !important;
-        }
-        /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
-            color: #999;
-        } */
-        div.filter-option-inner-inner{
-            color: #000 !important;
-        }
-    </style>
+    }
+
+    /* custom-select border & inline edit */
+    .btn-light {
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+    div.filter-option-inner-inner{
+        color: #000 !important;
+    }
+    /* custom-select border & inline edit */
+
+    /* select2 height proper */
+    .select2-selection__rendered {
+        line-height: 31px !important;
+    }
+    .select2-container .select2-selection--single {
+        height: 35px !important;
+    }
+    .select2-selection__arrow {
+        height: 34px !important;
+    }
+    /* select2 height proper */
+</style>
 @endsection
 @section('content')
 
@@ -68,7 +81,7 @@
 
                     <div class="d-flex">
 
-                        <select name="customer" data-live-search="true" class="custom-select form-control border @error('customer') is-invalid @enderror" id="">
+                        <select id="addCustomerSelect" name="customer" class="select2 form-control border @error('customer') is-invalid @enderror" id="">
                         <option value="">Nothing Selected</option>
     
                         @foreach ($customers as $customer)
@@ -196,7 +209,7 @@
                     <label for="" class="form-label">Attach File
                         <i class="bi bi-question-circle text-info border rounded-pill" data-bs-toggle="tooltip" data-bs-placement="top" title="Only jpg, jpeg, png, pdf, csv, docx, xlsx, gif, svg, webp and txt file is supported"></i>
                       </label>
-                    <input type="file" name="attached_document" class="form-control @error('attached_document') is-invalid @enderror" placeholder="" >
+                    <input type="file" name="attached_document" class="form-control @error('attached_document') is-invalid @enderror" placeholder="">
                     @error('attached_document')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -206,7 +219,7 @@
 
                 <div class="col-md-4 d-none">
                     <label for="" class="form-label">Order Tax</label>
-                    <input type="text" name="order_tax" class="form-control @error('order_tax') is-invalid @enderror" placeholder="" >
+                    <input type="text" name="order_tax" class="form-control @error('order_tax') is-invalid @enderror" placeholder="">
                     @error('order_tax')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -216,7 +229,7 @@
 
                 <div class="col-md-4 d-none">
                     <label for="" class="form-label">Discount</label>
-                    <input type="text" name="discount" class="form-control @error('discount') is-invalid @enderror" placeholder="" >
+                    <input type="text" name="discount" class="form-control @error('discount') is-invalid @enderror" placeholder="">
                     @error('discount')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -269,7 +282,7 @@
                 <button type="button" class="btn-close"
                     data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('addCustomerPost') }}" method="POST" enctype="multipart/form-data">@csrf
+            <form id="addCustomerForm" action="{{ route('addCustomerPost') }}" method="POST" enctype="multipart/form-data">@csrf
                 <div class="modal-body">
                     
                     <div class="d-grid mb-2">
@@ -288,24 +301,54 @@
 
                     <div class="d-grid mb-2">
                         <label for="">Phone Number</label>
-                        <input type="text" name="phone_number" class="form-control"
-                            placeholder="">
+                        <input type="text" name="phone_number" class="form-control" placeholder="">
                     </div>
 
                     <div class="d-grid mb-2">
                         <label for="">Whatsapp Number</label>
-                        <input type="text" name="whatsapp_phone_number" class="form-control"
-                            placeholder="">
+                        <input type="text" name="whatsapp_phone_number" class="form-control" placeholder="">
+                    </div>
+
+                    <div class="d-grid mb-2">
+                        <label for="">City/Town</label>
+                        <input type="text" name="city" class="form-control" placeholder="">
+                    </div>
+
+                    <div class="d-grid mb-2">
+                        <label for="">State</label>
+                        <input type="text" name="state" class="form-control" placeholder="">
+                    </div>
+
+                    <div class="d-grid mb-2">
+                        <label for="" class="form-label">Country</label>
+                        <select name="country" class="custom-select country form-control border" id="">
+                          <option value="1">Nigeria</option>
+                          @if (count($countries) > 0)
+                              @foreach ($countries as $country)
+                              <option value="{{ $country->id }}">{{ $country->name }}</option>
+                              @endforeach
+                          @endif
+                        </select>
+                        @error('country')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
                     </div>
 
                     <div class="d-grid mb-2">
                         <label for="">Address</label>
                         <input type="text" name="delivery_address" class="form-control" placeholder="">
                     </div>
+
+                    <div class="d-grid mb-2">
+                        <label for="">Profile Pic | Optional</label>
+                        <input type="file" name="profile_picture" class="form-control" placeholder="">
+                    </div>
                     
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Add Customer</button>
+                    <button type="submit" class="btn btn-primary addCustomerBtn">Add Customer</button>
                 </div>
             </form>
         </div>
@@ -319,8 +362,7 @@
 <script>
     $('#product').change(function(){ 
     var product = $(this).val();
-    // {{ $product->code }}|{{ $product->name }}|{{ $product->stock_available() }}|{{ $product->price }}
-    // alert(product)
+    
     var productArr = product.split('|');
     var code = productArr[0];
     var name = productArr[1];
@@ -365,6 +407,44 @@
         $(this).closest('tr').find('.total').text(total);
     });
 </script>
+
+<script>
+    //addCategory Modal
+   $('#addCustomerForm').submit(function(e){
+        e.preventDefault();
+    
+        // alert(category_name)
+        
+            $('#addCustomer').modal('hide');
+
+            $.ajax({
+                type:'get',
+                url:'/ajax-create-customer',
+                data:$(this).serialize(),
+                success:function(resp){
+                    
+                    if (resp.status) {
+                        
+                        var datas = {
+                            id: resp.data.customer.id,
+                            text: resp.data.customer.firstname+' '+resp.data.customer.lastname
+                        };
+                        var newOption = new Option(datas.text, datas.id, false, false);
+                        $('#addCustomerSelect').prepend(newOption).trigger('change');
+                        
+                        //$('#addCategorySelect').prepend('<option value='+resp.data.category.id+'>'+resp.data.category.name+'</option>')
+                        alert('Customer Added Successfully')
+                        // return false;
+                    } 
+                        
+                },error:function(){
+                    alert("Error");
+                }
+            });
+        
+        
+   });
+  </script>
 
 
 @endsection

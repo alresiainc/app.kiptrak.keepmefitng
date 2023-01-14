@@ -9,7 +9,7 @@
   <meta content="width=device-width, initial-scale=1.0, user-scalable=0" name="viewport">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
-  <title>@yield('title') :: CRM</title>
+  <title>@yield('title') :: Kiptrak CRM</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -49,7 +49,13 @@
   
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css"/>
   
-
+  <style>
+    @media only screen and (max-width: 600px) {
+  .logo img {
+    max-width: 60px;
+  }
+}
+  </style>
   @yield('extra_css')
 
 </head>
@@ -160,10 +166,11 @@
       // DataTables initialisation
       var table = $('.custom-table').DataTable({
         "bSort" : false,
-        dom: 'Bfrtip',
+        dom: 'Blfrtip',
         buttons: [
           'pdf', 'print', 'excel', 'csv', 'copy' 
-        ] 
+        ],
+          
       });
   
       // Refilter the table

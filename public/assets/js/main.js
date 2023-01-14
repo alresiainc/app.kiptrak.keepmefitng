@@ -140,10 +140,19 @@
   /**
    * Sidebar toggle
    */
-  if (select('.toggle-sidebar-btn')) {
-    on('click', '.toggle-sidebar-btn', function(e) {
-      select('body').classList.toggle('toggle-sidebar')
-    })
+  // if (select('.toggle-sidebar-btn')) {
+  //   on('click', '.toggle-sidebar-btn', function(e) {
+  //     select('body').classList.toggle('toggle-sidebar')
+  //   })
+  // }
+  const sidebarbtn = document.querySelectorAll('.toggle-sidebar-btn');
+
+  for (let i = 0; i < sidebarbtn.length; i++) {
+    const btnToggle = sidebarbtn[i];
+
+    btnToggle.addEventListener('click',()=>{
+      document.querySelector('body').classList.toggle('toggle-sidebar');
+    });    
   }
 
   /**

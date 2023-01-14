@@ -245,8 +245,7 @@
 <script>
     $('#product').change(function(){ 
     var product = $(this).val();
-    // {{ $product->code }}|{{ $product->name }}|{{ $product->stock_available() }}|{{ $product->price }}
-    // alert(product)
+    
     var productArr = product.split('|');
     var code = productArr[0];
     var name = productArr[1];

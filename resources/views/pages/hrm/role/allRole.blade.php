@@ -8,19 +8,22 @@
     <h1>Roles</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
         <li class="breadcrumb-item active">Roles</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
-
   
   <section class="users-list-wrapper">
     <div class="users-list-filter px-1">
-      
     </div>
-
   </section>
+
+  @if(Session::has('success'))
+    <div class="alert alert-success mb-3 text-center">
+        {{Session::get('success')}}
+    </div>
+  @endif
 
   <section>
     <div class="row">
@@ -85,7 +88,7 @@
                       <td>
                         <div class="d-flex">
                           <a href="{{ route('editRole', $role->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                          <a class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
+                          <a class="btn btn-danger btn-sm" href="{{ route('deleteRole', $role->unique_key) }}"><i class="bi bi-trash"></i></a>
                         </div>
                       </td>
                   </tr>

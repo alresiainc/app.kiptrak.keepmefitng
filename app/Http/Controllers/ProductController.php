@@ -16,6 +16,7 @@ use App\Models\Sale;
 use App\Models\WareHouse;
 use App\Models\ProductWarehouse;
 
+
 class ProductController extends Controller
 {
     public function addProduct()
@@ -201,8 +202,13 @@ class ProductController extends Controller
         //stock_available
         $stock_available = $product->stock_available();
 
+        $categories = Category::all();
+        $warehouses = Warehouse::all();
+
+        $agents = User::where('type', 'agent')->get();
+
         return view('pages.products.editProduct', compact('authUser', 'user_role', 'product', 'currency_symbol', 'features',
-        'countries', 'currency_nationality', 'stock_available'));
+        'countries', 'currency_nationality', 'stock_available', 'categories', 'warehouses', 'agents'));
     }
 
     public function editProductPost(Request $request, $unique_key)
@@ -217,10 +223,12 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string',
             'quantity' => 'required|numeric',
+            'category' => 'required',
             // 'color' => 'nullable|string',
             // 'size' => 'nullable|string',
             'currency' => 'required',
-            'price' => 'required|numeric',
+            'purchase_price' => 'required|numeric',
+            'sale_price' => 'required|numeric',
             'code' => 'nullable|string',
             // 'features' => 'nullable|array',
             //'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
@@ -230,11 +238,13 @@ class ProductController extends Controller
         $data = $request->all();
         $product->name = $data['name'];
         // $product->quantity = $data['quantity'];
+        $product->category_id = $data['category'];
         $product->color = !empty($data['color']) ? $data['color'] : null;
         $product->size = !empty($data['size']) ? $data['size'] : null;
         $product->country_id = $data['currency'];
-        $product->price = $data['price'];
-        $product->code = !empty($data['code']) ? $data['code'] : null;
+        $product->purchase_price = $data['purchase_price'];
+        $product->sale_price = $data['sale_price'];
+        // $product->code = !empty($data['code']) ? $data['code'] : null;
 
         $product->features = !empty($data['features']) ? serialize($data['features']) : null;
     

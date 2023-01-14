@@ -197,6 +197,8 @@ Route::get('/edit-customer/{unique_key}', [CustomerController::class, 'editCusto
 Route::post('/edit-customer/{unique_key}', [CustomerController::class, 'editCustomerPost'])->name('editCustomerPost');
 Route::get('/single-customer-sales/{unique_key}', [CustomerController::class, 'singleCustomerSales'])->name('singleCustomerSales');
 
+Route::get('/ajax-create-customer', [CustomerController::class, 'addCustomerAjax'])->name('addCustomerAjax');
+
 //product category
 Route::get('/categories', [CategoryController::class, 'allCategory'])->name('allCategory');
 Route::get('/create-category', [CategoryController::class, 'addCategory'])->name('addCategory');
@@ -337,6 +339,7 @@ Route::get('/view-role/{unique_key}', [RoleController::class, 'singleRole'])->na
 Route::get('/edit-role/{unique_key}', [RoleController::class, 'editRole'])->name('editRole');
 Route::post('/edit-role/{unique_key}', [RoleController::class, 'editRolePost'])->name('editRolePost');
 Route::post('/assign-role-to-user', [RoleController::class, 'assignRoleToUserPost'])->name('assignRoleToUserPost');
+Route::get('/delete-role/{unique_key}', [RoleController::class, 'deleteRole'])->name('deleteRole');
 
 //allAttendance
 Route::get('/all-attendances', [AttendanceController::class, 'allAttendance'])->name('allAttendance');

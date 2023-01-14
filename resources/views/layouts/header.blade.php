@@ -45,11 +45,7 @@
       </li>
 
       <li class="nav-item dropdown">
-        <a
-          class="nav-link nav-icon nav-link-expand"
-          id="btnFullscreen"
-          href="javascript:void(0)"
-        >
+        <a class="nav-link nav-icon nav-link-expand" id="btnFullscreen" href="javascript:void(0)">
           <i class="bi bi-fullscreen"></i>
         </a>
       </li>
@@ -156,12 +152,16 @@
       </li>
       <!-- End Profile Nav -->
 
+      
+
+      <li class="d-block d-lg-none"><i class="btn bi bi-list toggle-sidebar-btn"></i></li>
+      
+
       @guest
       <li class="nav-item"><a href="{{ route('login') }}">Login</a></li>
       @endguest
       
-      <li></li>
-      <i class="bi bi-list toggle-sidebar-btn"></i>
+      
     </ul>
   </nav>
   <!-- End Icons Navigation -->

@@ -121,7 +121,7 @@
                   {{ $currency }}{{ $profit }}
                   @else
                   {{-- ({{ number_format((float)abs($profit), 2, '.', ','); }}) --}}
-                  -{{ $profit }}
+                  {{ $profit == '-0' ? 0 : '-'.$profit }}
                   @endif
                   
                 </h2>

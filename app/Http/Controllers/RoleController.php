@@ -183,9 +183,19 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function deleteRole($unique_key)
     {
-        //
+        $role = Role::where(['unique_key'=>$unique_key]);
+        if(!$role->exists()){
+            return back()->with('role_error', 'Bad request');
+        }
+
+        $role = $role->first();
+        DB::table('user_roles')->where('role_id', $role->id)->delete();
+        DB::table('role_permissions')->where('role_id', $role->id)->delete();
+        $role->delete();
+
+        return back()->with('success', 'Role Removed Successfully');
     }
 
     /**
