@@ -141,16 +141,46 @@ public function singleSupplier($unique_key)
 }
 
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    
+    public function addSupplierAjax(Request $request)
     {
-        //
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $request->validate([
+            'company_name' => 'required|string',
+            'supplier_name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'nullable',
+            'company_logo' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+        ]);
+
+        $data = $request->all();
+
+        $supplier = new Supplier();
+        $supplier->company_name = $data['company_name'];
+        $supplier->supplier_name = $data['supplier_name'];
+        $supplier->email = $data['email'];
+        $supplier->phone_number = $data['phone_number'];
+        $supplier->created_by = $authUser->id;
+        $supplier->status = 'true';
+        
+        if ($request->company_logo) {
+            //image
+            $imageName = time().'.'.$request->company_logo->extension();
+            //store products in folder
+            $request->company_logo->storeAs('supplier', $imageName, 'public');
+            $supplier->company_logo = $imageName;
+        }
+
+        $supplier->save();
+        
+        $data['supplier'] = $supplier;
+
+        return response()->json([
+            'status'=>true,
+            'data'=>$data
+        ]);
     }
 
     /**

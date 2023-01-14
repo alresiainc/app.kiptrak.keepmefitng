@@ -239,6 +239,8 @@ Route::get('/view-supplier/{unique_key}', [SupplierController::class, 'singleSup
 Route::get('/edit-supplier/{unique_key}', [SupplierController::class, 'editSupplier'])->name('editSupplier');
 Route::post('/edit-supplier/{unique_key}', [SupplierController::class, 'editSupplierPost'])->name('editSupplierPost');
 
+Route::get('/ajax-create-supplier', [SupplierController::class, 'addSupplierAjax'])->name('addSupplierAjax'); //ajax
+
 //purchase
 Route::get('/purchases', [PurchaseController::class, 'allPurchase'])->name('allPurchase');
 Route::get('/create-purchase', [PurchaseController::class, 'addPurchase'])->name('addPurchase');

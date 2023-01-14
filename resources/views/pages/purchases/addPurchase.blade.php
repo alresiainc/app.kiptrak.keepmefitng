@@ -1,21 +1,34 @@
 @extends('layouts.design')
 @section('title')Add Purchase @endsection
 @section('extra_css')
-    <style>
-        select{
+<style>
+    /* select2 arrow */
+    select{
         -webkit-appearance: listbox !important
-        }
-        .btn-light {
-            background-color: #fff !important;
-            color: #000 !important;
-        }
-        /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
-            color: #999;
-        } */
-        div.filter-option-inner-inner{
-            color: #000 !important;
-        }
-    </style>
+    }
+
+    /* custom-select border & inline edit */
+    .btn-light {
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+    div.filter-option-inner-inner{
+        color: #000 !important;
+    }
+    /* custom-select border & inline edit */
+
+    /* select2 height proper */
+    .select2-selection__rendered {
+        line-height: 31px !important;
+    }
+    .select2-container .select2-selection--single {
+        height: 35px !important;
+    }
+    .select2-selection__arrow {
+        height: 34px !important;
+    }
+    /* select2 height proper */
+</style>
 @endsection
 @section('content')
 
@@ -59,6 +72,7 @@
               <form class="row g-3 needs-validation" action="{{ route('addPurchasePost') }}" method="POST"
               enctype="multipart/form-data">@csrf
               <div class="col-md-12 mb-3">The field labels marked with * are required input fields.</div>
+
                 <div class="col-md-6">
                   <label for="" class="form-label">Purchase Code *</label>
                   <input type="text" name="purchase_code" class="form-control @error('purchase_code') is-invalid @enderror" value="{{ $purchase_code }}" readonly>
@@ -68,18 +82,25 @@
                       </span>
                   @enderror
                 </div>
+
                 <div class="col-md-6">
                     <label for="" class="form-label">Select Supplier *</label>
-                    <select name="supplier" data-live-search="true" class="custom-select form-control border @error('supplier') is-invalid @enderror" id="">
-                      <option value="">Nothing Selected</option>
-  
-                      @foreach ($suppliers as $supplier)
-                          <option value="{{ $supplier->id }}">
-                              {{ $supplier->company_name }}
-                          </option>
-                      @endforeach
-                          
-                    </select>
+                    <div class="d-flex @error('category') is-invalid @enderror">
+                        <select name="supplier" id="addSupplierSelect" class="select2 form-control border @error('supplier') is-invalid @enderror">
+                            <option value="">Nothing Selected</option>
+        
+                            @foreach ($suppliers as $supplier)
+                                <option value="{{ $supplier->id }}">
+                                    {{ $supplier->company_name }}
+                                </option>
+                            @endforeach
+                                
+                        </select>
+
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addSupplier">
+                        <i class="bi bi-plus"></i></button>
+                    </div>
+                    
                     @error('supplier')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -238,9 +259,123 @@
 
 </main><!-- End #main -->
 
+<!-- ModalSupplier -->
+<div class="modal fade" id="addSupplier" tabindex="-1" aria-labelledby="addSupplierLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Supplier</h1>
+                <button type="button" class="btn-close"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addSupplierForm" action="" enctype="multipart/form-data">@csrf
+                <div class="modal-body">
+                    
+                    <div class="d-grid mb-2">
+                        <label for="" class="form-label">Company Name</label>
+                        <input type="text" name="company_name" class="form-control @error('company_name') is-invalid @enderror" id="">
+                        @error('company_name')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                      </div>
+                      
+                      <div class="d-grid mb-2">
+                        <label for="" class="form-label">Supplier Full Name</label>
+                        <input type="text" name="supplier_name" class="form-control @error('supplier_name') is-invalid @enderror" id="">
+                        @error('supplier_name')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                      </div>
+      
+                      <div class="d-grid mb-2">
+                        <label for="" class="form-label">Email</label>
+                        <input type="text" name="email" class="form-control @error('email') is-invalid @enderror" id="" >
+                        @error('email')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                      </div>
+      
+                      <div class="d-grid mb-2">
+                        <label for="" class="form-label">Phone</label>
+                        <input type="tel" name="phone_number" class="form-control @error('phone_number') is-invalid @enderror" placeholder="" >
+                        @error('phone_1')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                      </div>
+                  
+                      <div class="d-grid mb-2 d-none">
+                        <label for="" class="form-label">Company Logo | Optional</label>
+                        <input type="file" name="company_logo" class="form-control @error('company_logo') is-invalid @enderror" id="">
+                        @error('company_logo')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                      </div>
+                                    
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary addCategoryBtn">Add Supplier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+  </div>
+
 @endsection
 
 @section('extra_js')
+
+<!--addSupplier-->
+<script>
+    //addCategory Modal
+   $('#addSupplierForm').submit(function(e){
+        e.preventDefault();
+    
+            // var formData = new FormData($('#addSupplierForm')[0]);
+            var formData = $('#addSupplierForm').serialize();
+            
+            $('#addSupplier').modal('hide');
+
+            $.ajax({
+                type:'get',
+                url:'/ajax-create-supplier',
+                data: formData,
+                //cache: false,
+                // contentType: false,
+                // processData: false,
+                success:function(resp){
+                    
+                    if (resp.status) {
+                        
+                        var datas = {
+                            id: resp.data.supplier.id,
+                            text: resp.data.supplier.company_name
+                        };
+                        var newOption = new Option(datas.text, datas.id, false, false);
+                        $('#addSupplierSelect').prepend(newOption).trigger('change');
+                        
+                        //$('#addCategorySelect').prepend('<option value='+resp.data.category.id+'>'+resp.data.category.name+'</option>')
+                        alert('Supplier Added Successfully')
+                        // return false;
+                    } 
+                        
+                },error:function(){
+                    alert("Error");
+                }
+            });
+        
+        
+   });
+  </script>
 
 <script>
     $('#product').change(function(){ 

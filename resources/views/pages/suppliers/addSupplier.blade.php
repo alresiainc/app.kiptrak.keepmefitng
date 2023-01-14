@@ -51,6 +51,7 @@
                       </span>
                   @enderror
                 </div>
+                
                 <div class="col-md-12">
                   <label for="" class="form-label">Supplier Full Name</label>
                   <input type="text" name="supplier_name" class="form-control @error('supplier_name') is-invalid @enderror" id="">
@@ -81,9 +82,6 @@
                   @enderror
                 </div>
             
-                
-                
-
                 <div class="col-md-6">
                   <label for="" class="form-label">Company Logo | Optional</label>
                   <input type="file" name="company_logo" class="form-control @error('company_logo') is-invalid @enderror" id="">

@@ -111,7 +111,6 @@
                   @enderror
                 </div>
 
-
                 <div class="col-md-4">
                   <label for="" class="form-label">Product Cost of Production<span class="text-danger fw-bolder">*</span></label>
                   <input type="number" name="purchase_price" class="form-control @error('purchase_price') is-invalid @enderror" placeholder="" value="{{ old('purchase_price') }}">
