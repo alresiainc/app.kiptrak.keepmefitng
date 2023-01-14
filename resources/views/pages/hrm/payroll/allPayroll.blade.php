@@ -72,7 +72,7 @@
                     @foreach ($payrolls as $payroll)
                     <tr>
                       
-                      <td>{{ $payroll->created_at }}</td>
+                      <td>{{ \Carbon\Carbon::parse($payroll->updated_at->addHour(1)) }}</td>
                       <td>{{ $payroll->employee->name }}</td>
                       
                       <td>{{ $payroll->amount }} </td>

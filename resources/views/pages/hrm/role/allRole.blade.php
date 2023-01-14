@@ -53,7 +53,7 @@
                   <tr>
                       <th>Name</th>
                       <th>Permissions</th>
-                      <th>Staff Assigned</th>
+                      <th>Assigned User</th>
                       <th>Created By</th>
                       <th>Date Created</th>
                       <th>Action</th>

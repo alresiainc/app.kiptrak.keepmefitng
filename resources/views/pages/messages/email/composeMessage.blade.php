@@ -210,13 +210,13 @@
 <script>
     $('#user').change(function(){ 
     var user = $(this).val();
-    // {{ $user->id }}|{{ $user->name }}|{{ $user->email }}|{{ $user->type }}
+    
     var userArr = user.split('|');
     var id = userArr[0];
     var name = userArr[1];
     var email = userArr[2];
     var type = userArr[3];
-    // console.log(productArr)
+    
 
     var userText = '';
     $("#orderTable > tbody").append("<tr><th scope='row'><input type='hidden' name='user_id[]' value='"+id+"'>kpu-"+id+"</th><td>"+name+"</td><td>"+email+"</td><td>"+type+"</td><td class='btnDelete btn btn-danger btn-sm mt-1 mb-1'>Remove</td></tr>");

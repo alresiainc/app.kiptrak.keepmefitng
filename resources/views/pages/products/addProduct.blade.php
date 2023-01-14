@@ -203,7 +203,7 @@
 
                 <div class="product-clone-section wrapper">
                   <div class="col-md-12 mt-1 element">
-                    <label for="" class="form-label">Features | optional</label>
+                    <label for="" class="form-label">Product Description | optional</label>
                     <input type="text" name="features[]" class="form-control" placeholder="" value="">
                   </div>
 
