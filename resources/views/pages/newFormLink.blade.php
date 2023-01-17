@@ -90,6 +90,7 @@
             <input type="hidden" name="orderbump_stage" class="orderbump_stage" value="">
             <input type="hidden" name="upsell_stage" class="upsell_stage" value="">
             <input type="hidden" name="thankyou_stage" class="thankyou_stage" value="">
+            <input type="hidden" name="current_order_id" class="current_order_id" value="">
             <!-- Monitoring diferent stages in the form -->
         
             <!-- CHECKOUT VIEW Main + orderbump + upsell -->
@@ -764,6 +765,7 @@
                     console.log(resp)
                     $(".main_stage").val('done')
                     localStorage.setItem('main_stage', 'done');
+                    $('.current_order_id').val(resp.data.order_id);
                     if (resp.data.has_orderbump) {
                         setView('orderbump-section')
                         
@@ -771,7 +773,7 @@
                         setView('upsell-section')
                         
                     } else {
-                        
+                        $('.current_order_id').val('');
                         window.location.href = "/new-form-link/"+unique_key+"/thankYou"
                         setView('thankyou-section')
                     }
@@ -789,6 +791,7 @@
         $('.orderbump_submit_btn').click(function(e){
             e.preventDefault();
             var unique_key = $(".formholder_unique_key").val();
+            var current_order_id = $(".current_order_id").val();
             var orderbump_product_checkbox = ''
             if ($('.orderbump_product_checkbox').val() != '') {
                 var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
@@ -798,7 +801,7 @@
                 $.ajax({
                     type:'get',
                     url:'/ajax-save-new-form-link-orderbump',
-                    data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox },
+                    data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox, current_order_id:current_order_id },
                     success:function(resp){
                         console.log(resp)
                         localStorage.setItem('orderbump_stage', 'done');
@@ -807,6 +810,7 @@
                             
                         } else {
                         //$('.orderbump_submit_btn').text('Please wait...')
+                        $('.current_order_id').val('');
                         window.location.href = "/new-form-link/"+unique_key+"/thankYou"
                         setView('thankyou-section')
                     
@@ -826,6 +830,7 @@
         $('.upsell_submit_btn').click(function(e){
             e.preventDefault();
             var unique_key = $(".formholder_unique_key").val();
+            var current_order_id = $(".current_order_id").val();
             var upsell_product_checkbox = ''
             if ($('.upsell_product_checkbox').val() != '') {
                 var upsell_product_checkbox = $('.upsell_product_checkbox').val();
@@ -834,10 +839,11 @@
                 $.ajax({
                     type:'get',
                     url:'/ajax-save-new-form-link-upsell',
-                    data:{ unique_key:unique_key, upsell_product_checkbox:upsell_product_checkbox },
+                    data:{ unique_key:unique_key, upsell_product_checkbox:upsell_product_checkbox, current_order_id:current_order_id },
                     success:function(resp){
                         console.log(resp)
                         localStorage.setItem('upsell_stage', 'done');
+                        $('.current_order_id').val('');
                         //$('.upsell_submit_btn').text('Please wait...')
                         window.location.href = "/new-form-link/"+unique_key+"/thankYou"
                         setView('thankyou-section')

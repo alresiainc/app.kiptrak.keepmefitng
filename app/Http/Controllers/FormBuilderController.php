@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Session;
+use DB;
 
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TestMail;
 use App\Events\TestEvent;
 use App\Notifications\TestNofication;
-// use App\Notifications\Order;
+use App\Notifications\NewOrder;
 use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -765,6 +766,41 @@ class FormBuilderController extends Controller
     }
 
     //for external webpages
+    // public function formEmbedded($unique_key)
+    // {
+    //     $authUser = auth()->user();
+    //     $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+    //     $formHolder = FormHolder::where('unique_key', $unique_key)->first();
+    //     if (!isset($formHolder)) {
+    //         \abort(404);
+    //     }
+    //     $formName = $formHolder->name;
+    //     $formContact = \unserialize($formHolder->contact);
+    //     $formPackage = \unserialize($formHolder->package);
+    //     foreach ($formPackage as $package) {
+    //         foreach ($package['values'] as $key => $option) {
+    //             $option['product_price'] = Product::where('code', $option['value'])->first()->sale_price;
+    //             $option['type'] = $package['type'] == 'radio-group' ? 'radio' : 'checkbox';
+    //             $products[] = $option;
+    //         }
+            
+    //     }
+        
+    //     // return $products;
+    //     // [
+    //     //     {
+    //     //         "type":"radio-group","required":"false","label":"Select A Package From Below:","inline":"false","name":"package","access":"false","other":"false",
+    //     //         "values":[
+    //     //             {"label":"1 Bottle of Instant FLusher Pill + 1 Pack of Instant Flusher Tea","value":null,"selected":"false"},
+    //     //             {"label":"2 Bottles of Instant FLusher Pill + 2 Packs of Instant Flusher Tea","value":null,"selected":"false"}
+    //     //             ]
+    //     //     }
+    //     // ]
+        
+    //     return view('pages.formEmbedded', compact('authUser', 'user_role', 'unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products'));
+    // }
+
     public function formEmbedded($unique_key)
     {
         $authUser = auth()->user();
@@ -774,30 +810,125 @@ class FormBuilderController extends Controller
         if (!isset($formHolder)) {
             \abort(404);
         }
+        $stage="";
+
+        $authUser = User::find(1);
+
         $formName = $formHolder->name;
-        $formContact = \unserialize($formHolder->contact);
-        $formPackage = \unserialize($formHolder->package);
-        foreach ($formPackage as $package) {
-            foreach ($package['values'] as $key => $option) {
-                $option['product_price'] = Product::where('code', $option['value'])->first()->sale_price;
-                $option['type'] = $package['type'] == 'radio-group' ? 'radio' : 'checkbox';
-                $products[] = $option;
+        $formData = \unserialize($formHolder->form_data);
+        
+        $formContactInfo = [];
+        $formPackage = [];
+        $form_names = $formData['form_names'];
+        $form_labels = $formData['form_labels'];
+        $form_types = $formData['form_types'];
+        $packages = $formData['packages'];
+
+        //cos form_names are not determind by staff in form-building
+        foreach ( $form_names as $key => $form_name ) {
+            //$formContact[Str::slug($form_name)] = [ Str::slug($form_name), $form_labels[$key], $form_types[$key] ];
+            $formContactInfo['form_name'] = Str::slug($form_name);
+            $formContactInfo['form_label'] = $form_labels[$key];
+            $formContactInfo['form_type'] = $form_types[$key];
+            $formContact[] = $formContactInfo;
+        }
+
+        //extract products
+        foreach ($formContact as $key => $formProduct) {
+            if ($formProduct['form_name'] == Str::slug('Product Package')) {
+                $package_form_name = $formProduct['form_name'];
+                $package_form_label = $formProduct['form_label'];
+                $package_form_type = $formProduct['form_type'];
             }
-            
         }
         
-        // return $products;
-        // [
-        //     {
-        //         "type":"radio-group","required":"false","label":"Select A Package From Below:","inline":"false","name":"package","access":"false","other":"false",
-        //         "values":[
-        //             {"label":"1 Bottle of Instant FLusher Pill + 1 Pack of Instant Flusher Tea","value":null,"selected":"false"},
-        //             {"label":"2 Bottles of Instant FLusher Pill + 2 Packs of Instant Flusher Tea","value":null,"selected":"false"}
-        //             ]
-        //     }
-        // ]
+        //products package
+        foreach ($packages as $key => $package) {
+            $product = Product::where('id', $package)->first();
+            $formPackage['id'] = $package; //product_id
+            $formPackage['name'] = $product->name;
+            $formPackage['price'] = $product->sale_price;
+            $formPackage['form_name'] = Str::slug($package_form_name);
+            $formPackage['form_label'] = $package_form_label;
+            $formPackage['form_type'] = $package_form_type;
+            $products[] = $formPackage;
+        }
+        //name, labels, type, in dat order
+      
+        //for thankyou part
+        $order = $formHolder->order;
+        $mainProduct_revenue = 0;  //price * qty
+        $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
+        'customer_acceptance_status'=>'accepted'])->get();
+
+        if ( count($mainProducts_outgoingStocks) > 0 ) {
+            foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
+                $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+            }
+        }
+
+        //orderbump
+        $orderbumpProduct_revenue = 0; //price * qty
+        $orderbump_outgoingStock = '';
+        if (isset($formHolder->orderbump_id)) {
+            $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
+            if ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+                $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+            }
+        }
+
+        //upsell
+        $upsellProduct_revenue = 0; //price * qty
+        $upsell_outgoingStock = '';
+        if (isset($formHolder->upsell_id)) {
+            $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
+            if ($upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+                $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+            }
+        }
         
-        return view('pages.formEmbedded', compact('authUser', 'user_role', 'unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products'));
+        //order total amt
+        $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
+        $grand_total = $order_total_amount; //might include discount later
+        
+        $orderId = ''; //used in thankYou section
+        if ($order->id < 10){
+            $orderId = '0000'.$order->id;
+        }
+        // <!-- > 10 < 100 -->
+        if (($order->id > 10) && ($order->id < 100)) {
+            $orderId = '000'.$order->id;
+        }
+        // <!-- > 100 < 1000 -->
+        if (($order->id) > 100 && ($order->id < 1000)) {
+            $orderId = '00'.$order->id;
+        }
+        // <!-- > 1000 < 10000++ -->
+        if (($order->id) > 1000 && ($order->id < 1000)) {
+            $orderId = '0'.$order->id;
+        }
+
+        //package or product qty. sum = 0, if it doesnt exist
+        $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
+        $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
+        $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
+        $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
+
+        //end thankyou part
+
+        $customer = ''; $invoiceData = [];
+        if (isset($order->customer)) {
+            //customer
+            $customer =  $order->customer;
+
+            $receipients = Arr::collapse([[$authUser->email],[$customer->email]]);
+
+            // event(new TestEvent($invoiceData));
+        }
+        
+        return view('pages.formEmbedded', compact('authUser', 'user_role', 'unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products',
+        'mainProducts_outgoingStocks', 'order', 'orderId', 'mainProduct_revenue', 'orderbump_outgoingStock', 'orderbumpProduct_revenue', 'upsell_outgoingStock',
+        'upsellProduct_revenue', 'customer', 'qty_total', 'order_total_amount', 'grand_total', 'stage'));
     }
 
     //like single newFormBuilder
@@ -1031,7 +1162,7 @@ class FormBuilderController extends Controller
 
     }
 
-    //after clicking first main btn
+    //after clicking first main btn, ajax
     public function saveNewFormFromCustomer(Request $request)
     {
         $authUser = auth()->user();
@@ -1051,7 +1182,7 @@ class FormBuilderController extends Controller
             $order->status = 'new';
             $order->save();
 
-            $order = $order;
+            // $order = $order;
 
             foreach ($data['product_packages'] as $key => $product_id) {
                 if (!empty($product_id)) {
@@ -1111,15 +1242,16 @@ class FormBuilderController extends Controller
         $customer->save();
 
         //update order status
+        //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
         $order->customer_id = $customer->id;
         $order->status = 'new';
         $order->save();
         
-
         $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
         $has_upsell = isset($formHolder->upsell_id) ? true : false;
         $data['has_orderbump'] = $has_orderbump; 
         $data['has_upsell'] = $has_upsell;
+        $data['order_id'] = $order->id;
         
         //call notify fxn
         if ($has_orderbump==false && $has_upsell==false) {
@@ -1141,7 +1273,8 @@ class FormBuilderController extends Controller
         $data = $request->all();
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
-        $order = $formHolder->order;
+        // $order = $formHolder->order;
+        $order = Order::where('id', $data['current_order_id'])->first();
 
         //accepted orderbump
         if (!empty($data['orderbump_product_checkbox'])) {
@@ -1182,7 +1315,8 @@ class FormBuilderController extends Controller
         $data = $request->all();
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
-        $order = $formHolder->order;
+        // $order = $formHolder->order;
+        $order = Order::where('id', $data['current_order_id'])->first();
 
         //accepted orderbump
         if (!empty($data['upsell_product_checkbox'])) {
@@ -1455,7 +1589,7 @@ class FormBuilderController extends Controller
             'grand_total' => $grand_total,
         ];
 
-        Notification::route('mail', [$admin->official_notification_email])->notify(new Order($invoiceData));
+        Notification::route('mail', [$admin->official_notification_email])->notify(new NewOrder($invoiceData));
     }
 
     /**

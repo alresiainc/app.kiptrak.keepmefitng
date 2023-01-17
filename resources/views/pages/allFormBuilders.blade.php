@@ -68,6 +68,8 @@
             </div>
           </div>
           <hr>
+
+          <iframe src="http://127.0.0.1:8000/form-embedded/y1Bxi3yXEbXHNXWS6tJMHJ0kMzJH5p" width="100%" height="700" style="border:0"></iframe>
           
           <div class="table table-responsive">
             <table id="orders-table" class="table table-striped custom-table" style="width:100%">
