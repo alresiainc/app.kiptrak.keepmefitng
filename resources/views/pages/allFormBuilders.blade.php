@@ -561,8 +561,8 @@
                           <option value="">Nothing Selected</option>
 
                           @if (count($staffs) > 0)
-                            @foreach ($staffs as $staffs)
-                              <option value="{{ $staffs->id }}">{{ $staffs->name }} | {{ $agent->id }}</option>
+                            @foreach ($staffs as $staff)
+                              <option value="{{ $staff->id }}">{{ $staff->name }} | {{ $staff->id }}</option>
                             @endforeach
                           @endif
                           
@@ -597,8 +597,8 @@
 
                           <option value="" selected>Nothing Selected</option>
                           @if (count($staffs) > 0)
-                            @foreach ($staffs as $staffs)
-                              <option value="{{ $staffs->id }}">{{ $staffs->name }} | {{ $agent->id }}</option>
+                            @foreach ($staffs as $staff)
+                              <option value="{{ $staff->id }}">{{ $staff->name }} | {{ $staff->id }}</option>
                             @endforeach
                           @endif
                
