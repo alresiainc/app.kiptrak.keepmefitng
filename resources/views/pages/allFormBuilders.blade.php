@@ -144,7 +144,21 @@
                           </td>
                           @endif
                         @else
-                          <td>None</td>
+                          <td>
+                            @if (isset($formHolder->orderbump_id))
+                            <a
+                              href="{{ asset('/storage/products/'.$formHolder->orderbump->product->image) }}"
+                              data-fancybox="gallery"
+                              data-caption="{{ $formHolder->orderbump->product->name.', as OrderBump for '.$formHolder->name }}"
+                              >   
+                              <img src="{{ asset('/storage/products/'.$formHolder->orderbump->product->image) }}" width="30"
+                              class="img-thumbnail img-fluid"
+                              alt="{{$formHolder->orderbump->product->name}}" style="height: 30px;">
+                            </a>
+                            @else
+                            None
+                            @endif
+                          </td>
                         @endif
                       
                       @if (!isset($formHolder->order->customer_id))
@@ -172,7 +186,21 @@
                           <i class="bi bi-plus"></i> Add</span></td>
                         @endif
                       @else
-                        <td>None</td>
+                        <td>
+                          @if (isset($formHolder->upsell_id))
+                          <a
+                            href="{{ asset('/storage/products/'.$formHolder->upsell->product->image) }}"
+                            data-fancybox="gallery"
+                            data-caption="{{ $formHolder->upsell->product->name.', as Upsell for '.$formHolder->name }}"
+                            >   
+                            <img src="{{ asset('/storage/products/'.$formHolder->upsell->product->image) }}" width="30"
+                            class="img-thumbnail img-fluid"
+                            alt="{{$formHolder->upsell->product->name}}" style="height: 30px;">
+                          </a>
+                          @else
+                            None
+                          @endif
+                        </td>
                       @endif
 
                       <td><span>{{ isset($formHolder->order->customer_id) ? $formHolder->order->customer->firstname : 'No response' }} {{ $formHolder->order->customer_id ? $formHolder->order->customer->lastname : '' }}</span></td>
