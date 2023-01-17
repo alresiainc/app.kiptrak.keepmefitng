@@ -20,7 +20,7 @@ class AttendanceController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        $attendances = Attendance::all();
+        $attendances = Attendance::orderBy('id', 'DESC')->get();
         return view('pages.hrm.attendance.allAttendance', compact('authUser', 'user_role', 'attendances'));
     }
 
@@ -33,6 +33,13 @@ class AttendanceController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $dt = Carbon::now();
+        $already_checked_in = Attendance::where('employee_id', $authUser->id)->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->exists();
+
+        if ($already_checked_in) {
+            return back()->with('info', 'Staff Already Checked-In Today');
+        }
 
         $staffs = User::where('type', 'staff')->get();
         return view('pages.hrm.attendance.addAttendance', compact('authUser', 'user_role', 'staffs'));
@@ -48,10 +55,12 @@ class AttendanceController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-
+        
         $request->validate([
-            'employee' => 'required|string',
-            'check_in' => 'required|string',
+            // 'employee' => 'required|string',
+            //'check_in' => 'required|string|regex:(^AM$|^PM$)',
+            'check_in' => 'required|string|regex:/^((?!\.AM)(?!\.PM).)*$/',
+            //'check_in' => 'required|string|in:PM',
             'check_out' => 'nullable|string',
             'note' => 'nullable|string',
         ]);
@@ -59,31 +68,52 @@ class AttendanceController extends Controller
         $data = $request->all();
 
         $dt = Carbon::now();
-        $already_checked_in = Attendance::where('employee_id', $data['employee'])->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])
-        ->exists();
+        $already_checked_in = Attendance::where('employee_id', $authUser->id)->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->exists();
 
         if ($already_checked_in) {
             return back()->with('info', 'Staff Already Checked-In Today');
         }
+        //return explode(' ', $data['check_in']);
+        $period = false;
+        
+        $actual_check_in = $data['check_in'];
+        // $x = strtotime(Carbon::parse(str_replace('PM', '', $actual_check_in))->format('H:i'));
+        // $y = strtotime(Carbon::parse('08:00'));
+        
+        $ampm = substr($actual_check_in, -2); //AM, PM
 
-        $check_in = strtotime($data['check_in']); //1672513500
+        if ($ampm=='AM') {
+            $check_in = strtotime(str_replace('AM', '', $actual_check_in));
+            $period = true;
+        }
+        
+        if ($ampm=='PM') {
+            $check_in = strtotime(str_replace('PM', '', $actual_check_in));
+            $period = true;
+        }
+        
+        if ($period==false) {
+            return back()->with("info", "Check-In time must contain 'AM' OR 'PM'");
+        }
+        
+        // return $check_in = strtotime($data['check_in']); //1672513500
         $check_in_24h_format = strtotime(date("G:i", $check_in)); //1672513500
-        $expected_check_in = strtotime('08:00 AM'); //1672473600
+        $expected_check_in = strtotime('08:00 AM'); //1673769600
 
-        $daily_status = 'present';
+        $daily_status = 'on_time';
         if ($check_in > $expected_check_in) {
             $daily_status = 'late';
         }
         if ($expected_check_in == $check_in) {
-            $daily_status = 'present';
+            $daily_status = 'on_time';
         }
 
         $attendance = new Attendance();
-        $attendance->employee_id = $data['employee'];
+        $attendance->employee_id = $authUser->id;
         $attendance->check_in = !empty($data['check_in']) ? $data['check_in'] : null;
         $attendance->check_out = !empty($data['check_out']) ? $data['check_out'] : null;
-        $attendance->daily_status = $daily_status; //absent, late
-        $attendance->note = !empty($data['note']) ? $data['note'] : null;
+        $attendance->daily_status = $daily_status; //on_time, late, absent 
+        $attendance->check_in_note = !empty($data['note']) ? $data['note'] : null;
         $attendance->save();
 
         return back()->with('success', 'Attendance Saved Successfully');
@@ -98,6 +128,10 @@ class AttendanceController extends Controller
         $attendance = Attendance::where('unique_key', $unique_key)->first();
         if (!isset($attendance)) {
             abort(404);
+        }
+
+        if (isset($attendance->check_out)) {
+            return back()->with('info', 'Staff Already Checked-Out Today');
         }
 
         return view('pages.hrm.attendance.exitAttendance', compact('authUser', 'user_role', 'attendance'));
@@ -128,8 +162,8 @@ class AttendanceController extends Controller
         $data = $request->all();
 
         $attendance->check_out = !empty($data['check_out']) ? $data['check_out'] : null;
-        $attendance->daily_status = 'present'; //absent, late
-        $attendance->note = !empty($data['note']) ? $data['note'] : null;
+        // $attendance->daily_status = 'present'; //absent, late
+        $attendance->check_out_note = !empty($data['note']) ? $data['note'] : null;
         $attendance->save();
 
         return back()->with('success', 'Checkout Attendance Updated Successfully');

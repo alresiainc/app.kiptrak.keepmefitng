@@ -86,4 +86,10 @@ class FormHolder extends Model
     {
         return $this->hasMany(FormHolder::class, 'parent_id', 'id'); //mapping categories to its 'parent_id'
     }
+    
+    //can serve as entries
+    public function customers()
+    {
+        return $this->hasMany(Customer::class, 'form_holder_id');
+    }
 }

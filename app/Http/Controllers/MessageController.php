@@ -8,10 +8,12 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\Category;
+use App\Models\Customer;
 use App\Notifications\sendUserMessageNotification;
 use Illuminate\Support\Facades\Notification;
 // use App\Traits\EbulkSmsTrait;
 use App\Models\EbulkSmsApi;
+
 
 class MessageController extends Controller
 {
@@ -58,8 +60,6 @@ class MessageController extends Controller
         $message = '<#> Test message';
         $this->sendSMS($phone, $message);
     }
-
-
 
     public function composeSmsMessage()
     {
@@ -148,7 +148,6 @@ class MessageController extends Controller
         return view('pages.messages.email.composeMessage', compact('authUser', 'user_role', 'users'));
     }
 
-    
     public function composeEmailMessagePost(Request $request)
     {
         $authUser = auth()->user();
@@ -157,7 +156,7 @@ class MessageController extends Controller
         $request->validate([
             'topic' => 'required|string',
             'message' => 'required|string',
-            'user' => 'required|string',
+            'user_id' => 'required|string',
         ]);
 
         $data = $request->all();
@@ -172,8 +171,8 @@ class MessageController extends Controller
             $message->recipients = serialize($data['user_id']);
             $message->message = $data['message'];
             $message->message_status = 'sent';
-            $message->to = 'users';
-            $message->created_by = 1;
+            $message->to = 'employees';
+            $message->created_by = $authUser->id;
             $message->status = 'true';
             $message->save();
 
@@ -187,13 +186,216 @@ class MessageController extends Controller
             $message->recipients = serialize($data['user_id']);
             $message->message = $data['message'];
             $message->message_status = 'draft';
-            $message->to = 'users';
-            $message->created_by = 1;
+            $message->to = 'employees';
+            $message->created_by = $authUser->id;
             $message->status = 'true';
             $message->save();
     
             return back()->with('success', 'Message Saved As Draft Successfully');
         }
+    }
+
+    //from allEmployees tbl
+    public function sendEmployeeMail(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $request->validate([
+            'topic' => 'required|string',
+            'message' => 'required|string',
+            'employee_id' => 'required',
+        ]);
+
+        $data = $request->all();
+
+        //return $data['user_id']; //"2,3"
+        
+        $user_ids = explode(',', $data['employee_id']); //["2","3"]
+        $recipients = User::whereIn('id', $user_ids)->pluck('email');
+
+        $message = new Message();
+        $message->type = 'email';
+        $message->topic = $data['topic'];
+        $message->recipients = serialize($user_ids);
+        $message->message = $data['message'];
+        $message->message_status = 'sent';
+        $message->to = 'employees';
+        $message->created_by = $authUser->id;
+        $message->status = 'true';
+        $message->save();
+        
+        Notification::route('mail', $recipients)->notify(new sendUserMessageNotification($message));
+
+        return back()->with('success', 'Message Sent Successfully');
+        
+    }
+
+    //from allAgents tbl
+    public function sendAgentMail(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $request->validate([
+            'topic' => 'required|string',
+            'message' => 'required|string',
+            'agent_id' => 'required',
+        ]);
+
+        $data = $request->all();
+
+        //return $data['user_id']; //"2,3"
+        
+        $user_ids = explode(',', $data['agent_id']); //["2","3"]
+        $recipients = User::whereIn('id', $user_ids)->pluck('email');
+
+        $message = new Message();
+        $message->type = 'email';
+        $message->topic = $data['topic'];
+        $message->recipients = serialize($user_ids);
+        $message->message = $data['message'];
+        $message->message_status = 'sent';
+        $message->to = 'agents';
+        $message->created_by = $authUser->id;
+        $message->status = 'true';
+        $message->save();
+        
+        Notification::route('mail', $recipients)->notify(new sendUserMessageNotification($message));
+
+        return back()->with('success', 'Message Sent Successfully');
+        
+    }
+
+    //from allcustomers tbl
+    public function sendCustomerMail(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $request->validate([
+            'topic' => 'required|string',
+            'message' => 'required|string',
+            'user_id' => 'required',
+        ]);
+
+        $data = $request->all();
+
+        //return $data['user_id']; //"2,3"
+        
+        $user_ids = explode(',', $data['user_id']); //["2","3"]
+        $recipients = Customer::whereIn('id', $user_ids)->pluck('email');
+
+        $message = new Message();
+        $message->type = 'email';
+        $message->topic = $data['topic'];
+        $message->recipients = serialize($user_ids);
+        $message->message = $data['message'];
+        $message->message_status = 'sent';
+        $message->to = 'customers';
+        $message->created_by = $authUser->id;
+        $message->status = 'true';
+        $message->save();
+        
+        Notification::route('mail', $recipients)->notify(new sendUserMessageNotification($message));
+
+        return back()->with('success', 'Message Sent Successfully');
+        
+    }
+
+    //from allAgents tbl
+    public function sendAgentWhatsapp(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+
+        $data = $request->all();
+
+        //return $data['user_id']; //"2,3"
+        
+        $user_id = explode(',', $data['whatsapp_agent_id']); //["2","3"]
+        
+        $message = new Message();
+        $message->type = 'whatsapp';
+        $message->topic = 'Whatsapp Message';
+        $message->recipients = serialize($user_id);
+        $message->message = $data['message'];
+        $message->message_status = 'sent';
+        $message->to = 'agents';
+        $message->created_by = $authUser->id;
+        $message->status = 'true';
+        $message->save();
+
+        $recepient_phone_number = $data['recepient_phone_number'];
+        $text_msg = $data['message'];
+        
+        $url = "https://wa.me/".$recepient_phone_number."?text=".$text_msg;
+        return redirect()->away($url);
+        
+    }
+
+    //from allEmployees tbl
+    public function sendEmployeeWhatsapp(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+
+        $data = $request->all();
+
+        //return $data['user_id']; //"2,3"
+        
+        $user_id = explode(',', $data['whatsapp_employee_id']); //["2","3"]
+        
+        $message = new Message();
+        $message->type = 'whatsapp';
+        $message->topic = 'Whatsapp Message';
+        $message->recipients = serialize($user_id);
+        $message->message = $data['message'];
+        $message->message_status = 'sent';
+        $message->to = 'employees';
+        $message->created_by = $authUser->id;
+        $message->status = 'true';
+        $message->save();
+
+        $recepient_phone_number = $data['recepient_phone_number'];
+        $text_msg = $data['message'];
+        
+        $url = "https://wa.me/".$recepient_phone_number."?text=".$text_msg;
+        return redirect()->away($url);
+        
+    }
+
+    //from allCustomer tbl
+    public function sendCustomerWhatsapp(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $data = $request->all();
+
+        //return $data['user_id']; //"2,3"
+        
+        $user_id = explode(',', $data['whatsapp_customer_id']); //["2","3"]
+        
+        $message = new Message();
+        $message->type = 'whatsapp';
+        $message->topic = 'Whatsapp Message';
+        $message->recipients = serialize($user_id);
+        $message->message = $data['message'];
+        $message->message_status = 'sent';
+        $message->to = 'customers';
+        $message->created_by = $authUser->id;
+        $message->status = 'true';
+        $message->save();
+
+        $recepient_phone_number = $data['recepient_phone_number'];
+        $text_msg = $data['message'];
+        
+        $url = "https://wa.me/".$recepient_phone_number."?text=".$text_msg;
+        return redirect()->away($url);
+        
     }
 
     public function sentEmailMessage()
@@ -203,6 +405,36 @@ class MessageController extends Controller
         
         $messages = Message::where('type', 'email')->get();
         return view('pages.messages.email.sentMessage', compact('authUser', 'user_role', 'messages'));
+    }
+
+    public function sentEmailMessageUpdate(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $request->validate([
+            'topic' => 'required|string',
+            'message' => 'required|string',
+        ]);
+
+        $data = $request->all();
+        $message = Message::where('id', $data['message_id'])->first();
+        $user_ids = unserialize($message->recipients);
+
+        if ($message->to !== 'customers') {
+            $recipients = User::whereIn('id', $user_ids)->pluck('email');
+        } else {
+            $recipients = Customer::whereIn('id', $user_ids)->pluck('email');
+        }
+    
+        $message->topic = $data['topic'];
+        $message->message = $data['message'];
+        $message->save();
+        
+        Notification::route('mail', $recipients)->notify(new sendUserMessageNotification($message));
+
+        return back()->with('success', 'Message Sent Successfully');
+        
     }
 
     public function mailCustomersByCategory($selectedCategory, $recipients="")

@@ -94,10 +94,10 @@
                       <th scope="row">{{ ++$key }}</th>
                       <td>{{ $formHolder->name }} <br>
                         <a class="badge badge-info" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">Edit</a>
-                        @if ($formHolder->entries() > 0)
-                        <a class="badge badge-dark" href="{{ route('allOrders', $formHolder->unique_key) }}">Entries({{ $formHolder->entries() }})</a>
+                        @if (count($formHolder->customers) > 0)
+                        <a class="badge badge-dark" href="{{ route('allOrders', $formHolder->unique_key) }}">Entries({{ count($formHolder->customers) }})</a>
                         @else
-                        <span class="badge badge-dark" href="">Entries({{ $formHolder->entries() }})</span>
+                        <span class="badge badge-dark" href="">Entries({{ count($formHolder->customers) }})</span>
                         @endif
                         
                         <a class="badge badge-success" href="{{ route('duplicateForm', $formHolder->unique_key) }}">Duplicate</a>
@@ -111,7 +111,7 @@
                             </td>
                         @else
                         <td style="width: 120px">
-                          <span class="badge badge-success" onclick="addAgentModal('{{ $formHolder->order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Staff">
+                          <span class="badge badge-success" onclick="addAgentModal('{{ $formHolder->order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Staff" style="cursor: pointer;">
                             <i class="bi bi-plus"></i> <span>Assign Staff</span></span> 
                         </td>
                         @endif
@@ -539,6 +539,78 @@
       </form>
 
     </div>
+  </div>
+</div>
+
+<!-- Modal addAgentModal -->
+<div class="modal fade" id="addAgentModal" tabindex="-1" aria-labelledby="addAgentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h1 class="modal-title fs-5" id="addAgentModalLabel">Assign Staff</h1>
+              <button type="button" class="btn-close"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{{ route('assignAgentToOrder') }}" method="POST">@csrf
+              <div class="modal-body">
+                  
+                  <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                  <div class="d-grid mb-3">
+                      <label for="">Select Staff</label>
+                      <select name="agent_id" id="" data-live-search="true" class="custom-select form-control border border-dark">
+                          <option value="">Nothing Selected</option>
+
+                          @if (count($staffs) > 0)
+                            @foreach ($staffs as $staffs)
+                              <option value="{{ $staffs->id }}">{{ $staffs->name }} | {{ $agent->id }}</option>
+                            @endforeach
+                          @endif
+                          
+                      </select>
+                  </div>
+              
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary addAgentBtn">Assign Staff</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+<!-- Modal changeAgentModal -->
+<div class="modal fade" id="changeAgentModal" tabindex="-1" aria-labelledby="changeAgentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h1 class="modal-title fs-5" id="changeAgentModalLabel">Change Assigned Staff</h1>
+              <button type="button" class="btn-close"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{{ route('assignAgentToOrder') }}" method="POST">@csrf
+              <div class="modal-body">
+                  
+                  <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                  <div class="d-grid mb-3">
+                      <label for="">Select Staff</label>
+                      <select name="agent_id" id="changeAgentModalSelect" data-live-search="true" class="custom-select form-control border border-dark">
+
+                          <option value="" selected>Nothing Selected</option>
+                          @if (count($staffs) > 0)
+                            @foreach ($staffs as $staffs)
+                              <option value="{{ $staffs->id }}">{{ $staffs->name }} | {{ $agent->id }}</option>
+                            @endforeach
+                          @endif
+               
+                      </select>
+                  </div>
+              
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary addAgentBtn">Assign Staff</button>
+              </div>
+          </form>
+      </div>
   </div>
 </div>
 

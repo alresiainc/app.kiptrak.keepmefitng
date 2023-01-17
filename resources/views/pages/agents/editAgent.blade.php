@@ -1,5 +1,24 @@
 @extends('layouts.design')
 @section('title')Edit Agent @endsection
+
+@section('extra_css')
+    <style>
+        select{
+        -webkit-appearance: listbox !important
+        }
+        .btn-light {
+            background-color: #fff !important;
+            color: #000 !important;
+        }
+        /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
+            color: #999;
+        } */
+        div.filter-option-inner-inner{
+            color: #000 !important;
+        }
+    </style>
+@endsection
+
 @section('content')
 
 <main id="main" class="main">
@@ -158,6 +177,28 @@
                   <label for="" class="form-label">Profile Picture | Optional</label>
                   <input type="file" name="profile_picture" class="form-control @error('image') is-invalid @enderror" id="">
                   @error('profile_picture')
+                      <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                      </span>
+                  @enderror
+                </div>
+
+                <div class="col-md-12">
+                  <label for="" class="form-label">Assign Role (Optional)</label>
+                  <select name="role_id" id="role_id" data-live-search="true" class="custom-select form-control border @error('role_id') is-invalid @enderror" id="">
+                    
+                      <option value="{{ $agent->hasAnyRole($agent->id) ? $agent->role($agent->id)->role->id : '' }}">
+                        {{ $agent->hasAnyRole($agent->id) ? $agent->role($agent->id)->role->name : 'Nothing Selected' }}
+                      </option>
+                    
+                      @if (count($roles) > 0)
+                          @foreach($roles as $role)
+                          <option value="{{ $role->id }}">{{ $role->name }}</option>
+                          @endforeach
+                      @endif
+                      
+                  </select>
+                  @error('role_id')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>
                       </span>

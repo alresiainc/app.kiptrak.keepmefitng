@@ -27,7 +27,8 @@
       <h1>Edit Employee</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allStaff') }}">Employee List</a></li>
           <li class="breadcrumb-item active">Edit Employee</li>
         </ol>
       </nav>
@@ -61,7 +62,7 @@
                         @if (isset($staff->profile_picture))
                             <img src="{{ asset('/storage/staff/'.$staff->profile_picture) }}" width="100" class="img-fluid" alt="Upload Photo">
                         @else
-                            <img src="{{ asset('/storage/staff/person.png') }}" width="100" class="img-fluid" alt="Upload Photo">
+                            <img src="{{ asset('/storage/staff/person.png') }}" width="100" class="img-fluid img-circle" alt="Upload Photo">
                         @endif
                      
                     </label>
@@ -176,6 +177,17 @@
                   <label for="" class="form-label">Profile Picture | Optional</label>
                   <input type="file" name="profile_picture" class="form-control @error('image') is-invalid @enderror" id="">
                   @error('profile_picture')
+                      <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                      </span>
+                  @enderror
+                </div>
+
+                <div class="col-md-6">
+                  <label for="" class="form-label">Salary | Optional</label>
+                  <input type="number" name="current_salary" class="form-control @error('current_salary') is-invalid @enderror" placeholder=""
+                  value="{{ isset($staff->current_salary) ? $staff->current_salary : '' }}" >
+                  @error('current_salary')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>
                       </span>

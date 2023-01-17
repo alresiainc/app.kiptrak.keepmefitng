@@ -368,7 +368,17 @@ Route::get('/sent-sms-messages', [MessageController::class, 'sentSmsMessage'])->
 //email messages
 Route::get('/compose-email-message', [MessageController::class, 'composeEmailMessage'])->name('composeEmailMessage');
 Route::post('/compose-email-message', [MessageController::class, 'composeEmailMessagePost'])->name('composeEmailMessagePost');
-Route::get('/sent-email-messages', [MessageController::class, 'sentEmailMessage'])->name('sentEmailMessage'); //list
+Route::post('/send-customer-mail', [MessageController::class, 'sendCustomerMail'])->name('sendCustomerMail'); //sendCustomerMail
+Route::post('/send-employee-mail', [MessageController::class, 'sendEmployeeMail'])->name('sendEmployeeMail'); //sendEmployeeMail
+Route::post('/send-agent-mail', [MessageController::class, 'sendAgentMail'])->name('sendAgentMail'); //sendAgentMail
+Route::get('/sent-email-messages', [MessageController::class, 'sentEmailMessage'])->name('sentEmailMessage'); //sentEmailMessage
+Route::post('/sent-email-messages', [MessageController::class, 'sentEmailMessageUpdate'])->name('sentEmailMessageUpdate'); //sentEmailMessageUpdate
+
+//whatsapp
+Route::post('/send-agent-whatsapp', [MessageController::class, 'sendAgentWhatsapp'])->name('sendAgentWhatsapp'); //sendAgentWhatsapp
+Route::post('/send-employee-whatsapp', [MessageController::class, 'sendEmployeeWhatsapp'])->name('sendEmployeeWhatsapp'); //sendEmployeeWhatsapp
+Route::post('/send-customer-whatsapp', [MessageController::class, 'sendCustomerWhatsapp'])->name('sendCustomerWhatsapp'); //sendCustomerWhatsapp
+
 Route::get('/mail-customers-by-category/{selectedCategory}/{recipients?}', [MessageController::class, 'mailCustomersByCategory'])->name('mailCustomersByCategory'); //mailCustomersByCategory
 Route::post('/mail-customers-by-category/{selectedCategory}/{recipients?}', [MessageController::class, 'mailCustomersByCategoryPost'])->name('mailCustomersByCategoryPost'); //mailCustomersByCategoryPost
 

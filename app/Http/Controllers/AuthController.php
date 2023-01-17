@@ -95,142 +95,158 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function addStaffPost(Request $request)
-    {
-        $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+    // public function addStaffPost(Request $request)
+    // {
+    //     $authUser = auth()->user();
+    //     $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        $request->validate([
-            'firstname' => 'required|string',
-            'lastname' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string',
-            'phone_1' => 'required|unique:users',
-            'phone_2' => 'nullable|unique:users',
-            'country' => 'required|string',
-            'city' => 'required|string',
-            'state' => 'required|string',
-            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
-        ]);
+    //     $request->validate([
+    //         'firstname' => 'required|string',
+    //         'lastname' => 'required|string',
+    //         'email' => 'required|email|unique:users',
+    //         'password' => 'required|string',
+    //         'phone_1' => 'required|unique:users',
+    //         'phone_2' => 'nullable|unique:users',
+    //         'country' => 'required|string',
+    //         'city' => 'required|string',
+    //         'state' => 'required|string',
+    //         'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+    //     ]);
 
-        $data = $request->all();
+    //     $data = $request->all();
 
-        $user = new User();
-        $user->name = $data['firstname'].' '.$data['lastname'];
-        $user->email = $data['email'];
-        $user->password = Hash::make($data['password']);
-        $user->type = 'staff';  //customer, staff, agent, superadmin
-        $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
-        $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
-        $user->city = !empty($data['city']) ? $data['city'] : null;
-        $user->state = $data['state'];
-        $user->country_id = $data['country'];
-        $user->address = !empty($data['address']) ? $data['address'] : null;
+    //     $user = new User();
+    //     $user->name = $data['firstname'].' '.$data['lastname'];
+    //     $user->email = $data['email'];
+    //     $user->password = Hash::make($data['password']);
+    //     $user->type = 'staff';  //customer, staff, agent, superadmin
+    //     $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
+    //     $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
+    //     $user->city = !empty($data['city']) ? $data['city'] : null;
+    //     $user->state = $data['state'];
+    //     $user->country_id = $data['country'];
+    //     $user->address = !empty($data['address']) ? $data['address'] : null;
 
-        $user->created_by = $authUser->id;
-        $user->status = 'true';
+    //     $user->created_by = $authUser->id;
+    //     $user->status = 'true';
 
-        if ($request->profile_picture) {
-            //image
-            $imageName = time().'.'.$request->profile_picture->extension();
-            //store products in folder
-            $request->profile_picture->storeAs('staff', $imageName, 'public');
-            $user->profile_picture = $imageName;
-        }
+    //     if ($request->profile_picture) {
+    //         //image
+    //         $imageName = time().'.'.$request->profile_picture->extension();
+    //         //store products in folder
+    //         $request->profile_picture->storeAs('staff', $imageName, 'public');
+    //         $user->profile_picture = $imageName;
+    //     }
 
-        $user->save();
+    //     $user->save();
+
+    //     //add role to user
+    //     if (!empty($data['role_id'])) {
+
+    //         $role = Role::find($data['role_id']);
+    //         $permissions = $role->permissions;
+    //         //no need since its a new user
+    //         // if ($user->hasRole($role->slug)) {
+    //         //     return 'role already assigned to user';
+    //         // }
+    //         $user->roles()->attach($role);
+    //         // if(count($permissions) > 0){
+    //         //     $user->permissions()->attach($permissions);
+    //         // }
+    //         return back()->with('success', 'Staff Created and Assigned Role Successfully');
+    //     }
         
-        return back()->with('success', 'Staff Created Successfully');
+    //     return back()->with('success', 'Staff Created Successfully');
 
         
-    }
+    // }
 
-    public function singleStaff($unique_key)
-    {
-        $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+    // public function singleStaff($unique_key)
+    // {
+    //     $authUser = auth()->user();
+    //     $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        $staff = User::where('unique_key', $unique_key)->first();
-        if(!isset($staff)){
-            abort(404);
-        }
-        return view('pages.staff.singleStaff', compact('authUser', 'user_role', 'staff'));
-    }
+    //     $staff = User::where('unique_key', $unique_key)->first();
+    //     if(!isset($staff)){
+    //         abort(404);
+    //     }
+    //     return view('pages.staff.singleStaff', compact('authUser', 'user_role', 'staff'));
+    // }
 
-    public function editStaff($unique_key)
-    {
-        $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+    // public function editStaff($unique_key)
+    // {
+    //     $authUser = auth()->user();
+    //     $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        $staff = User::where('unique_key', $unique_key)->first();
-        if(!isset($staff)){
-            abort(404);
-        }
+    //     $staff = User::where('unique_key', $unique_key)->first();
+    //     if(!isset($staff)){
+    //         abort(404);
+    //     }
         
-        $countries = Country::all();
-        $name = explode(' ', $staff->name);
-        $firstname = $name[0];
-        $lastname = $name[1];
+    //     $countries = Country::all();
+    //     $name = explode(' ', $staff->name);
+    //     $firstname = $name[0];
+    //     $lastname = $name[1];
 
-        return view('pages.staff.editStaff', compact('authUser', 'user_role', 'staff', 'countries', 'firstname', 'lastname'));
-    }
+    //     return view('pages.staff.editStaff', compact('authUser', 'user_role', 'staff', 'countries', 'firstname', 'lastname'));
+    // }
 
-    public function editStaffPost(Request $request, $unique_key)
-    {
-        $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+    // public function editStaffPost(Request $request, $unique_key)
+    // {
+    //     $authUser = auth()->user();
+    //     $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        $user = User::where('unique_key', $unique_key)->first();
-        if(!isset($user)){
-            abort(404);
-        }
-        $request->validate([
-            'firstname' => 'required|string',
-            'lastname' => 'required|string',
-            'email' => 'required|email',
-            'phone_1' => 'required',
-            'phone_2' => 'nullable',
-            'country' => 'required|string',
-            'city' => 'required|string',
-            'state' => 'required|string',
-            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
-        ]);
+    //     $user = User::where('unique_key', $unique_key)->first();
+    //     if(!isset($user)){
+    //         abort(404);
+    //     }
+    //     $request->validate([
+    //         'firstname' => 'required|string',
+    //         'lastname' => 'required|string',
+    //         'email' => 'required|email',
+    //         'phone_1' => 'required',
+    //         'phone_2' => 'nullable',
+    //         'country' => 'required|string',
+    //         'city' => 'required|string',
+    //         'state' => 'required|string',
+    //         'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+    //     ]);
 
-        $data = $request->all();
+    //     $data = $request->all();
 
-        $user->name = $data['firstname'].' '.$data['lastname'];
-        $user->email = $data['email'];
-        $user->type = 'staff';  //customer, staff, agent, superadmin
-        $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
-        $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
-        $user->city = !empty($data['city']) ? $data['city'] : null;
-        $user->state = $data['state'];
-        $user->country_id = $data['country'];
-        $user->address = !empty($data['address']) ? $data['address'] : null;
+    //     $user->name = $data['firstname'].' '.$data['lastname'];
+    //     $user->email = $data['email'];
+    //     $user->type = 'staff';  //customer, staff, agent, superadmin
+    //     $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
+    //     $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
+    //     $user->city = !empty($data['city']) ? $data['city'] : null;
+    //     $user->state = $data['state'];
+    //     $user->country_id = $data['country'];
+    //     $user->address = !empty($data['address']) ? $data['address'] : null;
 
-        $user->created_by = $authUser->id;
-        $user->status = 'true';
+    //     $user->created_by = $authUser->id;
+    //     $user->status = 'true';
 
-        //profile_picture
-        if ($request->profile_picture) {
-            $oldImage = $user->profile_picture; //1.jpg
-            if(Storage::disk('public')->exists('staff/'.$oldImage)){
-                Storage::disk('public')->delete('staff/'.$oldImage);
-                /*
-                    Delete Multiple files this way
-                    Storage::delete(['upload/test.png', 'upload/test2.png']);
-                */
-            }
-            $imageName = time().'.'.$request->profile_picture->extension();
-            //store products in folder
-            $request->profile_picture->storeAs('staff', $imageName, 'public');
-            $user->profile_picture = $imageName;
-        }
+    //     //profile_picture
+    //     if ($request->profile_picture) {
+    //         $oldImage = $user->profile_picture; //1.jpg
+    //         if(Storage::disk('public')->exists('staff/'.$oldImage)){
+    //             Storage::disk('public')->delete('staff/'.$oldImage);
+    //             /*
+    //                 Delete Multiple files this way
+    //                 Storage::delete(['upload/test.png', 'upload/test2.png']);
+    //             */
+    //         }
+    //         $imageName = time().'.'.$request->profile_picture->extension();
+    //         //store products in folder
+    //         $request->profile_picture->storeAs('staff', $imageName, 'public');
+    //         $user->profile_picture = $imageName;
+    //     }
 
-        $user->save();
+    //     $user->save();
         
-        return back()->with('success', 'Staff Updated Successfully');
-    }
+    //     return back()->with('success', 'Staff Updated Successfully');
+    // }
 
     public function accountProfile()
     {
@@ -350,7 +366,8 @@ class AuthController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
         $agents = User::where('type', 'agent')->orderBy('id', 'DESC')->get();
-        return view('pages.agents.allAgent', compact('authUser', 'user_role', 'agents'));
+        $roles = Role::all();
+        return view('pages.agents.allAgent', compact('authUser', 'user_role', 'agents', 'roles'));
     }
 
 //add any user, like registration
@@ -359,8 +376,17 @@ class AuthController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
+        $id = 1;
+        $lastAgent = User::where('type', 'agent')->latest()->first();
+        if (isset($lastAgent)) {
+            $id = $lastAgent->id + 1;
+        }
+
+        $email = 'agent'.$id.'@kiptrak.com';
+
         $countries = Country::all();
-        return view('pages.agents.addAgent', compact('authUser', 'user_role', 'countries'));
+        $roles = Role::all();
+        return view('pages.agents.addAgent', compact('authUser', 'user_role', 'countries', 'roles', 'email'));
     }
 
 /**
@@ -393,6 +419,8 @@ class AuthController extends Controller
         
         $user = new User();
         $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->firstname = $data['firstname'];
+        $user->lastname = $data['lastname'];
         $user->email = $data['email'];
         $user->password = Hash::make($data['password']);
         $user->type = 'agent';  //customer, staff, agent, superadmin
@@ -415,6 +443,22 @@ class AuthController extends Controller
         }
 
         $user->save();
+
+        //add role to user
+        if (!empty($data['role_id'])) {
+
+            $role = Role::find($data['role_id']);
+            $permissions = $role->permissions;
+            //no need since its a new user
+            // if ($user->hasRole($role->slug)) {
+            //     return 'role already assigned to user';
+            // }
+            $user->roles()->attach($role);
+            // if(count($permissions) > 0){
+            //     $user->permissions()->attach($permissions);
+            // }
+            return back()->with('success', 'Agent Created and Assigned Role Successfully');
+        }
         
         return back()->with('success', 'Agent Created Successfully');
 
@@ -445,7 +489,9 @@ class AuthController extends Controller
         $firstname = $agent->firstname;
         $lastname = $agent->lastname;
 
-        return view('pages.agents.editAgent', compact('authUser', 'user_role', 'agent', 'countries', 'firstname', 'lastname'));
+        $roles = Role::all();
+
+        return view('pages.agents.editAgent', compact('authUser', 'user_role', 'agent', 'countries', 'firstname', 'lastname', 'roles'));
     }
 
     public function editAgentPost(Request $request, $unique_key)
@@ -471,6 +517,8 @@ class AuthController extends Controller
         $data = $request->all();
 
         $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->firstname = $data['firstname'];
+        $user->lastname = $data['lastname'];
         $user->email = $data['email'];
         $user->type = 'agent';  //customer, staff, agent, superadmin
         $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;

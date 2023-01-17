@@ -198,7 +198,7 @@
         success: function(resp) {
           if(resp.status){
             $('.alarm_count').text(resp.count);
-            console.log(resp.data)
+            //console.log(resp.data)
             var notes = resp.data;
 
             $("ul.messages notes").html('');

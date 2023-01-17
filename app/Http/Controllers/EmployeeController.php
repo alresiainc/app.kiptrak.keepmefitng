@@ -54,6 +54,7 @@ class EmployeeController extends Controller
             'country' => 'required|string',
             'city' => 'required|string',
             'state' => 'required|string',
+            'current_salary' => 'nullable|numeric',
             'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
         ]);
 
@@ -70,6 +71,7 @@ class EmployeeController extends Controller
         $user->state = $data['state'];
         $user->country_id = $data['country'];
         $user->address = !empty($data['address']) ? $data['address'] : null;
+        $user->current_salary = !empty($data['current_salary']) ? $data['current_salary'] : null;
 
         $user->created_by = $authUser->id;
         $user->status = 'true';
@@ -166,8 +168,9 @@ class EmployeeController extends Controller
         $user->state = $data['state'];
         $user->country_id = $data['country'];
         $user->address = !empty($data['address']) ? $data['address'] : null;
+        $user->current_salary = !empty($data['current_salary']) ? $data['current_salary'] : null;
 
-        $user->created_by = 1;
+        $user->created_by = $authUser->id;
         $user->status = 'true';
 
         //profile_picture
@@ -506,7 +509,7 @@ public function editCustomerPost(Request $request, $unique_key)
     $user->country_id = $data['country'];
     $user->address = !empty($data['address']) ? $data['address'] : null;
 
-    $user->created_by = 1;
+    $user->created_by = $authUser->id;
     $user->status = 'true';
 
     //profile_picture

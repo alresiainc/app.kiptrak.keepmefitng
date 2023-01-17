@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\TestMail;
 use App\Events\TestEvent;
 use App\Notifications\TestNofication;
-use App\Notifications\NewOrder;
+// use App\Notifications\Order;
 use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -81,6 +81,7 @@ class FormBuilderController extends Controller
         return view('pages.newFormBuilder', compact('authUser', 'user_role', 'products', 'package_select', 'form_code', 'staff_select'));
     }
 
+    //saving built form
     public function newFormBuilderPost(Request $request)
     {
         $authUser = auth()->user();
@@ -1041,23 +1042,56 @@ class FormBuilderController extends Controller
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
         $order = $formHolder->order;
 
-        //update package in OutgoingStock
-        foreach ($data['product_packages'] as $key => $product_id) {
-            $data['product_id'] = $product_id;
-            if (!empty($product_id)) {
+        //cos order was created initially @ newFormBuilderPost
+        if (isset($order->customer_id)) {
+            //save Order
+            $order = new Order();
+            $order->form_holder_id = $formHolder->id;
+            $order->source_type = 'form_holder_module';
+            $order->status = 'new';
+            $order->save();
 
-                //accepted updated
-                OutgoingStock::where(['product_id'=>$product_id, 'order_id'=>$order->id, 'reason_removed'=>'as_order_firstphase'])
-                ->update(['customer_acceptance_status'=>'accepted']);
-                
-                //rejected or declined updated
-                $rejected_products = OutgoingStock::where('product_id', '!=', $product_id)->where('order_id', $order->id)
-                ->where('reason_removed','as_order_firstphase')->get();
-                foreach ($rejected_products as $key => $rejected) {
-                    $rejected->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>$rejected->quantity_removed]);
+            $order = $order;
+
+            foreach ($data['product_packages'] as $key => $product_id) {
+                if (!empty($product_id)) {
+                    
+                    $product = Product::where('id', $product_id)->first();
+                    $product_ids[] = $product->id;
+                    $outgoingStock = new OutgoingStock();
+                    $outgoingStock->product_id = $product->id;
+                    $outgoingStock->order_id = $order->id;
+                    $outgoingStock->quantity_removed = 1;
+                    $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    $outgoingStock->customer_acceptance_status = 'accepted';
+                    $outgoingStock->quantity_returned = 0; //by default
+                    $outgoingStock->created_by = $authUser->id;
+                    $outgoingStock->status = 'true';
+                    $outgoingStock->save();
+
                 }
                 
-            } 
+            }
+        } else {
+            //update package in OutgoingStock
+            foreach ($data['product_packages'] as $key => $product_id) {
+                $data['product_id'] = $product_id;
+                if (!empty($product_id)) {
+
+                    //accepted updated
+                    OutgoingStock::where(['product_id'=>$product_id, 'order_id'=>$order->id, 'reason_removed'=>'as_order_firstphase'])
+                    ->update(['customer_acceptance_status'=>'accepted']);
+                    
+                    //rejected or declined updated
+                    $rejected_products = OutgoingStock::where('product_id', '!=', $product_id)->where('order_id', $order->id)
+                    ->where('reason_removed','as_order_firstphase')->get();
+                    foreach ($rejected_products as $key => $rejected) {
+                        $rejected->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>$rejected->quantity_removed]);
+                    }
+                    
+                } 
+            }
         }
 
         $customer = new Customer();
@@ -1080,7 +1114,7 @@ class FormBuilderController extends Controller
         $order->customer_id = $customer->id;
         $order->status = 'new';
         $order->save();
-        //$order = $order->update(['customer_id'=>$customer->id, 'status'=>'pending']);
+        
 
         $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
         $has_upsell = isset($formHolder->upsell_id) ? true : false;
@@ -1421,7 +1455,7 @@ class FormBuilderController extends Controller
             'grand_total' => $grand_total,
         ];
 
-        Notification::route('mail', [$admin->official_notification_email])->notify(new NewOrder($invoiceData));
+        Notification::route('mail', [$admin->official_notification_email])->notify(new Order($invoiceData));
     }
 
     /**

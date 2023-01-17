@@ -27,7 +27,8 @@
       <h1>Add Employee</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allStaff') }}">Employee List</a></li>
           <li class="breadcrumb-item active">Add Employee</li>
         </ol>
       </nav>
@@ -133,9 +134,9 @@
 
                 <div class="col-md-4">
                   <label for="" class="form-label">Select Country</label>
-                  <select name="country" class="form-select tags @error('country') is-invalid @enderror" data-allow-clear="true" data-suggestions-threshold="0">
+                  <select name="country" data-live-search="true" class="custom-select form-control border tags @error('country') is-invalid @enderror">
 
-                    <option value="">Nothing Selected</option>
+                    <option value="1">Nigeria</option>
                     @foreach ($countries as $country)
                       <option value="{{ $country->id }}">{{ $country->name }}</option>
                     @endforeach
@@ -168,7 +169,17 @@
                   @enderror
                 </div>
 
-                <div class="col-md-12">
+                <div class="col-md-6">
+                  <label for="" class="form-label">Salary | Optional</label>
+                  <input type="number" name="current_salary" class="form-control @error('current_salary') is-invalid @enderror" placeholder="">
+                  @error('current_salary')
+                      <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                      </span>
+                  @enderror
+                </div>
+
+                <div class="col-md-6">
                   <label for="" class="form-label">Assign Role (Optional)</label>
                   <select name="role_id" id="role_id" data-live-search="true" class="custom-select form-control border @error('role_id') is-invalid @enderror" id="">
                     <option value="">Nothing Selected</option>

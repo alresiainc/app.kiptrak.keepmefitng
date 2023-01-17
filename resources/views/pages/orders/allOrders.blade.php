@@ -144,12 +144,12 @@
                       @if (isset($order->agent_assigned_id))
                       <td>
                         {{ $order->agent->name }} <br>
-                        <span class="badge badge-dark" onclick="changeAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Agent">
+                        <span class="badge badge-dark" onclick="changeAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Agent" style="cursor: pointer">
                           <i class="bi bi-plus"></i> <span>Change Agent</span></span>
                       </td>
                       @else
                       <td style="width: 120px">
-                        <span class="badge badge-success" onclick="addAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Agent">
+                        <span class="badge badge-success" onclick="addAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Agent" style="cursor: pointer">
                           <i class="bi bi-plus"></i> <span>Assign Agent</span></span> 
                       </td>
                       @endif
@@ -272,7 +272,7 @@
                   <div class="d-grid mb-3">
                       <label for="">Select Agent</label>
                       <select name="agent_id" id="changeAgentModalSelect" data-live-search="true" class="custom-select form-control border border-dark">
-                          <option value="kkk" selected>Nothing Selected</option>
+                          <option value="" selected>Nothing Selected</option>
 
                           @foreach ($agents as $agent)
                             <option value="{{ $agent->id }}">{{ $agent->name }} | {{ $agent->id }}</option>

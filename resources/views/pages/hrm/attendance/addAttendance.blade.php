@@ -27,7 +27,8 @@
       <h1>Add Attendance</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allAttendance') }}">Attendance List</a></li>
           <li class="breadcrumb-item active">Add Attendance</li>
         </ol>
       </nav>
@@ -54,7 +55,7 @@
     <section class="section dashboard mb-3">
       <div class="row">
         <div class="col-md-12">
-          <a href="{{ route('allAttendance') }}" class="badge badge-dark">Attendance List</a>
+          
         </div>
       </div>
     </section>
@@ -67,21 +68,12 @@
               
               <form class="row g-3 needs-validation" action="{{ route('addAttendancePost') }}" method="POST" enctype="multipart/form-data">@csrf
 
+                
+
                 <div class="col-md-12">
-                    <label for="" class="form-label">Select Employee</label>
-                    <select name="employee" data-live-search="true" class="custom-select form-control border @error('employee') is-invalid @enderror">
-                        
-                      <option value="">Nothing Selected</option>
-                      @foreach ($staffs as $staff)
-                        <option value="{{ $staff->id }}">{{ $staff->name }}</option>
-                      @endforeach
-                      
-                    </select>
-                    @error('employee')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
+                  <label for="" class="form-label">Employee</label>
+                  <input type="text" name="employee_name" class="form-control" value="{{ $authUser->name }}" readonly>
+                  
                 </div>
 
                 <div class="col-md-6 d-none">
@@ -96,7 +88,7 @@
 
                 <div class="col-md-12">
                   <label for="" class="form-label">Check-In</label>
-                  <input type="time" name="check_in" class="form-control @error('check_in') is-invalid @enderror" id="" >
+                  <input type="text" name="check_in" id="datetimepicker2" class="form-control @error('check_in') is-invalid @enderror">
                   @error('check_in')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>
@@ -116,7 +108,7 @@
 
                 <div class="col-md-12">
                   <label for="" class="form-label">Note (Optional)</label>
-                  <textarea name="" id="" cols="30" rows="3" class="form-control"></textarea>
+                  <textarea name="note" id="" cols="30" rows="3" class="form-control"></textarea>
                   @error('phone_1')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>
@@ -138,4 +130,17 @@
 
 </main><!-- End #main -->
 
+@endsection
+
+@section('extra_js')
+
+<link href="{{asset('/assets/css/jquery.datetimepicker.min.css')}}" rel="stylesheet">
+<script src="{{asset('/assets/js/jquery.datetimepicker.min.js')}}"></script>
+<script>
+  jQuery('#datetimepicker2').datetimepicker({
+    datepicker:false,
+    //showPeriod: true,
+    format:'H:i A'
+  });
+</script>
 @endsection

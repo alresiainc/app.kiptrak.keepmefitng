@@ -32,8 +32,6 @@
 </style>
 @endsection
 
-
-
 @section('content')
     
 <main id="main" class="main">
@@ -422,7 +420,6 @@
                     <th scope="col">Qty Sold</th>
                     <th scope="col">Qty Remaining(Stock)</th>
                     <th scope="col">Date Added</th>
-                    
                   </tr>
                 </thead>
                 <tbody>
@@ -500,7 +497,7 @@
   $('.filter').change(function(){
         filter_function();
         //calling filter function each select box value change
-    });
+  });
 
     $('table tbody tr').show(); //intially all rows will be shown
 
@@ -561,7 +558,7 @@
 <script>
   var minDate, maxDate;
  
- // Custom filtering function which will search data in column four between two values
+ // Custom filtering function which will search data in column four between two values(dates)
  $.fn.dataTable.ext.search.push(
      function( settings, data, dataIndex ) {
          var min = minDate.val();

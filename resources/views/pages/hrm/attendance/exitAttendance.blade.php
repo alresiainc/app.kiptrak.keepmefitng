@@ -27,7 +27,8 @@
       <h1>Exit Attendance</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allAttendance') }}">Attendance List</a></li>
           <li class="breadcrumb-item active">Exit Attendance</li>
         </ol>
       </nav>
@@ -48,7 +49,7 @@
     <section class="section dashboard mb-3">
       <div class="row">
         <div class="col-md-12">
-          <a href="{{ route('allAttendance') }}" class="badge badge-dark">Attendance List</a>
+          
         </div>
       </div>
     </section>
@@ -71,19 +72,9 @@
                   @enderror
                 </div>
 
-                <div class="col-md-12 d-none">
-                  <label for="" class="form-label">Check-In</label>
-                  <input type="time" name="check_in" class="form-control @error('check_in') is-invalid @enderror" id="" >
-                  @error('check_in')
-                      <span class="invalid-feedback" role="alert">
-                          <strong>{{ $message }}</strong>
-                      </span>
-                  @enderror
-                </div>
-
                 <div class="col-md-12">
                     <label for="" class="form-label">Check-Out</label>
-                    <input type="time" name="check_out" class="form-control @error('check_out') is-invalid @enderror" id="" >
+                    <input type="text" name="check_out" id="datetimepicker2" class="form-control @error('check_out') is-invalid @enderror">
                     @error('check_out')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -93,8 +84,8 @@
 
                 <div class="col-md-12">
                   <label for="" class="form-label">Note (Optional)</label>
-                  <textarea name="" id="" cols="30" rows="3" class="form-control"></textarea>
-                  @error('phone_1')
+                  <textarea name="note" id="" cols="30" rows="3" class="form-control"></textarea>
+                  @error('note')
                       <span class="invalid-feedback" role="alert">
                           <strong>{{ $message }}</strong>
                       </span>
@@ -115,4 +106,17 @@
 
 </main><!-- End #main -->
 
+@endsection
+
+@section('extra_js')
+
+<link href="{{asset('/assets/css/jquery.datetimepicker.min.css')}}" rel="stylesheet">
+<script src="{{asset('/assets/js/jquery.datetimepicker.min.js')}}"></script>
+<script>
+  jQuery('#datetimepicker2').datetimepicker({
+    datepicker:false,
+    //showPeriod: true,
+    format:'H:i A'
+  });
+</script>
 @endsection

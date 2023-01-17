@@ -27,7 +27,8 @@
       <h1>Add Payroll</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allPayroll') }}">Payroll List</a></li>
           <li class="breadcrumb-item active">Add Payroll</li>
         </ol>
       </nav>
@@ -57,9 +58,9 @@
                     <label for="" class="form-label">Select Employee</label>
                     <select name="employee" data-live-search="true" class="custom-select form-control border @error('employee') is-invalid @enderror">
                         
-                      <option value="{{ $payroll->employee->id }}">{{ $payroll->employee->name }}</option>
+                      <option value="{{ $payroll->employee->id }}">{{ $payroll->employee->name }} {{ isset($payroll->employee->current_salary) ? ' | Salary: '.$payroll->employee->current_salary : '' }}</option>
                       @foreach ($staffs as $staff)
-                        <option value="{{ $staff->id }}">{{ $staff->name }}</option>
+                        <option value="{{ $staff->id }}">{{ $staff->name }} {{ isset($staff->current_salary) ? ' | Salary: '.$staff->current_salary : '' }}</option>
                       @endforeach
                       
                     </select>
@@ -82,6 +83,17 @@
                 </div>
 
                 <div class="col-md-6">
+                  <label for="" class="form-label">Bonus ({{ $generalSetting->country->symbol }}) | Optional</label>
+                  <input type="number" name="bonus" class="form-control @error('bonus') is-invalid @enderror" id="" min="1"
+                  value="{{ isset($payroll->bonus) ? $payroll->bonus : '' }}">
+                  @error('bonus')
+                      <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                      </span>
+                  @enderror
+                </div>
+
+                <div class="col-md-12">
                     <label for="" class="form-label">Select Method</label>
                     <select name="paying_method" data-live-search="true" class="custom-select form-control border @error('paying_method') is-invalid @enderror">
                       <option value="{{ $payroll->paying_method }}">

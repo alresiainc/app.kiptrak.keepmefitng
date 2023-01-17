@@ -23,7 +23,8 @@ return new class extends Migration
             $table->string('check_in')->nullable();
             $table->string('check_out')->nullable();
             $table->string('daily_status')->nullable(); //late, present, absent
-            $table->string('note')->nullable();
+            $table->string('check_in_note')->nullable();
+            $table->string('check_out_note')->nullable();
             
             $table->string('created_by')->nullable();
             $table->string('status')->nullable(); //true, false

@@ -90,7 +90,7 @@
           </span>
           <span class="text-muted">|</span>
           @if (isset(Auth::user()->profile_picture))
-            <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle" /> 
+            <img src="{{ asset('/storage/staff/'.Auth::user()->profile_picture) }}" alt="Profile" class="rounded-circle" /> 
           @else
             <span class="bg-dark rounded-circle p-2 text-white">{{ Auth::user()->shortName(Auth::user()->name) }}</span>
           @endif

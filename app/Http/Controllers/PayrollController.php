@@ -58,6 +58,7 @@ class PayrollController extends Controller
         $payroll = new Payroll();
         $payroll->employee_id = $data['employee'];
         $payroll->amount = $data['amount'];
+        $payroll->bonus = !empty($data['bonus']) ? $data['bonus'] : null;
         $payroll->paying_method = $data['paying_method'];
         $payroll->note = !empty($data['note']) ? $data['note'] : null;
         $payroll->save();
@@ -113,6 +114,7 @@ class PayrollController extends Controller
 
         $payroll->employee_id = $data['employee'];
         $payroll->amount = $data['amount'];
+        $payroll->bonus = !empty($data['bonus']) ? $data['bonus'] : null;
         $payroll->paying_method = $data['paying_method'];
         $payroll->note = !empty($data['note']) ? $data['note'] : null;
         $payroll->save();

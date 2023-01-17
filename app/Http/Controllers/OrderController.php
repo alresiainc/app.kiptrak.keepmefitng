@@ -32,40 +32,81 @@ class OrderController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $agents = User::where('type','agent')->get();
 
-        $orders = Order::all();
-        if ($status=="") {
+        if ($authUser->isSuperAdmin) {
+            
             $orders = Order::all();
-        }
-        if ($status=="new") {
-            $orders = Order::where('status', 'new')->get();
-        }
-        if ($status=="new_from_alarm") {
-            DB::table('sound_notifications')->update(['status'=>'seen']);
-            $orders = Order::where('status', 'new')->get();
-        }
-        if ($status=="pending") {
-            $orders = Order::where('status', 'pending')->get();
-        }
-        if ($status=="cancelled") {
-            $orders = Order::where('status', 'cancelled')->get();
-        }
-        if ($status=="delivered_not_remitted") {
-            $orders = Order::where('status', 'delivered_not_remitted')->get();
-        }
-        if ($status=="delivered_and_remitted") {
-            $orders = Order::where('status', 'delivered_and_remitted')->get();
-        }
+            if ($status=="") {
+                $orders = Order::all();
+            }
+            if ($status=="new") {
+                $orders = Order::where('status', 'new')->get();
+            }
+            if ($status=="new_from_alarm") {
+                DB::table('sound_notifications')->update(['status'=>'seen']);
+                $orders = Order::where('status', 'new')->get();
+            }
+            if ($status=="pending") {
+                $orders = Order::where('status', 'pending')->get();
+            }
+            if ($status=="cancelled") {
+                $orders = Order::where('status', 'cancelled')->get();
+            }
+            if ($status=="delivered_not_remitted") {
+                $orders = Order::where('status', 'delivered_not_remitted')->get();
+            }
+            if ($status=="delivered_and_remitted") {
+                $orders = Order::where('status', 'delivered_and_remitted')->get();
+            }
+    
+            $entries = false; $formHolder = '';
+            if ($status !== "") {
+                $formHolder = FormHolder::where('unique_key', $status);
+                if($formHolder->exists()) {
+                    $formHolder = $formHolder->first();
+                    // $formHolders = $formHolder->formHolders;
+                    // $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->get();
+                    $orders = Order::where('form_holder_id', $formHolder->id)->get();
+                    $entries = true;
+                }
+            }
+        } else {
+            
+            $orders = Order::where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+            if ($status=="") {
+                $orders = Order::where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+            }
+            if ($status=="new") {
+                $orders = Order::where('status', 'new')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+            }
+            if ($status=="new_from_alarm") {
+                DB::table('sound_notifications')->update(['status'=>'seen']);
+                $orders = Order::where('status', 'new')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+            }
+            if ($status=="pending") {
+                $orders = Order::where('status', 'pending')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+            }
+            if ($status=="cancelled") {
+                $orders = Order::where('status', 'cancelled')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+            }
+            if ($status=="delivered_not_remitted") {
+                $orders = Order::where('status', 'delivered_not_remitted')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+            }
+            if ($status=="delivered_and_remitted") {
+                $orders = Order::where('status', 'delivered_and_remitted')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+            }
 
-        $entries = false; $formHolder = '';
-        if ($status !== "") {
-            $formHolder = FormHolder::where('unique_key', $status);
-            if($formHolder->exists()) {
-                $formHolder = $formHolder->first();
-                $formHolders = $formHolder->formHolders;
-                $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->get();
-                $entries = true;
+            $entries = false; $formHolder = '';
+            if ($status !== "") {
+                $formHolder = FormHolder::where('unique_key', $status);
+                if($formHolder->exists()) {
+                    $formHolder = $formHolder->first();
+                    $formHolders = $formHolder->formHolders;
+                    $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->get();
+                    $entries = true;
+                }
             }
         }
+        
 
         return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents', 'status', 'entries', 'formHolder'));
     }

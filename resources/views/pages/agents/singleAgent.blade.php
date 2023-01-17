@@ -40,7 +40,7 @@
                   </div>
                   <div class="d-grid ms-lg-3">
                     <div class="display-6">{{ $agent->name }}</div>
-                    <h5>{{ $agent->state }} | {{ $agent->country->name }}</h5>
+                    <h5>{{ $agent->state }} | {{ $agent->country->name }} | Role: {{ $agent->hasAnyRole($agent->id) ? $agent->role($agent->id)->role->name : 'No Role' }}</h5>
 
                     @if ($agent->status == 'true')
                       <div class="d-flex justify-content-start">

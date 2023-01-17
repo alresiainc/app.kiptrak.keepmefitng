@@ -1,7 +1,12 @@
 @extends('layouts.design')
 @section('title')Dashboard @endsection
 @section('extra_css')@endsection
-
+<style>
+  .attendance:hover{
+    color: #fff;
+    background-color: #04512d !important;
+  }
+</style>
 @section('content')
     
 <main id="main" class="main">
@@ -47,6 +52,8 @@
   </div>
   <hr />
 
+  @if ($authUser->isSuperAdmin)
+      
   <section class="section m-0">
     <div class="row">
       <!-- Sales Card -->
@@ -400,12 +407,28 @@
       </div>
     </div>
   </section>
+
+  @else
+
+  <section class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card card-top-border border-top-success">
+          <div class="card-body">
+            <h5 class="card-title text-uppercase text-center">View More Features From Sidebar</h5>
+            <div class="text-uppercase text-center"><a href="{{ route('allAttendance') }}" class="attendance btn btn-dark rounded-pill">Attendance</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  @endif
 </main>
 
 @endsection
 
 @section('extra_js')
-
 
 <script>
   $(document).ready(function () {

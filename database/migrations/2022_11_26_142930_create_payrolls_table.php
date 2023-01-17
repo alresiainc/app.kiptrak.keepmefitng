@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('employee_id')->nullable();
             $table->string('account_id')->nullable();
             $table->string('amount')->nullable();
+            $table->string('bonus')->nullable();
             $table->string('paying_method')->nullable(); //late, present, absent
             $table->string('note')->nullable();
             
