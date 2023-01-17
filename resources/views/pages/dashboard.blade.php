@@ -416,7 +416,9 @@
         <div class="card card-top-border border-top-success">
           <div class="card-body">
             <h5 class="card-title text-uppercase text-center">View More Features From Sidebar</h5>
-            <div class="text-uppercase text-center"><a href="{{ route('allAttendance') }}" class="attendance btn btn-dark rounded-pill">Attendance</a></div>
+            @if ($authUser->type !== 'agent')
+              <div class="text-uppercase text-center"><a href="{{ route('allAttendance') }}" class="attendance btn btn-dark rounded-pill">Attendance</a></div>
+            @endif
           </div>
         </div>
       </div>

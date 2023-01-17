@@ -268,7 +268,7 @@ $routeName = \Route::currentRouteName();
     @endif
 
     <!---Human Resource Mgt--->
-    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($authUser->type !== 'agent') &&
     ($user_role->slug == 'human-resource-manager' || $user_role->permissions->contains('slug', 'view-hrm-menu')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#hrm-nav" data-bs-toggle="collapse" href="#"
