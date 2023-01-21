@@ -329,4 +329,25 @@ class ProductController extends Controller
         
         //
     }
+
+    public function deleteProduct($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $product = Product::where(['unique_key'=>$unique_key]);
+        if(!$product->exists()){
+            abort(404);
+        }
+
+        $product = $product->first();
+        $oldImage = $product->image;
+        if(Storage::disk('public')->exists('products/'.$oldImage)){
+            Storage::disk('public')->delete('products/'.$oldImage);
+        }
+
+        $product->delete();
+
+        return back()->with('success', 'Product Removed Successfully');
+    }
 }

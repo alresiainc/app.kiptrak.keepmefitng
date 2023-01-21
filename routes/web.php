@@ -221,6 +221,7 @@ Route::post('/create-product', [ProductController::class, 'addProductPost'])->na
 Route::get('/view-product/{unique_key}', [ProductController::class, 'singleProduct'])->name('singleProduct');
 Route::get('/edit-product/{unique_key}', [ProductController::class, 'editProduct'])->name('editProduct');
 Route::post('/edit-product/{unique_key}', [ProductController::class, 'editProductPost'])->name('editProductPost');
+Route::get('/delete-product/{unique_key}', [ProductController::class, 'deleteProduct'])->name('deleteProduct');
 
 //Warehouses
 Route::get('/warehouses', [WareHouseController::class, 'allWarehouse'])->name('allWarehouse');
