@@ -72,7 +72,7 @@ class ProductController extends Controller
             'code' => 'nullable|string|unique:products',
             // 'features' => 'nullable|array',
             //'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
-            'image' => 'required|image|size:2048|mimes:jpg,png,jpeg,gif,svg,webp',
+            'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg,webp',
         ]);
         
         $data = $request->all();
@@ -232,7 +232,7 @@ class ProductController extends Controller
             'code' => 'nullable|string',
             // 'features' => 'nullable|array',
             //'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
-            'image' => 'nullable|image|size:2048|mimes:jpg,png,jpeg,gif,svg,webp',
+            'image' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp',
         ]);
     
         $data = $request->all();

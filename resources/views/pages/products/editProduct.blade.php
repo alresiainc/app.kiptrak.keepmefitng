@@ -58,7 +58,7 @@
 
             <div class="card-body">
               
-                <form class="row g-3" action="{{ route('editProductPost', $product->unique_key) }}"
+                <form id="createForm" class="row g-3" action="{{ route('editProductPost', $product->unique_key) }}"
                     method="POST" enctype="multipart/form-data">@csrf
 
                     <div class="gallery-uploader-wrap">
@@ -422,6 +422,35 @@
 @endsection
 
 @section('extra_js')
+
+<script src="{{ asset('/assets/js/jquery.validate.min.js') }}"></script>
+<script src="{{ asset('/assets/js/additional-methods.min.js') }}"></script>
+
+<script>
+  var message = '<span class="text-danger">File size must be less than 2mb</span>';
+  $.validator.addMethod('filesize', function (value, element, param) {
+    return this.optional(element) || (element.files[0].size <= param)
+  }, message);
+  
+
+  jQuery(function ($) {
+      "use strict";
+      $('#createForm').validate({
+          rules: {
+              // FirstName: {
+              //     required: true,
+              //     maxlength: 20
+              // },
+              image: {
+                  required: true,
+                  extension: "jpg,png,jpeg,gif,svg,webp",
+                  filesize: 2048576, //2mb
+              }, 
+          },
+      });
+  });
+</script>
+
 <script>
     //clone
     $('.wrapper').on('click', '.remove', function() {
