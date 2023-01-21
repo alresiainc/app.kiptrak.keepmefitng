@@ -15,6 +15,7 @@ use App\Notifications\NewOrder;
 use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use Exception;
 
 use App\Models\FormHolder;
 use App\Models\Product;
@@ -64,22 +65,14 @@ class FormBuilderController extends Controller
     
         $form_code = $randomString;
         
-        $package_select = '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
-        <option value=""> --Select Product-- </option>';
+        $package_select = '<select class="form-control select-checkbox" name="packages[]" style="width:100%">
+        <option value="">--Select Option--</option>';
         foreach($products as $product):
             $package_select .= '<option value="'. $product->id.'"> '.$product->name.'</option>' ;
         endforeach;
         $package_select .='</select>';
 
-        $staff_select = '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
-        <option value=""> --Select Product-- </option>';
-        foreach($staffs as $user):
-            $staff_select .= '<option value="'. $user->id.'"> '.$user->name.'</option>' ;
-        endforeach;
-        $staff_select .='</select>';
-
-
-        return view('pages.newFormBuilder', compact('authUser', 'user_role', 'products', 'package_select', 'form_code', 'staff_select'));
+        return view('pages.newFormBuilder', compact('authUser', 'user_role', 'products', 'package_select', 'form_code'));
     }
 
     //saving built form
@@ -90,6 +83,7 @@ class FormBuilderController extends Controller
         
         $request->validate([
             'name' => 'required|string|unique:form_holders',
+            'packages' => 'required'
         ]);
 
         $data = $request->all();
@@ -145,7 +139,7 @@ class FormBuilderController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        $formHolds = FormHolder::all();
+        $formHolds = FormHolder::orderBy('id', 'DESC')->get();
         $formHolders = [];
         foreach ($formHolds as $key => $formHolder) {
             $formHolder['form_data'] = \unserialize($formHolder->form_data);
@@ -202,7 +196,7 @@ class FormBuilderController extends Controller
             <div class="col-sm-11 d-flex align-items-center">
                 <div class="mb-3 q-fc w-100">';
                 $package_select_edit[] .=
-                '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
+                '<select class="select2 form-control border select-checkbox" name="packages[]" style="width:100%">
                     <option value="'.$package.'" selected> '.$this->productById($package)->name.' </option>';
                     foreach($products as $product):
                         $package_select_edit[] .= '<option value="'. $product->id.'"> '.$product->name.'</option>';
@@ -359,7 +353,7 @@ class FormBuilderController extends Controller
             <div class="col-sm-11 d-flex align-items-center">
                 <div class="mb-3 q-fc w-100">';
                 $package_select_edit[] .=
-                '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
+                '<select class="select2 form-control border select-checkbox" name="packages[]" style="width:100%">
                     <option value="'.$package.'" selected> '.$this->productById($package)->name.' </option>';
                     foreach($products as $product):
                         $package_select_edit[] .= '<option value="'. $product->id.'"> '.$product->name.'</option>';
@@ -373,7 +367,7 @@ class FormBuilderController extends Controller
         endforeach;
 
         //return $package_select_edit;
-
+        
         //for cloning
         $package_select = '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
         <option value=""> --Select Product-- </option>';
@@ -561,7 +555,7 @@ class FormBuilderController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        $formHolds = FormHolder::all();
+        $formHolds = FormHolder::orderBy('id', 'DESC')->get();
         $formHolders = [];
         foreach ($formHolds as $key => $formHolder) {
             $formHolder['contact'] = \unserialize($formHolder->contact);
@@ -801,7 +795,7 @@ class FormBuilderController extends Controller
     //     return view('pages.formEmbedded', compact('authUser', 'user_role', 'unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products'));
     // }
 
-    public function formEmbedded($unique_key)
+    public function formEmbedded($unique_key, $current_order_id="", $stage="")
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
@@ -810,6 +804,17 @@ class FormBuilderController extends Controller
         if (!isset($formHolder)) {
             \abort(404);
         }
+        if ($current_order_id !== "") {
+            $order = Order::where('id', $current_order_id)->first();
+            if (!isset($order)) {
+                \abort(404);
+            }
+            $order->outgoingStocks()->where(['customer_acceptance_status'=>NULL])
+            ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
+        } else {
+            $order = $formHolder->order;
+        }
+        
         $stage="";
 
         $authUser = User::find(1);
@@ -843,11 +848,13 @@ class FormBuilderController extends Controller
         }
         
         //products package
+        //products package
         foreach ($packages as $key => $package) {
             $product = Product::where('id', $package)->first();
             $formPackage['id'] = $package; //product_id
             $formPackage['name'] = $product->name;
             $formPackage['price'] = $product->sale_price;
+            $formPackage['stock_available'] = $product->stock_available();
             $formPackage['form_name'] = Str::slug($package_form_name);
             $formPackage['form_label'] = $package_form_label;
             $formPackage['form_type'] = $package_form_type;
@@ -932,7 +939,7 @@ class FormBuilderController extends Controller
     }
 
     //like single newFormBuilder
-    public function newFormLink($unique_key, $stage="")
+    public function newFormLink($unique_key, $current_order_id="", $stage="")
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
@@ -940,6 +947,17 @@ class FormBuilderController extends Controller
         $formHolder = FormHolder::where('unique_key', $unique_key)->first();
         if (!isset($formHolder)) {
             \abort(404);
+        }
+
+        if ($current_order_id !== "") {
+            $order = Order::where('id', $current_order_id)->first();
+            if (!isset($order)) {
+                \abort(404);
+            }
+            $order->outgoingStocks()->where(['customer_acceptance_status'=>NULL])
+            ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
+        } else {
+            $order = $formHolder->order;
         }
 
         $authUser = User::find(1);
@@ -978,6 +996,7 @@ class FormBuilderController extends Controller
             $formPackage['id'] = $package; //product_id
             $formPackage['name'] = $product->name;
             $formPackage['price'] = $product->sale_price;
+            $formPackage['stock_available'] = $product->stock_available();
             $formPackage['form_name'] = Str::slug($package_form_name);
             $formPackage['form_label'] = $package_form_label;
             $formPackage['form_type'] = $package_form_type;
@@ -986,7 +1005,7 @@ class FormBuilderController extends Controller
         //name, labels, type, in dat order
       
         //for thankyou part
-        $order = $formHolder->order;
+        // $order = $formHolder->order;
         $mainProduct_revenue = 0;  //price * qty
         $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
         'customer_acceptance_status'=>'accepted'])->get();
@@ -1062,7 +1081,7 @@ class FormBuilderController extends Controller
     }
 
     //newFormLinkPost//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public function newFormLinkPost(Request $request, $unique_key)
+    public function newFormLinkPost(Request $request, $unique_key, $current_order_id="")
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
@@ -1175,93 +1194,160 @@ class FormBuilderController extends Controller
 
         //cos order was created initially @ newFormBuilderPost
         if (isset($order->customer_id)) {
+            
             //save Order
-            $order = new Order();
-            $order->form_holder_id = $formHolder->id;
-            $order->source_type = 'form_holder_module';
-            $order->status = 'new';
-            $order->save();
+            $newOrder = new Order();
+            $newOrder->form_holder_id = $formHolder->id;
+            $newOrder->source_type = 'form_holder_module';
+            $newOrder->status = 'new';
+            $newOrder->save();
+
+            //making a copy from the former outgoingStocks
+            $outgoingStocks = $order->outgoingStocks;
+            foreach($outgoingStocks as $i => $outgoingStock)
+            {
+                //make copy of rows, and create new records
+                $outgoingStocks[$i]->order_id = $newOrder->id;
+                $outgoingStocks[$i]->quantity_returned = 0;
+                $outgoingStocks[$i]->quantity_removed = 1;
+                $outgoingStocks[$i]->amount_accrued = $outgoingStock->product->sale_price;
+                $x[$i] = (new OutgoingStock())->create($outgoingStock->only(['product_id', 'order_id', 'quantity_removed', 'amount_accrued',
+                'reason_removed', 'quantity_returned', 'created_by', 'status']));
+            }
+            // return $x;
 
             // $order = $order;
 
             foreach ($data['product_packages'] as $key => $product_id) {
+                $data['product_id'] = $product_id;
                 if (!empty($product_id)) {
-                    
-                    $product = Product::where('id', $product_id)->first();
-                    $product_ids[] = $product->id;
-                    $outgoingStock = new OutgoingStock();
-                    $outgoingStock->product_id = $product->id;
-                    $outgoingStock->order_id = $order->id;
-                    $outgoingStock->quantity_removed = 1;
-                    $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-                    $outgoingStock->customer_acceptance_status = 'accepted';
-                    $outgoingStock->quantity_returned = 0; //by default
-                    $outgoingStock->created_by = $authUser->id;
-                    $outgoingStock->status = 'true';
-                    $outgoingStock->save();
 
-                }
-                
+                    $idPriceQty = explode('-', $product_id);
+                    $productId = $idPriceQty[0];
+                    $saleUnitPrice = $idPriceQty[1];
+                    $qtyRemoved = $idPriceQty[2];
+
+                    //accepted updated
+                    $amount_accrued = $qtyRemoved * $saleUnitPrice;
+                    OutgoingStock::where(['product_id'=>$productId, 'order_id'=>$newOrder->id, 'reason_removed'=>'as_order_firstphase'])
+                    ->update(['quantity_removed'=>$qtyRemoved, 'amount_accrued'=>$amount_accrued, 'customer_acceptance_status'=>'accepted']);
+                    
+                    //rejected or declined updated
+                    // $rejected_products = OutgoingStock::where('product_id', '!=', $productId)->where('order_id', $newOrder->id)
+                    // ->where('reason_removed','as_order_firstphase')->get();
+                    // foreach ($rejected_products as $key => $rejected) {
+                    //     $rejected->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>$rejected->quantity_removed]);
+                    // }
+                    
+                } 
             }
+                    
+            $customer = new Customer();
+            $customer->order_id = $newOrder->id;
+            $customer->form_holder_id = $formHolder->id;
+            $customer->firstname = $data['firstname'];
+            $customer->lastname = $data['lastname'];
+            $customer->phone_number = $data['phone_number'];
+            $customer->whatsapp_phone_number = $data['whatsapp_phone_number'];
+            $customer->email = $data['active_email'];
+            $customer->city = $data['city'];
+            $customer->state = $data['state'];
+            $customer->delivery_address = $data['address'];
+            $customer->delivery_duration = $data['delivery_duration'];
+            $customer->created_by = $authUser->id;
+            $customer->status = 'true';
+            $customer->save();
+
+            //update order status
+            //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
+            $newOrder = Order::find($newOrder->id);
+            $newOrder->customer_id = $customer->id;
+            $newOrder->status = 'new';
+            $newOrder->save();
+
+            $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
+            $has_upsell = isset($formHolder->upsell_id) ? true : false;
+            $data['has_orderbump'] = $has_orderbump; 
+            $data['has_upsell'] = $has_upsell;
+            $data['order_id'] = $newOrder->id;
+
+            //call notify fxn
+            if ($has_orderbump==false && $has_upsell==false) {
+                $this->invoiceData($formHolder, $customer, $newOrder);
+            }
+
+            return response()->json([
+                'status'=>true,
+                'data'=>$data,
+            ]);
+
         } else {
+            
             //update package in OutgoingStock
             foreach ($data['product_packages'] as $key => $product_id) {
                 $data['product_id'] = $product_id;
                 if (!empty($product_id)) {
 
+                    $idPriceQty = explode('-', $product_id);
+                    $productId = $idPriceQty[0];
+                    $saleUnitPrice = $idPriceQty[1];
+                    $qtyRemoved = $idPriceQty[2];
+
                     //accepted updated
-                    OutgoingStock::where(['product_id'=>$product_id, 'order_id'=>$order->id, 'reason_removed'=>'as_order_firstphase'])
-                    ->update(['customer_acceptance_status'=>'accepted']);
+                    $amount_accrued = $qtyRemoved * $saleUnitPrice;
+                    //accepted updated
+                    OutgoingStock::where(['product_id'=>$productId, 'order_id'=>$order->id, 'reason_removed'=>'as_order_firstphase'])
+                    ->update(['quantity_removed'=>$qtyRemoved, 'amount_accrued'=>$amount_accrued, 'customer_acceptance_status'=>'accepted']);
                     
                     //rejected or declined updated
-                    $rejected_products = OutgoingStock::where('product_id', '!=', $product_id)->where('order_id', $order->id)
-                    ->where('reason_removed','as_order_firstphase')->get();
-                    foreach ($rejected_products as $key => $rejected) {
-                        $rejected->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>$rejected->quantity_removed]);
-                    }
+                    // $rejected_products = OutgoingStock::where('product_id', '!=', $productId)->where('order_id', $order->id)
+                    // ->where('reason_removed','as_order_firstphase')->get();
+                    // foreach ($rejected_products as $key => $rejected) {
+                    //     $rejected->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>$rejected->quantity_removed]);
+                    // }
                     
                 } 
             }
-        }
-
-        $customer = new Customer();
-        $customer->order_id = $order->id;
-        $customer->form_holder_id = $formHolder->id;
-        $customer->firstname = $data['firstname'];
-        $customer->lastname = $data['lastname'];
-        $customer->phone_number = $data['phone_number'];
-        $customer->whatsapp_phone_number = $data['whatsapp_phone_number'];
-        $customer->email = $data['active_email'];
-        $customer->city = $data['city'];
-        $customer->state = $data['state'];
-        $customer->delivery_address = $data['address'];
-        $customer->delivery_duration = $data['delivery_duration'];
-        $customer->created_by = $authUser->id;
-        $customer->status = 'true';
-        $customer->save();
-
-        //update order status
-        //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
-        $order->customer_id = $customer->id;
-        $order->status = 'new';
-        $order->save();
         
-        $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
-        $has_upsell = isset($formHolder->upsell_id) ? true : false;
-        $data['has_orderbump'] = $has_orderbump; 
-        $data['has_upsell'] = $has_upsell;
-        $data['order_id'] = $order->id;
-        
-        //call notify fxn
-        if ($has_orderbump==false && $has_upsell==false) {
-            $this->invoiceData($formHolder, $customer, $order);
-        }
+            $customer = new Customer();
+            $customer->order_id = $order->id;
+            $customer->form_holder_id = $formHolder->id;
+            $customer->firstname = $data['firstname'];
+            $customer->lastname = $data['lastname'];
+            $customer->phone_number = $data['phone_number'];
+            $customer->whatsapp_phone_number = $data['whatsapp_phone_number'];
+            $customer->email = $data['active_email'];
+            $customer->city = $data['city'];
+            $customer->state = $data['state'];
+            $customer->delivery_address = $data['address'];
+            $customer->delivery_duration = $data['delivery_duration'];
+            $customer->created_by = $authUser->id;
+            $customer->status = 'true';
+            $customer->save();
 
-        return response()->json([
-            'status'=>true,
-            'data'=>$data,
-        ]);
+            //update order status
+            //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
+            $order->customer_id = $customer->id;
+            $order->status = 'new';
+            $order->save();
+            
+            $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
+            $has_upsell = isset($formHolder->upsell_id) ? true : false;
+            $data['has_orderbump'] = $has_orderbump; 
+            $data['has_upsell'] = $has_upsell;
+            $data['order_id'] = $order->id;
+            
+            //call notify fxn
+            if ($has_orderbump==false && $has_upsell==false) {
+                $this->invoiceData($formHolder, $customer, $order);
+            }
+
+            return response()->json([
+                'status'=>true,
+                'data'=>$data,
+            ]);
+
+        }
     }
 
     //saveNewFormOrderBumpFromCustomer
@@ -1350,14 +1436,15 @@ class FormBuilderController extends Controller
         $data = $request->all();
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
-        $order = $formHolder->order;
+        // $order = $formHolder->order;
+        $order = Order::where('id', $data['current_order_id'])->first();
 
         //accepted orderbump
         if (!empty($data['orderbump_product_checkbox'])) {
             //accepted updated
             $product_id = Product::where('id', $data['orderbump_product_checkbox'])->first()->id;
             OutgoingStock::where(['product_id'=>$product_id, 'order_id'=>$order->id, 'reason_removed'=>'as_orderbump'])
-            ->update(['customer_acceptance_status'=>'declined', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
+            ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
         }
 
         //update order with same orderbump as formholder
@@ -1381,14 +1468,15 @@ class FormBuilderController extends Controller
         $data = $request->all();
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
-        $order = $formHolder->order;
+        // $order = $formHolder->order;
+        $order = Order::where('id', $data['current_order_id'])->first();
 
         //declined upsell
         if (!empty($data['upsell_product_checkbox'])) {
             //accepted updated
             $product_id = Product::where('id', $data['upsell_product_checkbox'])->first()->id;
             OutgoingStock::where(['product_id'=>$product_id, 'order_id'=>$order->id, 'reason_removed'=>'as_upsell'])
-            ->update(['customer_acceptance_status'=>'declined', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
+            ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
         }
 
         //update order with same upsell as formholder
@@ -1495,7 +1583,6 @@ class FormBuilderController extends Controller
             }
         }
 
-        
         //orderbump
         $orderbumpProduct_revenue = 0; //price * qty
         $orderbump_outgoingStock = '';
@@ -1589,7 +1676,14 @@ class FormBuilderController extends Controller
             'grand_total' => $grand_total,
         ];
 
-        Notification::route('mail', [$admin->official_notification_email])->notify(new NewOrder($invoiceData));
+        try {
+            Notification::route('mail', [$admin->official_notification_email])->notify(new NewOrder($invoiceData));
+        } catch (Exception $exception) {
+            // return back()->withError($exception->getMessage())->withInput();
+            return back();
+        }
+
+        
     }
 
     /**
@@ -1867,6 +1961,17 @@ class FormBuilderController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
         //
+    }
+
+    //not used
+    public function search(Request $request)
+    {
+        try {
+            $user = User::findOrFail($request->input('user_id'));
+        } catch (ModelNotFoundException $exception) {
+            return back()->withError($exception->getMessage())->withInput();
+        }
+        return view('users.search', compact('user'));
     }
 
 

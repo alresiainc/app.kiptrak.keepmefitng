@@ -25,6 +25,9 @@ return new class extends Migration
 
             $table->string('customer_id')->nullable(); //not used
             $table->longText('delivery_address')->nullable();
+            $table->longText('email_message_ids')->nullable(); //serialized array
+            $table->longText('whatsapp_message_ids')->nullable(); //serialized array
+            $table->longText('sms_message_ids')->nullable(); //serialized array
 
             $table->string('form_holder_id')->nullable(); //incase coming from embedded form
             $table->string('agent_assigned_id')->nullable(); //delivery agent that delivered the order

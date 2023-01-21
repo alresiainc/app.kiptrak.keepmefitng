@@ -24,13 +24,12 @@
     <h1>Forms</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
         <li class="breadcrumb-item active">Forms</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
 
-  
   <section class="users-list-wrapper">
     <div class="users-list-filter px-1">
       <form>
@@ -68,9 +67,6 @@
             </div>
           </div>
           <hr>
-
-          <iframe src="http://127.0.0.1:8000/form-embedded/y1Bxi3yXEbXHNXWS6tJMHJ0kMzJH5p" width="100%" height="700" style="border:0"></iframe>
-          
           <div class="table table-responsive">
             <table id="orders-table" class="table table-striped custom-table" style="width:100%">
               <thead>
@@ -95,10 +91,10 @@
                     <tr>
                       <th scope="row">{{ ++$key }}</th>
                       <td>{{ $formHolder->name }} <br>
-                        <a class="badge badge-info" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">Edit</a>
                         @if (count($formHolder->customers) > 0)
                         <a class="badge badge-dark" href="{{ route('allOrders', $formHolder->unique_key) }}">Entries({{ count($formHolder->customers) }})</a>
                         @else
+                        <a class="badge badge-info" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">Edit</a>
                         <span class="badge badge-dark" href="">Entries({{ count($formHolder->customers) }})</span>
                         @endif
                         

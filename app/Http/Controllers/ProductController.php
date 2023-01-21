@@ -72,7 +72,7 @@ class ProductController extends Controller
             'code' => 'nullable|string|unique:products',
             // 'features' => 'nullable|array',
             //'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
-            'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+            'image' => 'required|image|size:2048|mimes:jpg,png,jpeg,gif,svg,webp',
         ]);
         
         $data = $request->all();
@@ -122,7 +122,7 @@ class ProductController extends Controller
         $incomingStock->product_id = $product->id;
         $incomingStock->quantity_added = $data['quantity'];
         $incomingStock->reason_added = 'as_new_product'; //as_new_product, as_returned_product, as_administrative
-        $incomingStock->created_by = '1';
+        $incomingStock->created_by = $authUser->id;
         $incomingStock->status = 'true';
         $incomingStock->save();
         
@@ -232,7 +232,7 @@ class ProductController extends Controller
             'code' => 'nullable|string',
             // 'features' => 'nullable|array',
             //'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
-            'image' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+            'image' => 'nullable|image|size:2048|mimes:jpg,png,jpeg,gif,svg,webp',
         ]);
     
         $data = $request->all();
@@ -249,7 +249,7 @@ class ProductController extends Controller
         $product->features = !empty($data['features']) ? serialize($data['features']) : null;
     
         // $product->warehouse_id =  !empty($data['warehouse_id']) ? $data['warehouse_id'] : null;
-        $product->created_by = '1';
+        $product->created_by = $authUser->id;
         $product->status = 'true';
         
         //image
@@ -291,7 +291,7 @@ class ProductController extends Controller
                 $incomingStock->product_id = $product->id;
                 $incomingStock->quantity_added = $data['quantity'];
                 $incomingStock->reason_added = 'as_new_product'; //as_new_product, as_returned_product, as_administrative
-                $incomingStock->created_by = '1';
+                $incomingStock->created_by = $authUser->id;
                 $incomingStock->status = 'true';
                 $incomingStock->save();
             }
@@ -303,7 +303,7 @@ class ProductController extends Controller
                 $outgoingStock->quantity_removed = abs($data['quantity']); //stay +ve
                 $outgoingStock->reason_removed = 'as_administrative'; //as_order, as_expired, as_damaged, as_administrative
                 $outgoingStock->quantity_returned = 0; //by default
-                $outgoingStock->created_by = '1';
+                $outgoingStock->created_by = $authUser->id;
                 $outgoingStock->status = 'true';
                 $outgoingStock->save();
             }

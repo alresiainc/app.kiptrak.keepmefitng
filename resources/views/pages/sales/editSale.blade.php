@@ -183,9 +183,24 @@
                     <label for="" class="form-label">Order Status *</label>
                     <select name="sale_status" id="sale_status" data-live-search="true" class="custom-select form-control border @error('payment_type') is-invalid @enderror" id="">
                       
-                      <option value="{{ $sale->status }}" selected>{{ $sale->status }}</option>
+                      <option value="{{ $sale->status }}" selected>
+                        @if ($sale->status=='new')
+                            New
+                        @elseif($sale->status=='delivered_and_remitted')
+                            Delivered and Remitted
+                        @elseif($sale->status=='delivered_not_remitted')
+                            Delivered Not Remitted
+                        @elseif($sale->status=='cancelled')
+                            Cancelled
+                        @elseif($sale->status=='pending')
+                            Pending
+                        @endif
+                      </option>
+                      <option value="delivered_and_remitted" selected>Delivered and Remitted</option>
+                      <option value="delivered_not_remitted">Delivered Not Remitted</option>
+                      <option value="cancelled">Cancelled</option>
                       <option value="pending">Pending</option>
-                      <option value="completed">Completed</option>
+                      <option value="new">New</option>
             
                     </select>
                     @error('sale_status')
@@ -197,8 +212,8 @@
 
                 <div class="col-md-4">
                     <label for="" class="form-label">Payment Status *</label>
-                    <select name="payment_status" id="payment_status" data-live-search="true" class="custom-select form-control border @error('sale_status') is-invalid @enderror" id="">
-                      <option value="{{ $sale->payment_status }}">{{ $sale->payment_status }}</option>
+                    <select name="payment_status" id="payment_status" data-live-search="true" class="custom-select form-control border @error('payment_status') is-invalid @enderror" id="">
+                      <option value="{{ $sale->payment_status }}">{{ ucFirst($sale->payment_status)}}</option>
                       <option value="due">Due</option>
                       <option value="partial">Partial</option>
                       <option value="paid">Paid</option>

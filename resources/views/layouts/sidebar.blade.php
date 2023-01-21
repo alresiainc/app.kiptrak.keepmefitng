@@ -498,10 +498,15 @@ $routeName = \Route::currentRouteName();
       </a>
       <ul id="messaging-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
         <li>
-          <a href="{{ route('sentSmsMessage') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>SMS Messages</span></a>
+          <a href="{{ route('sentWhatsappMessage') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Whatsapp Messages</span></a>
         </li>
+        
         <li>
           <a href="{{ route('sentEmailMessage') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Email Messages</span></a>
+        </li>
+
+        <li>
+          <a href="{{ route('sentSmsMessage') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>SMS Messages</span></a>
         </li>
       </ul>
     </li>

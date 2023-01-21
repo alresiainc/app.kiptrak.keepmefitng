@@ -102,6 +102,10 @@ class Order extends Model
         return $this->belongsTo(OrderLabel::class, 'order_label_id');  
     }
 
+    public function formHolder() {
+        return $this->belongsTo(FormHolder::class, 'form_holder_id');  
+    }
+
     public function customer() {
         return $this->belongsTo(Customer::class, 'customer_id');  
     }
@@ -112,6 +116,112 @@ class Order extends Model
 
     public function staff() {
         return $this->belongsTo(User::class, 'staff_assigned_id');  
+    }
+
+    //used in allOrders
+    public function whatsappMessages() {
+        $messages = '';
+        if (isset($this->whatsapp_message_ids)) {
+            $message_ids = unserialize($this->whatsapp_message_ids);
+            $messages = Message::whereIn('id', $message_ids)->get();
+        }
+        
+        return $messages;
+    }
+
+    public function emailMessages() {
+        $messages = '';
+        if (isset($this->email_message_ids)) {
+            $message_ids = unserialize($this->email_message_ids);
+            $messages = Message::whereIn('id', $message_ids)->get();
+        }
+        
+        return $messages;
+    }
+
+    public function orderId($order) {
+        $orderId = ''; //used in thankYou section
+        if ($order->id < 10){
+            $orderId = '0000'.$order->id;
+        }
+        // <!-- > 10 < 100 -->
+        if (($order->id > 10) && ($order->id < 100)) {
+            $orderId = '000'.$order->id;
+        }
+        // <!-- > 100 < 1000 -->
+        if (($order->id) > 100 && ($order->id < 1000)) {
+            $orderId = '00'.$order->id;
+        }
+        // <!-- > 1000 < 10000++ -->
+        if (($order->id) > 1000 && ($order->id < 1000)) {
+            $orderId = '0'.$order->id;
+        }
+
+        return $orderId;
+    }
+
+    public function whatsappNewOrderMessage($order) {
+
+        $authUser = auth()->user();
+        $customer = $order->customer;
+
+        //mainProduct_revenue
+        $mainProduct_revenue = 0;  //price * qty
+        $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase', 'customer_acceptance_status'=>'accepted'])->get();
+
+        if ( count($mainProducts_outgoingStocks) > 0 ) {
+            foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
+                $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+            }
+        }
+
+        //orderbump
+        $orderbumpProduct_revenue = 0; //price * qty
+        $orderbump_outgoingStock = '';
+        if (isset($formHolder->orderbump_id)) {
+            $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
+            if ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+                $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+            }
+        }
+        
+        //upsell
+        $upsellProduct_revenue = 0; //price * qty
+        $upsell_outgoingStock = '';
+        if (isset($formHolder->upsell_id)) {
+            $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
+            if ($upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+                $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+            }
+        }
+
+        if (isset($order->customer_id)) {
+
+            $whatsapp_msg = "Hello ".$customer->firstname." ".$customer->lastname.". My name is ".$authUser->name.", I am contacting you from KeepMeFit and I am the Customer Service Representative incharge of the order you placed for ";
+            $whatsapp_msg .= "";
+            foreach($mainProducts_outgoingStocks as $main_outgoingStock):
+                $whatsapp_msg .= " [Product: ".$main_outgoingStock->product->name.". Price: ".$mainProduct_revenue.". Qty: ".$main_outgoingStock->quantity_removed."], ";
+            endforeach;
+    
+            if($orderbump_outgoingStock != ''):
+                $whatsapp_msg .= "[Product: ".$orderbump_outgoingStock->product->name.". Price: ".$orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed.". Qty: ".$orderbump_outgoingStock->quantity_removed."], ";
+            endif;
+    
+            if($upsell_outgoingStock != ''):
+                $whatsapp_msg .= "[Product: ".$upsell_outgoingStock->product->name.". Price: ".$upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed.". Qty: ".$upsell_outgoingStock->quantity_removed."]. ";
+            endif;
+    
+            $whatsapp_msg .= "I am reaching out to you to confirm your order and to let you know the delivery person will call you to deliver your order. Kindly confirm if the details you sent are correct ";
+    
+            $whatsapp_msg .= "[Phone Number: ".$customer->phone_number.". Whatsapp Phone Number: ".$customer->whatsapp_phone_number.". Delivery Address: ".$customer->delivery_address."]. ";
+    
+            $whatsapp_msg .= "Please kindly let me know when we can deliver your order. Thank you!";
+    
+            return $whatsapp_msg;
+        } else {
+            return $whatsapp_msg = "";
+        }
+        
     }
     
 

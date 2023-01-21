@@ -1,5 +1,5 @@
 @extends('layouts.design')
-@section('title')Duplicate Form Builder @endsection
+@section('title')Edit Form Builder @endsection
 
 @section('extra_css')
 <style>
@@ -14,18 +14,6 @@
         text-align: center;
         display: inline-block;
     }
-
-    /* select2 height proper */
-    .select2-selection__rendered {
-          line-height: 31px !important;
-      }
-      .select2-container .select2-selection--single {
-          height: 35px !important;
-      }
-      .select2-selection__arrow {
-          height: 34px !important;
-      }
-      /* select2 height proper */
 
     .card.question-item .item-move {
         position: absolute;
@@ -47,7 +35,7 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Duplicate Form Builder</h1>
+        <h1>Edit Form Builder</h1>
         <nav>
           <div class="d-flex justify-content-between align-items-center">
               <ol class="breadcrumb">
@@ -70,18 +58,12 @@
 
     <section class="mt-5">
         <div class="container" id="form-field">
-            <form id="form-data" action="{{ route('duplicateFormPost', $formHolder->unique_key) }}" method="POST">@csrf
+            <form id="form-data" action="{{ route('editNewFormBuilderPost', $formHolder->unique_key) }}" method="POST">@csrf
                 <div class="row">
                     <div class="col-md-12">
                         <div class="p-1">
                             <h5 title="Unique Form Code" class="text-center">Form Code: {{ $form_code }}</h5>
                             <input type="hidden" name="form_code" value="{{ $form_code }}">
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" id="" placeholder="Enter Form Name" value="{{ $formHolder->name.'-'.$formHolder->id+1 }}">
-                            @error('name')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
                             {{-- <h5 title="Enter Title" class="text-center" id="form-title">Fields marked * are mandatory</h5> --}}
                             {{-- <h3 contenteditable="true" title="Enter Title" class="text-center" id="form-title">Enter Title Here</h3> --}}
                             {{-- <hr class="border-primary"> --}}
@@ -101,11 +83,16 @@
                 <input type="hidden" name="products[]" class="package_select" value="{{ $package_select }}">
 
                 <div>
-                    @foreach ($formContact as $contact)
-                        @if (($contact['form_name']) !== 'Product Package')
+                    @php
+                        $item_count = 0;
+                    @endphp
+                    
                         {{-- <div> --}}
+                            @foreach ($formContact as $key=>$contact)
+                                @if (($contact['form_name']) !== 'Product Package')
                             <div id="question-field" class='row ml-2 mr-2'>
-                                <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="0">
+                                
+                                <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="{{ $key }}">
                                     <span class="item-move"><i class="bi bi-grip-vertical"></i></span>
                                     <div class="card-body">
                                         <div class="row align-items-center d-flex">
@@ -181,10 +168,12 @@
                                         </div>
                                     </div>
                                 </div>
+                                
                             </div>
+                            @endif
+                        @endforeach
                         {{-- </div> --}}
-                        @endif
-                    @endforeach
+                        
 
                     @foreach ($formContact as $item)
                         @if (($item['form_name']) == 'Product Package')
@@ -290,7 +279,8 @@
             </form>
         </div>
 
-        <div class=" d-none" id = "q-item-clone">
+        <!--cloned on click of Add-Item Btn--->
+        <div class="d-none" id = "q-item-clone">
     
             <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="0">
                 <span class="item-move"><i class="bi bi-grip-vertical"></i></span>
@@ -370,7 +360,7 @@
 @section('extra_js')
 
 <script src="{{ asset('/assets/js/jquery-ui.min.js') }}"></script>
-<script src="{{ asset('/myassets/js/my-form-builder.js') }}"></script>
+<script src="{{ asset('/myassets/js/edit-form-builder.js') }}"></script>
 
 <script>
     

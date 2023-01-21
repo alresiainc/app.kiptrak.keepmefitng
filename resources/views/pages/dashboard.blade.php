@@ -65,7 +65,7 @@
                 {{-- <h2 class="fw-bold">{{ $currency }}{{ number_format((float)$purchases_amount_paid, 2, '.', ',') }}</h2> --}}
                 <h2 class="fw-bold">{{ $currency }}{{ $purchases_amount_paid }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold"
-                  >Purchases</small
+                  >Product Cost</small
                 >
               </div>
               <div class="rounded-circle float-end">
@@ -105,7 +105,7 @@
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
                 <h2 class="fw-bold">{{ $currency }}{{ $expenses }}</h2>
-                <small class="text-uppercase small pt-1 fw-bold">Expenses</small
+                <small class="text-uppercase small pt-1 fw-bold">Other Expenses</small
                 >
               </div>
               <div class="rounded-circle float-end">

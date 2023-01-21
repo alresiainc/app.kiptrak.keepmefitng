@@ -6,11 +6,12 @@ First Published in: www.kiptak.com
 $(function() {
 
     $('#add_q-item').click(function(e) {
-        var el = $('#q-item-clone').clone()
+        var el = $('#q-item-clone').clone() //clone a d-none div
         var f_arr = []
-        $('#question-field .question-item').each(function() {
+        $('#question-field .question-item').each(function() { //question-item, div similar to 'el(cloned)' above
             f_arr.push(parseInt($(this).attr('data-item')))
         })
+        console.log(f_arr)
         var i = f_arr.length
             // console.log(i)
         el.find('.question-item').attr('data-item', i)
@@ -96,7 +97,6 @@ $(function() {
                 for (var i = 0; i < 3; i++) {
                     package_field($(this), _field, "Enter Option")
                 }
-                $('.select-checkbox').select2();
 
             //multi choice single option
             } else if (choice == "package_multi") {
@@ -106,7 +106,6 @@ $(function() {
                 for (var i = 0; i < 3; i++) {
                     package_field($(this), _field, "Enter Option")
                 }
-                $('.select-checkbox').select2();
 
             //multi choice single option, not used
             } else if (choice == "radio") {
@@ -335,9 +334,8 @@ $(function() {
         })
         var select = $('<select>')
         select.attr({
-            "class": "select2 form-control product-select",
+            "class": "form-control",
             "name": "q[" + _field + "]",
-            
             //"type": "radio",
             //"value": _text
         })
@@ -351,8 +349,8 @@ $(function() {
         
         option.text(_text) //nott
         select.append(option) //not used
-        el.append(products)
-        //el.append(select)
+        el.append(products) //products contains the raw html with product-data, from controller e.g@newFormbuilder()
+        //el.append(option)
         return el
     }
     _initilize()

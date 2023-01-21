@@ -136,13 +136,13 @@ Route::post('/edit-new-form-builder/{unique_key}', [FormBuilderController::class
 Route::get('/duplicate-form/{unique_id}', [FormBuilderController::class, 'duplicateForm'])->name('duplicateForm');
 Route::post('/duplicate-form/{unique_id}', [FormBuilderController::class, 'duplicateFormPost'])->name('duplicateFormPost');
 
-Route::get('/form-embedded/{unique_key}', [FormBuilderController::class, 'formEmbedded'])->name('formEmbedded');
+Route::get('/form-embedded/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'formEmbedded'])->name('formEmbedded');
 Route::get('/form-link/{unique_key}', [FormBuilderController::class, 'formLink'])->name('formLink'); //like singleform
 Route::post('/form-link/{unique_key}/{stage?}', [FormBuilderController::class, 'formLinkPost'])->name('formLinkPost');
 Route::post('/form-link-upsell/{unique_key}', [FormBuilderController::class, 'formLinkUpsellPost'])->name('formLinkUpsellPost');
 
-Route::get('/new-form-link/{unique_key}/{stage?}', [FormBuilderController::class, 'newFormLink'])->name('newFormLink'); //like singleform for newFormBuilder 
-Route::post('/new-form-link/{unique_key}/{stage?}', [FormBuilderController::class, 'newFormLinkPost'])->name('newFormLinkPost'); //the post
+Route::get('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'newFormLink'])->name('newFormLink'); //like singleform for newFormBuilder 
+Route::post('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'newFormLinkPost'])->name('newFormLinkPost'); //the post
 Route::get('/ajax-save-new-form-link', [FormBuilderController::class, 'saveNewFormFromCustomer'])->name('saveNewFormFromCustomer'); //ajax
 Route::get('/ajax-save-new-form-link-orderbump', [FormBuilderController::class, 'saveNewFormOrderBumpFromCustomer'])->name('saveNewFormOrderBumpFromCustomer'); //ajax
 Route::get('/ajax-save-new-form-link-upsell', [FormBuilderController::class, 'saveNewFormUpSellFromCustomer'])->name('saveNewFormUpSellFromCustomer'); //ajax
@@ -371,6 +371,7 @@ Route::post('/compose-email-message', [MessageController::class, 'composeEmailMe
 Route::post('/send-customer-mail', [MessageController::class, 'sendCustomerMail'])->name('sendCustomerMail'); //sendCustomerMail
 Route::post('/send-employee-mail', [MessageController::class, 'sendEmployeeMail'])->name('sendEmployeeMail'); //sendEmployeeMail
 Route::post('/send-agent-mail', [MessageController::class, 'sendAgentMail'])->name('sendAgentMail'); //sendAgentMail
+Route::get('/sent-whatsapp-messages/{source?}', [MessageController::class, 'sentWhatsappMessage'])->name('sentWhatsappMessage'); //sentWhatsappMessage
 Route::get('/sent-email-messages', [MessageController::class, 'sentEmailMessage'])->name('sentEmailMessage'); //sentEmailMessage
 Route::post('/sent-email-messages', [MessageController::class, 'sentEmailMessageUpdate'])->name('sentEmailMessageUpdate'); //sentEmailMessageUpdate
 

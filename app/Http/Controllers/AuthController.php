@@ -49,7 +49,13 @@ class AuthController extends Controller
             if (!$check) {
                 return back()->with('login_error', 'Invalid email or password, please check your credentials and try again');
             }
-            $user = Auth::user();
+            $user = Auth::getProvider()->retrieveByCredentials($credentials); //full user details
+
+            if ($request->get('remember')) {
+                Auth::user($user, $request->get('remember')); //create remember_web_* cookie in browser
+            } else {
+                Auth::user($user);
+            }
 
             //$admin = User::where('isSuperAdmin', true)->first();
             $admin = GeneralSetting::first();

@@ -139,7 +139,7 @@
       <form id="sendMailForm" action="{{ route('sendCustomerMail') }}" method="POST">@csrf
         <div class="modal-body">
             <input type="hidden" name="user_id" id="user_id" value="">
-
+            <input type="hidden" name="mail_customer_order_id" id="mail_customer_order_id" value="">
             <div class="d-grid mb-3">
                 <label for="">Topic</label>
                 <input type="text" name="topic" class="form-control" placeholder="">
@@ -172,7 +172,7 @@
       <form id="sendMailForm" action="{{ route('sendCustomerWhatsapp') }}" method="POST">@csrf
         <div class="modal-body">
             <input type="hidden" name="whatsapp_customer_id" id="whatsapp_customer_id" value="">
-
+            <input type="hidden" name="whatsapp_customer_order_id" id="whatsapp_customer_order_id" value="">
             <div class="d-grid mb-2">
               <label for="">Phone format: 23480xxxx</label>
               <input type="text" name="recepient_phone_number" id="recepient_phone_number" class="form-control">
@@ -197,41 +197,41 @@
 
 @section('extra_js')
   
-  <script>
-    $('#users-master').on('click', function(e) {
-      if($(this).is(':checked',true))  
-      {
-        $(".sub_chk").prop('checked', true);  
-      } else {  
-        $(".sub_chk").prop('checked',false);  
+<script>
+  $('#users-master').on('click', function(e) {
+    if($(this).is(':checked',true))  
+    {
+      $(".sub_chk").prop('checked', true);  
+    } else {  
+      $(".sub_chk").prop('checked',false);  
+    }  
+  });
+
+  //mail_all
+  $('.mail_all').on('click', function(e) {
+
+      var allVals = [];  
+      $(".sub_chk:checked").each(function() {  
+          allVals.push($(this).attr('data-id')); //['2', '1']
+      });  
+
+      //check if any is checked
+      if(allVals.length <= 0)
+      {  
+        alert("Please select customer(s) to mail.");  
+      }  else {  
+          var check = confirm("Are you sure you want to mail this customer(s)?");  
+          if(check == true){  
+
+            //var join_selected_values = allVals.join(","); //2,1
+            console.log(allVals) //[2,1]
+            $('#sendMailModal').modal('show');
+            $('#user_id').val(allVals);
+          
+          }  
       }  
-    });
-
-    //mail_all
-    $('.mail_all').on('click', function(e) {
-
-        var allVals = [];  
-        $(".sub_chk:checked").each(function() {  
-            allVals.push($(this).attr('data-id')); //['2', '1']
-        });  
-
-        //check if any is checked
-        if(allVals.length <= 0)
-        {  
-          alert("Please select customer(s) to mail.");  
-        }  else {  
-            var check = confirm("Are you sure you want to mail this customer(s)?");  
-            if(check == true){  
-
-              //var join_selected_values = allVals.join(",");
-              console.log(allVals) //2,1
-              $('#sendMailModal').modal('show');
-              $('#user_id').val(allVals);
-            
-            }  
-        }  
-    }); 
-  </script>
+  }); 
+</script>
 
 <script>
   function whatsappModal($customer="") {

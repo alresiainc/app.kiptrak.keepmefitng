@@ -44,16 +44,30 @@
         <link href="{{asset('/customerform/assets/css/form-style.css')}}" rel="stylesheet">
 
         <style>
+            select{
+                -webkit-appearance: listbox !important
+            }
+
+            /* custom-select border & inline edit */
+            .btn-light {
+                background-color: #fff !important;
+                color: #000 !important;
+            }
+            div.filter-option-inner-inner{
+                color: #000 !important;
+            }
+            /* custom-select border & inline edit */
+
             /* select2 height proper */
-        .select2-selection__rendered {
-            line-height: 31px !important;
-        }
-        .select2-container .select2-selection--single {
-            height: 35px !important;
-        }
-        .select2-selection__arrow {
-            height: 34px !important;
-        }
+            .select2-selection__rendered {
+                line-height: 31px !important;
+            }
+            .select2-container .select2-selection--single {
+                height: 35px !important;
+            }
+            .select2-selection__arrow {
+                height: 34px !important;
+            }
         </style>
 
         
@@ -157,11 +171,19 @@
                                     
                                     @foreach ($products as $key=>$item)
                                     <div class="col-12 mb-3">
-                                        <label for="package{{$key}}" class="form-label btn btn-outline border d-flex align-items-center me-3 @error($item['form_name']) is-invalid @enderror">
+                                        <label for="package{{$key}}" class="product_package_label form-label btn btn-outline border d-flex align-items-center me-3 @error($item['form_name']) is-invalid @enderror">
                                             <input type="{{ $item['form_type'] == 'package_single' ? 'radio' : 'checkbox' }}" name="product_packages[]" id="package{{$key}}"
-                                            class="me-3 product-package" value="{{ $item['id'] }}"/>
+                                            class="me-3 product-package" value="{{ $item['id'] }}-{{ $item['price'] }}"/>
                                             <span class="me-1 fw-bold">{{ $item['name'] }} = {{ $item['price'] }} naira</span>
+
+                                            <select name="select_product_qty" class="select_product_qty custom-select form-control" style="width: 200px;">
+                                                <option value="1">Select Quantity</option>
+                                                @for ($i = 1; $i < $item['stock_available']; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
                                         </label>
+                                        
                                         @error($item['form_name'])
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -415,7 +437,6 @@
                     <!--order-summary-->
                     @if ($customer !== '')
                         
-                    
                     <div class="col-lg-12">
                         <article class="card shadow-sm mb-3">
                             <div class="card-body">
@@ -481,7 +502,7 @@
                                             </div> 
                                             <div class="info"> 
                                                 <p class="title">{{ $main_outgoingStock->product->name }}</p> 
-                                                <strong>N{{ $mainProduct_revenue }} ({{ $main_outgoingStock->quantity_removed }} items)</strong> 
+                                                <strong>N{{ $main_outgoingStock->amount_accrued }} ({{ $main_outgoingStock->quantity_removed }} items)</strong> 
                                             </div> 
                                         </div> 
                                     </li>
@@ -694,6 +715,8 @@
         $('.main_package_submit_btn').click(function (e) {
             e.preventDefault();
 
+            var unique_key = $(".formholder_unique_key").val();
+            
             var firstname = $(".first-name").val();
             var lastname = $(".last-name").val();
             var phone_number = $(".phone-number").val();
@@ -745,7 +768,9 @@
             var unique_key = $(".formholder_unique_key").val();
             var product_packages = $('input[name^="product_packages[]"]').map(function () {
                 if ($(this).is(':checked')) {
-                    return $(this).val();
+                    var selected_qty = $(this).closest(".product_package_label").find("select[name='select_product_qty']").val();
+                    //console.log(selected_qty)
+                    return $(this).val()+'-'+selected_qty; //1-2
                 }
             }).get();
 
@@ -773,8 +798,9 @@
                         setView('upsell-section')
                         
                     } else {
+                        var current_order_id = $('.current_order_id').val();
+                        window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
                         $('.current_order_id').val('');
-                        window.location.href = "/new-form-link/"+unique_key+"/thankYou"
                         setView('thankyou-section')
                     }
 
@@ -809,10 +835,9 @@
                             setView('upsell-section')
                             
                         } else {
-                        //$('.orderbump_submit_btn').text('Please wait...')
-                        $('.current_order_id').val('');
-                        window.location.href = "/new-form-link/"+unique_key+"/thankYou"
-                        setView('thankyou-section')
+                            window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
+                            $('.current_order_id').val('');
+                            setView('thankyou-section')
                     
                         }
                             
@@ -843,9 +868,8 @@
                     success:function(resp){
                         console.log(resp)
                         localStorage.setItem('upsell_stage', 'done');
+                        window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
                         $('.current_order_id').val('');
-                        //$('.upsell_submit_btn').text('Please wait...')
-                        window.location.href = "/new-form-link/"+unique_key+"/thankYou"
                         setView('thankyou-section')
                             
                     },error:function(){
@@ -863,6 +887,7 @@
             if ($(this).is(':checked')) {
                 
                 var unique_key = $(".formholder_unique_key").val();
+                var current_order_id = $(".current_order_id").val();
                 var orderbump_product_checkbox = ''
                 if ($('.orderbump_product_checkbox').val() != '') {
                     var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
@@ -871,7 +896,7 @@
                     $.ajax({
                         type:'get',
                         url:'/ajax-save-new-form-link-orderbump-refusal',
-                        data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox },
+                        data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox, current_order_id:current_order_id },
                         success:function(resp){
                             console.log(resp)
                             localStorage.setItem('orderbump_stage', 'done');
@@ -879,9 +904,9 @@
                                 setView('upsell-section')
                                 
                             } else {
-                                window.location.href = "/new-form-link/"+unique_key+"/thankYou"
+                                window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
+                                $(".current_order_id").val('');
                                 setView('thankyou-section')
-                        
                             }
                                 
                         },error:function(){
@@ -902,6 +927,7 @@
             if ($(this).is(':checked')) {
                 
                 var unique_key = $(".formholder_unique_key").val();
+                var current_order_id = $(".current_order_id").val();
                 var upsell_product_checkbox = ''
                 if ($('.upsell_product_checkbox').val() != '') {
                     var upsell_product_checkbox = $('.upsell_product_checkbox').val();
@@ -910,13 +936,13 @@
                     $.ajax({
                         type:'get',
                         url:'/ajax-save-new-form-link-upsell-refusal',
-                        data:{ unique_key:unique_key, upsell_product_checkbox:upsell_product_checkbox },
+                        data:{ unique_key:unique_key, upsell_product_checkbox:upsell_product_checkbox, current_order_id:current_order_id },
                         success:function(resp){
                             console.log(resp)
                             localStorage.setItem('upsell_stage', 'done');
-                                // location.reload()
-                                window.location.href = "/new-form-link/"+unique_key+"/thankYou"
-                                setView('thankyou-section')
+                            window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
+                            $(".current_order_id").val('');
+                            setView('thankyou-section')
                                 
                         },error:function(){
                             alert("Error");
@@ -927,8 +953,7 @@
                     alert('Error: Something went wrong')
                 }
 
-            } 
-            
+            }   
         });
     </script>
     @endif

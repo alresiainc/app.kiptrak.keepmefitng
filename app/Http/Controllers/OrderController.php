@@ -32,6 +32,7 @@ class OrderController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $agents = User::where('type','agent')->get();
 
+    
         if ($authUser->isSuperAdmin) {
             
             $orders = Order::all();

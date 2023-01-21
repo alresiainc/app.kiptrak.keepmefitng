@@ -177,8 +177,13 @@
                 <div class="col-md-4">
                     <label for="" class="form-label">Order Status *</label>
                     <select name="sale_status" id="sale_status" data-live-search="true" class="custom-select form-control border @error('payment_type') is-invalid @enderror" id="">
+                      {{-- <option value="pending">Pending</option>
+                      <option value="completed" selected>Completed</option> --}}
+                      <option value="delivered_and_remitted" selected>Delivered and Remitted</option>
+                      <option value="delivered_not_remitted">Delivered Not Remitted</option>
+                      <option value="cancelled">Cancelled</option>
                       <option value="pending">Pending</option>
-                      <option value="completed" selected>Completed</option>
+                      <option value="new">New</option>
                       
                         
                     </select>
@@ -196,6 +201,7 @@
                       <option value="due">Due</option>
                       <option value="partial">Partial</option>
                       <option value="paid" selected>Paid</option>
+                      
                         
                     </select>
                     @error('payment_status')
@@ -444,7 +450,7 @@
         
         
    });
-  </script>
+</script>
 
 
 @endsection

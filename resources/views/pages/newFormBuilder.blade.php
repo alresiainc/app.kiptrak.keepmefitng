@@ -15,6 +15,18 @@
         display: inline-block;
     }
 
+    /* select2 height proper */
+    .select2-selection__rendered {
+          line-height: 31px !important;
+      }
+      .select2-container .select2-selection--single {
+          height: 35px !important;
+      }
+      .select2-selection__arrow {
+          height: 34px !important;
+      }
+      /* select2 height proper */
+
     .card.question-item .item-move {
         position: absolute;
         left: 3px;
@@ -87,7 +99,10 @@
 
                 <!---used in my-form-builder.js--->
                 <input type="hidden" name="products[]" class="package_select" value="{{ $package_select }}">
-                <input type="hidden" name="staffs[]" class="package_select" value="{{ $staff_select }}">
+
+                
+                
+                
 
                 <div>
                     <div id="question-field" class='row ml-2 mr-2'>
@@ -165,7 +180,7 @@
             </form>
         </div>
 
-        <div class=" d-none" id = "q-item-clone">
+        <div class="d-none" id = "q-item-clone">
     
             <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="0">
                 <span class="item-move"><i class="bi bi-grip-vertical"></i></span>
@@ -249,9 +264,5 @@
 
 <script src="{{ asset('/assets/js/jquery-ui.min.js') }}"></script>
 <script src="{{ asset('/myassets/js/my-form-builder.js') }}"></script>
-
-<script>
-    
-</script>
 
 @endsection

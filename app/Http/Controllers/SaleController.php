@@ -82,7 +82,7 @@ class SaleController extends Controller
                     return back()->with('duplicate_error', 'Duplicate Product Detected. You can increase quantity accordingly');
                 }
             }
-            
+  
         }
 
         $sale_code = 'kps-' . date("Ymd") . '-'. date("his");
@@ -100,6 +100,7 @@ class SaleController extends Controller
         $order->source_type = 'sale_module';
         $order->customer_id = $data['customer'];
         $order->products = serialize($data['product_id']);
+        $order->status = $data['sale_status'];
         $order->save();
 
         //upd customer
@@ -120,11 +121,11 @@ class SaleController extends Controller
                     $outgoingStock->product_id = $id;
                     $outgoingStock->order_id = $order->id;
                     $outgoingStock->quantity_removed = $data['product_qty'][$key];
-                    $outgoingStock->customer_acceptance_status = 'accepted';
+                    $outgoingStock->customer_acceptance_status = $data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null;
                     $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
                     $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
                     $outgoingStock->quantity_returned = 0; //by default
-                    $outgoingStock->created_by = 1;
+                    $outgoingStock->created_by = $authUser->id;
                     $outgoingStock->status = 'true';
                     $outgoingStock->save();
                     
@@ -148,7 +149,7 @@ class SaleController extends Controller
     
                     $sale->attached_document = $imageName == '' ? null : $imageName;
     
-                    $sale->created_by = 1;
+                    $sale->created_by = $authUser->id;
                     $sale->status = $data['sale_status'];
     
                     $sale->save();
@@ -167,11 +168,11 @@ class SaleController extends Controller
                     $outgoingStock->product_id = $id;
                     $outgoingStock->order_id = $order->id;
                     $outgoingStock->quantity_removed = $data['product_qty'][$key];
-                    $outgoingStock->customer_acceptance_status = 'accepted';
+                    $outgoingStock->customer_acceptance_status = $data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null;
                     $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
                     $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
                     $outgoingStock->quantity_returned = 0; //by default
-                    $outgoingStock->created_by = 1;
+                    $outgoingStock->created_by = $authUser->id;
                     $outgoingStock->status = 'true';
                     $outgoingStock->save();
                     
@@ -195,7 +196,7 @@ class SaleController extends Controller
     
                     $sale->attached_document = $imageName == '' ? null : $imageName;
     
-                    $sale->created_by = 1;
+                    $sale->created_by = $authUser->id;
                     $sale->status = $data['sale_status'];
     
                     $sale->save();
@@ -203,8 +204,6 @@ class SaleController extends Controller
                     //update product <price></price>
                     Product::where(['id'=>$id])->update(['sale_id'=>$sale->id,'sale_price'=>$data['unit_price'][$key]]);
                 }
-                
-
             }
         }
 
@@ -216,7 +215,7 @@ class SaleController extends Controller
         $payment->account_id = $account->id;
         $payment->amount = $grand_total;
         $payment->paying_method = 'cash';
-        $payment->created_by = 1;
+        $payment->created_by = $authUser->id;
         $payment->status = 'true';
         $payment->save();
 
@@ -357,6 +356,7 @@ class SaleController extends Controller
                     OutgoingStock::where(['id'=>$data['outgoing_stock_id'][$key]])->update([
                      'product_id' => $id,
                      'quantity_removed' => $data['product_qty'][$key],
+                     'customer_acceptance_status' => $data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null,
                      'amount_accrued' => $data['product_qty'][$key] * $data['unit_price'][$key],
                      'reason_removed' => 'as_order_firstphase',
                      'created_by' => 1,
@@ -380,8 +380,9 @@ class SaleController extends Controller
                     $outgoingStock->quantity_removed = $data['product_qty'][$key];
                     $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
                     $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    $outgoingStock->customer_acceptance_status = $data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null;
                     $outgoingStock->quantity_returned = 0; //by default
-                    $outgoingStock->created_by = 1;
+                    $outgoingStock->created_by = $authUser->id;
                     $outgoingStock->status = 'true';
                     $outgoingStock->save();
                     
@@ -405,7 +406,7 @@ class SaleController extends Controller
 
                     $sale->attached_document = $imageName == '' ? null : $imageName;
 
-                    $sale->created_by = 1;
+                    $sale->created_by = $authUser->id;
                     $sale->status = $data['sale_status'];
 
                     $sale->save();
@@ -419,11 +420,10 @@ class SaleController extends Controller
                     $payment->account_id = $account->id;
                     $payment->amount = $data['product_qty'][$key] * $data['unit_price'][$key];
                     $payment->paying_method = 'cash';
-                    $payment->created_by = 1;
+                    $payment->created_by = $authUser->id;
                     $payment->status = 'true';
                     $payment->save();
 
-                    
                 }
                   
             }
@@ -434,7 +434,7 @@ class SaleController extends Controller
         $payment = Payment::where('sale_id', $sale_code)->first();
         $payment->amount = $grand_total;
         $payment->paying_method = 'cash';
-        $payment->created_by = 1;
+        $payment->created_by = $authUser->id;
         $payment->status = 'true';
         $payment->save();
 

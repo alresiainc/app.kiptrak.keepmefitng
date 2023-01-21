@@ -30,7 +30,6 @@ class OutgoingStock extends Model
             $unique_key = $string.''.$random;
             return $unique_key;
         }
-
         return $string;
     }
 

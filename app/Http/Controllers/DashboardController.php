@@ -16,6 +16,7 @@ use App\Models\Supplier;
 use App\Models\GeneralSetting;
 use App\Models\Product;
 use App\Models\Order;
+use App\Models\OutgoingStock;
 
 
 class DashboardController extends Controller
@@ -32,7 +33,15 @@ class DashboardController extends Controller
         ///////////////////////////////////////////////////////////////////////
         $purchases_amount_paid = Purchase::sum('amount_paid');
         $sales_due = Sale::sum('amount_due');
-        $sales_paid = Sale::sum('amount_paid');
+        //$sales_paid = Sale::sum('amount_paid');
+        $sales_paid = 0;
+
+        $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+        $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')->sum('amount_accrued');
+
+        $sales_paid += $accepted_outgoing_stock;
+
+
         $expenses = $this->shorten(Expense::sum('amount'));
 
         $profit_val = $sales_paid - ($purchases_amount_paid + Expense::sum('amount'));

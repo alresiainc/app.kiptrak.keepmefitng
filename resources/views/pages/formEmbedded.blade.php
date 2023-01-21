@@ -148,11 +148,19 @@
                                     
                                     @foreach ($products as $key=>$item)
                                     <div class="col-12 mb-3">
-                                        <label for="package{{$key}}" class="form-label btn btn-outline border d-flex align-items-center me-3 @error($item['form_name']) is-invalid @enderror">
+                                        <label for="package{{$key}}" class="product_package_label form-label btn btn-outline border d-flex align-items-center me-3 @error($item['form_name']) is-invalid @enderror">
                                             <input type="{{ $item['form_type'] == 'package_single' ? 'radio' : 'checkbox' }}" name="product_packages[]" id="package{{$key}}"
-                                            class="me-3 product-package" value="{{ $item['id'] }}"/>
+                                            class="me-3 product-package" value="{{ $item['id'] }}-{{ $item['price'] }}"/>
                                             <span class="me-1 fw-bold">{{ $item['name'] }} = {{ $item['price'] }} naira</span>
+
+                                            <select name="select_product_qty" class="select_product_qty custom-select form-control" style="width: 200px;">
+                                                <option value="1">Select Quantity</option>
+                                                @for ($i = 1; $i < $item['stock_available']; $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
                                         </label>
+                                        
                                         @error($item['form_name'])
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -724,7 +732,9 @@
             var unique_key = $(".formholder_unique_key").val();
             var product_packages = $('input[name^="product_packages[]"]').map(function () {
                 if ($(this).is(':checked')) {
-                    return $(this).val();
+                    var selected_qty = $(this).closest(".product_package_label").find("select[name='select_product_qty']").val();
+                    //console.log(selected_qty)
+                    return $(this).val()+'-'+selected_qty; //1-2
                 }
             }).get();
 
@@ -752,8 +762,9 @@
                         setView('upsell-section')
                         
                     } else {
+                        var current_order_id = $('.current_order_id').val();
+                        window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
                         $('.current_order_id').val('');
-                        window.location.href = "/new-form-link/"+unique_key+"/thankYou"
                         setView('thankyou-section')
                     }
 
@@ -789,8 +800,9 @@
                             
                         } else {
                         //$('.orderbump_submit_btn').text('Please wait...')
-                        $(".current_order_id").val('');
-                        window.location.href = "/new-form-link/"+unique_key+"/thankYou"
+                        var current_order_id = $('.current_order_id').val();
+                        window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
+                        $('.current_order_id').val('');
                         setView('thankyou-section')
                     
                         }
@@ -822,9 +834,9 @@
                     success:function(resp){
                         console.log(resp)
                         localStorage.setItem('upsell_stage', 'done');
+                        var current_order_id = $('.current_order_id').val();
+                        window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
                         $('.current_order_id').val('');
-                        //$('.upsell_submit_btn').text('Please wait...')
-                        window.location.href = "/new-form-link/"+unique_key+"/thankYou"
                         setView('thankyou-section')
                             
                     },error:function(){
@@ -842,6 +854,7 @@
             if ($(this).is(':checked')) {
                 
                 var unique_key = $(".formholder_unique_key").val();
+                var current_order_id = $(".current_order_id").val();
                 var orderbump_product_checkbox = ''
                 if ($('.orderbump_product_checkbox').val() != '') {
                     var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
@@ -850,7 +863,7 @@
                     $.ajax({
                         type:'get',
                         url:'/ajax-save-new-form-link-orderbump-refusal',
-                        data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox },
+                        data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox, current_order_id:current_order_id },
                         success:function(resp){
                             console.log(resp)
                             localStorage.setItem('orderbump_stage', 'done');
@@ -858,7 +871,9 @@
                                 setView('upsell-section')
                                 
                             } else {
-                                window.location.href = "/new-form-link/"+unique_key+"/thankYou"
+                                var current_order_id = $('.current_order_id').val();
+                                window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
+                                $('.current_order_id').val('');
                                 setView('thankyou-section')
                         
                             }
@@ -881,6 +896,7 @@
             if ($(this).is(':checked')) {
                 
                 var unique_key = $(".formholder_unique_key").val();
+                var current_order_id = $(".current_order_id").val();
                 var upsell_product_checkbox = ''
                 if ($('.upsell_product_checkbox').val() != '') {
                     var upsell_product_checkbox = $('.upsell_product_checkbox').val();
@@ -889,13 +905,14 @@
                     $.ajax({
                         type:'get',
                         url:'/ajax-save-new-form-link-upsell-refusal',
-                        data:{ unique_key:unique_key, upsell_product_checkbox:upsell_product_checkbox },
+                        data:{ unique_key:unique_key, upsell_product_checkbox:upsell_product_checkbox, current_order_id:current_order_id },
                         success:function(resp){
                             console.log(resp)
                             localStorage.setItem('upsell_stage', 'done');
-                                // location.reload()
-                                window.location.href = "/new-form-link/"+unique_key+"/thankYou"
-                                setView('thankyou-section')
+                            var current_order_id = $('.current_order_id').val();
+                            window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
+                            $('.current_order_id').val('');
+                            setView('thankyou-section')
                                 
                         },error:function(){
                             alert("Error");

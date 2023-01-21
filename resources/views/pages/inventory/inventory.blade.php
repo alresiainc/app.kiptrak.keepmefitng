@@ -488,10 +488,7 @@
 
 @endsection
 
-
-
 @section('extra_js')
-
 
 <script>
   $('.filter').change(function(){
@@ -554,7 +551,6 @@
     }
 </script>
 
-
 <script>
   var minDate, maxDate;
  
@@ -563,7 +559,7 @@
      function( settings, data, dataIndex ) {
          var min = minDate.val();
          var max = maxDate.val();
-         var date = new Date( data[6] );
+         var date = new Date( data[6] ); //6 is the date column on datatable
   
          if (
              ( min === null && max === null ) ||

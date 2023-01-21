@@ -54,8 +54,8 @@
       <li class="nav-item dropdown">
         <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
           <i class="bi bi-bell"></i>
-          <span id="sound_alarm" class="badge bg-primary badge-number alarm_count"></span> </a
-        ><!-- End Messages Icon -->
+          <span id="sound_alarm" class="badge bg-primary badge-number alarm_count"></span> </a>
+          <!-- End Messages Icon -->
 
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
           {{-- <li class="dropdown-header">
