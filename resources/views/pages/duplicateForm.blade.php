@@ -68,6 +68,22 @@
         </div>
     @endif
 
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
+    @if(Session::has('field_error'))
+        <div class="alert alert-danger mb-3 text-center">
+            {{Session::get('field_error')}}
+        </div>
+    @endif
+
     <section class="mt-5">
         <div class="container" id="form-field">
             <form id="form-data" action="{{ route('duplicateFormPost', $formHolder->unique_key) }}" method="POST">@csrf
@@ -101,11 +117,13 @@
                 <input type="hidden" name="products[]" class="package_select" value="{{ $package_select }}">
 
                 <div>
-                    @foreach ($formContact as $contact)
-                        @if (($contact['form_name']) !== 'Product Package')
-                        {{-- <div> --}}
-                            <div id="question-field" class='row ml-2 mr-2'>
-                                <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="0">
+                    
+                    {{-- <div> --}}
+                        
+                        <div id="question-field" class='row ml-2 mr-2'>
+                            @foreach ($formContact as $key=>$contact)
+                            @if (($contact['form_name']) !== 'Product Package')
+                                <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="{{ $key }}">
                                     <span class="item-move"><i class="bi bi-grip-vertical"></i></span>
                                     <div class="card-body">
                                         <div class="row align-items-center d-flex">
@@ -181,16 +199,10 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        {{-- </div> --}}
-                        @endif
-                    @endforeach
+                            @endif
 
-                    @foreach ($formContact as $item)
-                        @if (($item['form_name']) == 'Product Package')
-                        
-                            <div id="question-field" class='row ml-2 mr-2'>
-                                <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="0">
+                            @if (($contact['form_name']) == 'Product Package')
+                                <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="{{ $key }}">
                                     <span class="item-move"><i class="bi bi-grip-vertical"></i></span>
                                     <div class="card-body">
                                         <div class="row align-items-center d-flex">
@@ -198,7 +210,7 @@
                                             <input type="hidden" name="form_name_selected[]" class="form_name_selected" value="">
                                             <div class="col-sm-4">
                                                 <select title="interested info" name="form_names[]" class='form-control form_name'>
-                                                    <option value="{{ $item['form_name'] }}">{{ $item['form_name'] }}</option>
+                                                    <option value="{{ $contact['form_name'] }}">{{ $contact['form_name'] }}</option>
                                                     <option value="First Name">First Name</option>
                                                     <option value="Last Name">Last Name</option>
                                                     <option value="Phone Number">Phone Number</option>
@@ -212,7 +224,7 @@
                                             </div>
 
                                             <div class="col-sm-4">
-                                                <input type="text" name="form_labels[]" class="form-control col-sm-12 form_label" placeholder="Edit Input Label" value="{{ $item['form_label'] }}">
+                                                <input type="text" name="form_labels[]" class="form-control col-sm-12 form_label" placeholder="Edit Input Label" value="{{ $contact['form_label'] }}">
                                                 {{-- <p class="question-text m-0" contenteditable="true" title="Write you question here">Write Form Label Here</p> --}}
                                             </div>
 
@@ -220,16 +232,16 @@
                                                 <select title="question choice type" name="form_types[]" class='form-control choice-option'>
                                                     
                                                     
-                                                        @if ($item['form_type']=='text_field')
+                                                        @if ($contact['form_type']=='text_field')
                                                         <option value="text_field" selected>Text: Simple Input Field</option>
 
-                                                        @elseif($item['form_type']=='number_field')
+                                                        @elseif($contact['form_type']=='number_field')
                                                         <option value="number_field" selected>Number: Simple Input Field</option>
 
-                                                        @elseif($item['form_type']=='package_single')
+                                                        @elseif($contact['form_type']=='package_single')
                                                         <option value="package_single" selected>Multi-Choice Package (single option)</option>
 
-                                                        @elseif($item['form_type']=='package_multi')
+                                                        @elseif($contact['form_type']=='package_multi')
                                                         <option value="package_multi" selected>Multi-Choice Package (multiple option)</option>
 
                                                         @endif
@@ -248,9 +260,11 @@
                                             </div>
                                         </div>
                                         <hr class="border-dark">
+
                                         <div class="row ">
                                             <div class="form-group choice-field col-md-12">
-                                                @if($item['form_type']=='package_single')
+                                                
+                                                @if(($contact['form_type']=='package_single') || ($contact['form_type']=='package_multi'))
                                                 {{-- @foreach ($packages as $key=>$item) --}}
                                                 @foreach ($package_select_edit as $selected)
                                                     {!! $selected !!}
@@ -276,10 +290,11 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
+                            @endforeach
+                        </div>
+                    {{-- </div> --}}
                         
-                        @endif
-                    @endforeach
                 </div>
                 
 

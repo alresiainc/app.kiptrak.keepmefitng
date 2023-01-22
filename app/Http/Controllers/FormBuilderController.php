@@ -83,11 +83,35 @@ class FormBuilderController extends Controller
         
         $request->validate([
             'name' => 'required|string|unique:form_holders',
-            'packages' => 'required'
+            'packages' => 'required',
+            'form_names' => 'required',
+            'form_labels' => 'required',
         ]);
 
         $data = $request->all();
+        //neccessary fields contain at least one value
+        if ((count(array_filter($data['packages'])) == 0) || (count(array_filter($data['form_names'])) == 0) || (count(array_filter($data['form_labels'])) == 0)) {
+            return back()->with('field_error', 'Missing Fields');
+        }
 
+        $form_names_expected = array("First Name", "Last Name", "Phone Number", "Whatsapp Phone Number", "Active Email", "State", "City", "Address", "Product Package");
+        //check form-names & labels
+        $form_names = Arr::flatten($data['form_names']);
+        foreach ($form_names_expected as $form_name) {
+            if (!in_array($form_name, $form_names)) { return back()->with('field_error', $form_name.' is Missing'); }
+
+            //duplicates error
+            if (count(array_keys($form_names, $form_name)) > 1) { return back()->with('field_error', $form_name.' Occurred Morethan Once'); }
+        }
+
+        //duplicate products selected error
+        $packages = Arr::flatten($data['packages']);
+        $selected_products = Product::whereIn('id', $data['packages'])->get();
+        foreach ($selected_products as $package) {
+            if (count(array_keys($packages, $package->id)) > 1) { return back()->with('field_error', 'Product: '.$package->name.' Was Selected Morethan Once'); }
+        }
+    
+        //save FormHolder
         $formHolder = new FormHolder();
         $formHolder->name = $data['name'];
         $formHolder->slug = $request->form_code; //like form_code
@@ -196,8 +220,8 @@ class FormBuilderController extends Controller
             <div class="col-sm-11 d-flex align-items-center">
                 <div class="mb-3 q-fc w-100">';
                 $package_select_edit[] .=
-                '<select class="select2 form-control border select-checkbox" name="packages[]" style="width:100%">
-                    <option value="'.$package.'" selected> '.$this->productById($package)->name.' </option>';
+                '<select class="select2 form-control border select-checkbox" name="packages[]" style="width:100%">';
+                   if($this->productById($package) !== ""): '<option value="'.$package.'" selected> '.$this->productById($package)->name.' </option>'; endif;
                     foreach($products as $product):
                         $package_select_edit[] .= '<option value="'. $product->id.'"> '.$product->name.'</option>';
                     endforeach;
@@ -212,7 +236,7 @@ class FormBuilderController extends Controller
         //return $package_select_edit;
 
         //for cloning
-        $package_select = '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
+        $package_select = '<select class="form-control select-checkbox" name="packages[]" style="width:100%">
         <option value=""> --Select Product-- </option>';
         foreach($products as $product):
             $package_select .= '<option value="'. $product->id.'"> '.$product->name.'</option>' ;
@@ -249,16 +273,40 @@ class FormBuilderController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        $request->validate([
-            'name' => 'required|string|unique:form_holders',
-        ]);
-
         $formHolder_former = FormHolder::where('unique_key', $unique_key)->first();
         if (!isset($formHolder_former)) {
             abort(404);
         }
 
+        $request->validate([
+            'name' => 'required|string|unique:form_holders',
+            'packages' => 'required',
+            'form_names' => 'required',
+            'form_labels' => 'required',
+        ]);
+
         $data = $request->all();
+        //neccessary fields contain at least one value
+        if ((count(array_filter($data['packages'])) == 0) || (count(array_filter($data['form_names'])) == 0) || (count(array_filter($data['form_labels'])) == 0)) {
+            return back()->with('field_error', 'Missing Fields');
+        }
+
+        $form_names_expected = array("First Name", "Last Name", "Phone Number", "Whatsapp Phone Number", "Active Email", "State", "City", "Address", "Product Package");
+        //check form-names & labels
+        $form_names = Arr::flatten($data['form_names']);
+        foreach ($form_names_expected as $form_name) {
+            if (!in_array($form_name, $form_names)) { return back()->with('field_error', $form_name.' is Missing'); }
+
+            //duplicates error
+            if (count(array_keys($form_names, $form_name)) > 1) { return back()->with('field_error', $form_name.' Occurred Morethan Once'); }
+        }
+
+        //duplicate products selected error
+        $packages = Arr::flatten($data['packages']);
+        $selected_products = Product::whereIn('id', $data['packages'])->get();
+        foreach ($selected_products as $package) {
+            if (count(array_keys($packages, $package->id)) > 1) { return back()->with('field_error', 'Product: '.$package->name.' Was Selected Morethan Once'); }
+        }
 
         $formHolder = new FormHolder();
         $formHolder->name = $data['name'];
@@ -329,47 +377,32 @@ class FormBuilderController extends Controller
 
         $products = Product::all();
 
-        // foreach($packages as $key=>$package):
-        
-        // //for edit pg specifically
-        // $package_select_edit[] = '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
-        // <option value="'. $package.'" selected> '.$package.' </option>';
-        // foreach($products as $product):
-        //     $package_select_edit[] .= '<option value="'. $product->id.'"> '.$product->name.'</option>' ;
-        // endforeach;
-        // $package_select_edit[] .='</select>';
-
-        // endforeach;
-
-        //products package
-        
-
         foreach($packages as $key=>$package):
-        $package_select_edit[] =
-        '<div class="row w-100">
-            <div class="col-sm-1 rem-on-display" onclick="$(this).closest(\'.row\').remove()">
-                <button class="btn btn-sm btn-default" type="button"><span class="bi bi-x-lg"></span></button>
-            </div>
-            <div class="col-sm-11 d-flex align-items-center">
-                <div class="mb-3 q-fc w-100">';
-                $package_select_edit[] .=
-                '<select class="select2 form-control border select-checkbox" name="packages[]" style="width:100%">
-                    <option value="'.$package.'" selected> '.$this->productById($package)->name.' </option>';
-                    foreach($products as $product):
-                        $package_select_edit[] .= '<option value="'. $product->id.'"> '.$product->name.'</option>';
-                    endforeach;
-                $package_select_edit[] .=
-                '</select>
-                <input type="hidden" name="former_packages[]" value="'.$package.'">
+            $package_select_edit[] =
+            '<div class="row w-100">
+                <div class="col-sm-1 rem-on-display" onclick="$(this).closest(\'.row\').remove()">
+                    <button class="btn btn-sm btn-default" type="button"><span class="bi bi-x-lg"></span></button>
                 </div>
-            </div>
-        </div>';
+                <div class="col-sm-11 d-flex align-items-center">
+                    <div class="mb-3 q-fc w-100">';
+                    $package_select_edit[] .=
+                    '<select class="select2 form-control border select-checkbox" name="packages[]" style="width:100%">';
+                       if($this->productById($package) !== ""): $package_select_edit[] .= '<option value="'.$package.'" selected> '.$this->productById($package)->name.' </option>'; endif;
+                        foreach($products as $product):
+                            $package_select_edit[] .= '<option value="'. $product->id.'"> '.$product->name.'</option>';
+                        endforeach;
+                    $package_select_edit[] .=
+                    '</select>
+                    <input type="hidden" name="former_packages[]" value="'.$package.'">
+                    </div>
+                </div>
+            </div>';
         endforeach;
 
         //return $package_select_edit;
         
         //for cloning
-        $package_select = '<select class="form-control select-checkbox" name="packages[]" data-live-search="true" style="width:100%">
+        $package_select = '<select class="form-control select-checkbox" name="packages[]" style="width:100%">
         <option value=""> --Select Product-- </option>';
         foreach($products as $product):
             $package_select .= '<option value="'. $product->id.'"> '.$product->name.'</option>' ;
@@ -406,28 +439,49 @@ class FormBuilderController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        $data = $request->all();
-        
         $formHolder = FormHolder::where('unique_key', $unique_key)->first();
         if (!isset($formHolder)) {
             abort(404);
         }
+
+        $request->validate([
+            'name' => 'required|string',
+            'packages' => 'required',
+            'form_names' => 'required',
+            'form_labels' => 'required',
+        ]);
+
+        $data = $request->all();
+        //neccessary fields contain at least one value
+        if ((count(array_filter($data['packages'])) == 0) || (count(array_filter($data['form_names'])) == 0) || (count(array_filter($data['form_labels'])) == 0)) {
+            return back()->with('field_error', 'Missing Fields');
+        }
+
+        $form_names_expected = array("First Name", "Last Name", "Phone Number", "Whatsapp Phone Number", "Active Email", "State", "City", "Address", "Product Package");
+        //check form-names & labels
+        $form_names = Arr::flatten($data['form_names']);
+        foreach ($form_names_expected as $form_name) {
+            if (!in_array($form_name, $form_names)) { return back()->with('field_error', $form_name.' is Missing'); }
+
+            //duplicates error
+            if (count(array_keys($form_names, $form_name)) > 1) { return back()->with('field_error', $form_name.' Occurred Morethan Once'); }
+        }
+
+        //duplicate products selected error
+        $packages = Arr::flatten($data['packages']);
+        $selected_products = Product::whereIn('id', $data['packages'])->get();
+        foreach ($selected_products as $package) {
+            if (count(array_keys($packages, $package->id)) > 1) { return back()->with('field_error', 'Product: '.$package->name.' Was Selected Morethan Once'); }
+        }
+
         $order = $formHolder->order;
         $form_code = $formHolder->slug;
-        //$formHolder->name = 'Customer form';
-        //$formHolder->slug = $form_code; //like form_code
         
         $formHolder->form_data = \serialize($request->except(['products', 'q', 'required', 'form_name_selected', '_token', 'former_packages']));
         
         //$formHolder->created_by = $authUser->id;
         $formHolder->status = 'true';
         $formHolder->save();
-
-        //save Order, no need
-        // $order = new Order();
-        // $order->form_holder_id = $formHolder->id;
-        // $order->source_type = 'form_holder_module';
-        // $order->save();
 
         //outgoingStock, in place of orderProduct
         //remove n replace outgoing stock
@@ -1931,7 +1985,13 @@ class FormBuilderController extends Controller
     }
 
     public function productById($id){
-        return $product = Product::where('id',$id)->first();
+        $product = Product::where('id',$id)->first();
+        if(isset($product)){
+            return $product;
+        } else {
+            return "";
+        }
+
     }
 
     /**

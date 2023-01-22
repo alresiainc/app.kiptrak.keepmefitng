@@ -68,6 +68,22 @@
         </div>
     @endif
 
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
+    @if(Session::has('field_error'))
+        <div class="alert alert-danger mb-3 text-center">
+            {{Session::get('field_error')}}
+        </div>
+    @endif
+
     <section class="mt-5">
         <div class="container" id="form-field">
             <form id="form-data" action="{{ route('newFormBuilderPost') }}" method="POST">@csrf
@@ -76,7 +92,7 @@
                         <div class="p-1">
                             <h5 title="Unique Form Code" class="text-center">Form Code: {{ $form_code }}</h5>
                             <input type="hidden" name="form_code" value="{{ $form_code }}">
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" id="" placeholder="Enter Form Name">
+                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" id="" placeholder="Enter Form Name" value="{{ old('name') }}">
                             @error('name')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
@@ -99,10 +115,6 @@
 
                 <!---used in my-form-builder.js--->
                 <input type="hidden" name="products[]" class="package_select" value="{{ $package_select }}">
-
-                
-                
-                
 
                 <div>
                     <div id="question-field" class='row ml-2 mr-2'>

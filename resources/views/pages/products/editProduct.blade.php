@@ -426,13 +426,13 @@
 <script src="{{ asset('/assets/js/jquery.validate.min.js') }}"></script>
 <script src="{{ asset('/assets/js/additional-methods.min.js') }}"></script>
 
+<!--image validation--->
 <script>
   var message = '<span class="text-danger">File size must be less than 2mb</span>';
   $.validator.addMethod('filesize', function (value, element, param) {
     return this.optional(element) || (element.files[0].size <= param)
   }, message);
   
-
   jQuery(function ($) {
       "use strict";
       $('#createForm').validate({
@@ -442,7 +442,7 @@
               //     maxlength: 20
               // },
               image: {
-                  required: true,
+                  required: false,
                   extension: "jpg,png,jpeg,gif,svg,webp",
                   filesize: 2048576, //2mb
               }, 
@@ -451,6 +451,7 @@
   });
 </script>
 
+<!--add & remove features--->
 <script>
     //clone
     $('.wrapper').on('click', '.remove', function() {
@@ -461,6 +462,7 @@
     });
 </script>
 
+<!--add by modal--->
 <script>
   //addCategory Modal
  $('.addCategoryBtn').click(function(e){

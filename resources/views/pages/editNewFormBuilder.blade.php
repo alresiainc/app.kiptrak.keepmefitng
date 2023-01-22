@@ -68,6 +68,22 @@
         </div>
     @endif
 
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
+    @if(Session::has('field_error'))
+        <div class="alert alert-danger mb-3 text-center">
+            {{Session::get('field_error')}}
+        </div>
+    @endif
+
     <section class="mt-5">
         <div class="container" id="form-field">
             <form id="form-data" action="{{ route('editNewFormBuilderPost', $formHolder->unique_key) }}" method="POST">@csrf
@@ -76,6 +92,12 @@
                         <div class="p-1">
                             <h5 title="Unique Form Code" class="text-center">Form Code: {{ $form_code }}</h5>
                             <input type="hidden" name="form_code" value="{{ $form_code }}">
+                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" id="" placeholder="Enter Form Name" value="{{ $formHolder->name }}">
+                            @error('name')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                             {{-- <h5 title="Enter Title" class="text-center" id="form-title">Fields marked * are mandatory</h5> --}}
                             {{-- <h3 contenteditable="true" title="Enter Title" class="text-center" id="form-title">Enter Title Here</h3> --}}
                             {{-- <hr class="border-primary"> --}}
@@ -95,186 +117,183 @@
                 <input type="hidden" name="products[]" class="package_select" value="{{ $package_select }}">
 
                 <div>
-                    @php
-                        $item_count = 0;
-                    @endphp
                     
-                        {{-- <div> --}}
-                            
-                            <div id="question-field" class='row ml-2 mr-2'>
-                                @foreach ($formContact as $key=>$contact)
-                                @if (($contact['form_name']) !== 'Product Package')
-                                    <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="{{ $key }}">
-                                        <span class="item-move"><i class="bi bi-grip-vertical"></i></span>
-                                        <div class="card-body">
-                                            <div class="row align-items-center d-flex">
-                                                
-                                                <input type="hidden" name="form_name_selected[]" class="form_name_selected" value="">
-                                                <div class="col-sm-4">
-                                                    <select title="interested info" name="form_names[]" class='form-control form_name'>
-                                                        <option value="{{ $contact['form_name'] }}">{{ $contact['form_name'] }}</option>
-                                                        <option value="First Name">First Name</option>
-                                                        <option value="Last Name">Last Name</option>
-                                                        <option value="Phone Number">Phone Number</option>
-                                                        <option value="Whatsapp Phone Number">Whatsapp Phone Number</option>
-                                                        <option value="Active Email">Active Email</option>
-                                                        <option value="State">State</option>
-                                                        <option value="City">City</option>
-                                                        <option value="Address">Address</option>
-                                                        <option value="Product Package">Product Package</option>
-                                                    </select>
-                                                </div>
+                    {{-- <div> --}}
+                        
+                        <div id="question-field" class='row ml-2 mr-2'>
+                            @foreach ($formContact as $key=>$contact)
+                            @if (($contact['form_name']) !== 'Product Package')
+                                <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="{{ $key }}">
+                                    <span class="item-move"><i class="bi bi-grip-vertical"></i></span>
+                                    <div class="card-body">
+                                        <div class="row align-items-center d-flex">
+                                            
+                                            <input type="hidden" name="form_name_selected[]" class="form_name_selected" value="">
+                                            <div class="col-sm-4">
+                                                <select title="interested info" name="form_names[]" class='form-control form_name'>
+                                                    <option value="{{ $contact['form_name'] }}">{{ $contact['form_name'] }}</option>
+                                                    <option value="First Name">First Name</option>
+                                                    <option value="Last Name">Last Name</option>
+                                                    <option value="Phone Number">Phone Number</option>
+                                                    <option value="Whatsapp Phone Number">Whatsapp Phone Number</option>
+                                                    <option value="Active Email">Active Email</option>
+                                                    <option value="State">State</option>
+                                                    <option value="City">City</option>
+                                                    <option value="Address">Address</option>
+                                                    <option value="Product Package">Product Package</option>
+                                                </select>
+                                            </div>
 
-                                                <div class="col-sm-4">
-                                                    <input type="text" name="form_labels[]" class="form-control col-sm-12 form_label" placeholder="Edit Input Label" value="{{ $contact['form_label'] }}">
-                                                    {{-- <p class="question-text m-0" contenteditable="true" title="Write you question here">Write Form Label Here</p> --}}
-                                                </div>
+                                            <div class="col-sm-4">
+                                                <input type="text" name="form_labels[]" class="form-control col-sm-12 form_label" placeholder="Edit Input Label" value="{{ $contact['form_label'] }}">
+                                                {{-- <p class="question-text m-0" contenteditable="true" title="Write you question here">Write Form Label Here</p> --}}
+                                            </div>
 
-                                                <div class="col-sm-4">
-                                                    <select title="question choice type" name="form_types[]" class='form-control choice-option'>
-                                                        
+                                            <div class="col-sm-4">
+                                                <select title="question choice type" name="form_types[]" class='form-control choice-option'>
+                                                    
+                                                    @if ($contact['form_type']=='text_field')
+                                                        <option value="text_field" selected>Text: Simple Input Field</option>
+                                                            
+                                                        @elseif($contact['form_type']=='number_field')
+                                                        <option value="number_field" selected>Number: Simple Input Field</option>
+
+                                                        @elseif($contact['form_type']=='package_single')
+                                                        <option value="package_single" selected>Multi-Choice Package (single option)</option>
+
+                                                        @elseif($contact['form_type']=='package_multi')
+                                                        <option value="package_multi" selected>Multi-Choice Package (multiple option)</option>
+
+                                                        @endif
+                                                    </option>
+                                                    <option value="number_field">Text: Simple Input Field </option>
+                                                    <option value="number_field">Number: Simple Input Field </option>
+                                                    <option value="package_single">Multi-Choice Package (single option)</option>
+                                                    <option value="package_multi">Multi-Choice Package (multiple option)</option>
+
+                                                    {{-- <option value="radio">Mupliple Choice (single option) Package</option>
+                                                    <option value="checkbox">Mupliple Choice (multiple option) Package</option> --}}
+                                                    
+                                                    <option value="p">Textarea</option>
+                                                    <option value="file">File upload</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <hr class="border-dark">
+                                        <div class="row ">
+                                            <div class="form-group choice-field col-md-12">
+                                                <input type="text" name="q[0]" class="form-control col-sm-12" placeholder="Default Value | Optional">
+                                                {{-- <textarea name="q[0]" class="form-control col-sm-12" cols="30" rows="5" placeholder="Write your answer here"></textarea> --}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="w-100 d-flex justify-content-between align-items-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input req-item" name="required[]" type="checkbox" value="" checked>
+                                                <label class="form-check-label req-chk" for="">
+                                                    * Required
+                                                </label>
+                                            </div>
+                                            <button class="btn btn-danger border rem-q-item" type="button"><i class="bi bi-trash"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if (($contact['form_name']) == 'Product Package')
+                                <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="{{ $key }}">
+                                    <span class="item-move"><i class="bi bi-grip-vertical"></i></span>
+                                    <div class="card-body">
+                                        <div class="row align-items-center d-flex">
+                                            
+                                            <input type="hidden" name="form_name_selected[]" class="form_name_selected" value="">
+                                            <div class="col-sm-4">
+                                                <select title="interested info" name="form_names[]" class='form-control form_name'>
+                                                    <option value="{{ $contact['form_name'] }}">{{ $contact['form_name'] }}</option>
+                                                    <option value="First Name">First Name</option>
+                                                    <option value="Last Name">Last Name</option>
+                                                    <option value="Phone Number">Phone Number</option>
+                                                    <option value="Whatsapp Phone Number">Whatsapp Phone Number</option>
+                                                    <option value="Active Email">Active Email</option>
+                                                    <option value="State">State</option>
+                                                    <option value="City">City</option>
+                                                    <option value="Address">Address</option>
+                                                    <option value="Product Package">Product Package</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-sm-4">
+                                                <input type="text" name="form_labels[]" class="form-control col-sm-12 form_label" placeholder="Edit Input Label" value="{{ $contact['form_label'] }}">
+                                                {{-- <p class="question-text m-0" contenteditable="true" title="Write you question here">Write Form Label Here</p> --}}
+                                            </div>
+
+                                            <div class="col-sm-4">
+                                                <select title="question choice type" name="form_types[]" class='form-control choice-option'>
+                                                    
+                                                    
                                                         @if ($contact['form_type']=='text_field')
-                                                            <option value="text_field" selected>Text: Simple Input Field</option>
-                                                                
-                                                            @elseif($contact['form_type']=='number_field')
-                                                            <option value="number_field" selected>Number: Simple Input Field</option>
+                                                        <option value="text_field" selected>Text: Simple Input Field</option>
 
-                                                            @elseif($contact['form_type']=='package_single')
-                                                            <option value="package_single" selected>Multi-Choice Package (single option)</option>
+                                                        @elseif($contact['form_type']=='number_field')
+                                                        <option value="number_field" selected>Number: Simple Input Field</option>
 
-                                                            @elseif($contact['form_type']=='package_multi')
-                                                            <option value="package_multi" selected>Multi-Choice Package (multiple option)</option>
+                                                        @elseif($contact['form_type']=='package_single')
+                                                        <option value="package_single" selected>Multi-Choice Package (single option)</option>
 
-                                                            @endif
-                                                        </option>
-                                                        <option value="number_field">Text: Simple Input Field </option>
-                                                        <option value="number_field">Number: Simple Input Field </option>
-                                                        <option value="package_single">Multi-Choice Package (single option)</option>
-                                                        <option value="package_multi">Multi-Choice Package (multiple option)</option>
+                                                        @elseif($contact['form_type']=='package_multi')
+                                                        <option value="package_multi" selected>Multi-Choice Package (multiple option)</option>
 
-                                                        {{-- <option value="radio">Mupliple Choice (single option) Package</option>
-                                                        <option value="checkbox">Mupliple Choice (multiple option) Package</option> --}}
-                                                        
-                                                        <option value="p">Textarea</option>
-                                                        <option value="file">File upload</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <hr class="border-dark">
-                                            <div class="row ">
-                                                <div class="form-group choice-field col-md-12">
-                                                    <input type="text" name="q[0]" class="form-control col-sm-12" placeholder="Default Value | Optional">
-                                                    {{-- <textarea name="q[0]" class="form-control col-sm-12" cols="30" rows="5" placeholder="Write your answer here"></textarea> --}}
-                                                </div>
+                                                        @endif
+                                                    
+                                                    <option value="number_field">Text: Simple Input Field </option>
+                                                    <option value="number_field">Number: Simple Input Field </option>
+                                                    <option value="package_single">Multi-Choice Package (single option)</option>
+                                                    <option value="package_multi">Multi-Choice Package (multiple option)</option>
+
+                                                    {{-- <option value="radio">Mupliple Choice (single option) Package</option>
+                                                    <option value="checkbox">Mupliple Choice (multiple option) Package</option> --}}
+                                                    
+                                                    <option value="p">Textarea</option>
+                                                    <option value="file">File upload</option>
+                                                </select>
                                             </div>
                                         </div>
-                                        <div class="card-footer">
-                                            <div class="w-100 d-flex justify-content-between align-items-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input req-item" name="required[]" type="checkbox" value="" checked>
-                                                    <label class="form-check-label req-chk" for="">
-                                                        * Required
-                                                    </label>
-                                                </div>
-                                                <button class="btn btn-danger border rem-q-item" type="button"><i class="bi bi-trash"></i></button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
+                                        <hr class="border-dark">
 
-                                @if (($contact['form_name']) == 'Product Package')
-                                    <div class="card mt-3 mb-3 col-md-12 question-item ui-state-default" data-item="0">
-                                        <span class="item-move"><i class="bi bi-grip-vertical"></i></span>
-                                        <div class="card-body">
-                                            <div class="row align-items-center d-flex">
+                                        <div class="row ">
+                                            <div class="form-group choice-field col-md-12">
                                                 
-                                                <input type="hidden" name="form_name_selected[]" class="form_name_selected" value="">
-                                                <div class="col-sm-4">
-                                                    <select title="interested info" name="form_names[]" class='form-control form_name'>
-                                                        <option value="{{ $contact['form_name'] }}">{{ $contact['form_name'] }}</option>
-                                                        <option value="First Name">First Name</option>
-                                                        <option value="Last Name">Last Name</option>
-                                                        <option value="Phone Number">Phone Number</option>
-                                                        <option value="Whatsapp Phone Number">Whatsapp Phone Number</option>
-                                                        <option value="Active Email">Active Email</option>
-                                                        <option value="State">State</option>
-                                                        <option value="City">City</option>
-                                                        <option value="Address">Address</option>
-                                                        <option value="Product Package">Product Package</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="col-sm-4">
-                                                    <input type="text" name="form_labels[]" class="form-control col-sm-12 form_label" placeholder="Edit Input Label" value="{{ $contact['form_label'] }}">
-                                                    {{-- <p class="question-text m-0" contenteditable="true" title="Write you question here">Write Form Label Here</p> --}}
-                                                </div>
-
-                                                <div class="col-sm-4">
-                                                    <select title="question choice type" name="form_types[]" class='form-control choice-option'>
-                                                        
-                                                        
-                                                            @if ($contact['form_type']=='text_field')
-                                                            <option value="text_field" selected>Text: Simple Input Field</option>
-
-                                                            @elseif($contact['form_type']=='number_field')
-                                                            <option value="number_field" selected>Number: Simple Input Field</option>
-
-                                                            @elseif($contact['form_type']=='package_single')
-                                                            <option value="package_single" selected>Multi-Choice Package (single option)</option>
-
-                                                            @elseif($contact['form_type']=='package_multi')
-                                                            <option value="package_multi" selected>Multi-Choice Package (multiple option)</option>
-
-                                                            @endif
-                                                        
-                                                        <option value="number_field">Text: Simple Input Field </option>
-                                                        <option value="number_field">Number: Simple Input Field </option>
-                                                        <option value="package_single">Multi-Choice Package (single option)</option>
-                                                        <option value="package_multi">Multi-Choice Package (multiple option)</option>
-
-                                                        {{-- <option value="radio">Mupliple Choice (single option) Package</option>
-                                                        <option value="checkbox">Mupliple Choice (multiple option) Package</option> --}}
-                                                        
-                                                        <option value="p">Textarea</option>
-                                                        <option value="file">File upload</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <hr class="border-dark">
-
-                                            <div class="row ">
-                                                <div class="form-group choice-field col-md-12">
-                                                    
-                                                    @if(($contact['form_type']=='package_single') || ($contact['form_type']=='package_multi'))
-                                                    {{-- @foreach ($packages as $key=>$item) --}}
-                                                    @foreach ($package_select_edit as $selected)
-                                                        {!! $selected !!}
-                                                    @endforeach
-                                                    <button type="button" class="add_package btn btn-sm btn-success border"><i class="bi bi-plus"></i> Add option</button>
-                                                    {{-- @endforeach --}}
-                                                    
-                                                    @else
-                                                        <input type="text" name="q[0]" class="form-control col-sm-12" placeholder="Default Value | Optional">
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="card-footer">
-                                            <div class="w-100 d-flex justify-content-between align-items-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input req-item" name="required[]" type="checkbox" value="" checked>
-                                                    <label class="form-check-label req-chk" for="">
-                                                        * Required
-                                                    </label>
-                                                </div>
-                                                <button class="btn btn-danger border rem-q-item" type="button"><i class="bi bi-trash"></i></button>
+                                                @if(($contact['form_type']=='package_single') || ($contact['form_type']=='package_multi'))
+                                                {{-- @foreach ($packages as $key=>$item) --}}
+                                                @foreach ($package_select_edit as $selected)
+                                                    {!! $selected !!}
+                                                @endforeach
+                                                <button type="button" class="add_package btn btn-sm btn-success border"><i class="bi bi-plus"></i> Add option</button>
+                                                {{-- @endforeach --}}
+                                                
+                                                @else
+                                                    <input type="text" name="q[0]" class="form-control col-sm-12" placeholder="Default Value | Optional">
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
-                                @endif
-                                @endforeach
-                            </div>
-                        {{-- </div> --}}
+                                    <div class="card-footer">
+                                        <div class="w-100 d-flex justify-content-between align-items-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input req-item" name="required[]" type="checkbox" value="" checked>
+                                                <label class="form-check-label req-chk" for="">
+                                                    * Required
+                                                </label>
+                                            </div>
+                                            <button class="btn btn-danger border rem-q-item" type="button"><i class="bi bi-trash"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                            @endforeach
+                        </div>
+                    {{-- </div> --}}
                         
                 </div>
                 

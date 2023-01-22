@@ -46,6 +46,8 @@ $(function() {
                 $(this).siblings('input[type="checkbox"]').prop("checked", true).trigger("change")
             }
         })
+        add_package()
+        
         $('.rem-q-item').click(function() {
             $(this).closest('.question-item').remove()
             // $('.remove').closest('.wrapper').find('.element').not(':first').last().remove();
@@ -93,21 +95,23 @@ $(function() {
                 //adds add-btn
                 $(this).closest('.question-item').find('.choice-field').html('<button type="button" class="add_package btn btn-sm btn-success border"><i class="bi bi-plus"></i> Add option</button>')
                 add_package()
+                
                 for (var i = 0; i < 3; i++) {
                     package_field($(this), _field, "Enter Option")
                 }
                 $('.select-checkbox').select2();
-
+                
             //multi choice single option
             } else if (choice == "package_multi") {
                 //adds add-btn
                 $(this).closest('.question-item').find('.choice-field').html('<button type="button" class="add_package btn btn-sm btn-success border"><i class="bi bi-plus"></i> Add option</button>')
                 add_package()
+    
                 for (var i = 0; i < 3; i++) {
                     package_field($(this), _field, "Enter Option")
                 }
                 $('.select-checkbox').select2();
-
+                
             //multi choice single option, not used
             } else if (choice == "radio") {
                 $(this).closest('.question-item').find('.choice-field').html('<button type="button" class="add_radio btn btn-sm btn-success border"><i class="bi bi-plus"></i> Add option</button>')
@@ -146,6 +150,7 @@ $(function() {
             
         });
     }
+    //_initilize end
 
     function add_checkbox() {
         $('.add_chk').click(function() {

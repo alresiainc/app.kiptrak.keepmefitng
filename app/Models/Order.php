@@ -171,7 +171,10 @@ class Order extends Model
 
         if ( count($mainProducts_outgoingStocks) > 0 ) {
             foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-                $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                if (isset($main_outgoingStock->product->id)) {
+                    $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                }
+                
             }
         }
 
@@ -181,7 +184,10 @@ class Order extends Model
         if (isset($formHolder->orderbump_id)) {
             $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
             if ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
-                $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+                if (isset($orderbump_outgoingStock->product->id)) {
+                    $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+                }
+                
             }
         }
         
@@ -191,7 +197,10 @@ class Order extends Model
         if (isset($formHolder->upsell_id)) {
             $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
             if ($upsell_outgoingStock->customer_acceptance_status == 'accepted') {
-                $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+                if (isset($upsell_outgoingStock->product->id)) {
+                    $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+                }
+                
             }
         }
 
@@ -200,15 +209,21 @@ class Order extends Model
             $whatsapp_msg = "Hello ".$customer->firstname." ".$customer->lastname.". My name is ".$authUser->name.", I am contacting you from KeepMeFit and I am the Customer Service Representative incharge of the order you placed for ";
             $whatsapp_msg .= "";
             foreach($mainProducts_outgoingStocks as $main_outgoingStock):
-                $whatsapp_msg .= " [Product: ".$main_outgoingStock->product->name.". Price: ".$mainProduct_revenue.". Qty: ".$main_outgoingStock->quantity_removed."], ";
+                if (isset($main_outgoingStock->product->id)) {
+                    $whatsapp_msg .= " [Product: ".$main_outgoingStock->product->name.". Price: ".$mainProduct_revenue.". Qty: ".$main_outgoingStock->quantity_removed."], ";
+                }
             endforeach;
     
             if($orderbump_outgoingStock != ''):
-                $whatsapp_msg .= "[Product: ".$orderbump_outgoingStock->product->name.". Price: ".$orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed.". Qty: ".$orderbump_outgoingStock->quantity_removed."], ";
+                if (isset($orderbump_outgoingStock->product->id)) {
+                    $whatsapp_msg .= "[Product: ".$orderbump_outgoingStock->product->name.". Price: ".$orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed.". Qty: ".$orderbump_outgoingStock->quantity_removed."], ";
+                }
             endif;
     
             if($upsell_outgoingStock != ''):
-                $whatsapp_msg .= "[Product: ".$upsell_outgoingStock->product->name.". Price: ".$upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed.". Qty: ".$upsell_outgoingStock->quantity_removed."]. ";
+                if (isset($upsell_outgoingStock->product->id)) {
+                    $whatsapp_msg .= "[Product: ".$upsell_outgoingStock->product->name.". Price: ".$upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed.". Qty: ".$upsell_outgoingStock->quantity_removed."]. ";
+                }  
             endif;
     
             $whatsapp_msg .= "I am reaching out to you to confirm your order and to let you know the delivery person will call you to deliver your order. Kindly confirm if the details you sent are correct ";
