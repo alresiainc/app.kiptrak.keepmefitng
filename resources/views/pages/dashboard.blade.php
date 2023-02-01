@@ -417,7 +417,11 @@
           <div class="card-body">
             <h5 class="card-title text-uppercase text-center">View More Features From Sidebar</h5>
             @if ($authUser->type !== 'agent')
-              <div class="text-uppercase text-center"><a href="{{ route('allAttendance') }}" class="attendance btn btn-dark rounded-pill">Attendance</a></div>
+              <div class="d-flex justify-content-center align-items-center">
+                <div class="text-uppercase text-center ms-2"><a href="{{ route('allAttendance') }}" class="attendance btn btn-dark rounded-pill">Attendance</a></div>
+                <div class="text-uppercase text-center ms-2"><a href="{{ route('overview') }}" class="attendance btn btn-dark rounded-pill">Task Manager</a></div>
+              </div>
+              
             @endif
           </div>
         </div>
@@ -460,7 +464,7 @@
         "</div>",
       ].join("");
 
-      alertPlaceholder.append(wrapper);
+      // alertPlaceholder.append(wrapper);
     };
 
     alert("Nice, you triggered this alert message!", "danger");

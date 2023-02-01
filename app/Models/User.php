@@ -78,6 +78,11 @@ class User extends Authenticatable
         return $this->belongsTo(Country::class, 'country_id');  
     }
 
+    public function projects()
+    {
+        return $this->hasMany(Project::class, 'assigned_to');  
+    }
+
     public function roles() {
         return $this->belongsToMany(Role::class,'user_roles');
     }

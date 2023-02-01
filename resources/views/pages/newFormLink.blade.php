@@ -79,8 +79,9 @@
     <nav class="navbar bg-light sticky-top">
         <div class="container">
             <a class="navbar-brand" href="/">
-            <img src="{{asset('/customerform/assets/img/logo.png')}}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
-            <span class="project-name"></span>
+            <img src="{{asset('/customerform/assets/img/logo.png')}}" alt="Logo" class="d-inline-block align-text-top">
+            
+            <span class="project-namek"></span>
             </a>
         </div>
     </nav>
@@ -105,6 +106,7 @@
             <input type="hidden" name="upsell_stage" class="upsell_stage" value="">
             <input type="hidden" name="thankyou_stage" class="thankyou_stage" value="">
             <input type="hidden" name="current_order_id" class="current_order_id" value="">
+            <input type="hidden" name="cartAbandoned_id" class="cartAbandoned_id" value="{{ $cartAbandoned_id }}">
             <!-- Monitoring diferent stages in the form -->
         
             <!-- CHECKOUT VIEW Main + orderbump + upsell -->
@@ -624,8 +626,9 @@
         $("input.contact-input").click(function() {
             // console.log($(this).val())
             var parentC = $(this).parent().prev();
+            var cartAbandoned_id = $(".cartAbandoned_id").val();
             var unique_key = $(".formholder_unique_key").val();
-
+            
             //if prev exist, incase firstinput is typed, eg(firstname)
             if ( parentC.length > 0 ) {
                 var prev = parentC.find('.contact-input');
@@ -640,16 +643,17 @@
                     var prevVal = prev.val();
                     var inputName = prev.attr('data-name');
                     var inputVal = prevVal+'|'+inputName;
+                    //console.log(inputVal)
 
                     contacts.push( inputVal ) //store in array
                     //check for duplicates
                     var contact_copy = unique(contacts)
-                    console.log(contact_copy)
+                    //console.log(contact_copy)
                     
                     $.ajax({
                         type:'get',
                         url:'/cart-abandon-contact',
-                        data:{unique_key:unique_key, inputValueName:contact_copy, 
+                        data:{unique_key:unique_key, inputValueName:contact_copy, inputVal:inputVal, cartAbandoned_id:cartAbandoned_id
                             },
                         success:function(resp){
                             console.log(resp)
@@ -673,42 +677,89 @@
             return result;
         }
 
+        //cart-abandon-delivery-duration, & delivery addr check
+        $('.delivery_duration').change(function() {
+            var cartAbandoned_id = $('.cartAbandoned_id').val();
+            var unique_key = $(".formholder_unique_key").val();
+            var delivery_duration = $(this).val();
+            var customer_delivery_addr = $('.address').val();
+            var last_Val = $('input.contact-input:last').val();
+            var last_inputName = $('input.contact-input:last').attr('data-name');
+            
+            if (last_Val=='' || last_Val==null) {
+                var msg = last_inputName+' '+'must be filled';
+                alert(msg)
+            } else {
+                var inputVal = last_Val+'|'+last_inputName;
+                $.ajax({
+                    type:'get',
+                    url:'/cart-abandon-delivery-duration',
+                    data:{unique_key:unique_key, cartAbandoned_id:cartAbandoned_id, delivery_duration:delivery_duration, inputVal:inputVal
+                        },
+                    success:function(resp){
+                        console.log(resp)
+
+                    },error:function(){
+                        alert("Error");
+                    }
+                });
+            }
+
+            //cart-abandon-delivery-address
+        })
+
         //cart-abandon-package
         var packages = [];
         $(".product-package").click(function() {
-
+            var cartAbandoned_id = $('.cartAbandoned_id').val();
             var unique_key = $(".formholder_unique_key").val();
-            var product_packsge = $(this).val();
+            var product_package = $(this).val();
             var package_field_type = $(this).attr('type');
+
+            var selected_qty = $(this).closest(".product_package_label").find("select[name='select_product_qty']").val(); //notused
+            //console.log(selected_qty)
+            product_package = $(this).val(); //1-1000-10
+            
+
+            //var product_package = $(".product-package").val();
 
             if (package_field_type=='radio') {
                 if (packages.length > 0) {
                     packages = []
                 }
-                packages.push( product_packsge ) //store in array
+                packages.push( product_package ) //store in array
                 //check for duplicates
                 var packages_copy = unique(packages)
-                console.log(packages_copy)
+                //console.log(packages_copy)
             } else {
-                packages.push( product_packsge ) //store in array
+                packages.push( product_package ) //store in array
                 //check for duplicates
                 var packages_copy = unique(packages)
                 console.log(packages_copy)
             }
 
-            $.ajax({
-                type:'get',
-                url:'/cart-abandon-package',
-                data:{unique_key:unique_key, product_package:packages_copy, 
-                    },
-                success:function(resp){
-                    console.log(resp)
+            var last_Val = $('input.contact-input:last').val();
+            var last_inputName = $('input.contact-input:last').attr('data-name');
+            
+            if (last_Val=='' || last_Val==null) {
+                var msg = last_inputName+' '+'must be filled';
+                alert(msg)
+            } else {
+                var inputVal = last_Val+'|'+last_inputName;
+                $.ajax({
+                    type:'get',
+                    url:'/cart-abandon-package',
+                    data:{unique_key:unique_key, cartAbandoned_id:cartAbandoned_id, product_package:packages_copy, inputVal:inputVal
+                        },
+                    success:function(resp){
+                        console.log(resp)
 
-
-                },error:function(){
-                    alert("Error");
-                }
-            });
+                    },error:function(){
+                        alert("Error");
+                    }
+                });
+            }
+            
         })
         
         //main package
@@ -766,11 +817,12 @@
             }
 
             var unique_key = $(".formholder_unique_key").val();
+            var cartAbandoned_id = $('.cartAbandoned_id').val();
             var product_packages = $('input[name^="product_packages[]"]').map(function () {
                 if ($(this).is(':checked')) {
                     var selected_qty = $(this).closest(".product_package_label").find("select[name='select_product_qty']").val();
                     //console.log(selected_qty)
-                    return $(this).val()+'-'+selected_qty; //1-2
+                    return $(this).val()+'-'+selected_qty; //1-1000-2
                 }
             }).get();
 
@@ -783,7 +835,7 @@
             $.ajax({
                 type:'get',
                 url:'/ajax-save-new-form-link',
-                data:{unique_key:unique_key, firstname:firstname, lastname:lastname, phone_number:phone_number, whatsapp_phone_number:whatsapp_phone_number,
+                data:{unique_key:unique_key, cartAbandoned_id:cartAbandoned_id, firstname:firstname, lastname:lastname, phone_number:phone_number, whatsapp_phone_number:whatsapp_phone_number,
                     active_email:active_email, state:state, city:city, address:address, delivery_duration:delivery_duration, product_packages:product_packages, 
                     },
                 success:function(resp){

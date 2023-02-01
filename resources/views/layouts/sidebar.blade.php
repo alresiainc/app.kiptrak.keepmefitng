@@ -110,7 +110,7 @@ $routeName = \Route::currentRouteName();
         @endif
 
         @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-order-list')) ))
-        <li class="d-none">
+        <li>
           <a href="{{ route('cartAbandon') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Cart Abandoned</span></a>
         </li>
         @endif
@@ -479,6 +479,58 @@ $routeName = \Route::currentRouteName();
         @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-staff-report')) ))
         <li>
           <a href="{{ route('staffReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Staff Report</span></a>
+        </li>
+        @endif
+        
+      </ul>
+    </li>
+    @endif
+
+    <!---Task Manager--->
+    @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
+    ($user_role->slug == 'report-manager' || $user_role->permissions->contains('slug', 'view-report-menu')) ))
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#tasks-nav" data-bs-toggle="collapse" href="#"
+      @if(($routeName=='overview') || ($routeName=='addProject') || ($routeName=='allProject') || ($routeName=='singleProject') || ($routeName=='editProject')
+      || ($routeName=='addTask') || ($routeName=='allTask') || ($routeName=='singleTask') || ($routeName=='editTask'))
+      style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
+        <i class="bi bi-briefcase"></i>
+        <span>Task Manager</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="tasks-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-product-report')) ))
+        <li>
+          <a href="{{ route('overview') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Overview</span></a>
+        </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-sale-report')) ))
+        <li>
+          <a href="{{ route('addProject') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Add Project</span></a>
+        </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-purchase-report')) ))
+        <li>
+          <a href="{{ route('allProject') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Project List</span></a>
+        </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-customer-report')) ))
+        <li>
+          <a href="{{ route('addTask') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Add Task</span></a>
+        </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-supplier-report')) ))
+        <li>
+          <a href="{{ route('allTask') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Task List</span></a>
+        </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-staff-report')) ))
+        <li>
+          <a href="{{ route('allTaskCategory') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Task Category List</span></a>
         </li>
         @endif
         

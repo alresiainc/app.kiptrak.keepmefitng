@@ -54,8 +54,41 @@ class CategoryController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+    }
 
+    public function editCategoryPost(Request $request, $unique_key="")
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $request->validate([
+            'category_name' => 'required',
+        ]);
+        
+        $data = $request->all();
+
+        $category = Category::where('id', $data['category_id'])->first();
+        $category->name = $data['category_name'];
+        $category->created_by = $authUser->id;
+        $category->status = 'true';
+        $category->save();
+
+        return back()->with('success', 'Category Updated Successfully');
+    }
+
+    public function deleteCategory($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $category = Category::where(['unique_key'=>$unique_key]);
+        if(!$category->exists()){
+            abort(404);
+        }
+        $category = $category->first();
+        $category->delete();
+    
+        return back()->with('success', 'Category Renoved Successfully');
     }
 
     public function productsByCategory($unique_key)

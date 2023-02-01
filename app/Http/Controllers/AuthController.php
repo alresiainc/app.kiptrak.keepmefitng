@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Validator;
+use Exception;
 use Illuminate\Support\Facades\Session;
 use App\Notifications\UserLogin;
 use Illuminate\Support\Facades\Notification;
@@ -61,7 +62,14 @@ class AuthController extends Controller
             $admin = GeneralSetting::first();
             //notify admin
             // Notification::send($admin, new UserLogin($user));
-            Notification::route('mail', [$admin->official_notification_email])->notify(new UserLogin($user));
+
+            try {
+                Notification::route('mail', [$admin->official_notification_email])->notify(new UserLogin($user));
+            } catch (Exception $exception) {
+                //return back()->with('info', 'Mail Server Issue. Message Saved in System. You can Re-send later');
+                return redirect()->route('dashboard');
+            }
+            
             return redirect()->route('dashboard');
         }
     }

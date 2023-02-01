@@ -1,5 +1,5 @@
 @extends('layouts.design')
-@section('title')Categories @endsection
+@section('title')Task Categories @endsection
 
 @section('extra_css')
     <style>
@@ -35,11 +35,11 @@
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Product Categories</h1>
+    <h1>Task Categories</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active">Product Categories</li>
+        <li class="breadcrumb-item active">Task Categories</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -85,10 +85,7 @@
               <thead>
                   <tr>
                       <th>Category Name</th>
-                      <th>Products</th>
-                      <th>Sales</th>
-                      <th>Purchases</th>
-                      <th>Customers</th>
+                      <th>Tasks</th>
                       <th>Created By</th>
                       <th>Date</th>
                       <th>Action</th>
@@ -103,62 +100,20 @@
 
                             <!--productsByCategory-->
                             <td>
-                              @if ($category->products->count() > 0)
-                              <a href="{{ route('productsByCategory', $category->unique_key) }}" class="badge badge-dark">{{ $category->products->count() }}</a>
+                              @if ($category->tasks->count() > 0)
+                              <a href="{{ route('productsByCategory', $category->unique_key) }}" class="badge badge-dark">{{ $category->tasks->count() }}</a>
                               @else
                               0
                               @endif
                             </td>
 
-                            <!--salesByCategory-->
-                            <td>
-                              @if ($category->products->count() > 0)
-                                @if ($category->sales($category->unique_key) > 0)
-                                <a href="{{ route('salesByCategory', $category->unique_key) }}" class="badge badge-dark">{{ $category->sales($category->unique_key) }}</a>
-                                @else
-                                0
-                                @endif
-                              
-                              @else
-                              0
-                              @endif
-                            </td>
-
-                            <!--purchasesByCategory-->
-                            <td>
-                              @if ($category->products->count() > 0)
-                                @if ($category->purchases($category->unique_key) > 0)
-                                <a href="{{ route('purchasesByCategory', $category->unique_key) }}" class="badge badge-dark">{{ $category->purchases($category->unique_key) }}</a>
-                                @else
-                                0
-                                @endif
-                              
-                              @else
-                              0
-                              @endif
-                            </td>
-
-                            <!--customersByCategory-->
-                            <td>
-                              @if ($category->products->count() > 0)
-                                @if ($category->customers($category->unique_key) > 0)
-                                <a href="{{ route('customersByCategory', $category->unique_key) }}" class="badge badge-dark">{{ $category->customers($category->unique_key) }}</a>
-                                @else
-                                0
-                                @endif
-                              
-                              @else
-                              0
-                              @endif
-                            </td>
-                            
                             <td>{{ $category->createdBy->name }}</td>
                             <td>{{ $category->created_at }}</td>
                             
                             <td>
                                 <div class="d-flex">
-                                <a href="javascript:void(0)" onclick="editCategoryModal({{ json_encode($category) }})" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                                <a href="{{ route('deleteCategory', $category->unique_key) }}" onclick="return confirm('Are you sure?')" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
+                                <a href="javascript:void(0)" onclick="editTaskCategoryModal({{ json_encode($category) }})" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                <a href="{{ route('deleteTaskCategory', $category->unique_key) }}" onclick="return confirm('Are you sure?')" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -209,13 +164,13 @@
                 <button type="button" class="btn-close"
                     data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('addCategoryPost') }}" method="POST">@csrf
+            <form action="{{ route('addTaskCategoryPost') }}" method="POST">@csrf
                 <div class="modal-body">
                     
                     <div class="d-grid mb-3">
                         <label for="">Category Name</label>
-                        <input type="text" name="category" id="" class="form-control @error('category') is-invalid @enderror">
-                        @error('category')
+                        <input type="text" name="category_name" id="" class="form-control @error('category_name') is-invalid @enderror">
+                        @error('category_name')
                           <span class="invalid-feedback" role="alert">
                               <strong>{{ $message }}</strong>
                           </span>
@@ -232,31 +187,31 @@
 
 <!-- Modal editCategory -->
 <div class="modal fade" id="editCategory" tabindex="-1" aria-labelledby="editCategoryLabel" aria-hidden="true">
-  <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Category</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <form action="{{ route('editCategoryPost') }}" method="POST">@csrf
-              <div class="modal-body">
-                  <input type="hidden" name="category_id"  class="category_id">
-                  <div class="d-grid mb-3">
-                      <label for="">Category Name</label>
-                      <input type="text" name="category_name" id="" class="edit_category_name form-control @error('category_name') is-invalid @enderror">
-                      @error('category_name')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                      @enderror
-                  </div>               
-              </div>
-              <div class="modal-footer">
-                  <button type="submit" class="btn btn-primary addMoneyTransferBtn">Update Category</button>
-              </div>
-          </form>
-      </div>
-  </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Category</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('editTaskCategoryPost') }}" method="POST">@csrf
+                <div class="modal-body">
+                    <input type="hidden" name="category_id"  class="category_id">
+                    <div class="d-grid mb-3">
+                        <label for="">Category Name</label>
+                        <input type="text" name="category_name" id="" class="edit_category_name form-control @error('category_name') is-invalid @enderror">
+                        @error('category_name')
+                          <span class="invalid-feedback" role="alert">
+                              <strong>{{ $message }}</strong>
+                          </span>
+                        @enderror
+                    </div>               
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary addMoneyTransferBtn">Update Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @endsection
@@ -272,7 +227,7 @@
   <?php endif ?>
 
   <script>
-    function editCategoryModal($category="") {
+    function editTaskCategoryModal($category="") {
         $('#editCategory').modal('show');
         $('.category_id').val($category.id);
         $('.edit_category_name').val($category.name);

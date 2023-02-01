@@ -146,6 +146,15 @@
 
   @yield('extra_js')
 
+  <script>
+    $('#mobile-hamburger').click(function(){
+        document.querySelector('body').classList.toggle('toggle-sidebar');
+    })
+    $('#desktop-hamburger').click(function(){
+        document.querySelector('body').classList.toggle('toggle-sidebar');
+    })
+</script>
+
   <script type="text/javascript">
     $(".select2").select2();
   </script>

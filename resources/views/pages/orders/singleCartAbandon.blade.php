@@ -8,7 +8,9 @@
       <h1>Cart Abandoned Information</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{route('cartAbandon') }}">Abandoned List</a></li>
+          
           <li class="breadcrumb-item active">Cart Abandoned Information<li>
         </ol>
       </nav>
@@ -26,42 +28,18 @@
                 </div>
                 
                 <div class="col-lg-5">
+
                     <label for="" class="fw-bolder">Customer</label>
-                    @foreach ($customer_info as $info)
-                            
-                        @if (str_contains($info, 'first-name'))
-                        <div>First Name: <span class="lead">{{ substr($info, 0, strpos($info, '|')) }}</div>
-                        @endif
 
-                        @if (str_contains($info, 'last-name'))
-                        <div>Last Name: <span class="lead">{{ substr($info, 0, strpos($info, '|')) }}</span></div>
-                        @endif
-
-                        @if (substr($info, strpos($info, '|') + 1) == 'active-email')
-                        <div>Email: <span class="lead">{{ substr($info, 0, strpos($info, '|')) }}</span></div>
-                        @endif
-
-                        @if (substr($info, strpos($info, '|') + 1) == 'phone-number')
-                        <div>Phone: <span class="lead">{{ substr($info, 0, strpos($info, '|')) }}</span></div>
-                        @endif
-
-                        @if (substr($info, strpos($info, '|') + 1) == 'whatsapp-phone-number')
-                        <div>Whatsapp Phone: <span class="lead">{{ substr($info, 0, strpos($info, '|')) }}</span></div>
-                        @endif
-
-                        @if (substr($info, strpos($info, '|') + 1) == 'city')
-                        <div>City: <span class="lead">{{ substr($info, 0, strpos($info, '|')) }}</span></div>
-                        @endif
-
-                        @if (substr($info, strpos($info, '|') + 1) == 'state')
-                        <div>State: <span class="lead">{{ substr($info, 0, strpos($info, '|')) }}</span></div>
-                        @endif
-
-                        @if (substr($info, strpos($info, '|') + 1) == 'delivery-address')
-                        <div>Address: <span class="lead">{{ substr($info, 0, strpos($info, '|')) }}</span></div>
-                        @endif
-                        
-                    @endforeach
+                    <div>First Name: <span class="lead">{{ isset($cart->customer_firstname) ? $cart->customer_firstname : '' }}</div>
+                    <div>Last Name: <span class="lead">{{ isset($cart->customer_lastname) ? $cart->customer_lastname : '' }}</span></div>                                   
+                    <div>Phone Number: <span class="lead">{{ isset($cart->customer_phone_number) ? $cart->customer_phone_number : '' }}</span></div>
+                    <div>Whatsapp Phone: <span class="lead">{{ isset($cart->customer_whatsapp_phone_number) ? $cart->customer_whatsapp_phone_number : '' }}</span></div>
+                    <div>Email: <span class="lead">{{ isset($cart->customer_email) ? $cart->customer_email : '' }}</span></div>
+                    <div>State: <span class="lead">{{ isset($cart->customer_state) ? $cart->customer_state : '' }}</span></div>
+                    <div>City: <span class="lead">{{ isset($cart->customer_city) ? $cart->customer_city : '' }}</span></div>
+                    <div>Address: <span class="lead">{{ isset($cart->customer_delivery_address) ? $cart->customer_delivery_address : '' }}</span></div>
+                      
                 </div>
 
                 <div class="col-lg-2">
@@ -99,7 +77,7 @@
 
                 <div class="col-lg-3">
                     <label for="" class="fw-bolder">Quantity</label>
-                    <div class="text-dark" style="font-size: 14px;">{{ $package['quantity_removed'].' @'. $package['product']->price }}</div>
+                    <div class="text-dark" style="font-size: 14px;">{{ $package['quantity_removed'].' @'. $package['product']->sale_price }}</div>
                 </div>
                 
                 <div class="col-lg-3">

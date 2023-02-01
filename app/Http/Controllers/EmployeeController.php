@@ -62,6 +62,8 @@ class EmployeeController extends Controller
 
         $user = new User();
         $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->firstname = $data['firstname'];
+        $user->lastname = $data['lastname'];
         $user->email = $data['email'];
         $user->password = Hash::make($data['password']);
         $user->type = 'staff';  //customer, staff, agent, superadmin
@@ -160,6 +162,8 @@ class EmployeeController extends Controller
         $data = $request->all();
 
         $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->firstname = $data['firstname'];
+        $user->lastname = $data['lastname'];
         $user->email = $data['email'];
         $user->type = 'staff';  //customer, staff, agent, superadmin
         $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
@@ -267,6 +271,8 @@ public function addAgentPost(Request $request)
 
     $user = new User();
     $user->name = $data['firstname'].' '.$data['lastname'];
+    $user->firstname = $data['firstname'];
+    $user->lastname = $data['lastname'];
     $user->email = $data['email'];
     $user->password = Hash::make($data['password']);
     $user->type = 'agent';  //customer, staff, agent, superadmin
@@ -346,6 +352,8 @@ public function editAgentPost(Request $request, $unique_key)
     $data = $request->all();
 
     $user->name = $data['firstname'].' '.$data['lastname'];
+    $user->firstname = $data['firstname'];
+    $user->lastname = $data['lastname'];
     $user->email = $data['email'];
     $user->type = 'agent';  //customer, staff, agent, superadmin
     $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;

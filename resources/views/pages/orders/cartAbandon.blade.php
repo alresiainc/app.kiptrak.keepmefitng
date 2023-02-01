@@ -71,10 +71,7 @@
                   <i class="bi bi-plus"></i> <span>Add Money Transfer</span></button>
             </div>
 
-            <div class="float-end text-end">
-              <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
-                <i class="bi bi-upload"></i> <span>Import</span></button>
-              <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
+            <div class="float-end text-end d-none">
               <button class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
             </div>
           </div>
@@ -86,8 +83,15 @@
                   <tr>
                     <th>Cart Id</th>
                     <th>Form Id</th>
-                    {{-- <th>Delivery Address</th>
-                    <th>Agent</th>--}}
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Phone</th>
+                    <th>Whatsapp Phone</th>
+                    <th>Email</th>
+                    
+                    <th>State</th>
+                    <th>City</th>
+                    <th>Address</th>
                     <th>Date</th>
                     {{-- <th>Status</th>
                     <th>Actions</th>  --}}
@@ -99,11 +103,26 @@
                   @foreach ($carts as $key=>$cart)
                 
                     <tr>
-                      <th><a href="{{ route('singleCartAbandon', $cart->unique_key) }}">kpcart-0{{ $cart->id }}</a></th>
+                      <th>kpcart-0{{ $cart->id }}
+                        <div class="d-flex justify-content-start align-items-center">
+                          <a href="{{ route('singleCartAbandon', $cart->unique_key) }}" class="badge badge-dark">View</a>
+                          <a href="{{ route('deleteCartAbandon', $cart->unique_key) }}" onclick="return confirm('Are you sure?')" class="badge badge-danger">Delete</a>
+                        </div>
+                        
+                      </th>
 
                       <td>
                         {{ $cart->formHolder->slug }}
                       </td>
+
+                      <td>{{ isset($cart->customer_firstname) ? $cart->customer_firstname : '' }}</td>
+                      <td>{{ isset($cart->customer_lastname) ? $cart->customer_lastname : '' }}</td>
+                      <td>{{ isset($cart->customer_phone_number) ? $cart->customer_phone_number : '' }}</td>
+                      <td>{{ isset($cart->customer_whatsapp_phone_number) ? $cart->customer_whatsapp_phone_number : '' }}</td>
+                      <td>{{ isset($cart->customer_email) ? $cart->customer_email : '' }}</td>
+                      <td>{{ isset($cart->customer_state) ? $cart->customer_state : '' }}</td>
+                      <td>{{ isset($cart->customer_city) ? $cart->customer_city : '' }}</td>
+                      <td>{{ isset($cart->customer_delivery_address) ? $cart->customer_delivery_address : '' }}</td>
 
                       <td>
                         {{ $cart->created_at->format('D, jS M Y, g:ia') }}

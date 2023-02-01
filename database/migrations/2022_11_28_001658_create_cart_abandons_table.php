@@ -18,9 +18,21 @@ return new class extends Migration
 
             $table->string('unique_key')->nullable();
 
+            $table->string('order_id')->nullable();
             $table->string('form_holder_id')->nullable();
 
-            $table->longText('customer_info')->nullable(); //serialised
+            $table->longText('customer_firstname')->nullable();
+            $table->longText('customer_lastname')->nullable();
+            $table->longText('customer_phone_number')->nullable();
+            $table->longText('customer_whatsapp_phone_number')->nullable();
+            $table->longText('customer_email')->nullable();
+            $table->longText('customer_password')->nullable();
+            $table->longText('customer_city')->nullable();
+            $table->longText('customer_state')->nullable();
+            $table->longText('customer_delivery_address')->nullable();
+            $table->longText('customer_delivery_duration')->nullable();
+            $table->longText('customer_ip_address')->nullable();
+
             $table->longText('package_info')->nullable(); //serialised
 
             $table->string('orderbump_status')->nullable(); //true or false

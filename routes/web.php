@@ -158,9 +158,10 @@ Route::post('/edit-upsell', [FormBuilderController::class, 'editUpsellToForm'])-
 //cart abandoned
 Route::get('/carts', [OrderController::class, 'cartAbandon'])->name('cartAbandon');
 Route::get('/carts/{unique_key}', [OrderController::class, 'singleCartAbandon'])->name('singleCartAbandon');
+Route::get('/delete-carts/{unique_key}', [OrderController::class, 'deleteCartAbandon'])->name('deleteCartAbandon');
 Route::get('/cart-abandon-contact', [FormBuilderController::class, 'cartAbandonContact'])->name('cartAbandonContact'); //ajax
+Route::get('/cart-abandon-delivery-duration', [FormBuilderController::class, 'cartAbandonDeliveryDuration'])->name('cartAbandonDeliveryDuration'); //ajax
 Route::get('/cart-abandon-package', [FormBuilderController::class, 'cartAbandonPackage'])->name('cartAbandonPackage'); //ajax
-
 
 //Orders
 Route::get('/orders/{status?}', [OrderController::class, 'allOrders'])->name('allOrders');
@@ -205,7 +206,8 @@ Route::get('/create-category', [CategoryController::class, 'addCategory'])->name
 Route::post('/create-category', [CategoryController::class, 'addCategoryPost'])->name('addCategoryPost');
 Route::get('/view-category/{unique_key}', [CategoryController::class, 'singleCategory'])->name('singleCategory');
 Route::get('/edit-category/{unique_key}', [CategoryController::class, 'editCategory'])->name('editCategory');
-Route::post('/edit-category/{unique_key}', [CategoryController::class, 'editCategoryPost'])->name('editCategoryPost');
+Route::post('/edit-category/{unique_key?}', [CategoryController::class, 'editCategoryPost'])->name('editCategoryPost');
+Route::get('/delete-category/{unique_key}', [CategoryController::class, 'deleteCategory'])->name('deleteCategory');
 Route::get('/category-products/{unique_key}', [CategoryController::class, 'productsByCategory'])->name('productsByCategory');
 Route::get('/category-sales/{unique_key}', [CategoryController::class, 'salesByCategory'])->name('salesByCategory');
 Route::get('/category-purchases/{unique_key}', [CategoryController::class, 'purchasesByCategory'])->name('purchasesByCategory');
@@ -452,6 +454,41 @@ Route::get('/customers-export', [ExportController::class, 'customersExport'])->n
 
 //soundNotification
 Route::get('/sound-notification', [SoundNotificationController::class, 'soundNotification'])->name('soundNotification'); //soundNotification
+
+//task mgt
+//project
+Route::get('/taskmgr-overview', [ProjectController::class, 'overview'])->name('overview'); //project
+Route::get('/add-project', [ProjectController::class, 'addProject'])->name('addProject'); //addProject
+Route::post('/add-project', [ProjectController::class, 'addProjectPost'])->name('addProjectPost'); //addProjectPost
+Route::get('/all-projects', [ProjectController::class, 'allProject'])->name('allProject'); //allProject
+Route::get('/single-project/{unique_key}', [ProjectController::class, 'singleProject'])->name('singleProject'); //singleProject
+Route::get('/edit-project/{unique_key}', [ProjectController::class, 'editProject'])->name('editProject'); //editProject
+Route::post('/edit-project/{unique_key}', [ProjectController::class, 'editProjectPost'])->name('editProjectPost'); //editProjectPost
+Route::get('/delete-project/{unique_key}', [ProjectController::class, 'deleteProject'])->name('deleteProject'); //deleteProject
+
+//task
+Route::get('/add-task', [TaskController::class, 'addTask'])->name('addTask'); //addTask
+Route::post('/add-task', [TaskController::class, 'addTaskPost'])->name('addTaskPost'); //addTaskPost
+Route::get('/all-tasks', [TaskController::class, 'allTask'])->name('allTask'); //allTask
+Route::get('/single-task/{unique_key}', [TaskController::class, 'singleTask'])->name('singleTask'); //singleTask
+Route::get('/edit-task/{unique_key}', [TaskController::class, 'editTask'])->name('editTask'); //editTask
+Route::post('/edit-task/{unique_key}', [TaskController::class, 'editTaskPost'])->name('editTaskPost'); //editTaskPost
+Route::post('/task-remark/{unique_key}', [TaskController::class, 'taskRemarkPost'])->name('taskRemarkPost'); //taskRemarkPost
+Route::get('/delete-task/{unique_key}', [TaskController::class, 'deleteTask'])->name('deleteTask'); //deleteTask
+
+Route::get('/update-task-status/{unique_key}/{status}', [TaskController::class, 'updateTaskStatus'])->name('updateTaskStatus'); //updateTaskStatus
+Route::get('/update-task-priority/{unique_key}/{priority}', [TaskController::class, 'updateTaskPriority'])->name('updateTaskPriority'); //updateTaskPriority
+
+//ajax-create-task-category
+Route::get('/ajax-create-task-category', [TaskController::class, 'ajaxCreateTaskCategory'])->name('ajaxCreateTaskCategory'); //ajaxCreateTaskCategory
+Route::get('/all-task-category', [TaskController::class, 'allTaskCategory'])->name('allTaskCategory'); //allTaskCategory
+Route::post('/add-task-category', [TaskController::class, 'addTaskCategoryPost'])->name('addTaskCategoryPost'); //addTaskCategoryPost
+Route::post('/edit-task-category', [TaskController::class, 'editTaskCategoryPost'])->name('editTaskCategoryPost'); //editTaskCategoryPost
+Route::get('/delete-task-category/{unique_key}', [TaskController::class, 'deleteTaskCategory'])->name('deleteTaskCategory'); //deleteTaskCategory
+
+//Route::get('/nLargest', [TaskController::class, 'nLargest'])->name('nLargest'); //kLargest
+
+
 
 });
 

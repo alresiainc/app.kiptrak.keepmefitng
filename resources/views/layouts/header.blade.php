@@ -1,10 +1,11 @@
 <header id="header" class="header fixed-top d-flex align-items-center">
   <div class="d-flex align-items-center justify-content-between">
     <a href="{{ url('/') }}" class="logo d-flex align-items-center">
-      <img src="{{asset('/assets/img/logo.png')}}" alt="" />
+      <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" />
       <span class="d-none d-lg-block project-name"></span>
     </a>
-    <i class="bi bi-list toggle-sidebar-btn d-none d-md-block"></i>
+    <!---for desktop--->
+    <i id="desktop-hamburger" class="bi bi-list toggle-sidebar-btn d-none d-md-block"></i>
   </div>
   <!-- End Logo -->
 
@@ -152,11 +153,9 @@
       </li>
       <!-- End Profile Nav -->
 
+      <!---for mobile--->
+      <li id="mobile-hamburger" class="d-block d-lg-none"><i class="btn bi bi-list toggle-sidebar-btn"></i></li>
       
-
-      <li class="d-block d-lg-none"><i class="btn bi bi-list toggle-sidebar-btn"></i></li>
-      
-
       @guest
       <li class="nav-item"><a href="{{ route('login') }}">Login</a></li>
       @endguest

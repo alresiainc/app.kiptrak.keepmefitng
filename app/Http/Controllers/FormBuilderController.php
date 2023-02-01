@@ -221,7 +221,7 @@ class FormBuilderController extends Controller
                 <div class="mb-3 q-fc w-100">';
                 $package_select_edit[] .=
                 '<select class="select2 form-control border select-checkbox" name="packages[]" style="width:100%">';
-                   if($this->productById($package) !== ""): '<option value="'.$package.'" selected> '.$this->productById($package)->name.' </option>'; endif;
+                   if($this->productById($package) !== ""): $package_select_edit[] .= '<option value="'.$package.'" selected> '.$this->productById($package)->name.' </option>'; endif;
                     foreach($products as $product):
                         $package_select_edit[] .= '<option value="'. $product->id.'"> '.$product->name.'</option>';
                     endforeach;
@@ -307,6 +307,7 @@ class FormBuilderController extends Controller
         foreach ($selected_products as $package) {
             if (count(array_keys($packages, $package->id)) > 1) { return back()->with('field_error', 'Product: '.$package->name.' Was Selected Morethan Once'); }
         }
+        //validation ends
 
         $formHolder = new FormHolder();
         $formHolder->name = $data['name'];
@@ -349,6 +350,71 @@ class FormBuilderController extends Controller
         //update formHolder
         $formHolder->update(['order_id'=>$order->id]);
         $order->update(['products'=>serialize($product_ids)]);
+
+        if ( (isset($formHolder_former->orderbump_id)) && (isset($formHolder_former->orderbump->product->id)) ) {
+            //orderbump
+            $former_orderbump = $formHolder_former->orderbump;
+
+            $orderbump = new OrderBump();
+            $orderbump->orderbump_heading = $former_orderbump->orderbump_heading;
+            $orderbump->orderbump_subheading = $former_orderbump->orderbump_subheading;
+            $orderbump->product_id = $former_orderbump->product_id;
+            $orderbump->order_id = $order->id;
+            $orderbump->product_expected_quantity_to_be_sold = 1;
+            $orderbump->product_expected_amount = 0;
+            $orderbump->status = 'true';
+            $orderbump->save();
+
+            $product = $former_orderbump->product;
+
+            //outgoing stock for orderbump
+            $outgoingStock = new OutgoingStock();
+            $outgoingStock->product_id = $product->id;
+            $outgoingStock->order_id = $order->id;
+            $outgoingStock->quantity_removed = 1;
+            $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+            $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+            $outgoingStock->quantity_returned = 0; //by default
+            $outgoingStock->created_by = $authUser->id;
+            $outgoingStock->status = 'true';
+            $outgoingStock->save();
+
+            //update formHolder
+            $formHolder->update(['orderbump_id'=>$orderbump->id]);
+        }
+
+        if ( (isset($formHolder_former->upsell_id)) && (isset($formHolder_former->upsell->product->id)) ) {
+            //orderbump
+            $former_upsell = $formHolder_former->upsell;
+
+            $upsell = new UpSell();
+            $upsell->upsell_heading = $former_upsell->upsell_heading;
+            $upsell->upsell_subheading = $former_upsell->upsell_subheading;
+            $upsell->upsell_setting_id = $former_upsell->upsell_setting_id;
+            $upsell->product_id = $former_upsell->product_id;
+            $upsell->order_id = $order->id;
+            $upsell->product_expected_quantity_to_be_sold = 1;
+            $upsell->product_expected_amount = 0;
+            $upsell->status = 'true';
+            $upsell->save();
+
+            $product = $former_upsell->product;
+
+            //outgoing stock for upsell
+            $outgoingStock = new OutgoingStock();
+            $outgoingStock->product_id = $product->id;
+            $outgoingStock->order_id = $order->id;
+            $outgoingStock->quantity_removed = 1;
+            $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+            $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+            $outgoingStock->quantity_returned = 0; //by default
+            $outgoingStock->created_by = $authUser->id;
+            $outgoingStock->status = 'true';
+            $outgoingStock->save();
+
+            //update formHolder
+            $formHolder->update(['upsell_id'=>$upsell->id]);
+        }
 
         return back()->with('success', 'Duplicate Form Created Successfully');
         
@@ -637,7 +703,6 @@ class FormBuilderController extends Controller
             abort(404);
         }
         
-
         //orderbump
         $orderbump = new OrderBump();
         $orderbump->orderbump_heading = !empty($data['orderbump_heading']) ? $data['orderbump_heading'] : 'Would You Like to Add this Package to your Order';
@@ -1016,6 +1081,21 @@ class FormBuilderController extends Controller
 
         $authUser = User::find(1);
 
+        $customer_ip_address = \Request::ip();
+        $existingCart = CartAbandon::where(['order_id'=>$order->id, 'form_holder_id'=>$formHolder->id, 'customer_ip_address'=>$customer_ip_address])->first();
+        if (isset($existingCart)) {
+            $cartAbandoned_id = $existingCart->id;
+        } else {
+            //create new cart-abandoned, for this process
+            $cartAbandoned = new CartAbandon();
+            $cartAbandoned->order_id = $order->id;
+            $cartAbandoned->form_holder_id = $formHolder->id;
+            $cartAbandoned->customer_delivery_duration = 1;
+            $cartAbandoned->customer_ip_address = $customer_ip_address;
+            $cartAbandoned->save();
+            $cartAbandoned_id = $cartAbandoned->id;
+        }
+
         $formName = $formHolder->name;
         $formData = \unserialize($formHolder->form_data);
         
@@ -1131,7 +1211,7 @@ class FormBuilderController extends Controller
         
         return view('pages.newFormLink', compact('authUser', 'user_role', 'unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products',
         'mainProducts_outgoingStocks', 'order', 'orderId', 'mainProduct_revenue', 'orderbump_outgoingStock', 'orderbumpProduct_revenue', 'upsell_outgoingStock',
-        'upsellProduct_revenue', 'customer', 'qty_total', 'order_total_amount', 'grand_total', 'stage'));
+        'upsellProduct_revenue', 'customer', 'qty_total', 'order_total_amount', 'grand_total', 'stage', 'cartAbandoned_id'));
     }
 
     //newFormLinkPost//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1242,6 +1322,9 @@ class FormBuilderController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
         $data = $request->all();
+
+        //delete cartabandoned
+        CartAbandon::where('id', $data['cartAbandoned_id'])->first()->delete();
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
         $order = $formHolder->order;
@@ -1553,26 +1636,57 @@ class FormBuilderController extends Controller
         
         $data = $request->all();
         $contact_data = $request->except(['unique_key']);
-        
-        $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
-        $order = $formHolder->order;
+        $cartAbandoned_id = $data['cartAbandoned_id'];
 
-        $cartAbandon = CartAbandon::where('form_holder_id',$formHolder->id);
+        $contactFieldArr = explode('|', $data['inputVal']); //Ugo|first-name
+        $contact = $contactFieldArr[0]; //Ugo
+        $field = $contactFieldArr[1]; //first-name
 
-        if ($cartAbandon->exists()) {
-            //update
-            $cartAbandon->update(['customer_info'=>serialize($contact_data)]);
-        } else {
-            //create
-            $cartAbandon = new CartAbandon();
-            $cartAbandon->form_holder_id = $formHolder->id;
-            $cartAbandon->customer_info = \serialize($contact_data);
-            $cartAbandon->status = 'true';
-            $cartAbandon->save();
-            
-        }
+        $cartAbandon = CartAbandon::where('id',$cartAbandoned_id)->first();
+        if ($field=='first-name') { $cartAbandon->customer_firstname = $contact; }
+        if ($field=='last-name') { $cartAbandon->customer_lastname = $contact; }
+        if ($field=='phone-number') { $cartAbandon->customer_phone_number = $contact; }
+        if ($field=='whatsapp-phone-number') { $cartAbandon->customer_whatsapp_phone_number = $contact; }
+        if ($field=='active-email') { $cartAbandon->customer_email = $contact; }
+        if ($field=='state') { $cartAbandon->customer_state = $contact; }
+        if ($field=='city') { $cartAbandon->customer_city = $contact; }
+        if ($field=='address') { $cartAbandon->customer_delivery_address = $contact; }
         
+        $cartAbandon->save();
+    
+        return response()->json([
+            'status'=>true,
+            'data'=>$data,
+        ]);
+    }
+
+    public function cartAbandonDeliveryDuration(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
+        $data = $request->all();
+        $contact_data = $request->except(['unique_key']);
+        $cartAbandoned_id = $data['cartAbandoned_id'];
+
+        $contactFieldArr = explode('|', $data['inputVal']); //Ugo|first-name
+        $contact = $contactFieldArr[0]; //Ugo
+        $field = $contactFieldArr[1]; //first-name
+
+        $cartAbandon = CartAbandon::where('id',$cartAbandoned_id)->first();
+        if ($field=='first-name') { $cartAbandon->customer_firstname = $contact; }
+        if ($field=='last-name') { $cartAbandon->customer_lastname = $contact; }
+        if ($field=='phone-number') { $cartAbandon->customer_phone_number = $contact; }
+        if ($field=='whatsapp-phone-number') { $cartAbandon->customer_whatsapp_phone_number = $contact; }
+        if ($field=='active-email') { $cartAbandon->customer_email = $contact; }
+        if ($field=='state') { $cartAbandon->customer_state = $contact; }
+        if ($field=='city') { $cartAbandon->customer_city = $contact; }
+        if ($field=='address') { $cartAbandon->customer_delivery_address = $contact; }
+        
+        $cartAbandon->customer_delivery_duration = $data['delivery_duration'];
+
+        $cartAbandon->save();
+
         return response()->json([
             'status'=>true,
             'data'=>$data,
@@ -1586,32 +1700,33 @@ class FormBuilderController extends Controller
         
         $data = $request->all();
         $package_data = $request->except(['unique_key']);
-        
-        $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
-        $order = $formHolder->order;
 
-        $cartAbandon = CartAbandon::where('form_holder_id',$formHolder->id);
+        $cartAbandoned_id = $data['cartAbandoned_id'];
 
-        if ($cartAbandon->exists()) {
-            //update
-            $cartAbandon->update(['package_info'=>serialize($package_data)]);
-        } else {
-            //create
-            $cartAbandon = new CartAbandon();
-            $cartAbandon->form_holder_id = $formHolder->id;
-            $cartAbandon->package_info = \serialize($package_data);
-            $cartAbandon->status = 'true';
-            $cartAbandon->save();
-            
-        }
-        
+        $contactFieldArr = explode('|', $data['inputVal']); //Ugo|first-name
+        $contact = $contactFieldArr[0]; //Ugo
+        $field = $contactFieldArr[1]; //first-name
+
+        $cartAbandon = CartAbandon::where('id',$cartAbandoned_id)->first();
+        if ($field=='first-name') { $cartAbandon->customer_firstname = $contact; }
+        if ($field=='last-name') { $cartAbandon->customer_lastname = $contact; }
+        if ($field=='phone-number') { $cartAbandon->customer_phone_number = $contact; }
+        if ($field=='whatsapp-phone-number') { $cartAbandon->customer_whatsapp_phone_number = $contact; }
+        if ($field=='active-email') { $cartAbandon->customer_email = $contact; }
+        if ($field=='state') { $cartAbandon->customer_state = $contact; }
+        if ($field=='city') { $cartAbandon->customer_city = $contact; }
+        if ($field=='address') { $cartAbandon->customer_delivery_address = $contact; }
+
+        $cartAbandon->package_info = serialize($data['product_package']);
+        $cartAbandon->save();
+
         return response()->json([
             'status'=>true,
             'data'=>$data,
         ]);
     }
 
-    //callback for notifying admin abt new order
+    //invoiceData(), callback for notifying admin abt new order
     public function invoiceData($formHolder, $customer, $order)
     {
         $authUser = auth()->user();

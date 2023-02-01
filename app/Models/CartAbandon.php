@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class CartAbandon extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $guarded = []; 
     
@@ -31,6 +31,14 @@ class CartAbandon extends Model
         }
 
         return $string;
+    }
+
+    public function getPackageInfoAttribute($value)
+    {
+        return $product_info = unserialize($value);
+        
+        
+        // return \Carbon\Carbon::parse($value->created_at)->diffForHumans();
     }
 
     public function formHolder()

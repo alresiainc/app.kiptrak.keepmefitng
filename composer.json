@@ -9,6 +9,7 @@
         "akaunting/laravel-apexcharts": "^2.0",
         "fedeisas/laravel-mail-css-inliner": "^5.0",
         "guzzlehttp/guzzle": "^7.2",
+        "jenssegers/agent": "^2.6",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",

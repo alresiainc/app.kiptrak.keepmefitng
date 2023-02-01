@@ -147,13 +147,18 @@
   // }
   const sidebarbtn = document.querySelectorAll('.toggle-sidebar-btn');
 
-  for (let i = 0; i < sidebarbtn.length; i++) {
-    const btnToggle = sidebarbtn[i];
+  // for (let i = 0; i < sidebarbtn.length; i++) {
+  //   const btnToggle = sidebarbtn[i];
 
-    btnToggle.addEventListener('click',()=>{
-      document.querySelector('body').classList.toggle('toggle-sidebar');
-    });    
-  }
+  //   btnToggle.addEventListener('click',dummy
+      
+  //     // document.querySelector('body').classList.toggle('toggle-sidebar');
+  //   );    
+  // }
+
+  // function dummy() {
+  //   document.querySelector('body').classList.toggle('toggle-sidebar');
+  // }
 
   /**
    * Search bar toggle

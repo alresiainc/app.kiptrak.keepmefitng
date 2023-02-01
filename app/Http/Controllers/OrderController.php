@@ -193,44 +193,15 @@ class OrderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
+        //remove any reminant
+        CartAbandon::where([ 'customer_firstname'=>null, 'customer_lastname'=>null, 'customer_phone_number'=>null, 'customer_whatsapp_phone_number'=>null,
+        'customer_email'=>null ])->delete();
+
         $carts = CartAbandon::all();
-        $contacts = [];
-        $packages = [];
-        foreach ($carts as $key => $cart) {
-            $cart_ids['cart_id'] = $cart->id;
-            $contacts[] = \unserialize($cart->customer_info);
-            $packages [] = \unserialize($cart->package_info);
-        }
-
-        $contact_info = $contacts[0]['inputValueName'];
-        $product_info = $packages[0]['product_package']; ['1'];
-
-        //["Jerry|first-name","James|last-name","09876234567|phone-number","09876234567|whatsapp-phone-number","jerrry@email.com|active-email","Lagos|state","Ikeja|city","1"]
-
-        $customers = []; $customer_holder=[];
-        foreach ($contact_info as $key => $contact) {
-            $customers['firstname'] = (explode("|", $contact)[1] == 'first-name') ? explode("|", $contact)[0] : 'none';
-            $customers['lastname'] = (explode("|", $contact)[1] == 'last-name') ? explode("|", $contact)[0] : 'none';
-            $customers['phone_number'] = (explode("|", $contact)[1] == 'phone-number') ? explode("|", $contact)[0] : 'none';
-            $customers['whatsapp_phone_number'] = (explode("|", $contact)[1] == 'whatsapp-phone-number') ? explode("|", $contact)[0] : 'none';
-            $customers['active_email'] = (explode("|", $contact)[1] == 'active-email') ? explode("|", $contact)[0] : 'none';
-            $customers['state'] = (explode("|", $contact)[1] == 'state') ? explode("|", $contact)[0] : 'none';
-            $customers['city'] = (explode("|", $contact)[1] == 'city') ? explode("|", $contact)[0] : 'none'; 
-        }
-        //return $customers;
-
-        $customer_holder['customer'] = $customers;
-
-        $products = [];
-        foreach ($product_info as $key => $id) {
-            $products['products'] = $this->productById($id)->first();
-        }
-
-        $final_cart = array_merge($customer_holder, $products, $cart_ids);
-
+        
         $agents = User::where('type','agent')->get();
-        return view('pages.orders.cartAbandon', compact('authUser', 'user_role', 'carts', 'agents', 'final_cart'));
+        return view('pages.orders.cartAbandon', compact('authUser', 'user_role', 'carts', 'agents'));
     }
 
     public function singleCartAbandon($unique_key)
@@ -239,8 +210,7 @@ class OrderController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
         $cart = CartAbandon::where('unique_key', $unique_key)->first();
-        $customer_info = \unserialize($cart->customer_info)['inputValueName'];
-        $package_info = \unserialize($cart->package_info)['product_package']; //wat customer clicked
+        $package_info = $cart->package_info; //wat customer clicked
 
         $order = $cart->FormHolder->order;
 
@@ -261,7 +231,17 @@ class OrderController extends Controller
             $packages[] = $products;
         }
         
-        return view('pages.orders.singleCartAbandon', compact('authUser', 'user_role', 'cart', 'customer_info', 'package_info', 'order', 'packages', 'gross_revenue', 'currency'));
+        return view('pages.orders.singleCartAbandon', compact('authUser', 'user_role', 'cart', 'package_info', 'order', 'packages', 'gross_revenue', 'currency'));
+    }
+
+    public function deleteCartAbandon($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $cart = CartAbandon::where('unique_key', $unique_key)->first();
+        $cart->delete();
+        return back()->with('success', 'Cart Deleted Successfully');
     }
 
     /**
