@@ -1,5 +1,5 @@
 @extends('layouts.design')
-@section('title')Compose Message @endsection
+@section('title')Compose SMS Message @endsection
 @section('extra_css')
     <style>
         select{
@@ -22,11 +22,12 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Compose Message</h1>
+      <h1>Compose SMS Message</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-          <li class="breadcrumb-item active">Compose Message</li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('sentSmsMessage') }}">All SMS</a></li>
+          <li class="breadcrumb-item active">Compose SMS Message</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
@@ -80,9 +81,9 @@
                 <div class="col-md-12 mb-3">
                     <label for="" class="form-label d-flex justify-content-between">
                         <span>Message</span>
-                        <span>Word Count (<span id="count">0</span> / 160) used</span>
+                        <span>Word Count (<span id="count">0</span> / 200) used</span>
                     </label>
-                    <textarea name="message" id="message" cols="30" rows="10" class="form-control @error('message') is-invalid @enderror" maxlength="160"></textarea>
+                    <textarea name="message" id="message" cols="30" rows="5" class="form-control @error('message') is-invalid @enderror" maxlength="160"></textarea>
                     @error('message')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -163,7 +164,7 @@
 @section('extra_js')
 
 <script>
-    var max = 160;
+    var max = 200;
     $("#message").keyup(function(e){
     $("#count").text(($(this).val().length));
     });

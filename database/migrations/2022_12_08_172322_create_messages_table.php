@@ -20,7 +20,7 @@ return new class extends Migration
 
             $table->string('type')->nullable(); //sms, email
             $table->string('topic')->nullable();
-            $table->string('recipients')->nullable(); 
+            $table->longText('recipients')->nullable(); 
             $table->longText('message')->nullable(); 
             $table->string('to')->nullable(); //users, customers 
             $table->string('message_status')->nullable(); //sent, draft

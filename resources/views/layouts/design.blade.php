@@ -140,10 +140,6 @@
 
   <!--------------------------------------------------------------------->
   
-    
-
-    
-
   @yield('extra_js')
 
   <script>
@@ -151,8 +147,10 @@
         document.querySelector('body').classList.toggle('toggle-sidebar');
     })
     $('#desktop-hamburger').click(function(){
-        document.querySelector('body').classList.toggle('toggle-sidebar');
+        // document.querySelector('body').classList.toggle('toggle-sidebar');
+        $("body").toggleClass("toggle-sidebar");
     })
+    
 </script>
 
   <script type="text/javascript">

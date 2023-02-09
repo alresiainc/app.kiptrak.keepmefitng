@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Http;
 
 use App\Models\Message;
 use App\Models\User;
@@ -85,8 +86,7 @@ class MessageController extends Controller
         $request->validate([
             'topic' => 'required|string',
             'recipients' => 'required|string',
-            'message' => 'required|string',
-            
+            'message' => 'required|string|max:200',
         ]);
 
         $data = $request->all();
@@ -102,6 +102,32 @@ class MessageController extends Controller
             $message->created_by = 1;
             $message->status = 'true';
             $message->save();
+
+            $sms_api_token = 'f7NlJwr24AMV2wjnWOTCtHwVWV2sklkb5cPxO0dpvIPg0pNf8kEIpX4nAQzd';
+
+            //array to string
+            $to = $data['recipients']; //'2348066216874, 2347048777792'
+
+            try {
+                $response = Http::post('https://www.bulksmsnigeria.com/api/v1/sms/create', [
+                    'api_token' => $sms_api_token,
+                    'from' => 'BulkSMS.ng',
+                    'to' => $to,
+                    'body' => $data['message'],
+                    'dnd' => '2',
+                ]);
+        
+               $x = json_decode($response);
+                if (isset($x->error)) {
+                    //return $x->error->message;
+                    return back()->with('success', 'SMS Saved Successfully, but not Delivered. Contact Service Providers');
+                } else {
+                    return back()->with('success', 'SMS Saved & Delivered Successfully');
+                }
+                
+            } catch (Exception $exception) {
+                return back()->with('success', 'SMS Saved successfully, but not delivered. Something Went Wrong');
+            }
     
             return back()->with('success', 'Message Sent Successfully');
         } else {
