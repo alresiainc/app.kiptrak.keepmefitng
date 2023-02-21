@@ -49,14 +49,24 @@
   
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css"/>
   
-  <style>
+<style>
     @media only screen and (max-width: 600px) {
-  .logo img {
-    max-width: 60px;
+      .logo img {
+        max-width: 60px;
+      }
+    }
+    .btn{
+      background-color: #04512d !important;
+      border-color: #04512d !important;
+      color: #fff !important;
+    }
+  .btn:hover{
+    background-color: #fff !important;
+    border-color: #04512d !important;
+    color: #04512d !important;
   }
-}
-  </style>
-  @yield('extra_css')
+</style>
+@yield('extra_css')
 
 </head>
 

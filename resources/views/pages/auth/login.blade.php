@@ -28,6 +28,21 @@
 
 </head>
 
+<style>
+  button{
+    background-color: #04512d !important;
+    border-color: #04512d !important;
+  }
+  button:hover{
+    background-color: #fff !important;
+    border-color: #04512d !important;
+    color: #04512d !important;
+  }
+  .forgotPassword, .card-title{
+    color: #04512d !important;
+  }
+</style>
+
 <body>
 
   <main>
@@ -94,11 +109,11 @@
                         <label class="form-check-label" for="rememberMe">Remember me</label>
                       </div>
                       <div>
-                        <a href="forgot">Forgot Password?</a>
+                        <a href="forgot" class="forgotPassword">Forgot Password?</a>
                       </div>
                     </div>
                     <div class="col-12">
-                      <button type="submit" class="btn btn-primary rounded-pill w-100" type="submit">Login</button>
+                      <button type="submit" class="btn btn-primary rounded-pill w-100 sidebarColor" type="submit">Login</button>
                     </div>
                     <div class="col-12 d-none">
                       <p class="small mb-0">Don't have account? <a href="register">Create an account</a></p>
