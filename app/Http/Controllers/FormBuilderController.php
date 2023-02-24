@@ -175,7 +175,29 @@ class FormBuilderController extends Controller
         $upsellTemplates = UpsellSetting::all();
         $staffs = User::where('type','staff')->get();
         return view('pages.allFormBuilders', compact('authUser', 'user_role', 'formHolders', 'products', 'upsellTemplates', 'staffs'));
+    }
+
+    public function assignStaffToForm(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
+        $data = $request->all();
+        $form_id = $data['form_id'];
+        $staff_id = $data['staff_id'];
+
+        $formHolder = FormHolder::where('id',$form_id)->first();
+
+        //check if form has entries
+        if (count($formHolder->customers) > 0) {
+            $orders = Order::where('form_holder_id', $formHolder->id)->update(['staff_assigned_id'=>$staff_id]);
+        }
+        
+        //upd form
+        $formHolder->update(['staff_assigned_id'=>$staff_id]);
+        
+         
+        return back()->with('success', 'Staff Assigned Successfully');
     }
 
     //duplicateForm
@@ -1275,8 +1297,7 @@ class FormBuilderController extends Controller
                     $rejected->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>$rejected->quantity_removed]);
                 }
                 
-            }
-            
+            } 
         }
 
         //accepted orderbump
@@ -1324,7 +1345,11 @@ class FormBuilderController extends Controller
         $data = $request->all();
 
         //delete cartabandoned
-        CartAbandon::where('id', $data['cartAbandoned_id'])->first()->delete();
+
+        $cartAbandon = CartAbandon::where('id', $data['cartAbandoned_id']);
+        if($cartAbandon->exists()) {
+            $cartAbandon->delete();
+        }
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
         $order = $formHolder->order;
@@ -1400,6 +1425,7 @@ class FormBuilderController extends Controller
             $newOrder = Order::find($newOrder->id);
             $newOrder->customer_id = $customer->id;
             $newOrder->status = 'new';
+            $newOrder->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
             $newOrder->save();
 
             $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
@@ -1466,6 +1492,7 @@ class FormBuilderController extends Controller
             //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
             $order->customer_id = $customer->id;
             $order->status = 'new';
+            $order->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
             $order->save();
             
             $has_orderbump = isset($formHolder->orderbump_id) ? true : false;

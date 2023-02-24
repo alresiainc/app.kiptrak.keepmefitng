@@ -1,5 +1,6 @@
 @php
-   // $ids = \App\Models\SoundNotification::where('status', 'new')->pluck('id')
+    $newOrders = \App\Models\SoundNotification::newOrders();
+    $pendingOrders = \App\Models\SoundNotification::pendingOrders();
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -55,12 +56,12 @@
         max-width: 60px;
       }
     }
-    .btn{
+    .btn {
       background-color: #04512d !important;
       border-color: #04512d !important;
       color: #fff !important;
     }
-  .btn:hover{
+  .btn:hover {
     background-color: #fff !important;
     border-color: #04512d !important;
     color: #04512d !important;
@@ -73,15 +74,6 @@
 
 
 <body>
-
-  {{-- <audio id="sound_notification" src="{{ asset('/assets/audio/sound_notification.mp3') }}" muted></audio> --}}
-
-  {{-- <audio id="sound_notification">
-    <source src="{{ asset('/assets/audio/sound_notification.ogg') }}" type="audio/ogg">
-    <source src="{{ asset('/assets/audio/sound_notification.mp3') }}" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio> --}}
-  
 
   <!-- ======= Header ======= -->
   @include('layouts.header')
@@ -141,27 +133,26 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"></script>
-<script src="https://cdn.datatables.net/datetime/1.2.0/js/dataTables.dateTime.min.js"></script>
+  <script src="https://cdn.datatables.net/datetime/1.2.0/js/dataTables.dateTime.min.js"></script>
 
   <!-- Template Main JS File -->
   <script src="{{asset('/assets/js/main.js')}}"></script>
   <script src="{{asset('/assets/js/navigation.js')}}"></script>
 
-
   <!--------------------------------------------------------------------->
   
-  @yield('extra_js')
+@yield('extra_js')
 
   <script>
-    $('#mobile-hamburger').click(function(){
-        document.querySelector('body').classList.toggle('toggle-sidebar');
-    })
-    $('#desktop-hamburger').click(function(){
-        // document.querySelector('body').classList.toggle('toggle-sidebar');
-        $("body").toggleClass("toggle-sidebar");
-    })
-    
-</script>
+      $('#mobile-hamburger').click(function(){
+          document.querySelector('body').classList.toggle('toggle-sidebar');
+      })
+      $('#desktop-hamburger').click(function(){
+          // document.querySelector('body').classList.toggle('toggle-sidebar');
+          $("body").toggleClass("toggle-sidebar");
+      })
+      
+  </script>
 
   <script type="text/javascript">
     $(".select2").select2();
@@ -179,7 +170,7 @@
       maxDate = new DateTime($('#max'), {
           format: 'MMMM Do YYYY'
       });
-  
+
       // DataTables initialisation
       var table = $('.custom-table').DataTable({
         "bSort" : false,
@@ -189,7 +180,7 @@
         ],
           
       });
-  
+
       // Refilter the table
       $('#min, #max').on('change', function () {
         table.draw();
@@ -203,98 +194,79 @@
   <script>
     var timeInterval = 300000; //5mins
     var sound_notification = "{{ asset('/assets/audio/sound_notification.mp3') }}";
+
+    //initially
+    // if (localStorage.getItem("sound_value") === null) {
+    //   localStorage.setItem("sound_value", 0);
+    // } else {
+    //   var stored_sound_value = localStorage.getItem("sound_value");
+    // }
+
+    var sound_value = $('.sound_value').val();
     
-    var soundNotification = function() {
-      $.ajax({
-        url: "{{ route('soundNotification') }}",
-        type: 'GET',
-        dataType: 'json',
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function(resp) {
-          if(resp.status){
-            $('.alarm_count').text(resp.count);
-            //console.log(resp.data)
-            var notes = resp.data;
+    // var soundNotification = function() {
+    //   $.ajax({
+    //     url: "{{ route('soundNotification') }}",
+    //     type: 'GET',
+    //     dataType: 'json',
+    //     headers: {
+    //       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    //     },
+    //     success: function(resp) {
+    //       if(resp.status){
+    //         $('.alarm_count').text(resp.count);
+    //         //console.log(resp.data)
+    //         var notes = resp.data;
 
-            $("ul.messages notes").html('');
+    //         $("ul.messages notes").html('');
 
-            $('ul.messages').append('<li class="dropdown-header">You have <span class="alarm_count">'+resp.count+'</span> new messages<a href="/orders/new_from_alarm"><span class="badge rounded-pill bg-primary p-2 ms-2">View all</span></a></li><li><hr class="dropdown-divider" /></li>')
+    //         $('ul.messages').append('<li class="dropdown-header">You have <span class="alarm_count">'+resp.count+'</span> new messages<a href="/orders/new_from_alarm"><span class="badge rounded-pill bg-primary p-2 ms-2">View all</span></a></li><li><hr class="dropdown-divider" /></li>')
 
-              $.each(notes,function(key,note){
+    //           $.each(notes,function(key,note){
                 
-                  $('ul.messages').append('<li class="message-item" onclick="deleteNotification('+note.id+')"><div><h4>'+note.topic+' #000'+note.order_id+'</h4><p>'+note.content+'</p><p>'+momentsAgo(note.created_at)+'</p></div></li><li><hr class="dropdown-divider"/></li>');
-              });
+    //               $('ul.messages').append('<li class="message-item" onclick="deleteNotification('+note.id+')"><div><h4>'+note.topic+' #000'+note.order_id+'</h4><p>'+note.content+'</p><p>'+momentsAgo(note.created_at)+'</p></div></li><li><hr class="dropdown-divider"/></li>');
+    //           });
 
               
-            var audio = new Audio(sound_notification);
+    //         var audio = new Audio(sound_notification);
 
-            $("body").hover(function(){
-              // audio.play();
-            });
+    //         $("body").hover(function(){
+    //           // audio.play();
+    //         });
 
-          } else {
-            console.log('no')
-          }
-        },
-        error: function(data){
-          console.log(data);
-        }
-      });
-    }
-    
-    soundNotification();
-    let interval = setInterval(() => {
-      soundNotification();
-    }, timeInterval);
-
-    function momentsAgo(datetime) {
-      //return moment(datetime, 'YYYY-MM-DD HH:mm:ss').format('MM/DD/YY h:mm A');
-      return moment(datetime).fromNow();
-    }
-
-    
-
-// var globalAjaxResponseStatus="";
-// var int=self.setInterval("CheckData()",1000);
-
-// function CheckData()
-// {
-//   if(globalAjaxResponseStatus=="completed")
-//   {
-//      globalAjaxResponseStatus=""
-//      $.ajax({
-//         url: "{{ route('soundNotification') }}",
-//         type: 'GET',
-//         dataType: 'json',
-//         headers: {
-//           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-//         },
-//            success: function(resp){
-//               globalAjaxResponseStatus="completed"
-//               if(resp.status){
-//                 $('.alarm_count').text(resp.count);
-//                 console.log(resp.data)
-//                 var audio = new Audio(sound_notification);
-//                 // audio.play();
-//               } else {
-//                 console.log('no')
-//               }
-//               //Do what you want with the response
-//              }
-//           });
-
-//   }
-
-// }
-
-    // function playAlert() {
-    //     var x = document.getElementById("sound_notification"); 
-    //     document.body.addEventListener("mousemove", function () {
-    //     x.play()
-    //   })
+    //       } else {
+    //         console.log('no')
+    //       }
+    //     },
+    //     error: function(data){
+    //       console.log(data);
+    //     }
+    //   });
     // }
+    
+    $(document).ready(function(){
+          
+      $('body').click(function(){
+
+        if (!localStorage.hasOwnProperty("sound_value")) {
+          localStorage.setItem("sound_value", 0);
+        } else {
+          var stored_sound_value = localStorage.getItem("sound_value");
+
+          if (($('.sound_value').val() == 0) || (sound_value == stored_sound_value)) {
+            return true;
+          } else {
+            localStorage.setItem("sound_value", sound_value);
+            var audio = new Audio(sound_notification);
+            audio.play();
+          }
+          
+        }
+          
+      });
+      
+    });
+
   </script>
       
 </body>

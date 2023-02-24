@@ -29,6 +29,10 @@ return new class extends Migration
             $table->longText('whatsapp_message_ids')->nullable(); //serialized array
             $table->longText('sms_message_ids')->nullable(); //serialized array
 
+            $table->longText('order_note')->nullable();
+            $table->string('expected_delivery_date')->nullable();
+            $table->string('actual_delivery_date')->nullable(); //by agent
+
             $table->string('form_holder_id')->nullable(); //incase coming from embedded form
             $table->string('agent_assigned_id')->nullable(); //delivery agent that delivered the order
             

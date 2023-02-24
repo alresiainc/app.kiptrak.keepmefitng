@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use App\Models\OutgoingStock;
+use Carbon\Carbon;
 
 class Order extends Model
 {
@@ -236,6 +237,20 @@ class Order extends Model
         } else {
             return $whatsapp_msg = "";
         }
+        
+    }
+
+    public function checkExpectedDeliveryDate() {
+
+        $expected_date = Carbon::parse($this->expected_delivery_date);
+        $today = Carbon::now();
+        $result = $expected_date->gt($today);
+        
+        //if > today
+        if ($result) {
+            return $daysDiff = now()->diffInDays($expected_date).' day(s) remaining';
+        }
+        return 'Due';
         
     }
     

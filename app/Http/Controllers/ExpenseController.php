@@ -7,6 +7,7 @@ use App\Models\WareHouse;
 use App\Models\ExpenseCategory;
 use App\Models\Expense;
 use App\Models\Account;
+use App\Models\User;
 
 class ExpenseController extends Controller
 {
@@ -32,10 +33,11 @@ class ExpenseController extends Controller
         $categories = ExpenseCategory::all();
         $accounts = Account::all();
         $warehouses = WareHouse::all();
+        $staffs = User::where('type', 'staff')->get();
 
         $account_no = 'kpa-' . date("Ymd") . '-'. date("his");
         
-        return view('pages.expenses.addExpense', compact('authUser', 'user_role', 'categories', 'accounts', 'warehouses', 'account_no'));
+        return view('pages.expenses.addExpense', compact('authUser', 'user_role', 'categories', 'accounts', 'warehouses', 'account_no', 'staffs'));
     }
 
     public function addExpensePost(Request $request)
@@ -55,6 +57,7 @@ class ExpenseController extends Controller
         $expense->expense_code = $expense_code;
         $expense->expense_category_id = $data['category'];
         $expense->warehouse_id = $data['warehouse'];
+        $expense->staff_id = !empty($data['staff_id']) ? $data['staff_id'] : null;
         // $expense->expense_date = $data['expense_date'];
         $expense->amount = $data['amount'];
         // $expense->account_id = $data['account'];

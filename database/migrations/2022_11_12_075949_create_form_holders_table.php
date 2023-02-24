@@ -35,6 +35,8 @@ return new class extends Migration
             $table->string('orderbump_id')->nullable();
             $table->string('upsell_id')->nullable();
 
+            $table->string('staff_assigned_id')->nullable();
+
             $table->string('created_by');
             $table->string('status')->nullable();
             $table->softDeletes();

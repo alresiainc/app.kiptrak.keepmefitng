@@ -93,7 +93,11 @@ class User extends Authenticatable
 
     public function role($user_id) {
         return UserRole::where('user_id', $user_id)->first();
-    }    
+    }
+    
+    public function assignedOrders() {
+        return $this->hasMany(Order::class,'staff_assigned_id');
+    }
     
 
 }

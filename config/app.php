@@ -195,6 +195,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Jenssegers\Agent\AgentServiceProvider::class,
+        Ladumor\OneSignal\OneSignalServiceProvider::class,
 
     ],
 
@@ -212,6 +213,7 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Agent' => Jenssegers\Agent\Facades\Agent::class,
+        'OneSignal' => \Ladumor\OneSignal\OneSignal::class,
     ])->toArray(),
 
 ];

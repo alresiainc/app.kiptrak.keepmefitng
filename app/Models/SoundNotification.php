@@ -36,12 +36,25 @@ class SoundNotification extends Model
         return $this->belongsTo(Order::class, 'order_id');  
     }
 
-    // public function getCreatedAtAttribute($value)
-    // {
-    //     return $date = (int) $value;
-    //     $start_date = date('Y-m-d', );
-    //     return $start_date;
-        
-    //     // return \Carbon\Carbon::parse($value->created_at)->diffForHumans();
-    // }
+    public static function newOrders()
+    {
+        $newOrders = collect([])->all();
+        $order_ids = static::where('id', '>=', 1)->pluck('order_id');
+        if ($order_ids->count() > 0) {
+            $newOrders = Order::whereIn('id', $order_ids)->where('status', 'new')->get();
+            return $newOrders;
+        }
+        return $newOrders;
+    }
+
+    public static function pendingOrders()
+    {
+        $pendingOrders = collect([])->all();
+        $order_ids = static::where('id', '>=', 1)->pluck('order_id');
+        if ($order_ids->count() > 0) {
+            $pendingOrders = Order::whereIn('id', $order_ids)->where('status', 'pending')->get();
+            return $pendingOrders;
+        }
+        return $pendingOrders;
+    }
 }

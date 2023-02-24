@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 use App\Models\Order;
 use App\Models\OrderLabel;
@@ -31,8 +32,8 @@ class OrderController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $agents = User::where('type','agent')->get();
+        $staffs = User::where('type','staff')->get();
 
-    
         if ($authUser->isSuperAdmin) {
             
             $orders = Order::all();
@@ -96,6 +97,48 @@ class OrderController extends Controller
                 $orders = Order::where('status', 'delivered_and_remitted')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
             }
 
+            //orders whose dates are greater-than today
+            if ($status=="total_follow_ups") {
+                $totalFollowUpOrders1 = []; $today = Carbon::now(); $expected_date;
+                foreach ($authUser->assignedOrders as $order) {
+                    $expected_date = Carbon::parse($order->expected_delivery_date);
+                    $result = $expected_date->gt($today);
+                    if ($result) {
+                        $totalFollowUpOrders1[] = $order;
+                    }
+                } 
+                $orders = collect($totalFollowUpOrders1);
+            }
+
+            //today only
+            if ($status=="today_follow_ups") {
+                $todayFollowUpOrders1 = [];
+                foreach ($authUser->assignedOrders as $order) {
+                    $expected_date = Carbon::parse($order->expected_delivery_date);
+                    $result = $expected_date->isToday();
+                    if ($result) {
+                        $todayFollowUpOrders1[] = $order;
+                    }
+                }
+                $orders = collect($todayFollowUpOrders1);
+            }
+            
+            //tomorrow only
+            if ($status=="tomorrow_follow_ups") {
+                $tomorrowFollowUpOrders1 = []; $tomorrow = Carbon::now()->addDays(1)->format('Y-m-d');
+                foreach ($authUser->assignedOrders as $order) {
+                    $expected_date = Carbon::parse($order->expected_delivery_date)->format('Y-m-d');
+                    if ($expected_date == $tomorrow) {
+                        $tomorrowFollowUpOrders1[] = $order;
+                    }
+                }
+                $orders = collect($tomorrowFollowUpOrders1);
+            }
+
+            if ($status=="other_orders") {
+                $orders = $authUser->assignedOrders()->where(['customer_id'=>null])->get();
+            }
+            
             $entries = false; $formHolder = '';
             if ($status !== "") {
                 $formHolder = FormHolder::where('unique_key', $status);
@@ -108,8 +151,7 @@ class OrderController extends Controller
             }
         }
         
-
-        return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents', 'status', 'entries', 'formHolder'));
+        return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents', 'staffs', 'status', 'entries', 'formHolder'));
     }
 
     public function updateOrderStatus($unique_key, $status)
@@ -120,6 +162,29 @@ class OrderController extends Controller
         }
         $order->update(['status'=>$status]);
         return back()->with('success', 'Order Updated Successfully!');
+    }
+
+    public function updateOrderDateStatus(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $data = $request->all();
+        $order_id = $data['order_id'];
+        $order_delivery_date = $data['order_delivery_date'];
+        $order_status = $data['order_status'];
+        $order_note = $data['order_note'];
+
+        $order = Order::where('id',$order_id)->first();
+        
+        $order->status = !empty($order_status) ? $order_status : $order->status;
+        $order->order_note = !empty($order_note) ? $order_note : null;
+        $order->expected_delivery_date = !empty($order_delivery_date) ? $order_delivery_date : $order->expected_delivery_date;
+        $order->save();
+
+        //upd order
+        //DB::table('orders')->where('id',$order_id)->update(['status'=>$status, 'order_note'=>$order_note, 'expected_delivery_date'=>$order_delivery_date]);
+        return back()->with('success', 'Order Date Status Updated Successfully!');
     }
 
     //orderForm

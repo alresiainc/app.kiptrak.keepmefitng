@@ -64,4 +64,12 @@ class Category extends Model
     public function products() {
         return $this->hasMany(Product::class, 'category_id');    
     }
+
+    public function revenue() {
+        $products = $this->products->pluck('id');
+        $revenue = 0;
+        $accepted_outgoing_stock = OutgoingStock::whereIn('product_id', $products)->where('customer_acceptance_status', 'accepted');
+        $revenue += $accepted_outgoing_stock->sum('amount_accrued');
+        return $revenue;
+    }
 }

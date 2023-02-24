@@ -1,5 +1,5 @@
 @extends('layouts.design')
-@section('title')Sales Report @endsection
+@section('title')Activity Log Report @endsection
 
 @section('extra_css')
 <style>
@@ -23,11 +23,11 @@
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Sales Report</h1>
+    <h1>Activity Log Report</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active">Sales Report</li>
+        <li class="breadcrumb-item active">Activity Log Report</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -43,22 +43,8 @@
       <form action="{{ route('saleReportQuery') }}" method="POST">@csrf
         <div class="row border rounded py-2 mb-2">
 
-          <div class="col-12 col-md-6 col-lg-3 mb-3">
-            <label for="">Start Date</label>
-            <fieldset class="form-group">
-              <input type="date" name="start_date" class="form-control" id="" value="{{ $start_date != '' ? $start_date : '' }}">
-            </fieldset>
-          </div>
-          
-          <div class="col-12 col-md-6 col-lg-3 mb-3">
-            <label for="">End Date</label>
-            <fieldset class="form-group">
-              <input type="date" name="end_date" class="form-control" id="" value="{{ $end_date != '' ? $end_date : '' }}">
-            </fieldset>
-          </div>
-
-          <div class="col-12 col-md-6 col-lg-3 mb-3">
-            <label for="">Select Warehouse</label>
+          <div class="col-12 col-md-6 col-lg-4 mb-3">
+            <label for="">Select Location</label>
             <fieldset class="form-group">
               <select data-live-search="true" class="custom-select border form-control" name="warehouse_id" id="">
                 <option value="{{ $warehouse_selected != '' ? $warehouse_selected->id : '' }}">{{ $warehouse_selected != '' ? $warehouse_selected->name : 'Nothing Selected' }}</option>
@@ -71,9 +57,13 @@
             </fieldset>
           </div>
 
-          <div class="col-12 col-md-6 col-lg-3 d-flex align-items-end mb-3">
-            <div class="d-grid w-100">
-              <button class="btn btn-primary btn-block glow users-list-clear mb-0"><i class="bx bx-plus"></i>Submit</button>
+          <div class="col-12 col-md-6 col-lg-2 mb-3">
+            <fieldset class="form-group">
+                <label for="" style="visibility: hidden;">Submit</label>
+                <input type="button" name="end_date" class="form-control btn" id="" value="Submit">
+              </fieldset>
+            <div class="d-grid w-100 d-none">
+              <button class="btn btn-primary btn-block glow users-list-clear mb-0"></button>
             </div>
           </div>
 
@@ -99,34 +89,49 @@
           </div>
           <hr>
           
-          <div class="table table-responsive">
-            <table id="products-table" class="table custom-table" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>Product Name</th>
-                        <th>Sold Amount</th>
-                        <th>Sold Qty</th>
-                        <th>In Stock</th>
-                        
-                    </tr>
-                </thead>
-                <tbody>
-                  @if (count($sellingProductsBulk) > 0)
-                      @foreach ($sellingProductsBulk as $product)
-                      
-                          <tr>
-                              <td>{{ $product['product_name'] }}</td>
-                              <td>{{ $product['sold_amount'] }}</td>
-                              <td>{{ $product['sold_qty'] }}</td>
-                              <td>{{ $product['stock_available'] }}</td>
-                          </tr>
-                              
-                      @endforeach
-                  @endif
-                    
-                </tbody>
-              </table>
+          <div class="row mb-3">
+            
+            <div class="col-lg-3 col-md-6">
+              <label for="">Start Date</label>
+              <input type="text" name="start_date" id="min" class="form-control filter">
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+              <label for="">End Date</label>
+              <input type="text" name="end_date" id="max" class="form-control filter">
+            </div>
+    
           </div>
+
+          <div class="table table-responsive default_show">
+            <table class="table custom-table" style="width:100%">
+              <thead>
+                  <tr>
+                      <th>Date</th>
+                      <th>Subject Type</th>
+                      <th>Action</th>
+                      <th>By</th>
+                      <th>Note</th>
+                  </tr>
+              </thead>
+              <tbody>
+              
+                @if (count($activityLogs))
+                    @foreach ($activityLogs as $log)
+                    <tr>
+                      <td>{{ $log->created_at }}</td>
+                      <td>{{ $log->subject_type }}</td>
+                      <td>{{ $log->action }}</td>
+                      <td>{{ $log->user_id }}</td>
+                      <td>{{ isset($log->note) ? $log->note : '' }}</td>
+                  </tr>
+                    @endforeach
+                @endif
+                
+              </tbody>
+            </table>
+          </div>
+
           </div>
         </div>
       </div>
@@ -158,4 +163,34 @@
   </div>
 </div>
 
+@endsection
+
+@section('extra_js')
+
+<script>
+    var minDate, maxDate;
+   
+   // Custom filtering function which will search data in column four between two values(dates)
+   $.fn.dataTable.ext.search.push(
+       function( settings, data, dataIndex ) {
+           var min = minDate.val();
+           var max = maxDate.val();
+           var date = new Date( data[6] ); //6 is the date column on datatable
+    
+           if (
+               ( min === null && max === null ) ||
+               ( min === null && date <= max ) ||
+               ( min <= date   && max === null ) ||
+               ( min <= date   && date <= max )
+           ) {
+               return true;
+           }
+           return false;
+       }
+   );
+  
+  </script>
+
+
+    
 @endsection

@@ -129,6 +129,7 @@ Route::get('/form-builder-save', [FormBuilderController::class, 'formBuilderSave
 Route::get('/new-form-builder', [FormBuilderController::class, 'newFormBuilder'])->name('newFormBuilder');
 Route::post('/new-form-builder', [FormBuilderController::class, 'newFormBuilderPost'])->name('newFormBuilderPost');
 Route::get('/all-new-form-builder', [FormBuilderController::class, 'allNewFormBuilders'])->name('allNewFormBuilders');
+Route::post('/assign-staff-to-form', [FormBuilderController::class, 'assignStaffToForm'])->name('assignStaffToForm'); //ajax
 Route::get('/edit-new-form-builder/{unique_key}', [FormBuilderController::class, 'editNewFormBuilder'])->name('editNewFormBuilder'); //edit by admin
 Route::post('/edit-new-form-builder/{unique_key}', [FormBuilderController::class, 'editNewFormBuilderPost'])->name('editNewFormBuilderPost'); //edit by admin
 
@@ -171,6 +172,7 @@ Route::post('/create-order', [OrderController::class, 'addOrderPost'])->name('ad
 Route::get('/view-order/{unique_key}', [OrderController::class, 'singleOrder'])->name('singleOrder'); //viewed by admin
 Route::post('/assign-agent-to-order', [OrderController::class, 'assignAgentToOrder'])->name('assignAgentToOrder');
 Route::post('/assign-staff-to-order', [OrderController::class, 'assignStaffToOrder'])->name('assignStaffToOrder');
+Route::post('/update-order-date-status', [OrderController::class, 'updateOrderDateStatus'])->name('updateOrderDateStatus');
 
 //register any user, customer or agent, staff, etc
 //staff
@@ -389,6 +391,11 @@ Route::post('/mail-customers-by-category/{selectedCategory}/{recipients?}', [Mes
 Route::get('/send-sms/{phone?}', [MessageController::class, 'sendVCode'])->name('sendVCode'); //list
 
 //reports
+Route::get('/reports-profit-and-loss/{start_date?}/{end_date?}/{location?}', [ReportController::class, 'profitLossReport'])->name('profitLossReport'); //profitLossReport
+Route::get('/reports-sales-rep/{staff_unique_key?}/{start_date?}/{end_date?}/{location?}', [ReportController::class, 'salesRepReport'])->name('salesRepReport'); //salesRepReport
+
+Route::get('/reports-activity-logs', [ReportController::class, 'activityLogReport'])->name('activityLogReport'); //activityLogReport
+
 Route::get('/reports-product', [ReportController::class, 'productReport'])->name('productReport'); //productReport
 Route::post('/reports-product', [ReportController::class, 'productReportQuery'])->name('productReportQuery'); //productReportQuery
 
@@ -485,6 +492,21 @@ Route::get('/all-task-category', [TaskController::class, 'allTaskCategory'])->na
 Route::post('/add-task-category', [TaskController::class, 'addTaskCategoryPost'])->name('addTaskCategoryPost'); //addTaskCategoryPost
 Route::post('/edit-task-category', [TaskController::class, 'editTaskCategoryPost'])->name('editTaskCategoryPost'); //editTaskCategoryPost
 Route::get('/delete-task-category/{unique_key}', [TaskController::class, 'deleteTaskCategory'])->name('deleteTaskCategory'); //deleteTaskCategory
+
+//staff-dashboarf
+Route::get('/staff-dashboard', [StaffDashboardController::class, 'staffDashboard'])->name('staffDashboard'); //staffDashboard
+Route::get('/staff-dashboard/{start_date?}/{end_date?}/{duration?}', [StaffDashboardController::class, 'staffDashboardDateFilter'])->name('staffDashboardDateFilter'); //staffDashboardFilter
+Route::post('/staff-dashboard/{start_date?}/{end_date?}/{duration?}', [StaffDashboardController::class, 'staffDashboardFilterPost'])->name('staffDashboardFilterPost'); //staffDashboardFilterPost
+
+Route::get('/staff-dashboard-today', [StaffDashboardController::class, 'staffTodayRecord'])->name('staffTodayRecord'); //staffTodayRecord
+Route::get('/staff-dashboard-yesterday', [StaffDashboardController::class, 'staffYesterdayRecord'])->name('staffYesterdayRecord'); //staffYesterdayRecord
+Route::get('/staff-dashboard-last7days', [StaffDashboardController::class, 'staffLast7DaysRecord'])->name('staffLast7DaysRecord'); //staffLast7DaysRecord
+Route::get('/staff-dashboard-last14days', [StaffDashboardController::class, 'staffLast14DaysRecord'])->name('staffLast14DaysRecord'); //staffLast14DaysRecord
+Route::get('/staff-dashboard-last30days', [StaffDashboardController::class, 'staffLast30DaysRecord'])->name('staffLast30DaysRecord'); //staffLast30DaysRecord
+Route::get('/staff-dashboard-weekly', [StaffDashboardController::class, 'staffWeeklyRecord'])->name('staffWeeklyRecord'); //staffWeeklyRecord
+Route::get('/staff-dashboard-lastweek', [StaffDashboardController::class, 'staffLastWeekRecord'])->name('staffLastWeekRecord'); //staffLastWeekRecord
+Route::get('/staff-dashboard-monthly', [StaffDashboardController::class, 'staffMonthlyRecord'])->name('staffMonthlyRecord'); //staffMonthlyRecord
+Route::get('/staff-dashboard-lastmonth', [StaffDashboardController::class, 'staffLastMonthRecord'])->name('staffLastMonthRecord'); //staffLastMonthRecord
 
 //Route::get('/nLargest', [TaskController::class, 'nLargest'])->name('nLargest'); //kLargest
 

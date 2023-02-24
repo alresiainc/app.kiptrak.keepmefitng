@@ -510,8 +510,6 @@
 </script>
 @endif
 
-
-
 <script>
    'use strict';
 

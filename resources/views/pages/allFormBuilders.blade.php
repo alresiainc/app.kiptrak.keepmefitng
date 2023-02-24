@@ -101,15 +101,15 @@
                         <a class="badge badge-success" href="{{ route('duplicateForm', $formHolder->unique_key) }}">Duplicate</a>
                       </td>
                       
-                        @if (isset($formHolder->order->staff_assigned_id))
-                            <td>
-                              {{ $formHolder->order->staff->name }} <br>
-                              <span class="badge badge-dark" onclick="changeAgentModal('{{ $formHolder->order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Staff">
-                                <i class="bi bi-plus"></i> <span>Change Staff</span></span>
-                            </td>
+                        @if (isset($formHolder->staff_assigned_id))
+                        <td>
+                          {{ $formHolder->staff->name }} <br>
+                          <span class="badge badge-dark" onclick="changeAgentModal('{{ $formHolder->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Staff">
+                            <i class="bi bi-plus"></i> <span>Change Staff</span></span>
+                        </td>
                         @else
                         <td style="width: 120px">
-                          <span class="badge badge-success" onclick="addAgentModal('{{ $formHolder->order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Staff" style="cursor: pointer;">
+                          <span class="badge badge-success" onclick="addAgentModal('{{ $formHolder->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Staff" style="cursor: pointer;">
                             <i class="bi bi-plus"></i> <span>Assign Staff</span></span> 
                         </td>
                         @endif
@@ -577,13 +577,13 @@
               <button type="button" class="btn-close"
                   data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form action="{{ route('assignAgentToOrder') }}" method="POST">@csrf
+          <form action="{{ route('assignStaffToForm') }}" method="POST">@csrf
               <div class="modal-body">
                   
-                  <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                  <input type="hidden" id="form_id" class="form_id" name="form_id" value="">
                   <div class="d-grid mb-3">
                       <label for="">Select Staff</label>
-                      <select name="agent_id" id="" data-live-search="true" class="custom-select form-control border border-dark">
+                      <select name="staff_id" id="" data-live-search="true" class="custom-select form-control border border-dark">
                           <option value="">Nothing Selected</option>
 
                           @if (count($staffs) > 0)
@@ -613,13 +613,13 @@
               <button type="button" class="btn-close"
                   data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form action="{{ route('assignAgentToOrder') }}" method="POST">@csrf
+          <form action="{{ route('assignStaffToForm') }}" method="POST">@csrf
               <div class="modal-body">
                   
-                  <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                  <input type="hidden" id="form_id" class="form_id" name="form_id" value="">
                   <div class="d-grid mb-3">
                       <label for="">Select Staff</label>
-                      <select name="agent_id" id="changeAgentModalSelect" data-live-search="true" class="custom-select form-control border border-dark">
+                      <select name="staff_id" id="changeAgentModalSelect" data-live-search="true" class="custom-select form-control border border-dark">
 
                           <option value="" selected>Nothing Selected</option>
                           @if (count($staffs) > 0)
@@ -703,14 +703,14 @@
 </script>
 
 <script>
-  function addAgentModal($orderId="") {
+  function addAgentModal($formId="") {
     $('#addAgentModal').modal("show");
-    $('.order_id').val($orderId);
+    $('.form_id').val($formId);
   }
 
-  function changeAgentModal($orderId="") {
+  function changeAgentModal($formId="") {
     $('#changeAgentModal').modal("show");
-    $('.order_id').val($orderId);
+    $('.form_id').val($formId);
   }
 </script>
 

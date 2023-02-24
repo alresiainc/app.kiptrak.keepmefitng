@@ -73,6 +73,10 @@ class FormHolder extends Model
         return $this->belongsTo(Order::class, 'order_id');  
     }
 
+    public function formOrders() {
+        return $this->hasMany(Order::class, 'form_holder_id');  
+    }
+
     public function orderbump() {
         return $this->belongsTo(OrderBump::class, 'orderbump_id');  
     }
@@ -91,5 +95,9 @@ class FormHolder extends Model
     public function customers()
     {
         return $this->hasMany(Customer::class, 'form_holder_id');
+    }
+
+    public function staff() {
+        return $this->belongsTo(User::class, 'staff_assigned_id');  
     }
 }

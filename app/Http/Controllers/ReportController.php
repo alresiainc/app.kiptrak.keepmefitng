@@ -16,9 +16,115 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Expense;
 use App\Models\ProductWarehouse;
+use App\Models\GeneralSetting;
+use App\Models\Payroll;
+use App\Models\Category;
+use App\Models\ActivityLog;
 
 class ReportController extends Controller
 {
+
+    public function profitLossReport()
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency = $generalSetting->country->symbol;
+        /////////////////////////////////////////////////////////////////
+        
+        $warehouses = WareHouse::all();
+        $start_date = '';
+        $end_date = '';
+        $warehouse_selected = '';
+
+
+        //join 'products tbl' to 'incoming_stocks tbl', whr product_id is foreignKey, then SUM the multiples of two columns, from the resulting array
+        $openningStock_by_purchasePrice = DB::table('products')
+                ->join('incoming_stocks', 'products.id', '=', 'incoming_stocks.product_id')
+                //->select('table1.column1', 'table1.column2', 'table2.column3')
+                ->select(DB::raw('SUM(purchase_price * quantity_added) as total'))
+                ->get()[0]->total;
+
+        // $total = DB::table('products')
+        //         ->select(DB::raw('SUM(column1 * column2) as total'))
+        //         ->get()[0]->total;
+
+        $openningStock_by_salePrice = DB::table('products')
+                ->join('incoming_stocks', 'products.id', '=', 'incoming_stocks.product_id')
+                ->select(DB::raw('SUM(sale_price * quantity_added) as total'))
+                ->get()[0]->total;
+            
+        //closingStock
+        //productsAllQty minus productsSoldQty = closingStockQty
+        // $openningStock_by_salePrice = DB::table('products')
+        //         ->join('outgoing_stocks', 'products.id', '=', 'outgoing_stocks.product_id')
+        //         ->select(DB::raw('SUM(sale_price * quantity_added) as total'))
+        //         ->get()[0]->total;
+
+        $purchases_amount_paid = Purchase::sum('amount_paid');
+        $other_espenses = Expense::sum('amount');
+        $payroll = Payroll::sum('amount');
+        $total_expenses = $purchases_amount_paid + $other_espenses + $payroll;
+
+        $products = Product::all();
+        $categories = Category::all();
+        $activityLogs = ActivityLog::all();
+
+        return view('pages.reports.profitLossReport', compact('authUser', 'user_role', 'currency', 'warehouses', 'start_date', 'end_date', 'warehouse_selected',
+        'openningStock_by_purchasePrice', 'openningStock_by_salePrice', 'purchases_amount_paid', 'other_espenses', 'payroll', 'total_expenses', 'products', 'categories',
+        'activityLogs'));
+    }
+
+    public function activityLogReport()
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency = $generalSetting->country->symbol;
+        /////////////////////////////////////////////////////////////////
+        
+        $warehouses = WareHouse::all();
+        $warehouse_selected = '';
+
+        $activityLogs = ActivityLog::all();
+
+        return view('pages.reports.activityLog', compact('authUser', 'user_role', 'currency', 'warehouses', 'warehouse_selected', 'activityLogs'));
+    }
+
+    public function salesRepReport()
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency = $generalSetting->country->symbol;
+        
+        $warehouses = WareHouse::all();
+        $start_date = '';
+        $end_date = '';
+        $warehouse_selected = '';
+
+        // $yearly_best_selling_qty = Sale::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->whereDate('created_at', '>=' , date("Y").'-01-01')
+        // ->whereDate('created_at', '<=' , date("Y").'-12-31')->groupBy('product_id')->orderBy('sold_qty', 'desc')->take(5)->get();
+        $yearly_best_selling_qty = Sale::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->groupBy('product_id')->orderBy('sold_qty', 'desc')->get();
+        
+        $sellingProductsBulk = [];
+        foreach ($yearly_best_selling_qty as $key => $sale) {
+            $product = Product::find($sale->product_id);
+            $sellingProducts['product_name'] = $product->name;
+            $sellingProducts['sold_amount'] = $this->soldAmount($product->id);
+            $sellingProducts['sold_qty'] = $sale->sold_qty;
+            $sellingProducts['stock_available'] = $product->stock_available();
+
+            $sellingProductsBulk[] = $sellingProducts;
+        }
+
+        //return $bestSellingProductsBulk;
+
+        return view('pages.reports.salesRepReport', \compact('authUser', 'user_role', 'currency', 'warehouses', 'start_date', 'end_date', 'warehouse_selected', 'sellingProductsBulk'));
+    }
     
     public function productReport()
     {

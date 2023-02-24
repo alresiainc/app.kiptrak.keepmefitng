@@ -156,6 +156,7 @@
                     <th>Customer</th>
                     <th>Delivery Due Date</th>
                     <th>Delivery Address</th>
+                    <th>Staff Assigned</th>
                     <th>Agent</th>
                     <th>Message</th>
                     <th>Date Created</th>
@@ -173,17 +174,38 @@
                       @if (!$entries)<td>{{ $order->orderCode($order->id) }}</td>@endif
                       <td>{{ $order->customer_id ? $order->customer->firstname : 'No response' }} {{ $order->customer_id ? $order->customer->lastname : '' }}</td>
                       
+                      <!--Delivery Due Date-->
                       <td>
-                        @if (isset($order->customer->delivery_duration))
-                        {{ \Carbon\Carbon::parse($order->customer->created_at->addDays($order->customer->delivery_duration))->format('D, jS M Y') }}
+                        @if (isset($order->expected_delivery_date))
+                        {{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('D, jS M Y') }}
+
+                        <span class="badge badge-dark" onclick="changeDeliveryDateModal('{{ $order->id }}', '{{ $order->orderCode($order->id) }}', '{{ ucFirst($order->status) }}', '{{ $order->customer->firstname.' '.$order->customer->lastname }}',
+                        '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')" style="cursor: pointer;">
+                        <i class="bi bi-plus"></i> <span>Change Delivery Date</span></span>
                         
                         @else
                          No reponse   
                         @endif
                         
                       </td>
+                      
                       <td>{{ $order->customer_id ? $order->customer->delivery_address : 'No response' }}</td>
 
+                      <!--Assign Staff-->
+                      @if (isset($order->staff_assigned_id))
+                      <td>
+                        {{ $order->staff->name }} <br>
+                        <span class="badge badge-dark" onclick="changeStaffModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Staff" style="cursor: pointer">
+                          <i class="bi bi-plus"></i> <span>Change Staff</span></span>
+                      </td>
+                      @else
+                      <td style="width: 120px">
+                        <span class="badge badge-success" onclick="addStaffModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Staff" style="cursor: pointer">
+                          <i class="bi bi-plus"></i> <span>Assign Staff</span></span> 
+                      </td>
+                      @endif
+
+                      <!--Assign Agent-->
                       @if (isset($order->agent_assigned_id))
                       <td>
                         {{ $order->agent->name }} <br>
@@ -363,6 +385,73 @@
   </div>
 </div>
 
+<!-- Modal addStaffModal -->
+<div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h1 class="modal-title fs-5" id="addStaffModalLabel">Assign Agent</h1>
+              <button type="button" class="btn-close"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{{ route('assignStaffToOrder') }}" method="POST">@csrf
+              <div class="modal-body">
+                  
+                  <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                  <div class="d-grid mb-3">
+                      <label for="">Select Staff</label>
+                      <select name="staff_id" id="" data-live-search="true" class="custom-select form-control border border-dark">
+                          <option value="">Nothing Selected</option>
+
+                          @foreach ($staffs as $staff)
+                            <option value="{{ $staff->id }}">{{ $staff->name }} | {{ $staff->id }}</option>
+                          @endforeach
+                          
+                      </select>
+                  </div>
+              
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary addAgentBtn">Assign Staff</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+<!-- Modal changeStaffModal -->
+<div class="modal fade" id="changeStaffModal" tabindex="-1" aria-labelledby="changeStaffModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h1 class="modal-title fs-5" id="changeStaffModalLabel">Change Assigned Agent</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{{ route('assignStaffToOrder') }}" method="POST">@csrf
+              <div class="modal-body">
+                  
+                  <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                  <div class="d-grid mb-3">
+                      <label for="">Select Agent</label>
+                      <select name="staff_id" id="changeStaffModalSelect" data-live-search="true" class="custom-select form-control border border-dark">
+                          <option value="" selected>Nothing Selected</option>
+
+                          @foreach ($staffs as $staff)
+                            <option value="{{ $staff->id }}">{{ $staff->name }} | {{ $staff->id }}</option>
+                          @endforeach
+                          
+                      </select>
+                  </div>
+              
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary addAgentBtn">Assign Agent</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
 <!--sendMailModal -->
 <div class="modal fade" id="sendMailModal">
   <div class="modal-dialog">
@@ -431,11 +520,71 @@
   </div>
 </div>
 
+<!-- Modal changeDeliveryDateModal -->
+<div class="modal fade" id="changeDeliveryDateModal" tabindex="-1" aria-labelledby="changeDeliveryDateModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <div class="modal-title fs-7">Change Delivery Date <br> Order: <span class="order_code" style="color: #04512d"></span> &nbsp; Order Status: <span class="order_status" style="color: #04512d"></span>
+                <br>Customer: <span class="order_customer text-success" style="color: #04512d"></span></div>
+              
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{{ route('updateOrderDateStatus') }}" method="POST">@csrf
+              <div class="modal-body">
+                  
+                  <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                  <div class="d-grid mb-3">
+                      <label for="">Select Delivery Date</label>
+                      <input type="text" name="order_delivery_date" class="order_delivery_date form-control @error('order_delivery_date') is-invalid @enderror"
+                      id="" value="">
+                  </div>
+
+                  <div class="d-grid mb-3">
+                    <label for="">Update Order Status | Optional</label>
+                    <select name="order_status" data-live-search="true" class="custom-select form-control border border-dark">
+                        <option value="" selected>Nothing Selected</option>
+
+                        <option value="new">New</option>
+                        <option value="pending">Pending</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="delivered_not_remitted">Delivered Not Remitted</option>
+                        <option value="delivered_and_remitted">Delivered and Remitted</option>
+                        
+                    </select>
+                  </div>
+
+                  <div class="d-grid mb-3">
+                    <label for="">Note | Optional</label>
+                    <textarea name="order_note" id="" cols="30" rows="3" class="form-control"></textarea>
+                </div>
+              
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary addAgentBtn">Update Order</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
 @endsection
 
 @section('extra_js')
 
-<!---add & change agent---->
+<link href="{{asset('/assets/css/jquery.datetimepicker.min.css')}}" rel="stylesheet">
+<script src="{{asset('/assets/js/jquery.datetimepicker.min.js')}}"></script>
+<!--dateplugin--->
+<script>
+  jQuery('.order_delivery_date').datetimepicker({
+    datepicker:true,
+    //showPeriod: true,
+    format:'Y-m-d',
+    timepicker:false,
+  });
+</script>
+
+<!---add & change agent, change delivery date---->
 <script>
   function addAgentModal($orderId="") {
     $('#addAgentModal').modal("show");
@@ -445,12 +594,27 @@
   function changeAgentModal($orderId="") {
     $('#changeAgentModal').modal("show");
     $('.order_id').val($orderId);
-
-  //  var option = $('#changeAgentModalSelect').val();
-  //  console.log(option)
-
   }
 
+  function addStaffModal($orderId="") {
+    $('#addStaffModal').modal("show");
+    $('.order_id').val($orderId);
+  }
+
+  function changeStaffModal($orderId="") {
+    $('#changeStaffModal').modal("show");
+    $('.order_id').val($orderId);
+  }
+
+  
+  function changeDeliveryDateModal($orderId="", $orderCode="", $orderStatus="", $orderCustomer="", $orderDeliveryDate="") {
+    $('#changeDeliveryDateModal').modal("show");
+    $('.order_id').val($orderId);
+    $('.order_code').html($orderCode);
+    $('.order_status').html($orderStatus);
+    $('.order_customer').html($orderCustomer);
+    $('.order_delivery_date').val($orderDeliveryDate);
+  }
   
 </script>
 

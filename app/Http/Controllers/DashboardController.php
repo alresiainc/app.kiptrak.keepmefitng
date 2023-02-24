@@ -38,6 +38,10 @@ class DashboardController extends Controller
         //return $authUser = auth()->user()->role(auth()->user()->id)->role->permissions->contains('slug', 'view-product-list');
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        if (!$authUser->isSuperAdmin) {
+            return redirect()->route('staffTodayRecord');
+        } 
         
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
@@ -49,10 +53,9 @@ class DashboardController extends Controller
         $sales_paid = 0;
 
         $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
-        $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')->sum('amount_accrued');
+        $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
 
-        $sales_paid += $accepted_outgoing_stock;
-
+        $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
 
         $expenses = $this->shorten(Expense::sum('amount'));
 
@@ -73,6 +76,7 @@ class DashboardController extends Controller
         $purchasesInvoice = Purchase::where('parent_id', null)->count();
 
         $sales_count = Sale::count();
+        $sales_count += $accepted_outgoing_stock->sum('quantity_removed');
         $invoices_count = $salesInvoice + $purchasesInvoice;
 
         /////////yearly report purchase, sales, expenses/////////////recent products///
@@ -86,6 +90,7 @@ class DashboardController extends Controller
             $end_date = date("Y").'-'.date('m', $start).'-'.date('t', mktime(0, 0, 0, date("m", $start), 1, date("Y", $start)));
             
             $sale_amount = Sale::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
+            $sale_amount += $accepted_outgoing_stock->sum('amount_accrued');
             $purchase_amount = Purchase::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
             $profit_amount = $sale_amount - $purchase_amount;
             $expense_amount = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount') + $purchase_amount;
@@ -558,65 +563,10 @@ class DashboardController extends Controller
             $num = $num . 'm';
         }
         if ($num >= 1000) {
-            $num = number_format(abs($num / 1000), $digits, '.', '') + 0;
+            $num = number_format(abs( (int) $num / 1000), $digits, '.', '') + 0;
             $num = $num . 'k';
         }
         return $num;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }

@@ -3,31 +3,29 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\SoundNotification;
+use App\Models\ActivityLog;
+use App\Models\GeneralSetting;
 
-class SoundNotificationController extends Controller
+class ActivityLogController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function soundNotification()
+    public function activityLog()
     {
-        $soundNotifications = SoundNotification::where('status', 'new')->get();
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        if (count($soundNotifications) > 0) {
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency = $generalSetting->country->symbol;
+        /////////////////////////////////////////////////////////////////
 
-            return response()->json([
-                'status'=>true,
-                'data'=>$soundNotifications,
-                'count'=>count($soundNotifications),
-            ]);
-        } else {
-            return response()->json([
-                'status'=>false,
-            ]); 
-        }
+        $activityLogs = ActivityLog::all();
+
+        return view('pages.reports.activityLog', compact('activityLogs'));
+
     }
 
     /**

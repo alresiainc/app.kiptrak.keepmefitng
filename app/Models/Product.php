@@ -118,4 +118,13 @@ class Product extends Model
         return $this->hasMany(Sale::class, 'product_id');  
     }
 
+    public function revenue() {
+        //
+        $revenue = 0;
+        //$delivered_and_remitted_orders = Order::where('product_id', $this->id)->where('status', 'delivered_and_remitted')->pluck('id');
+        $accepted_outgoing_stock = OutgoingStock::where('product_id', $this->id)->where('customer_acceptance_status', 'accepted');
+        $revenue += $accepted_outgoing_stock->sum('amount_accrued');
+        return $revenue;
+    }
+
 }

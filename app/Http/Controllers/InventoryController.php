@@ -581,7 +581,7 @@ class InventoryController extends Controller
             $num = $num . 'm';
         }
         if ($num >= 1000) {
-            $num = number_format(abs($num / 1000), $digits, '.', '') + 0;
+            $num = number_format(abs( (int) $num / 1000), $digits, '.', '') + 0;
             $num = $num . 'k';
         }
         return $num;

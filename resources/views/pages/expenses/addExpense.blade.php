@@ -68,7 +68,7 @@
               <div class="col-md-12 mb-3">The field labels marked with * are required input fields.</div>
 
                 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="" class="form-label">Select Category *</label>
 
                     <div class="d-flex">
@@ -95,7 +95,7 @@
                     
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="" class="form-label">Select Warehouse *</label>
                     <select name="warehouse" class="select2 form-control border @error('warehouse') is-invalid @enderror" id="">
                       <option value="">Nothing Selected</option>
@@ -108,6 +108,25 @@
                           
                     </select>
                     @error('warehouse')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
+
+                <div class="col-md-4">
+                    <label for="" class="form-label">Expenses For | Optional</label>
+                    <select name="staff_id" class="select2 form-control border @error('staff_id') is-invalid @enderror" id="">
+                      <option value="">Nothing Selected</option>
+  
+                      @foreach ($staffs as $staff)
+                          <option value="{{ $staff->id }}">
+                              {{ $staff->name }}
+                          </option>
+                      @endforeach
+                          
+                    </select>
+                    @error('staff_id')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
                         </span>

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('expense_category_id')->nullable();
             $table->string('warehouse_id')->nullable();
             $table->string('product_id')->nullable(); //expense relating to purchases
+            $table->string('staff_id')->nullable(); //expense relating to purchases
             $table->string('amount');
             $table->string('account_id')->nullable();
             $table->text('note')->nullable();

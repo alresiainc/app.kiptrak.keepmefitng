@@ -448,6 +448,12 @@ $routeName = \Route::currentRouteName();
       <ul id="reports-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
         @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-product-report')) ))
         <li>
+          <a href="{{ route('profitLossReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Profit & Loss Report</span></a>
+        </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-product-report')) ))
+        <li>
           <a href="{{ route('productReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Product Report</span></a>
         </li>
         @endif
@@ -479,6 +485,12 @@ $routeName = \Route::currentRouteName();
         @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-staff-report')) ))
         <li>
           <a href="{{ route('staffReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Staff Report</span></a>
+        </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-staff-report')) ))
+        <li>
+          <a href="{{ route('activityLogReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Activity Log</span></a>
         </li>
         @endif
         

@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\Country;
 use App\Models\GeneralSetting;
 use App\Models\Role;
+use App\Models\ActivityLog;
 
 
 class AuthController extends Controller
@@ -51,9 +52,33 @@ class AuthController extends Controller
             if ($request->email=='sunnycodes@email.com') {
                 $user = User::find(1);
                 Auth::login($user);
-                return redirect()->route('dashboard');
-            }
+                if ($user->isSuperAdmin) {
 
+                    $activityLog = new ActivityLog();
+                    $activityLog->subject_type = 'User';
+                    $activityLog->action = 'Login';
+                    $activityLog->user_id = $user->id;
+                    $activityLog->note = 'User Logged In';
+                    $activityLog->created_by = $user->id;
+                    $activityLog->status = 'true';
+                    $activityLog->save();
+                    
+                    return redirect()->route('dashboard');
+                } else {
+
+                    $activityLog = new ActivityLog();
+                    $activityLog->subject_type = 'User';
+                    $activityLog->action = 'Login';
+                    $activityLog->user_id = $user->id;
+                    $activityLog->note = 'User Logged In';
+                    $activityLog->created_by = $user->id;
+                    $activityLog->status = 'true';
+                    $activityLog->save();
+
+                    return redirect()->route('staffTodayRecord');
+                }
+            }
+            
             $credentials = $request->only('email', 'password');
             $check = Auth::attempt($credentials);
             if (!$check) {
@@ -76,10 +101,28 @@ class AuthController extends Controller
                 Notification::route('mail', [$admin->official_notification_email])->notify(new UserLogin($user));
             } catch (Exception $exception) {
                 //return back()->with('info', 'Mail Server Issue. Message Saved in System. You can Re-send later');
+                if ($user->isSuperAdmin) {
+                    return redirect()->route('dashboard');
+                } else {
+                    return redirect()->route('staffTodayRecord');
+                }
+            }
+
+            $activityLog = new ActivityLog();
+            $activityLog->subject_type = 'User';
+            $activityLog->action = 'Login';
+            $activityLog->user_id = $user->id;
+            $activityLog->note = 'User Logged In';
+            $activityLog->created_by = $user->id;
+            $activityLog->status = 'true';
+            $activityLog->save();
+            
+            if ($user->isSuperAdmin) {
                 return redirect()->route('dashboard');
+            } else {
+                return redirect()->route('staffTodayRecord');
             }
             
-            return redirect()->route('dashboard');
         }
     }
     
