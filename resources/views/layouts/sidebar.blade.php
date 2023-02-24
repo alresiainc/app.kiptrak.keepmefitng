@@ -470,6 +470,12 @@ $routeName = \Route::currentRouteName();
         </li>
         @endif
 
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-sale-report')) ))
+        <li>
+          <a href="{{ route('salesRepReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Sales Representative Report</span></a>
+        </li>
+        @endif
+
         @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-customer-report')) ))
         <li>
           <a href="{{ route('customerReport') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Customer Report</span></a>
