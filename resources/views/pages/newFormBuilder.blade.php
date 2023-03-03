@@ -58,7 +58,6 @@
     
               <button type="button" id="saveData" class="btn btn-success d-none" style="width: 30%;">Save Form</button>
           </div>
-          
         </nav>
     </div><!-- End Page Title -->
 

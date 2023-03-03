@@ -18,15 +18,21 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function allTask() {
+    public function allTask($project_unique_key="") {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        if ($project_unique_key != "") {
+            $project = Project::where('unique_key', $project_unique_key)->first();
+        }
         
         if ($authUser->isSuperAdmin) {
-            $tasks = Task::all();
+            $tasks = $project_unique_key == "" ? Task::all() : $project->tasks;
         } else {
             //as creator, or assigned-to
-            $myTasks = Task::where('created_by', $authUser->id)->orWhere('assigned_to', $authUser->id)->get();
+            $myTasks = $project_unique_key == "" ? Task::where('created_by', $authUser->id)->orWhere('assigned_to', $authUser->id)->get() : $project->tasks()->where('created_by', $authUser->id)
+            ->orWhere('assigned_to', $authUser->id);
+            
             $tasks = $myTasks;
 
             //as team leader
@@ -55,10 +61,10 @@ class TaskController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-
+        
         $request->validate([
             'name' => 'required|string',
-            'project' => 'required',
+            'project_id' => 'required',
             'description' => 'nullable|string',
             'end_date' => 'required|date',
             'start_date' => 'required|date|before:end_date',
@@ -66,13 +72,13 @@ class TaskController extends Controller
             'task_category' => 'nullable',
             'logo' => 'nullable|image|max:2048|mimes:jpg, jpeg, png, gif, svg, webp',
         ]);
-
+        
         
         $data = $request->all();
 
         $task = new Task();
         $task->name = $data['name'];
-        $task->project_id = $data['project'];
+        $task->project_id = $data['project_id'];
         $task->description = $data['description'] ?? null;
         $task->start_date = $data['start_date'];
         $task->end_date = $data['end_date'];

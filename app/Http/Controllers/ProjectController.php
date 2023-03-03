@@ -186,6 +186,24 @@ class ProjectController extends Controller
         return back()->with('success', 'Project Updated Successfully');
     }
 
+    public function updateProjectPerformance(Request $request, $unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $project = Project::where(['unique_key'=>$unique_key]);
+        if(!$project->exists()){
+            abort(404);
+        }
+
+        if ($request->performance > 100 || $request->performance < 0) {
+            return back()->with('error', 'Performance values must be between 0 & 100');
+        }
+
+        $project = $project->first()->update(['performance'=>$request->performance]);
+        return back()->with('success', 'Project Performance Updated Successfully');
+    }
+
     /**
      * Show the form for editing the specified resource.
      *

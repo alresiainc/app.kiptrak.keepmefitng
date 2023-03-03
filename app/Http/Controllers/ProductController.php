@@ -97,7 +97,7 @@ class ProductController extends Controller
         $product->features = !empty($data['features']) ? serialize($data['features']) : null;
     
         // $product->warehouse_id =  !empty($data['warehouse_id']) ? $data['warehouse_id'] : null;
-        $product->created_by = 1;
+        $product->created_by = $authUser->id;
         $product->status = 'true';
         
         //image

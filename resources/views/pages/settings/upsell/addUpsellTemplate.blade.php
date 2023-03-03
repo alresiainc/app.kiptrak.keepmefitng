@@ -576,7 +576,7 @@
 
                 <div class="col-md-3">
                     <label for="" class="form-label">Background Color</label>
-                    <input type="color" name="button_bg_color" class="form-control @error('button_bg_color') is-invalid @enderror" placeholder="" value="#012970">
+                    <input type="color" name="button_bg_color" class="form-control @error('button_bg_color') is-invalid @enderror" placeholder="" value="#04512d">
                     @error('button_bg_color')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>

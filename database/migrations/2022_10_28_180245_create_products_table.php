@@ -26,6 +26,11 @@ return new class extends Migration
             $table->string('color')->nullable();
             $table->string('size')->nullable();
             $table->string('country_id')->nullable(); //will contain country_id
+
+            $table->string('combo_product_ids')->nullable(); //serialized
+            $table->string('discount_type')->nullable();
+            $table->string('discount')->nullable();
+            $table->longText('short_description')->nullable();
             
             $table->string('purchase_price')->nullable(); //currently
             $table->string('sale_price')->nullable(); //currently

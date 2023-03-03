@@ -1,25 +1,23 @@
 @extends('layouts.design')
-@section('title')Upsell Templates @endsection
+@section('title')ThankYou Templates @endsection
 @section('content')
 
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Upsell Templates</h1>
+    <h1>ThankYou Templates</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active">Upsell Templates</li>
+        <li class="breadcrumb-item active">ThankYou Templates</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
 
-  
   <section class="users-list-wrapper">
     <div class="users-list-filter px-1">
       
     </div>
-
   </section>
 
   <section>
@@ -31,7 +29,7 @@
             <div class="clearfix mb-2">
 
               <div class="float-start text-start">
-                  <a href="{{ route('addUpsellTemplate') }}"><button class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Add New Template">
+                  <a href="{{ route('addThankYouTemplate') }}"><button class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Add New Template">
                     <i class="bi bi-plus"></i> <span>Add New Template</span></button></a>
               </div>
   
@@ -49,7 +47,7 @@
             <table id="products-table" class="table custom-table" style="width:100%">
               <thead>
                   <tr>
-                      <th>Template ID</th>
+                      <th>Template Name</th>
                       <th>Heading</th>
                       <th>Subheading</th>
                       <th>Date</th>
@@ -57,20 +55,20 @@
                   </tr>
               </thead>
               <tbody>
-                @if (count($upsellTemplates) > 0)
-                    @foreach ($upsellTemplates as $template)
+                @if (count($thankYouTemplates) > 0)
+                    @foreach ($thankYouTemplates as $template)
                     
                         <tr>
                     
-                            <td>{{ $template->template_code }}</td>
+                            <td>{{ $template->template_name }}</td>
                             <td>{{ $template->heading_text}}</td>
                             <td>{{ $template->subheading_text}}</td>
                             <td>{{ $template->created_at }}</td>
         
                             <td>
                                 <div class="d-flex">
-                                <a href="{{ route('singleUpsellTemplate', $template->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
-                                <a href="{{ route('editUpsellTemplate', $template->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                <a href="{{ route('singleThankYouTemplate', $template->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
+                                <a href="{{ route('editThankYouTemplate', $template->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
                                 <a class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
                                 </div>
                             </td>

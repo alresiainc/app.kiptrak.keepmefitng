@@ -390,7 +390,7 @@
 <script>
     $("#orderTable").on('click', '.editOrderBtn', function () {
         var product = $(this).attr('data-product');
-        console.log(product)
+        // console.log(product)
     });
 </script>
 
@@ -447,8 +447,7 @@
                     alert("Error");
                 }
             });
-        
-        
+
    });
 </script>
 

@@ -51,7 +51,7 @@
     </div>
   </div>
   <hr />
-
+  
   @if ($authUser->isSuperAdmin)
       
   <section class="section m-0">

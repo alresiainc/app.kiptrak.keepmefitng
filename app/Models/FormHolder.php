@@ -28,7 +28,6 @@ class FormHolder extends Model
             
         });
 
-        
     }
 
     //check if unique_key exists
@@ -99,5 +98,9 @@ class FormHolder extends Model
 
     public function staff() {
         return $this->belongsTo(User::class, 'staff_assigned_id');  
+    }
+
+    public function thankYou() {
+        return $this->belongsTo(ThankYou::class, 'thankyou_id');  
     }
 }

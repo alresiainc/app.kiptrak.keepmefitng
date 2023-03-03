@@ -45,6 +45,19 @@
         .select2-selection__arrow {
             height: 34px !important;
         }
+        .header {
+            transition: all 0.5s;
+            z-index: 997;
+            height: 50px;
+            box-shadow: 0px 2px 20px rgb(1 41 112 / 10%);
+            background-color: #D2FFE8;
+            padding-left: 20px;
+        }
+        .btn:hover {
+            background-color: #fff !important;
+            border-color: #04512d !important;
+            color: #04512d !important;
+        }
         </style>
 
         
@@ -53,14 +66,15 @@
     <body class="">
 
     <!-- will be shown in singlelink-->
-    <nav class="navbar bg-light sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-            <img src="{{asset('/customerform/assets/img/logo.png')}}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
-            <span class="project-name"></span>
-            </a>
+    <header id="header" class="header fixed-top d-flex align-items-center">
+        <div class="d-flex align-items-center justify-content-between">
+          <a href="/" class="logo d-flex align-items-center">
+            <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="width: 30%; !important">
+            <span class="d-none d-lg-block project-namek"></span>
+          </a>
         </div>
-    </nav>
+        <!-- End Logo -->    
+    </header>
     
     <main class="container mb-5 py-5 min-vh-100">
         
@@ -125,7 +139,7 @@
                                     @endforeach
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="" class="form-label">Select how long you want the order to be delivered *</label>
+                                        <label for="" class="form-label"><b>Select how long you want the order to be delivered *</b></label>
                                         <select data-name="delivery_duration" class="delivery_duration select2 form-control border @error('delivery_duration') is-invalid @enderror" id="">
                                           <option value="1">Within 1 business day (Today / Tommorrow)</option>
                                           <option value="2">Within 2 business days from now</option>
@@ -142,6 +156,7 @@
                                     
                                     
                                     <input type="hidden" name="formholder_unique_key" class="formholder_unique_key" value="{{ $unique_key }}">
+                                    <input type="hidden" name="thankyou_unique_key" class="thankyou_unique_key" value="{{ isset($formHolder->thankyou_id) ? $formHolder->thankyou->unique_key : '' }}">
                                     
                                     <hr>
                                     <div class="col-12 mb-1 mt-3 fw-bolder">Select A Package From Below</div>
@@ -153,7 +168,8 @@
                                             class="me-3 product-package" value="{{ $item['id'] }}-{{ $item['price'] }}"/>
                                             <span class="me-1 fw-bold">{{ $item['name'] }} = {{ $item['price'] }} naira</span>
 
-                                            <select name="select_product_qty" class="select_product_qty custom-select form-control" style="width: 200px;">
+                                            <select name="select_product_qty" class="select_product_qty custom-select form-control"
+                                            style="width: 200px; @if($item['combo_product_ids']) visibility: hidden; @endif">
                                                 <option value="1">Select Quantity</option>
                                                 @for ($i = 1; $i < $item['stock_available']; $i++)
                                                     <option value="{{ $i }}">{{ $i }}</option>
@@ -171,7 +187,7 @@
 
                                     <div class="col-12">
                                         <div class="d-flex justify-content-center">
-                                            <button type="button" class="btn w-50 p-2 text-white main_package_submit_btn" style="background-color: #012970">Submit Order</button>
+                                            <button type="button" class="btn rounded-pill w-50 p-2 text-white main_package_submit_btn" style="background-color: #04512d">Submit Order</button>
                                         </div>
                                     </div>
                                         
@@ -205,7 +221,7 @@
                                             <div class="d-flex justify-content-center">
                                                 <div class="content text-center p-3" style="border: 3px dashed black; background-color: #D2FFE8;">
                                                     <h3 class="heading">{{ $formHolder->orderbump->orderbump_heading }}</h3>
-                                                    <h4 class="subheading" style="color: #012970;">{{ $formHolder->orderbump->orderbump_subheading }}</h4>
+                                                    <h4 class="subheading" style="color: #04512d;">{{ $formHolder->orderbump->orderbump_subheading }}</h4>
                                                     {{-- <p class="product-feature">Melts Away Fats In 2 Days!</p> --}}
     
                                                     <div class="orderbump-product-image mb-3">
@@ -240,7 +256,7 @@
                                                     <div class="make-your-choice d-flex justify-content-center">
     
                                                         <div class="d-flex justify-content-center">
-                                                            <button type="submit" class="btn w-100 p-2 text-white orderbump_submit_btn" style="background-color: #012970;">ADD TO MY ORDER</button>
+                                                            <button type="submit" class="btn rounded-pill w-100 p-2 text-white orderbump_submit_btn" style="background-color: #04512d;">ADD TO MY ORDER</button>
                                                         </div>
     
                                                     </div>
@@ -255,7 +271,7 @@
                                                 <label for="orderbump_refusal" class="form-label d-flex align-items-center">
                                                     <input type="checkbox" name="orderbump_refusal" id="orderbump_refusal" class="cta-check2 me-1 orderbump_refusal invisible"
                                                     @error('product') checked @enderror value="true"/>
-                                                    <span class="fw-light" style="color: #012970;">No, thank you</span>
+                                                    <span class="fw-light" style="color: #04512d;">No, thank you</span>
                                                 </label>
 
                                             </div>
@@ -355,9 +371,9 @@
 
                                                     <div class="make-your-choice d-flex justify-content-center">
     
-                                                        {{-- <button type="submit" class="btn w-100 p-2 text-white upsell_submit_btn" style="background-color: #012970;">ADD TO MY ORDER</button> --}}
+                                                        {{-- <button type="submit" class="btn w-100 p-2 text-white upsell_submit_btn" style="background-color: #04512d;">ADD TO MY ORDER</button> --}}
 
-                                                        <button type="submit" class="btn w-100 p-2 upsell_submit_btn text-{{ $formHolder->upsell->template->button_text_align }} fst-{{ $formHolder->upsell->template->button_text_style }}"
+                                                        <button type="submit" class="btn rounded-pill w-100 p-2 upsell_submit_btn text-{{ $formHolder->upsell->template->button_text_align }} fst-{{ $formHolder->upsell->template->button_text_style }}"
                                                         style="background-color: {{ $formHolder->upsell->template->button_bg_color }}; color: {{ $formHolder->upsell->template->button_text_color }};">ADD TO MY ORDER</button>
     
                                                     </div>
@@ -373,7 +389,7 @@
                                                 <label for="upsell_refusal" class="form-label d-flex align-items-center">
                                                     <input type="checkbox" name="upsell_refusal" id="upsell_refusal" class="cta-check2 me-1 upsell_refusal invisible"
                                                     @error('product') checked @enderror value="true"/>
-                                                    <span class="fw-light" style="color: #012970;">No, thank you</span>
+                                                    <span class="fw-light" style="color: #04512d;">No, thank you</span>
                                                 </label>
 
                                             </div>
@@ -547,10 +563,7 @@
 
     <!-- Vendor JS Files -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
-   
     <script src="{{asset('/customerform/assets/vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
-    
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/0.9.0rc1/jspdf.min.js"></script>
     <!-- upsell->Template Main JS File -->
     
@@ -742,6 +755,7 @@
             var has_upsell = $(".has_upsell").val();
 
             $(this).text('Please wait...')
+            $(this).prop('disabled', true);
 
             //ajax start
             $.ajax({
@@ -763,9 +777,19 @@
                         
                     } else {
                         var current_order_id = $('.current_order_id').val();
-                        window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
-                        $('.current_order_id').val('');
-                        setView('thankyou-section')
+                        // window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
+                        // $('.current_order_id').val('');
+                        // setView('thankyou-section')
+                        var thankyou_unique_key = $(".thankyou_unique_key").val();
+
+                        if (thankyou_unique_key=='') {
+                            window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                            $('.current_order_id').val('');
+                            setView('thankyou-section')
+                        } else {
+                            $('.current_order_id').val('');
+                            window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                        }
                     }
 
                 },error:function(){
@@ -787,6 +811,7 @@
                 var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
 
                 $(this).text('Please wait...')
+            $(this).prop('disabled', true);
 
                 $.ajax({
                     type:'get',
@@ -799,11 +824,18 @@
                             setView('upsell-section')
                             
                         } else {
-                        //$('.orderbump_submit_btn').text('Please wait...')
-                        var current_order_id = $('.current_order_id').val();
-                        window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
-                        $('.current_order_id').val('');
-                        setView('thankyou-section')
+                            //$('.orderbump_submit_btn').text('Please wait...')
+                            var current_order_id = $('.current_order_id').val();
+                            var thankyou_unique_key = $(".thankyou_unique_key").val();
+
+                            if (thankyou_unique_key=='') {
+                                window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                                $('.current_order_id').val('');
+                                setView('thankyou-section')
+                            } else {
+                                $('.current_order_id').val('');
+                                window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                            }
                     
                         }
                             
@@ -826,6 +858,7 @@
             if ($('.upsell_product_checkbox').val() != '') {
                 var upsell_product_checkbox = $('.upsell_product_checkbox').val();
                 $(this).text('Please wait...')
+            $(this).prop('disabled', true);
 
                 $.ajax({
                     type:'get',
@@ -835,9 +868,16 @@
                         console.log(resp)
                         localStorage.setItem('upsell_stage', 'done');
                         var current_order_id = $('.current_order_id').val();
-                        window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
-                        $('.current_order_id').val('');
-                        setView('thankyou-section')
+                        var thankyou_unique_key = $(".thankyou_unique_key").val();
+
+                        if (thankyou_unique_key=='') {
+                            window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                            $('.current_order_id').val('');
+                            setView('thankyou-section')
+                        } else {
+                            $('.current_order_id').val('');
+                            window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                        }
                             
                     },error:function(){
                         alert("Error");
@@ -859,6 +899,7 @@
                 if ($('.orderbump_product_checkbox').val() != '') {
                     var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
                     $(this).text('Please wait...')
+            $(this).prop('disabled', true);
 
                     $.ajax({
                         type:'get',
@@ -872,9 +913,16 @@
                                 
                             } else {
                                 var current_order_id = $('.current_order_id').val();
-                                window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
-                                $('.current_order_id').val('');
-                                setView('thankyou-section')
+                                var thankyou_unique_key = $(".thankyou_unique_key").val();
+
+                                if (thankyou_unique_key=='') {
+                                    window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                                    $('.current_order_id').val('');
+                                    setView('thankyou-section')
+                                } else {
+                                    $('.current_order_id').val('');
+                                    window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                                }
                         
                             }
                                 
@@ -901,6 +949,7 @@
                 if ($('.upsell_product_checkbox').val() != '') {
                     var upsell_product_checkbox = $('.upsell_product_checkbox').val();
                     $(this).text('Please wait...')
+            $(this).prop('disabled', true);
 
                     $.ajax({
                         type:'get',
@@ -910,9 +959,16 @@
                             console.log(resp)
                             localStorage.setItem('upsell_stage', 'done');
                             var current_order_id = $('.current_order_id').val();
-                            window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
-                            $('.current_order_id').val('');
-                            setView('thankyou-section')
+                            var thankyou_unique_key = $(".thankyou_unique_key").val();
+
+                            if (thankyou_unique_key=='') {
+                                window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                                $('.current_order_id').val('');
+                                setView('thankyou-section')
+                            } else {
+                                $('.current_order_id').val('');
+                                window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                            }
                                 
                         },error:function(){
                             alert("Error");

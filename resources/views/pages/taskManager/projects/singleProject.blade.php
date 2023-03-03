@@ -33,10 +33,29 @@
         {{Session::get('success')}}
     </div>
   @endif
+  @if(Session::has('error'))
+    <div class="alert alert-danger mb-3 text-center">
+        {{Session::get('error')}}
+    </div>
+  @endif
 
   <div class="d-flex align-items-center justify-content-between">
     <a href="{{ route('addProject') }}" class="btn btn-sm btn-dark rounded-pill"><i class="bi bi-plus"></i> <span>Create Project</span></a>
 
+    <!---only-teamleader-can-update-projectprogress--->
+    @if ($authUser->id == $project->assignedTo->id)
+    <div>
+        <form action="{{ route('updateProjectPerformance', $project->unique_key) }}" method="POST">@csrf
+            <label for="percentage_progress"><b>Percentage(%) Performance</b></label>
+            <div class="d-flex align-items-center justify-content-start">
+                <input type="text" class="form-control me-1" name="performance" min="0" max="100" style="width: 30%;"
+                value="{{ isset($project->performance) ? $project->performance : 0 }}">
+                <button type="submit" class="btn">Update</button>
+            </div>
+        </form>
+    </div>
+    @endif
+    
     <div class="pagetitle"><h1>{{ $project->name }}</h1></div>
     <div class="d-none">
       <a href="{{ route('allProject') }}" class="btn btn-sm btn-dark rounded-pill"><i class="bi bi-card-list"></i> <span>Project List</span></a>
@@ -492,7 +511,7 @@
       <!-- Done -->
       <div class="col-lg-3 col-md-6">
 
-        <div class="text-center mb-2"><h6 class="fw-bold">Done</h6></div>
+        <div class="text-center mb-2"><h6 class="fw-bold">Completed</h6></div>
 
         @if (count($done_tasks))
             @foreach ($done_tasks as $task)

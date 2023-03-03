@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\CartAbandon;
 use App\Models\FormHolder;
 use App\Models\SoundNotification;
+use App\Models\Customer;
 
 
 class OrderController extends Controller
@@ -31,8 +32,8 @@ class OrderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        $agents = User::where('type','agent')->get();
-        $staffs = User::where('type','staff')->get();
+        $agents = User::where('type','agent')->orderBy('id', 'DESC')->get();
+        $staffs = User::where('type','staff')->orderBy('id', 'DESC')->get();
 
         if ($authUser->isSuperAdmin) {
             
@@ -41,23 +42,23 @@ class OrderController extends Controller
                 $orders = Order::all();
             }
             if ($status=="new") {
-                $orders = Order::where('status', 'new')->get();
+                $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->get();
             }
             if ($status=="new_from_alarm") {
                 DB::table('sound_notifications')->update(['status'=>'seen']);
-                $orders = Order::where('status', 'new')->get();
+                $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->get();
             }
             if ($status=="pending") {
-                $orders = Order::where('status', 'pending')->get();
+                $orders = Order::where('status', 'pending')->orderBy('id', 'DESC')->get();
             }
             if ($status=="cancelled") {
-                $orders = Order::where('status', 'cancelled')->get();
+                $orders = Order::where('status', 'cancelled')->orderBy('id', 'DESC')->get();
             }
             if ($status=="delivered_not_remitted") {
-                $orders = Order::where('status', 'delivered_not_remitted')->get();
+                $orders = Order::where('status', 'delivered_not_remitted')->orderBy('id', 'DESC')->get();
             }
             if ($status=="delivered_and_remitted") {
-                $orders = Order::where('status', 'delivered_and_remitted')->get();
+                $orders = Order::where('status', 'delivered_and_remitted')->orderBy('id', 'DESC')->get();
             }
     
             $entries = false; $formHolder = '';
@@ -66,35 +67,35 @@ class OrderController extends Controller
                 if($formHolder->exists()) {
                     $formHolder = $formHolder->first();
                     // $formHolders = $formHolder->formHolders;
-                    // $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->get();
-                    $orders = Order::where('form_holder_id', $formHolder->id)->get();
+                    // $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('form_holder_id', $formHolder->id)->orderBy('id', 'DESC')->get();
                     $entries = true;
                 }
             }
         } else {
             
-            $orders = Order::where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+            $orders = Order::where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             if ($status=="") {
-                $orders = Order::where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+                $orders = Order::where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
             if ($status=="new") {
-                $orders = Order::where('status', 'new')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+                $orders = Order::where('status', 'new')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
             if ($status=="new_from_alarm") {
                 DB::table('sound_notifications')->update(['status'=>'seen']);
-                $orders = Order::where('status', 'new')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+                $orders = Order::where('status', 'new')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
             if ($status=="pending") {
-                $orders = Order::where('status', 'pending')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+                $orders = Order::where('status', 'pending')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
             if ($status=="cancelled") {
-                $orders = Order::where('status', 'cancelled')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+                $orders = Order::where('status', 'cancelled')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
             if ($status=="delivered_not_remitted") {
-                $orders = Order::where('status', 'delivered_not_remitted')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+                $orders = Order::where('status', 'delivered_not_remitted')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
             if ($status=="delivered_and_remitted") {
-                $orders = Order::where('status', 'delivered_and_remitted')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->get();
+                $orders = Order::where('status', 'delivered_and_remitted')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
 
             //orders whose dates are greater-than today
@@ -136,7 +137,7 @@ class OrderController extends Controller
             }
 
             if ($status=="other_orders") {
-                $orders = $authUser->assignedOrders()->where(['customer_id'=>null])->get();
+                $orders = $authUser->assignedOrders()->where(['customer_id'=>null])->orderBy('id', 'DESC')->get();
             }
             
             $entries = false; $formHolder = '';
@@ -145,7 +146,7 @@ class OrderController extends Controller
                 if($formHolder->exists()) {
                     $formHolder = $formHolder->first();
                     $formHolders = $formHolder->formHolders;
-                    $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->get();
+                    $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->orderBy('id', 'DESC')->get();
                     $entries = true;
                 }
             }
@@ -209,7 +210,7 @@ class OrderController extends Controller
         
         //return $packages;
         
-        $outgoingStocks = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted'])->get();
+        $outgoingStocks = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted'])->orderBy('id', 'DESC')->get();
         $packages = [];
         foreach ($outgoingStocks as $key => $product) {
             $products['product'] = $this->productById($product->product_id);
@@ -222,6 +223,138 @@ class OrderController extends Controller
         }
 
         return view('pages.orders.singleOrder', compact('authUser', 'user_role', 'url', 'order', 'packages', 'gross_revenue', 'currency', 'status'));
+    }
+
+    //edit order, help customer to edit existing orders
+    public function editOrder($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $order = Order::where('unique_key', $unique_key);
+        if(!$order->exists()) {
+            abort(404);
+        }
+        $order = $order->first();
+        $status = $order->status;
+
+        $products = Product::all();
+        $customers = Customer::all();
+
+        $orderbump_outgoingStock = OutgoingStock::where(['order_id'=>$order->id, 'reason_removed'=>'as_orderbump'])->first();
+        $upsell_outgoingStock = OutgoingStock::where(['order_id'=>$order->id, 'reason_removed'=>'as_upsell'])->first();
+
+        //order-products
+        $mainProducts_outgoingStocks = OutgoingStock::where(['order_id'=>$order->id, 'reason_removed'=>'as_order_firstphase'])->get();
+        $packages = []; $gross_revenue = 0; $productArr = [];
+        foreach ($mainProducts_outgoingStocks as $key => $outgone) {
+            $productArr['product'] = $this->productById($outgone->product_id);
+            $productArr['quantity_removed'] = $outgone->quantity_removed;
+            $productArr['amount_accrued'] =  $outgone->amount_accrued;
+            $productArr['customer_acceptance_status'] =  $outgone->customer_acceptance_status;
+            $gross_revenue += $outgone->amount_accrued;
+            $currency = $this->productById($outgone->product_id)->country->symbol;
+
+            $packages[] = $productArr;
+        }
+        
+
+        return view('pages.orders.editOrder', compact('authUser', 'user_role', 'order', 'status', 'products', 'customers', 'gross_revenue', 'currency', 'packages',
+        'orderbump_outgoingStock', 'upsell_outgoingStock'));
+    }
+
+    //
+    public function editOrderPost(Request $request, $unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $order = Order::where('unique_key', $unique_key);
+        if(!$order->exists()) {
+            abort(404);
+        }
+        $order = $order->first();
+
+        $data = $request->all();
+
+        $dup = [];
+        foreach($data['product_id'] as $key => $id){
+            if(!empty($id)){
+                
+                if(!in_array($id, $dup)){
+                    $dup[] = $id;
+                
+                } else {
+                    return back()->with('duplicate_error', 'Duplicate Product Detected. You can increase quantity accordingly');
+                }
+            }
+        }
+        $data['product_id'];
+        $order->products = serialize($data['product_id']);
+        $order->customer_id = $data['customer'];
+        $order->status = $data['order_status'];
+        $order->order_note = !empty($data['note']) ? $data['note'] : null;
+        $order->save();
+        
+        $grand_total = 0;
+        foreach ($data['product_id'] as $key => $id) {
+            if(!empty($id)) {
+
+               $outgone_existing = OutgoingStock::where('order_id', $order->id)->where('product_id', $id)->where('reason_removed', 'as_order_firstphase');
+                
+                if ($outgone_existing->exists()) {
+                    $outgone = $outgone_existing->first();
+                    $outgone->update([
+                        'product_id' => $id,
+                        'quantity_removed' => $data['product_qty'][$key],
+                        'customer_acceptance_status' => $data['customer_acceptance_status'][$key],
+                        'amount_accrued' => $data['product_qty'][$key] * $data['unit_price'][$key],
+                        'reason_removed' => 'as_order_firstphase',
+                        'quantity_returned' => $data['customer_acceptance_status'][$key] == 'rejected' ? $data['product_qty'][$key] : 0,
+                        'reason_returned' => $data['customer_acceptance_status'][$key] == 'rejected' ? 'declined' : null,
+                        'created_by' => $authUser->id,
+                        'status' => 'true'
+                    ]);
+                } else {
+                    //update product stock
+                    $outgoingStock = new OutgoingStock();
+                    $outgoingStock->product_id = $id;
+                    $outgoingStock->order_id = $order->id;
+                    $outgoingStock->quantity_removed = $data['product_qty'][$key];
+                    $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
+                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    $outgoingStock->customer_acceptance_status = $data['customer_acceptance_status'][$key];
+                    $outgoingStock->quantity_returned = 0; //by default
+                    $outgoingStock->created_by = $authUser->id;
+                    $outgoingStock->status = 'true';
+                    $outgoingStock->save();
+                }
+                
+            }
+        }
+
+        $orderbump_outgoingStock = OutgoingStock::where(['order_id'=>$order->id, 'reason_removed'=>'as_orderbump'])->first();
+        $upsell_outgoingStock = OutgoingStock::where(['order_id'=>$order->id, 'reason_removed'=>'as_upsell'])->first();
+
+        //accepted orderbump
+        if (!empty($data['orderbump_product']) && isset($orderbump_outgoingStock)) {
+            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_orderbump')->update(['product_id'=>$data['orderbump_product'], 'customer_acceptance_status'=>'accepted']);
+        }
+        //rejected orderbump
+        if (empty($data['orderbump_product']) && isset($orderbump_outgoingStock)) {
+            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_orderbump')->update(['customer_acceptance_status'=>'rejected']);
+        }
+        //accepted upsell
+        if (!empty($data['upsell_product'])) {
+            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_upsell')->update(['product_id'=>$data['upsell_product']]);
+        }
+        //rejected upsell
+        if (empty($data['upsell_product']) && isset($upsell_outgoingStock)) {
+            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_upsell')->update(['customer_acceptance_status'=>'rejected']);
+        }
+
+        return back()->with('success', 'Order Updated Successfully');
+
     }
 
     public function assignAgentToOrder(Request $request)
@@ -265,7 +398,7 @@ class OrderController extends Controller
 
         $carts = CartAbandon::all();
         
-        $agents = User::where('type','agent')->get();
+        $agents = User::where('type','agent')->orderBy('id', 'DESC')->get();
         return view('pages.orders.cartAbandon', compact('authUser', 'user_role', 'carts', 'agents'));
     }
 
@@ -285,7 +418,7 @@ class OrderController extends Controller
         $gross_revenue = 0;
         $currency = '';
         
-        $outgoingStocks = OutgoingStock::where(['order_id'=>$order->id])->get();
+        $outgoingStocks = OutgoingStock::where(['order_id'=>$order->id])->orderBy('id', 'DESC')->get();
         foreach ($outgoingStocks as $key => $product) {
             $products['product'] = $this->productById($product->product_id);
             $products['quantity_removed'] = $product->quantity_removed;

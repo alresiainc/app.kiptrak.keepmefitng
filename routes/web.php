@@ -155,6 +155,8 @@ Route::post('/add-orderbump', [FormBuilderController::class, 'addOrderbumpToForm
 Route::post('/edit-orderbump', [FormBuilderController::class, 'editOrderbumpToForm'])->name('editOrderbumpToForm');
 Route::post('/add-upsell', [FormBuilderController::class, 'addUpsellToForm'])->name('addUpsellToForm');
 Route::post('/edit-upsell', [FormBuilderController::class, 'editUpsellToForm'])->name('editUpsellToForm');
+Route::post('/add-thankyou', [FormBuilderController::class, 'addThankYouTemplateToForm'])->name('addThankYouTemplateToForm');
+Route::post('/edit-thankyou', [FormBuilderController::class, 'editThankYouTemplateToForm'])->name('editThankYouTemplateToForm');
 
 //cart abandoned
 Route::get('/carts', [OrderController::class, 'cartAbandon'])->name('cartAbandon');
@@ -170,6 +172,8 @@ Route::get('/update-order-status/{unique_key}/{status}', [OrderController::class
 Route::get('/create-order', [OrderController::class, 'addOrder'])->name('addOrder');
 Route::post('/create-order', [OrderController::class, 'addOrderPost'])->name('addOrderPost');
 Route::get('/view-order/{unique_key}', [OrderController::class, 'singleOrder'])->name('singleOrder'); //viewed by admin
+Route::get('/edit-order/{unique_key}', [OrderController::class, 'editOrder'])->name('editOrder'); 
+Route::post('/edit-order/{unique_key}', [OrderController::class, 'editOrderPost'])->name('editOrderPost'); 
 Route::post('/assign-agent-to-order', [OrderController::class, 'assignAgentToOrder'])->name('assignAgentToOrder');
 Route::post('/assign-staff-to-order', [OrderController::class, 'assignStaffToOrder'])->name('assignStaffToOrder');
 Route::post('/update-order-date-status', [OrderController::class, 'updateOrderDateStatus'])->name('updateOrderDateStatus');
@@ -226,6 +230,14 @@ Route::get('/view-product/{unique_key}', [ProductController::class, 'singleProdu
 Route::get('/edit-product/{unique_key}', [ProductController::class, 'editProduct'])->name('editProduct');
 Route::post('/edit-product/{unique_key}', [ProductController::class, 'editProductPost'])->name('editProductPost');
 Route::get('/delete-product/{unique_key}', [ProductController::class, 'deleteProduct'])->name('deleteProduct');
+
+//combo product
+Route::get('/products-combo', [ProductComboController::class, 'allCombo'])->name('allCombo');
+Route::get('/create-product-combo', [ProductComboController::class, 'addCombo'])->name('addCombo');
+Route::post('/create-product-combo', [ProductComboController::class, 'addComboPost'])->name('addComboPost');
+Route::get('/view-product-combo/{unique_key}', [ProductComboController::class, 'singleCombo'])->name('singleCombo');
+Route::get('/edit-product-combo/{unique_key}', [ProductComboController::class, 'editCombo'])->name('editCombo');
+Route::post('/edit-product-combo/{unique_key}', [ProductComboController::class, 'editComboPost'])->name('editComboPost');
 
 //Warehouses
 Route::get('/warehouses', [WareHouseController::class, 'allWarehouse'])->name('allWarehouse');
@@ -316,6 +328,15 @@ Route::get('/add-upsell-templates', [UpsellSettingController::class, 'addUpsellT
 Route::post('/add-upsell-templates', [UpsellSettingController::class, 'addUpsellTemplatePost'])->name('addUpsellTemplatePost');
 Route::get('/edit-upsell-templates/{unique_key}', [UpsellSettingController::class, 'editUpsellTemplate'])->name('editUpsellTemplate');
 Route::post('/edit-upsell-templates/{unique_key}', [UpsellSettingController::class, 'editUpsellTemplatePost'])->name('editUpsellTemplatePost');
+
+//thankYouTemplates
+Route::get('/all-thankyou-templates', [ThankYouSettingController::class, 'thankYouTemplates'])->name('thankYouTemplates');
+Route::get('/add-thankyou-templates', [ThankYouSettingController::class, 'addThankYouTemplate'])->name('addThankYouTemplate');
+Route::post('/add-thankyou-templates', [ThankYouSettingController::class, 'addThankYouTemplatePost'])->name('addThankYouTemplatePost');
+Route::get('/view-thankyou-templates/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'singleThankYouTemplate'])->name('singleThankYouTemplate');
+Route::get('/edit-thankyou-templates/{unique_key}', [ThankYouSettingController::class, 'editThankYouTemplate'])->name('editThankYouTemplate');
+Route::post('/edit-thankyou-templates/{unique_key}', [ThankYouSettingController::class, 'editThankYouTemplatePost'])->name('editThankYouTemplatePost');
+Route::get('/thankYou-embedded/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'thankYouEmbedded'])->name('thankYouEmbedded');
 
 //generalSetting
 Route::get('/general-setting', [GeneralSettingController::class, 'generalSetting'])->name('generalSetting');
@@ -469,6 +490,7 @@ Route::get('/add-project', [ProjectController::class, 'addProject'])->name('addP
 Route::post('/add-project', [ProjectController::class, 'addProjectPost'])->name('addProjectPost'); //addProjectPost
 Route::get('/all-projects', [ProjectController::class, 'allProject'])->name('allProject'); //allProject
 Route::get('/single-project/{unique_key}', [ProjectController::class, 'singleProject'])->name('singleProject'); //singleProject
+Route::post('/single-project/{unique_key}', [ProjectController::class, 'updateProjectPerformance'])->name('updateProjectPerformance'); //updateProjectPerformance
 Route::get('/edit-project/{unique_key}', [ProjectController::class, 'editProject'])->name('editProject'); //editProject
 Route::post('/edit-project/{unique_key}', [ProjectController::class, 'editProjectPost'])->name('editProjectPost'); //editProjectPost
 Route::get('/delete-project/{unique_key}', [ProjectController::class, 'deleteProject'])->name('deleteProject'); //deleteProject
@@ -476,7 +498,7 @@ Route::get('/delete-project/{unique_key}', [ProjectController::class, 'deletePro
 //task
 Route::get('/add-task', [TaskController::class, 'addTask'])->name('addTask'); //addTask
 Route::post('/add-task', [TaskController::class, 'addTaskPost'])->name('addTaskPost'); //addTaskPost
-Route::get('/all-tasks', [TaskController::class, 'allTask'])->name('allTask'); //allTask
+Route::get('/all-tasks/{project_unique_key?}', [TaskController::class, 'allTask'])->name('allTask'); //allTask
 Route::get('/single-task/{unique_key}', [TaskController::class, 'singleTask'])->name('singleTask'); //singleTask
 Route::get('/edit-task/{unique_key}', [TaskController::class, 'editTask'])->name('editTask'); //editTask
 Route::post('/edit-task/{unique_key}', [TaskController::class, 'editTaskPost'])->name('editTaskPost'); //editTaskPost

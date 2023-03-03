@@ -41,6 +41,18 @@ $routeName = \Route::currentRouteName();
         </li>
         @endif
 
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-product')) ))
+        <li>
+          <a href="{{ route('addCombo') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Add Combo</span></a>
+        </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-product')) ))
+        <li>
+          <a href="{{ route('allCombo') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>View Combos</span></a>
+        </li>
+        @endif
+
         @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-product-category-list')) ))
         <li>
           <a href="{{ route('allCategory') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>View Categories</span></a>
@@ -611,15 +623,19 @@ $routeName = \Route::currentRouteName();
         <span>Settings</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="setting-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        <li>
+        <li class="d-none">
           <a href="{{ route('generalSetting') }}"><i style="font-size: 100%!important;" class="bi bi-list"></i><span>Company Structure</span></a>
+        </li>
+        <li>
+          <a href="{{ route('generalSetting') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>General Settings</span></a>
         </li>
         <li>
           <a href="{{ route('allUpsellTemplates') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Upsell Templates</span></a>
         </li>
         <li>
-          <a href="{{ route('generalSetting') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>General Settings</span></a>
+          <a href="{{ route('thankYouTemplates') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>ThankYou Templates</span></a>
         </li>
+        
         <li>
           <a href="{{ route('dashboardDocs') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Documentation</span></a>
         </li>

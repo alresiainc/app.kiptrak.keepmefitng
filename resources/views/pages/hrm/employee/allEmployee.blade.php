@@ -350,7 +350,7 @@
             if(check == true){  
 
               //var join_selected_values = allVals.join(",");
-              console.log(allVals) //2,1
+              //console.log(allVals) //2,1
               $('#sendMailModal').modal('show');
               $('#employee_id').val(allVals);
             

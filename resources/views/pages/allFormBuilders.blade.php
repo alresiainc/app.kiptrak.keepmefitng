@@ -66,7 +66,9 @@
               <button class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
             </div>
           </div>
+          
           <hr>
+          
           <div class="table table-responsive">
             <table id="orders-table" class="table table-striped custom-table" style="width:100%">
               <thead>
@@ -79,8 +81,9 @@
                   <th scope="col">Staff Assigned</th>
                   <th scope="col">OrderBump</th>
                   <th scope="col">UpSell</th>
+                  <th scope="col">Thank-You Page</th>
                   <th scope="col">Customer</th>
-                  {{-- <th scope="col">Delivery Duration</th><!--remove--> --}}
+                  
                   <th scope="col">Actions</th>
                 </tr>
               </thead>
@@ -199,6 +202,35 @@
                         </td>
                       @endif
 
+                      @if (isset($formHolder->thankyou_id))
+                        <td>
+                          {{ $formHolder->thankyou->template_name }} <span class="badge badge-info" onclick="addThankYouTemplate('{{ $formHolder->unique_key }}', '{{ $formHolder->name }}')" style="cursor: pointer;">
+                            <i class="bi bi-pencil"></i> Edit</span>
+                          <br>
+
+                          <div class="d-flex mt-1">
+                            <a class="btn btn-info btn-sm me-2 clipboard-btn" data-bs-toggle="tooltip" data-bs-placement="top"
+                              data-bs-title="Copy Url Link" data-clipboard-text="{{ url('/').'/'.$formHolder->thankyou->url }}">
+                              <i class="bi bi-clipboard"></i>
+                            </a>
+  
+                            <a class="btn btn-secondary btn-sm me-2 clipboard-btn" data-bs-toggle="tooltip" data-bs-placement="top"
+                              data-bs-title="Copy Embedded Code" data-clipboard-text="{{ $formHolder->thankyou->iframe_tag }}">
+                              <i class="bi bi-archive"></i>
+                            </a>
+  
+                            <a href="{{ route('singleThankYouTemplate', $formHolder->thankyou->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
+                          </div>
+
+                            <!-- Edit Upsell-Modal -->
+                            
+                            <!--edit Upsell-modal-end--->
+                        </td> 
+                        @else  
+                        <td><span class="badge badge-primary" onclick="addThankYouTemplate('{{ $formHolder->unique_key }}', '{{ $formHolder->name }}')" style="cursor: pointer;">
+                          <i class="bi bi-plus"></i> Add</span></td>
+                        @endif
+
                       <td><span>{{ isset($formHolder->order->customer_id) ? $formHolder->order->customer->firstname : 'No response' }} {{ $formHolder->order->customer_id ? $formHolder->order->customer->lastname : '' }}</span></td>
                       
                       <td>
@@ -216,7 +248,7 @@
 
                           <a href="{{ route('newFormLink', $formHolder->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
                           <a href="{{ route('editForm', $formHolder->unique_key) }}" class="btn btn-success btn-sm me-2 d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                          <a class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
+                          <a class="btn btn-danger btn-sm d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
                         </div>
                       </td>
                     </tr>
@@ -252,12 +284,12 @@
           <input type="hidden" id="form_unique_key" class="form_unique_key" name="form_unique_key" value="">
 
           <div class="mt-3">
-            <label for="" class="form-label">Heading</label>
+            <label for="" class="form-label">Heading | Optional</label>
             <input type="text" id="orderbump_heading" name="orderbump_heading"  class="form-control" value="">
           </div>
 
           <div class="mt-3">
-            <label for="" class="form-label">Sub Heading</label>
+            <label for="" class="form-label">Sub Heading | Optional</label>
             <input type="text" id="orderbump_subheading" name="orderbump_subheading"  class="form-control" value="">
           </div>
 
@@ -283,7 +315,7 @@
             @enderror
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Discount Type</label>
             <select name="ordernump_discount_type" class="custom-select form-control border btn-dark">
               <option value="">Nothing Selected</option>
@@ -292,7 +324,7 @@
             </select>
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Discount Amount</label>
             <input type="text" name="orderbump_discount" class="form-control" value="">
           </div>
@@ -323,12 +355,12 @@
         <div class="modal-body">
           <input type="hidden" id="editOrderbump_form_unique_key" name="editOrderbump_form_unique_key">
           <div class="mt-3">
-            <label for="" class="form-label">Heading</label>
+            <label for="" class="form-label">Heading | Optional</label>
             <input type="text" name="orderbump_heading" id="editOrderbump_heading"  class="form-control" value="">
           </div>
 
           <div class="mt-3">
-            <label for="" class="form-label">Sub Heading</label>
+            <label for="" class="form-label">Sub Heading | Optional</label>
             <input type="text" name="orderbump_subheading" id="editOrderbump_subheading"  class="form-control" value="">
           </div>
 
@@ -354,7 +386,7 @@
             @enderror
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Discount Type</label>
             <select name="ordernump_discount_type" class="custom-select form-control border btn-dark">
               <option value="">Nothing Selected</option>
@@ -363,7 +395,7 @@
             </select>
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Discount Amount</label>
             <input type="text" name="orderbump_discount" class="form-control" value="">
           </div>
@@ -395,13 +427,13 @@
           <input type="hidden" name="addUpsell_form_unique_key" id="addUpsell_form_unique_key" class="addUpsell_form_unique_key" value="">
 
           <div class="mt-3">
-            <label for="" class="form-label">Heading</label>
+            <label for="" class="form-label">Heading | Optional</label>
             <textarea name="upsell_heading" class="form-control" id="upsell_heading" cols="30" rows="3"></textarea>
             
           </div>
 
           <div class="mt-3">
-            <label for="" class="form-label">Sub Heading</label>
+            <label for="" class="form-label">Sub Heading | Optional</label>
             <textarea name="upsell_subheading" class="form-control" id="upsell_subheading" cols="30" rows="3"></textarea>
           </div>
           
@@ -449,7 +481,7 @@
             @enderror
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Discount Type</label>
             <select name="upsell_discount_type" class="custom-select form-control border btn-dark">
               <option value="">Nothing Selected</option>
@@ -458,7 +490,7 @@
             </select>
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Discount Amount</label>
             <input type="text" name="upsell_discount" class="form-control" value="">
           </div>
@@ -562,6 +594,53 @@
           <button type="submit" class="btn btn-info"><i class="bi bi-send"></i> UPDATE</button>
         </div>
 
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal ThankYou -->
+<div class="modal fade @error('product') show @enderror" id="addThankYou" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-white">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="addThankYouTitle">Add Thank-You to this Form</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ route('addThankYouTemplateToForm') }}" method="POST">@csrf
+        <div class="modal-body">
+
+          <input type="hidden" name="addThankYou_form_unique_key" id="addThankYou_form_unique_key" class="addThankYou_form_unique_key" value="">
+
+          <div class="mt-3">
+            <label for="upsell_product" class="form-label">Select Template</label>
+            <select name="thankyou_template_id" data-live-search="true" class="custom-select form-control border btn-dark @error('thankyou_template_id') is-invalid @enderror"
+              id="" style="color: black !important;">
+              <option value="">Nothing Selected</option>
+              @if (count($thankYouTemplates) > 0)
+
+              @foreach ($thankYouTemplates as $template)
+                <option value="{{ $template->id }}">{{ $template->template_name }}</option>
+              @endforeach
+
+              @endif
+      
+            </select>
+
+            @error('product')
+              <span class="invalid-feedback mb-3" role="alert">
+                  <strong>{{ $message }}</strong>
+              </span>
+            @enderror
+          </div>
+
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> SUBMIT</button>
+        </div>
       </form>
 
     </div>
@@ -698,6 +777,12 @@
     $('#editUpsellModal').prepend(newOption).trigger('change');
 
     //$("orderbump_product").val($formHolder.orderbump.product.id).change();
+  }
+
+  function addThankYouTemplate($form_unique_key="", $form_name="") {
+    $('#addThankYou').modal("show");
+    $('#addThankYou_form_unique_key').val($form_unique_key);
+    $('#addThankYouTitle').text('Add Thank-you template to this Form: '+$form_name);
   }
 
 </script>

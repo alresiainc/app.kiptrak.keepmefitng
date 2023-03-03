@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
@@ -88,7 +89,10 @@ class Product extends Model
         if (count($this->outgoingStocks) == 0) {
             $stock_available = $sum_incomingStocks;
         } else {
-            $sum_outgoingStocks = $this->outgoingStocks->sum->outgoingStockTotal();
+            $delivered_order_ids = Order::where('status', 'delivered_and_remitted')->pluck('id');
+            //$sum_outgoingStocks = $this->outgoingStocks->sum->outgoingStockTotal();
+            $sum_outgoingStocks = $this->outgoingStocks()->whereIn('order_id', $delivered_order_ids)->sum(DB::raw('quantity_removed - quantity_returned'));
+            
             $stock_available = $sum_incomingStocks - $sum_outgoingStocks;
         }
         return $stock_available;
@@ -125,6 +129,38 @@ class Product extends Model
         $accepted_outgoing_stock = OutgoingStock::where('product_id', $this->id)->where('customer_acceptance_status', 'accepted');
         $revenue += $accepted_outgoing_stock->sum('amount_accrued');
         return $revenue;
+    }
+
+    public function comboOriginalSalePrice() {
+        //
+        $originalSalePrice = 0;
+        
+        $salePrice_after_discount = $this->sale_price;
+        $discount_type = $this->discount_type;
+        $discount = $this->discount;
+        if ($discount_type=='fixed') {
+            $originalSalePrice = $salePrice_after_discount + $discount;
+        } else {
+            $discount_percent = $discount / 100;
+            $divided_by = 1 - $discount_percent;
+            $originalSalePrice = $salePrice_after_discount / $divided_by;
+        }
+
+        return $originalSalePrice;
+    }
+
+    public function comboProducts() {
+        $products = [];
+        $product_idQtys = unserialize($this->combo_product_ids); //['4-2', '1-2']
+        foreach ($product_idQtys as $key => $idQty) {
+            $explode = explode('-', $idQty); //
+            $id = $explode[0];
+            $qty = $explode[1];
+            $product = Product::find($id);
+            $products[] = $product;
+            $products[$key]->quantity_combined = $qty;
+        }
+        return $products; 
     }
 
 }

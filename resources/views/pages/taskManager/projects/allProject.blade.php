@@ -114,7 +114,7 @@
 
                       <td>
                         @if (count($project->tasks) > 0)
-                            <a href="" class="badge badge-dark">{{ count($project->tasks) }}</a>
+                            <a href="{{ route('allTask', $project->unique_key) }}" class="badge badge-dark">{{ count($project->tasks) }}</a>
                         @else
                             None
                         @endif
@@ -180,7 +180,7 @@
 </main><!-- End #main -->
 
 <!--addTask Modal -->
-<div class="modal fade" id="addTask" tabindex="-1" aria-labelledby="addTaskLabel" aria-hidden="true">
+<div class="modal fade" id="addTask" tabindex="-1" aria-labelledby="addTaskLabel" aria-hidden="true" style="overflow-y: scroll;">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -194,7 +194,7 @@
           
           <div class="d-grid mb-3">
             <label for="" class="form-label">Name<span class="text-danger fw-bolder">*</span></label>
-            <input type="text" name="name" class="form-control name @error('name') is-invalid @enderror"
+            <input type="text" name="name" id="name" class="form-control name @error('name') is-invalid @enderror"
             id="" value="{{ old('name') }}">
             @error('name')
                 <span class="invalid-feedback" role="alert">

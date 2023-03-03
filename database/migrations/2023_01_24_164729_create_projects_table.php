@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('assigned_to')->nullable();
             $table->string('status')->nullable(); //pending, in_progress, ready, done, backlog 
             $table->string('priority')->nullable(); //low(green), medium(yellow), high(red)
+            $table->string('performance')->nullable(); //in percentage
 
             $table->softDeletes();
             $table->timestamps();

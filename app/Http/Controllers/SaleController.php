@@ -359,7 +359,7 @@ class SaleController extends Controller
                      'customer_acceptance_status' => $data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null,
                      'amount_accrued' => $data['product_qty'][$key] * $data['unit_price'][$key],
                      'reason_removed' => 'as_order_firstphase',
-                     'created_by' => 1,
+                     'created_by' => $authUser->id,
                      'status' => 'true'
                     ]);
                     

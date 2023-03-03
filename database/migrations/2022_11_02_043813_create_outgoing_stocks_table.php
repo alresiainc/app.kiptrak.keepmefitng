@@ -27,6 +27,8 @@ return new class extends Migration
             $table->string('quantity_returned')->nullable(); //0 by default //$quantity_removed - $quantity_returned = actual qty sold
             $table->string('reason_returned')->nullable(); //administrative, will be added by staff later
 
+            $table->string('isCombo')->nullable();
+
             $table->string('created_by');
             $table->string('status'); //'true','false'
             $table->softDeletes();
