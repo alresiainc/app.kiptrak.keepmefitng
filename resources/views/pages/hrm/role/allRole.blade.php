@@ -37,6 +37,10 @@
                     <a href="{{ route('addRole') }}"><button data-bs-target="#addMoneyTransfer" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                       <i class="bi bi-plus"></i> <span>Create Role</span></button></a>
                 </div>
+                <div class="float-end text-end">
+                  <a href="{{ route('addPermission') }}"><button data-bs-target="#addMoneyTransfer" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
+                    <i class="bi bi-plus"></i> <span>Create Permissions</span></button></a>
+                </div>
     
                 <div class="float-end text-end d-none">
                   <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">

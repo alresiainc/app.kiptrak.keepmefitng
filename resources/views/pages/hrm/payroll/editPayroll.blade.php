@@ -1,5 +1,5 @@
 @extends('layouts.design')
-@section('title')Add Payroll @endsection
+@section('title')Edit Payroll @endsection
 
 @section('extra_css')
     <style>
@@ -24,12 +24,12 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Add Payroll</h1>
+      <h1>Edit Payroll</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="/">Home</a></li>
           <li class="breadcrumb-item"><a href="{{ route('allPayroll') }}">Payroll List</a></li>
-          <li class="breadcrumb-item active">Add Payroll</li>
+          <li class="breadcrumb-item active">Edit Payroll</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
@@ -93,7 +93,7 @@
                   @enderror
                 </div>
 
-                <div class="col-md-12">
+                <div class="col-md-6">
                     <label for="" class="form-label">Select Method</label>
                     <select name="paying_method" data-live-search="true" class="custom-select form-control border @error('paying_method') is-invalid @enderror">
                       <option value="{{ $payroll->paying_method }}">
@@ -112,6 +112,24 @@
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
+                </div>
+
+                <div class="col-md-6">
+                  <label for="" class="form-label">Location | Optional</label>
+                  <select name="warehouse_id" data-live-search="true" class="custom-select form-control border @error('warehouse_id') is-invalid @enderror">
+                    <option value="{{ isset($payroll->warehouse_id) ? $payroll->warehouse->name : '' }}" selected>{{ isset($payroll->warehouse_id) ? $payroll->warehouse->name : 'Nothing Selected' }}</option>
+                    @foreach ($warehouses as $warehouse)
+                      <option value="{{ $warehouse->id }}">
+                          {{ $warehouse->name }}
+                      </option>
+                    @endforeach
+                    
+                  </select>
+                  @error('paying_method')
+                      <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                      </span>
+                  @enderror
                 </div>
 
                 <div class="col-md-12">

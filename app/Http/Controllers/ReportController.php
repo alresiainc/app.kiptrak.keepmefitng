@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 use App\Models\Product;
 use App\Models\WareHouse;
@@ -20,6 +21,7 @@ use App\Models\GeneralSetting;
 use App\Models\Payroll;
 use App\Models\Category;
 use App\Models\ActivityLog;
+use App\Models\Order;
 
 class ReportController extends Controller
 {
@@ -38,9 +40,10 @@ class ReportController extends Controller
         $end_date = '';
         $warehouse_selected = '';
 
-
+        $today = Carbon::now();
+        
         //join 'products tbl' to 'incoming_stocks tbl', whr product_id is foreignKey, then SUM the multiples of two columns, from the resulting array
-        $openningStock_by_purchasePrice = DB::table('products')
+        $openningStock_by_purchasePrice = DB::table('products')->whereDate('products.created_at', '<', $today)
                 ->join('incoming_stocks', 'products.id', '=', 'incoming_stocks.product_id')
                 //->select('table1.column1', 'table1.column2', 'table2.column3')
                 ->select(DB::raw('SUM(purchase_price * quantity_added) as total'))
@@ -50,7 +53,7 @@ class ReportController extends Controller
         //         ->select(DB::raw('SUM(column1 * column2) as total'))
         //         ->get()[0]->total;
 
-        $openningStock_by_salePrice = DB::table('products')
+        $openningStock_by_salePrice = DB::table('products')->whereDate('products.created_at', '<', $today)
                 ->join('incoming_stocks', 'products.id', '=', 'incoming_stocks.product_id')
                 ->select(DB::raw('SUM(sale_price * quantity_added) as total'))
                 ->get()[0]->total;
@@ -62,18 +65,346 @@ class ReportController extends Controller
         //         ->select(DB::raw('SUM(sale_price * quantity_added) as total'))
         //         ->get()[0]->total;
 
+        $productsLessToday = Product::whereDate('created_at', '<', $today)->get();
+        $productsLessToday_SoldByPurchasePrice = 0; $productsLessToday_SoldBySalePrice = 0;
+        foreach ($productsLessToday as $key=>$product) {
+            if ($product->revenue() > 0) {
+                $productsLessToday_SoldByPurchasePrice += $product->stock_available() * $product->purchase_price;
+                $productsLessToday_SoldBySalePrice += $product->stock_available() * $product->sale_price;
+            }
+        }
+
+        //actual opening stock values
+        $openningStock_by_purchasePrice = $openningStock_by_purchasePrice - $productsLessToday_SoldByPurchasePrice;
+        $openningStock_by_salePrice = $openningStock_by_salePrice - $productsLessToday_SoldBySalePrice;
+
         $purchases_amount_paid = Purchase::sum('amount_paid');
         $other_espenses = Expense::sum('amount');
         $payroll = Payroll::sum('amount');
         $total_expenses = $purchases_amount_paid + $other_espenses + $payroll;
 
+        //closing stocks, products not sold
         $products = Product::all();
+        $closingStock_by_purchasePrice = 0; $closingStock_by_salePrice = 0;
+        foreach ($products as $key=>$product) {
+            if ($product->revenue() == 0) {
+                $closingStock_by_purchasePrice += $product->stock_available() * $product->purchase_price;
+                $closingStock_by_salePrice += $product->stock_available() * $product->sale_price;
+            }
+        }
+        //total-sales remitted
+        $sales_paid = 0;
+        $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+        $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+        $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+
+        $profit_val = $sales_paid - $total_expenses;
+        
         $categories = Category::all();
         $activityLogs = ActivityLog::all();
 
         return view('pages.reports.profitLossReport', compact('authUser', 'user_role', 'currency', 'warehouses', 'start_date', 'end_date', 'warehouse_selected',
         'openningStock_by_purchasePrice', 'openningStock_by_salePrice', 'purchases_amount_paid', 'other_espenses', 'payroll', 'total_expenses', 'products', 'categories',
-        'activityLogs'));
+        'activityLogs', 'closingStock_by_purchasePrice', 'closingStock_by_salePrice', 'sales_paid', 'profit_val'));
+    }
+
+    public function profitLossReportAjax(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $authUser = auth()->user();
+        $data = $request->all();
+
+        //only date
+        if (empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
+            $warehouse_id = "";
+            //strtotime for checking
+            $start_date = strtotime($data['start_date']);
+            $end_date = strtotime($data['end_date']);
+
+            if ($start_date > $end_date) {
+                $data['error'] = 'Start Date Cannot be greater than End Date';
+                return response()->json([
+                    'status'=>true,
+                    'data'=>$data
+                ]);
+            }
+            //date proper
+            $start_date = date('Y-m-d',$start_date);
+            $end_date = date('Y-m-d',$end_date);
+            
+            $openningStock_by_purchasePrice = DB::table('products')->whereBetween(DB::raw('DATE(products.created_at)'), [$start_date, $end_date])
+                ->join('incoming_stocks', 'products.id', '=', 'incoming_stocks.product_id')
+                ->select(DB::raw('SUM(purchase_price * quantity_added) as total'))
+                ->get()[0]->total;
+
+            $openningStock_by_salePrice = DB::table('products')->whereBetween(DB::raw('DATE(products.created_at)'), [$start_date, $end_date])
+                ->join('incoming_stocks', 'products.id', '=', 'incoming_stocks.product_id')
+                ->select(DB::raw('SUM(sale_price * quantity_added) as total'))
+                ->get()[0]->total;
+            
+            $productsLessToday = Product::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->get();
+            $productsLessToday_SoldByPurchasePrice = 0; $productsLessToday_SoldBySalePrice = 0;
+            foreach ($productsLessToday as $key=>$product) {
+                if ($product->revenue() > 0) {
+                    $productsLessToday_SoldByPurchasePrice += $product->stock_available() * $product->purchase_price;
+                    $productsLessToday_SoldBySalePrice += $product->stock_available() * $product->sale_price;
+                }
+            }
+    
+            //actual opening stock values
+            $openningStock_by_purchasePrice = $openningStock_by_purchasePrice - $productsLessToday_SoldByPurchasePrice;
+            $openningStock_by_salePrice = $openningStock_by_salePrice - $productsLessToday_SoldBySalePrice;
+
+            $purchases_amount_paid = Purchase::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->sum('amount_paid');
+            $other_espenses = Expense::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->sum('amount');
+            $payroll = Payroll::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->sum('amount');
+            $total_expenses = $purchases_amount_paid + $other_espenses + $payroll;
+
+            //closing stocks, products not sold
+            $products = Product::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->get();
+            $closingStock_by_purchasePrice = 0; $closingStock_by_salePrice = 0;
+            foreach ($products as $key=>$product) {
+                if ($product->revenue() == 0) {
+                    $closingStock_by_purchasePrice += $product->stock_available() * $product->purchase_price;
+                    $closingStock_by_salePrice += $product->stock_available() * $product->sale_price;
+                }
+            }
+
+            //total-sales remitted
+            $sales_paid = 0;
+            $delivered_and_remitted_orders = Order::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('status', 'delivered_and_remitted')->pluck('id');
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            
+            $profit_val = $sales_paid - $total_expenses;
+
+            //for datatables
+            $categories = Category::all();
+            $warehouse_id = "";
+            foreach ($categories as $key=>$category) {
+                $categories[$key]->revenue = number_format($category->revenue($start_date, $end_date, $warehouse_id));
+            }
+
+            $activityLogs = ActivityLog::all();
+
+            $products = Product::all(); $staff_id="";
+            //store filter in array
+            foreach ($products as $key=>$product) {
+                $products[$key]->revenue = number_format($product->revenue($start_date, $end_date, $warehouse_id));
+            }
+
+            // $allExpenses = Expense::where('staff_id', $staff_id)->get();
+            // foreach ($allExpenses as $key=>$expense) {
+            //     $allExpenses[$key]->category_name = $expense->category->name;
+            //     $allExpenses[$key]->amount = $expense->amount;
+            //     $allExpenses[$key]->staff_name = $expense->staff->name;
+            // }
+            
+            ///////////////////////////////////////////
+
+        }
+
+        //warehouse, location
+        if (!empty($data['warehouse_id']) && empty($data['start_date']) && empty($data['end_date'])) {
+            $warehouse_id = $data['warehouse_id'];
+            $start_date = "";
+            $end_date = "";
+
+            $warehouse = WareHouse::find($warehouse_id);
+            $product_ids = $warehouse->products->pluck('id');
+            
+            $openningStock_by_purchasePrice = DB::table('products')->whereIn('products.id', $product_ids)
+                ->join('incoming_stocks', 'products.id', '=', 'incoming_stocks.product_id')
+                ->select(DB::raw('SUM(purchase_price * quantity_added) as total'))
+                ->get()[0]->total;
+
+            $openningStock_by_salePrice = DB::table('products')->whereIn('products.id', $product_ids)
+                ->join('incoming_stocks', 'products.id', '=', 'incoming_stocks.product_id')
+                ->select(DB::raw('SUM(sale_price * quantity_added) as total'))
+                ->get()[0]->total;
+            
+            $productsLessToday = Product::whereIn('id', $product_ids)->get();
+            $productsLessToday_SoldByPurchasePrice = 0; $productsLessToday_SoldBySalePrice = 0;
+            foreach ($productsLessToday as $key=>$product) {
+                if ($product->revenue() > 0) {
+                    $productsLessToday_SoldByPurchasePrice += $product->stock_available() * $product->purchase_price;
+                    $productsLessToday_SoldBySalePrice += $product->stock_available() * $product->sale_price;
+                }
+            }
+    
+            //actual opening stock values
+            $openningStock_by_purchasePrice = $openningStock_by_purchasePrice - $productsLessToday_SoldByPurchasePrice;
+            $openningStock_by_salePrice = $openningStock_by_salePrice - $productsLessToday_SoldBySalePrice;
+
+            $purchases_amount_paid = Purchase::whereIn('product_id', $product_ids)->sum('amount_paid');
+            $other_espenses = Expense::where('warehouse_id', $warehouse_id)->sum('amount');
+            $payroll = Payroll::sum('amount');
+            $total_expenses = $purchases_amount_paid + $other_espenses + $payroll;
+
+            //closing stocks, products not sold
+            $products = Product::whereIn('id', $product_ids)->get();
+            $closingStock_by_purchasePrice = 0; $closingStock_by_salePrice = 0;
+            foreach ($products as $key=>$product) {
+                if ($product->revenue() == 0) {
+                    $closingStock_by_purchasePrice += $product->stock_available() * $product->purchase_price;
+                    $closingStock_by_salePrice += $product->stock_available() * $product->sale_price;
+                }
+            }
+
+            //total-sales remitted
+            $sales_paid = 0;
+            $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+            $accepted_outgoing_stock = OutgoingStock::whereIn('product_id', $product_ids)->whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            
+            $profit_val = $sales_paid - $total_expenses;
+
+            //for datatables
+            $categories = Category::all();
+            $warehouse_id = "";
+            foreach ($categories as $key=>$category) {
+                $categories[$key]->revenue = number_format($category->revenue($start_date, $end_date, $warehouse_id));
+            }
+
+            $activityLogs = ActivityLog::all();
+
+            $products = Product::all(); $staff_id="";
+            //store filter in array
+            foreach ($products as $key=>$product) {
+                $products[$key]->revenue = number_format($product->revenue($start_date, $end_date, $warehouse_id));
+            }
+
+            // $allExpenses = Expense::where('staff_id', $staff_id)->get();
+            // foreach ($allExpenses as $key=>$expense) {
+            //     $allExpenses[$key]->category_name = $expense->category->name;
+            //     $allExpenses[$key]->amount = $expense->amount;
+            //     $allExpenses[$key]->staff_name = $expense->staff->name;
+            // }
+            
+            ///////////////////////////////////////////
+
+        }
+
+        //all
+        if (!empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
+            $warehouse_id = $data['warehouse_id'];
+            $warehouse = WareHouse::find($warehouse_id);
+            $product_ids = $warehouse->products->pluck('id');
+
+            //strtotime for checking
+            $start_date = strtotime($data['start_date']);
+            $end_date = strtotime($data['end_date']);
+
+            if ($start_date > $end_date) {
+                $data['error'] = 'Start Date Cannot be greater than End Date';
+                return response()->json([
+                    'status'=>true,
+                    'data'=>$data
+                ]);
+            }
+            //date proper
+            $start_date = date('Y-m-d',$start_date);
+            $end_date = date('Y-m-d',$end_date);
+            
+            $openningStock_by_purchasePrice = DB::table('products')->whereBetween(DB::raw('DATE(products.created_at)'), [$start_date, $end_date])
+                ->whereIn('products.id', $product_ids)
+                ->join('incoming_stocks', 'products.id', '=', 'incoming_stocks.product_id')
+                ->select(DB::raw('SUM(purchase_price * quantity_added) as total'))
+                ->get()[0]->total;
+
+            $openningStock_by_salePrice = DB::table('products')->whereBetween(DB::raw('DATE(products.created_at)'), [$start_date, $end_date])
+                ->whereIn('products.id', $product_ids)
+                ->join('incoming_stocks', 'products.id', '=', 'incoming_stocks.product_id')
+                ->select(DB::raw('SUM(sale_price * quantity_added) as total'))
+                ->get()[0]->total;
+            
+            $productsLessToday = Product::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->whereIn('id', $product_ids)->get();
+            $productsLessToday_SoldByPurchasePrice = 0; $productsLessToday_SoldBySalePrice = 0;
+            foreach ($productsLessToday as $key=>$product) {
+                if ($product->revenue() > 0) {
+                    $productsLessToday_SoldByPurchasePrice += $product->stock_available() * $product->purchase_price;
+                    $productsLessToday_SoldBySalePrice += $product->stock_available() * $product->sale_price;
+                }
+            }
+    
+            //actual opening stock values
+            $openningStock_by_purchasePrice = $openningStock_by_purchasePrice - $productsLessToday_SoldByPurchasePrice;
+            $openningStock_by_salePrice = $openningStock_by_salePrice - $productsLessToday_SoldBySalePrice;
+
+            $purchases_amount_paid = Purchase::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->whereIn('product_id', $product_ids)->sum('amount_paid');
+            $other_espenses = Expense::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('warehouse_id', $warehouse_id)->sum('amount');
+            $payroll = Payroll::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->sum('amount');
+            $total_expenses = $purchases_amount_paid + $other_espenses + $payroll;
+
+            //closing stocks, products not sold
+            $products = Product::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->whereIn('id', $product_ids)->get();
+            $closingStock_by_purchasePrice = 0; $closingStock_by_salePrice = 0;
+            foreach ($products as $key=>$product) {
+                if ($product->revenue() == 0) {
+                    $closingStock_by_purchasePrice += $product->stock_available() * $product->purchase_price;
+                    $closingStock_by_salePrice += $product->stock_available() * $product->sale_price;
+                }
+            }
+
+            //total-sales remitted
+            $sales_paid = 0;
+            $delivered_and_remitted_orders = Order::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('status', 'delivered_and_remitted')->pluck('id');
+            $accepted_outgoing_stock = OutgoingStock::whereIn('product_id', $product_ids)->whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            
+            $profit_val = $sales_paid - $total_expenses;
+
+            //for datatables
+            $categories = Category::all();
+            $warehouse_id = "";
+            foreach ($categories as $key=>$category) {
+                $categories[$key]->revenue = number_format($category->revenue($start_date, $end_date, $warehouse_id));
+            }
+
+            $activityLogs = ActivityLog::all();
+
+            $products = Product::all(); $staff_id="";
+            //store filter in array
+            foreach ($products as $key=>$product) {
+                $products[$key]->revenue = number_format($product->revenue($start_date, $end_date, $warehouse_id));
+            }
+
+            // $allExpenses = Expense::where('staff_id', $staff_id)->get();
+            // foreach ($allExpenses as $key=>$expense) {
+            //     $allExpenses[$key]->category_name = $expense->category->name;
+            //     $allExpenses[$key]->amount = $expense->amount;
+            //     $allExpenses[$key]->staff_name = $expense->staff->name;
+            // }
+            
+            ///////////////////////////////////////////
+
+        }
+
+        //store in array
+        $data['openningStock_by_purchasePrice'] = number_format($openningStock_by_purchasePrice);
+        $data['openningStock_by_salePrice'] = number_format($openningStock_by_salePrice);
+        $data['purchases_amount_paid'] = number_format($purchases_amount_paid);
+        $data['other_espenses'] = number_format($other_espenses);
+        $data['payroll'] = number_format($payroll);
+        $data['total_expenses'] = number_format($total_expenses);
+        $data['other_espenses'] = number_format($other_espenses);
+        $data['closingStock_by_purchasePrice'] = number_format($closingStock_by_purchasePrice);
+        $data['closingStock_by_salePrice'] = number_format($closingStock_by_salePrice);
+        $data['sales_paid'] = number_format($sales_paid);
+        $data['profit'] = number_format($profit_val);
+        $data['products'] = $products;
+        $data['categories'] = $categories;
+
+
+        //store in array
+        return response()->json([
+            'status'=>true,
+            'data'=>$data
+        ]);
+
+        
     }
 
     public function activityLogReport()
@@ -93,37 +424,231 @@ class ReportController extends Controller
         return view('pages.reports.activityLog', compact('authUser', 'user_role', 'currency', 'warehouses', 'warehouse_selected', 'activityLogs'));
     }
 
-    public function salesRepReport()
+    public function salesRepReport($staff_unique_key="", $start_date="", $end_date="", $location="")
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
-        
+        ////////////////////////////////////////////////////////////////
+        $staffs = User::where('type', 'staff')->orderBy('id', 'DESC')->get();
         $warehouses = WareHouse::all();
         $start_date = '';
         $end_date = '';
         $warehouse_selected = '';
 
-        // $yearly_best_selling_qty = Sale::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->whereDate('created_at', '>=' , date("Y").'-01-01')
-        // ->whereDate('created_at', '<=' , date("Y").'-12-31')->groupBy('product_id')->orderBy('sold_qty', 'desc')->take(5)->get();
-        $yearly_best_selling_qty = Sale::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->groupBy('product_id')->orderBy('sold_qty', 'desc')->get();
-        
-        $sellingProductsBulk = [];
-        foreach ($yearly_best_selling_qty as $key => $sale) {
-            $product = Product::find($sale->product_id);
-            $sellingProducts['product_name'] = $product->name;
-            $sellingProducts['sold_amount'] = $this->soldAmount($product->id);
-            $sellingProducts['sold_qty'] = $sale->sold_qty;
-            $sellingProducts['stock_available'] = $product->stock_available();
+        //revenue
+        $sales_paid = 0;
+        $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+        $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
 
-            $sellingProductsBulk[] = $sellingProducts;
+        $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+        $sales_paid = $this->shorten($sales_paid); //total revenue
+
+        //expenses
+        // $expenses = Expense::where('staff_id', $authUser->id)->sum('amount');
+        $expenses = Expense::sum('amount');
+        $expenses = $this->shorten($expenses);
+
+        //products
+        $products = Product::all();
+        $allExpenses = Expense::all();
+
+        // if ($staff_unique_key != "") {
+        //     $staff = User::where('unique_key', $staff_unique_key)->first();
+        //     //revenue
+        //     $sales_paid = 0;
+        //     $delivered_and_remitted_orders = Order::where('staff_assigned_id', $staff->id)->where('status', 'delivered_and_remitted')->pluck('id');
+        //     $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+        // }
+
+        return view('pages.reports.salesRepReport', \compact('authUser', 'user_role', 'currency', 'staffs', 'warehouses', 'start_date', 'end_date', 'warehouse_selected',
+        'sales_paid', 'expenses', 'products', 'allExpenses'));
+    }
+
+    //salesRepReportAjax
+    public function salesRepReportAjax(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $authUser = auth()->user();
+        $data = $request->all();
+        
+        //only staff
+        if (!empty($data['staff_id']) && empty($data['start_date']) && empty($data['end_date'])) {
+            $staff_id = $data['staff_id'];
+            $start_date = "";
+            $end_date = "";
+            
+            //revenue
+            $sales_paid = 0;
+            $delivered_and_remitted_orders = Order::where('staff_assigned_id', $staff_id)->where('status', 'delivered_and_remitted')->pluck('id');
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+
+            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            $sales_paid = $this->shorten($sales_paid); //total revenue
+
+            $expenses = Expense::where('staff_id', $staff_id)->sum('amount');
+            $expenses = $this->shorten($expenses);
+
+            //for datatables
+            $products = Product::all(); $theProducts = [];
+            //store filter in array
+            foreach ($products as $key=>$product) {
+                if ($product->revenue($staff_id, $start_date, $end_date) > 0) {
+                    $theProducts[] = $product;
+                }
+            }
+
+            //loop tru resulting array
+            foreach ($theProducts as $key=>$product) {
+                $theProducts[$key]->name = $product->name; 
+                $theProducts[$key]->revenue = number_format($product->revenue($staff_id, $start_date, $end_date)); 
+                $theProducts[$key]->soldQty = $product->soldQty($staff_id); 
+                $theProducts[$key]->stock_available = $product->stock_available(); 
+            }
+
+            $allExpenses = Expense::where('staff_id', $staff_id)->get();
+            foreach ($allExpenses as $key=>$expense) {
+                $allExpenses[$key]->category_name = $expense->category->name;
+                $allExpenses[$key]->amount = $expense->amount;
+                $allExpenses[$key]->staff_name = $expense->staff->name;
+            }
+            
+            $data['sales'] = $sales_paid;
+            $data['expenses'] = $expenses;
+            $data['products'] = $theProducts;
+            $data['allExpenses'] = $allExpenses;
         }
 
-        //return $bestSellingProductsBulk;
+        //only date
+        if (empty($data['staff_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
+            $staff_id = "";
+            //strtotime for checking
+            $start_date = strtotime($data['start_date']);
+            $end_date = strtotime($data['end_date']);
 
-        return view('pages.reports.salesRepReport', \compact('authUser', 'user_role', 'currency', 'warehouses', 'start_date', 'end_date', 'warehouse_selected', 'sellingProductsBulk'));
+            if ($start_date > $end_date) {
+                $data['error'] = 'Start Date Cannot be greater than End Date';
+                return response()->json([
+                    'status'=>true,
+                    'data'=>$data
+                ]);
+            }
+            //date proper
+            $start_date = date('Y-m-d',$start_date);
+            $end_date = date('Y-m-d',$end_date);
+            
+            //revenue
+            $sales_paid = 0;
+            $delivered_and_remitted_orders = Order::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('status', 'delivered_and_remitted')->pluck('id');
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            $sales_paid = $this->shorten($sales_paid); //total revenue
+
+            $expenses = Expense::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->sum('amount');
+            $expenses = $this->shorten($expenses);
+
+            //for datatables
+            $products = Product::all(); $theProducts = [];
+            //store filter in array
+            foreach ($products as $key=>$product) {
+                if ($product->revenue($staff_id, $start_date, $end_date) > 0) {
+                    $theProducts[] = $product;
+                }
+            }
+
+            //loop tru resulting array
+            foreach ($theProducts as $key=>$product) {
+                $theProducts[$key]->name = $product->name; 
+                $theProducts[$key]->revenue = number_format($product->revenue($staff_id, $start_date, $end_date)); 
+                $theProducts[$key]->soldQty = $product->soldQty($staff_id); 
+                $theProducts[$key]->stock_available = $product->stock_available(); 
+            }
+
+            $allExpenses = Expense::where('staff_id', $staff_id)->get();
+            foreach ($allExpenses as $key=>$expense) {
+                $allExpenses[$key]->category_name = $expense->category->name;
+                $allExpenses[$key]->amount = $expense->amount;
+                $allExpenses[$key]->staff_name = $expense->staff->name;
+            }
+            
+            $data['sales'] = $sales_paid;
+            $data['expenses'] = $expenses;
+            $data['products'] = $theProducts;
+            $data['allExpenses'] = $allExpenses;
+
+            ///////////////////////////////////////////
+            
+        }
+
+        //all
+        if (!empty($data['staff_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
+            $staff_id = $data['staff_id'];
+
+            //strtotime for checking
+            $start_date = strtotime($data['start_date']);
+            $end_date = strtotime($data['end_date']);
+
+            if ($start_date > $end_date) {
+                $data['error'] = 'Start Date Cannot be greater than End Date';
+                return response()->json([
+                    'status'=>true,
+                    'data'=>$data
+                ]);
+            }
+            //date proper
+            $start_date = date('Y-m-d',$start_date);
+            $end_date = date('Y-m-d',$end_date);
+            
+            //revenue
+            $sales_paid = 0;
+            $delivered_and_remitted_orders = Order::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('staff_assigned_id', $staff_id)->where('status', 'delivered_and_remitted')->pluck('id');
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+
+            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            $sales_paid = $this->shorten($sales_paid); //total revenue
+
+            $expenses = Expense::where('staff_id', $staff_id)->sum('amount');
+            $expenses = $this->shorten($expenses);
+
+            //for datatables
+            $products = Product::all(); $theProducts = [];
+            //store filter in array
+            foreach ($products as $key=>$product) {
+                if ($product->revenue($staff_id, $start_date, $end_date) > 0) {
+                    $theProducts[] = $product;
+                }
+            }
+
+            //loop tru resulting array
+            foreach ($theProducts as $key=>$product) {
+                $theProducts[$key]->name = $product->name; 
+                $theProducts[$key]->revenue = number_format($product->revenue($staff_id, $start_date, $end_date)); 
+                $theProducts[$key]->soldQty = $product->soldQty($staff_id); 
+                $theProducts[$key]->stock_available = $product->stock_available(); 
+            }
+
+            $allExpenses = Expense::where('staff_id', $staff_id)->get();
+            foreach ($allExpenses as $key=>$expense) {
+                $allExpenses[$key]->category_name = $expense->category->name;
+                $allExpenses[$key]->amount = $expense->amount;
+                $allExpenses[$key]->staff_name = $expense->staff->name;
+            }
+            
+            $data['sales'] = $sales_paid;
+            $data['expenses'] = $expenses;
+            $data['products'] = $theProducts;
+            $data['allExpenses'] = $allExpenses;
+        }
+        
+        //store in array
+        return response()->json([
+            'status'=>true,
+            'data'=>$data
+        ]);
     }
     
     public function productReport()
@@ -658,17 +1183,20 @@ class ReportController extends Controller
     }
 
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
-        //
+    public function shorten($num, $digits = 1) {
+        $num = preg_replace('/[^0-9]/','',$num);
+        if ($num >= 1000000000) {
+            $num = number_format(abs($num / 1000000000), $digits, '.', '') + 0;
+            $num = $num . "b";
+        }
+        if ($num >= 1000000) {
+            $num = number_format(abs($num / 1000000), $digits, '.', '') + 0;
+            $num = $num . 'm';
+        }
+        if ($num >= 1000) {
+            $num = number_format(abs( (int) $num / 1000), $digits, '.', '') + 0;
+            $num = $num . 'k';
+        }
+        return $num;
     }
 }

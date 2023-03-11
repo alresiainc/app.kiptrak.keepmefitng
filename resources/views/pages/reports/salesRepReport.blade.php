@@ -16,6 +16,21 @@
     div.filter-option-inner-inner{
         color: #000 !important;
     }
+    #loader {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.75) url(assets/img/loading.gif) no-repeat center center;
+      z-index: 10000;
+    }
+    .active-tab{
+      background-color: #04512d !important;
+      color: #fff !important; 
+    }
 </style>
 @endsection
 @section('content')
@@ -38,26 +53,27 @@
   </div>
   @endif
 
+  <!---filter--->
   <section class="users-list-wrapper">
     <div class="users-list-filter px-1">
-      <form action="{{ route('saleReportQuery') }}" method="POST">@csrf
+      <form>
         <div class="row border rounded py-2 mb-2">
 
-          <div class="col-12 col-md-6 col-lg-3 mb-3">
+          <div class="col-12 col-md-6 col-lg-6 mb-3">
             <label for="">Select Staff</label>
             <fieldset class="form-group">
-                <select data-live-search="true" class="custom-select border form-control" name="warehouse_id" id="">
-                <option value="{{ $warehouse_selected != '' ? $warehouse_selected->id : '' }}">{{ $warehouse_selected != '' ? $warehouse_selected->name : 'Nothing Selected' }}</option>
-                @if (count($warehouses))
-                    @foreach ($warehouses as $warehouse)
-                        <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
+                <select data-live-search="true" class="custom-select border form-control" name="staff_id" id="staff_id">
+                <option value="">Nothing Selected</option>
+                @if (count($staffs))
+                    @foreach ($staffs as $user)
+                        <option value="{{ $user->id }}">{{ $user->name }}</option>
                     @endforeach
                 @endif
                 </select>
             </fieldset>
           </div>
 
-          <div class="col-12 col-md-6 col-lg-3 mb-3">
+          <div class="col-12 col-md-6 col-lg-3 mb-3 d-none">
             <label for="">Select Location</label>
             <fieldset class="form-group">
               <select data-live-search="true" class="custom-select border form-control" name="warehouse_id" id="">
@@ -74,23 +90,22 @@
           <div class="col-12 col-md-6 col-lg-2 mb-3">
             <label for="">Start Date</label>
             <fieldset class="form-group">
-              <input type="text" name="start_date" class="form-control form_date" id="" value="">
+              <input type="text" name="start_date" class="form-control form_date" id="start_date" value="">
+              <span id="date_error" class="text-danger" style="font-size: 12px;"></span>
             </fieldset>
           </div>
           
           <div class="col-12 col-md-6 col-lg-2 mb-3">
             <label for="">End Date</label>
             <fieldset class="form-group">
-              <input type="text" name="end_date" class="form-control form_date" id="" value="">
+              <input type="text" name="end_date" class="form-control form_date" id="end_date" value="">
             </fieldset>
           </div>
-
-          
 
           <div class="col-12 col-md-6 col-lg-2 mb-3">
             <fieldset class="form-group">
                 <label for="" style="visibility: hidden;">Submit</label>
-                <input type="button" name="end_date" class="form-control btn" id="" value="Submit">
+                <input type="button" class="form-control btn" id="btnSubmit" value="Submit">
               </fieldset>
             <div class="d-grid w-100 d-none">
               <button class="btn btn-primary btn-block glow users-list-clear mb-0"></button>
@@ -102,6 +117,7 @@
     </div>
 
   </section>
+  <!---filter--->
 
   <section>
     <div class="row">
@@ -113,11 +129,12 @@
                        <span class="text-dark">Total Revenue</span> <br> <span style="color:gray"></span>
                     </p>
 
-                    <p>{{ $currency }}0.00</p>
+                    <p><b>{{ $currency }}<span id="revenue">{{ $sales_paid }}</span></b></p>
                 </div>
                   
               </div>
             </div>
+            
         </div>
 
         <div class="col-md-6">
@@ -128,7 +145,7 @@
                        <span class="text-dark">Total Expenses</span> <br> <span style="color:gray"></span>
                     </p>
 
-                    <p>{{ $currency }}0.00</p>
+                    <p><b>{{ $currency }}<span id="expenses">{{ $expenses }}</span></b></p>
                 </div>
                   
               </div>
@@ -137,15 +154,18 @@
 
     </div>
   </section>
+  <!---can be in any position--->
+  <div id="loader"></div>
 
   <!---tabs--->
   <section>
     <ul class="nav nav-tabs mb-3">
-        <li class="active me-3 text-center p-1 tab" style="background-color:#fff;"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#SalesAdded" class="text-dark">Sales Added</a></li>
-        <li class="me-3 text-center p-1 tab" style="background-color:#fff;"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#Expenses" class="text-dark">Expenses</a></li>
+        <li class="active me-3 text-center rounded p-1 tab active-tab"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#SalesAdded" style="color: #fff; font-size: 14px;">Sales Added</a></li>
+        <li class="me-3 text-center rounded p-1 tab" style="background-color:#fff;"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#Expenses" style="color: #000; font-size: 14px;">Expenses</a></li>
     </ul>
   </section>
 
+  <!---table tab-content--->
   <section>
     <div class="row">
       <div class="col-md-12">
@@ -168,26 +188,25 @@
                 <table class="table custom-table" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Salll</th>
-                            <th>Sold Amount</th>
-                            <th>Sold Qty</th>
-                            <th>In Stock</th>
-                            
+                          <th>Product</th>
+                          <th>Sold Amount({{$currency }})</th>
+                          <th>Sold Qty</th>
+                          <th>In Stock</th> 
                         </tr>
                     </thead>
                     <tbody>
-                    @if (count($sellingProductsBulk) > 0)
-                        @foreach ($sellingProductsBulk as $product)
-                        
-                            <tr>
-                                <td>{{ $product['product_name'] }}</td>
-                                <td>{{ $product['sold_amount'] }}</td>
-                                <td>{{ $product['sold_qty'] }}</td>
-                                <td>{{ $product['stock_available'] }}</td>
-                            </tr>
-                                
-                        @endforeach
-                    @endif
+                      @if (count($products) > 0)
+                          @foreach ($products as $product)
+                          @if ($product->revenue() > 0)
+                          <tr>
+                            <td>{{ $product->name }}</td>
+                            <td>{{ number_format($product->revenue())}}</td>
+                            <td>{{ $product->soldQty() }}</td>
+                            <td>{{ $product->stock_available() }}</td>
+                          </tr>
+                          @endif    
+                          @endforeach
+                      @endif
                         
                     </tbody>
                 </table>
@@ -198,26 +217,23 @@
                 <table class="table custom-table" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Exp Name2</th>
-                            <th>Sold Amount</th>
-                            <th>Sold Qty</th>
-                            <th>In Stock</th>
-                            
+                            <th>Expense Category</th>
+                            <th>Amount ({{ $currency }})</th>
+                            <th>Staff</th>  
                         </tr>
                     </thead>
                     <tbody>
-                    @if (count($sellingProductsBulk) > 0)
-                        @foreach ($sellingProductsBulk as $product)
+                      @if (count($allExpenses) > 0)
+                        @foreach ($allExpenses as $expense)
                         
-                            <tr>
-                                <td>{{ $product['product_name'] }}</td>
-                                <td>{{ $product['sold_amount'] }}</td>
-                                <td>{{ $product['sold_qty'] }}</td>
-                                <td>{{ $product['stock_available'] }}</td>
-                            </tr>
-                                
+                        <tr>
+                          <td>{{ $expense->category->name }}</td>
+                          <td>{{ $expense->amount }}</td>
+                          <td>{{ isset($expense->staff_id) ? $expense->staff->name : 'None' }}</td>
+                        </tr>
+                          
                         @endforeach
-                    @endif
+                      @endif
                         
                     </tbody>
                 </table>
@@ -225,28 +241,28 @@
 
           </div>
 
+          <!---default--->
           <div class="table table-responsive default_show">
             <table class="table custom-table" style="width:100%">
                 <thead>
                     <tr>
-                        <th>Product Default</th>
-                        <th>Sold Amount</th>
-                        <th>Sold Qty</th>
-                        <th>In Stock</th>
-                        
+                      <th>Product</th>
+                      <th>Sold Amount({{$currency }})</th>
+                      <th>Sold Qty</th>
+                      <th>In Stock</th> 
                     </tr>
                 </thead>
                 <tbody>
-                @if (count($sellingProductsBulk) > 0)
-                    @foreach ($sellingProductsBulk as $product)
-                    
-                        <tr>
-                            <td>{{ $product['product_name'] }}</td>
-                            <td>{{ $product['sold_amount'] }}</td>
-                            <td>{{ $product['sold_qty'] }}</td>
-                            <td>{{ $product['stock_available'] }}</td>
-                        </tr>
-                            
+                @if (count($products) > 0)
+                    @foreach ($products as $product)
+                    @if ($product->revenue() > 0)
+                    <tr>
+                      <td>{{ $product->name }}</td>
+                      <td>{{ number_format($product->revenue())}}</td>
+                      <td>{{ $product->soldQty() }}</td>
+                      <td>{{ $product->stock_available() }}</td>
+                    </tr>
+                    @endif    
                     @endforeach
                 @endif
                     
@@ -303,7 +319,89 @@
 <script>
     $('.tab').click(function(){
         $('.default_show').hide();
+
+        $(".tab").removeClass("active-tab").css({'color':'black'});
+        $(".tab a").css({'color':'black'});
+        $(this).addClass("active-tab");
+        $(this).closest('.tab').find('a').css({'color':'white'}); 
     })
+   
+</script>
+
+<script>
+
+$('#btnSubmit').click(function(e){
+    e.preventDefault();
+    var staff_id = $("#staff_id").val();
+    //var warehouse_id = $("#warehouse_id").val();
+    var start_date = $("#start_date").val();
+    var end_date = $("#end_date").val();
+    
+    $("#loader").show();
+    // $(this).prop('disabled', true);
+
+    $.ajax({
+        type:'get',
+        url:'/reports-sales-rep-ajax',
+        data:{ staff_id:staff_id, start_date:start_date, end_date:end_date },
+        success:function(resp){
+            //console.log(resp)
+    
+            if (resp.data.error) {
+                var date_error = resp.data.error;
+                $('#date_error').text(date_error)
+            }
+            if (resp.data.sales) {
+                var revenue = resp.data.sales;
+                $('#revenue').text(revenue)
+            }
+            if (resp.data.expenses) {
+                var expenses = resp.data.expenses;
+                $('#expenses').text(expenses)
+            }
+            // console.log(resp.data.products)
+            if (resp.data.products) {
+              $(".default_show tbody tr").html('');
+                $.each(resp.data.products, function (key, product) {
+                  $('.default_show tbody').append("<tr>\
+                      <td>"+product.name+"</td>\
+                      <td>"+product.revenue+"</td>\
+                      <td>"+product.soldQty+"</td>\
+                      <td>"+product.stock_available+"</td>\
+                      </tr>");
+              })
+              $("#SalesAdded tbody tr").html('');
+                $.each(resp.data.products, function (key, product) {
+                  $('#SalesAdded tbody').append("<tr>\
+                      <td>"+product.name+"</td>\
+                      <td>"+product.revenue+"</td>\
+                      <td>"+product.soldQty+"</td>\
+                      <td>"+product.stock_available+"</td>\
+                      </tr>");
+              })
+            }
+
+            if (resp.data.allExpenses) {
+              $("#Expenses tbody tr").html('');
+                $.each(resp.data.allExpenses, function (key, expense) {
+                  $('#Expenses tbody').append("<tr>\
+                      <td>"+expense.category_name+"</td>\
+                      <td>"+expense.amount+"</td>\
+                      <td>"+expense.staff_name+"</td>\
+                      </tr>");
+              })
+            }
+            
+            $("#loader").hide();
+                
+        },error:function(){
+            alert("Error");
+        }
+    });
+    
+    
+});
+
 </script>
     
 @endsection

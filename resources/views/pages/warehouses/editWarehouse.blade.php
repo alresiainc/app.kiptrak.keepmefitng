@@ -88,7 +88,7 @@
                     <div class="col-md-4">
                       <label for="" class="form-label">Country</label>
                       <select name="country" class="custom-select form-control border" id="">
-                        <option value="{{ $warehouse->country->id }}" selected>{{ $warehouse->country->name }}</option>
+                        <option value="{{ isset($warehouse->country_id) ? '| '.$warehouse->country->id : '' }}" selected>{{ isset($warehouse->country_id) ? '| '.$warehouse->country->name : 'Nothing Selected' }}</option>
                         @if (count($countries) > 0)
                             @foreach ($countries as $country)
                             <option value="{{ $country->id }}">{{ $country->name }}</option>

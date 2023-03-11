@@ -68,7 +68,7 @@
                       <td>{{ isset($warehouse->agent_id) ? $warehouse->agent->name : 'None' }}</td>
                       <td>{{ isset($warehouse->city) ? $warehouse->city : 'None' }}</td>
 
-                      <td>{{ $warehouse->state }} {{ isset($warehouse->country_id) ?? ' | '.$warehouse->country->name }}</td>
+                      <td>{{ $warehouse->state }} {{ isset($warehouse->country_id) ? '| '.$warehouse->country->name : '' }}</td>
                       
                       <td>
                         <div class="d-flex">

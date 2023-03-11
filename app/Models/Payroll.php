@@ -37,5 +37,9 @@ class Payroll extends Model
     {
         return $this->belongsTo(User::class, 'employee_id');  
     }
+
+    public function warehouse() {
+        return $this->belongsTo(WareHouse::class, 'warehouse_id');  
+    }
     
 }

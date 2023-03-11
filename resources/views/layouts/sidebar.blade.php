@@ -518,7 +518,7 @@ $routeName = \Route::currentRouteName();
 
     <!---Task Manager--->
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
-    ($user_role->slug == 'report-manager' || $user_role->permissions->contains('slug', 'view-report-menu')) ))
+    ($user_role->slug == 'task-manager' || $user_role->permissions->contains('slug', 'view-project-list')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#tasks-nav" data-bs-toggle="collapse" href="#"
       @if(($routeName=='overview') || ($routeName=='addProject') || ($routeName=='allProject') || ($routeName=='singleProject') || ($routeName=='editProject')
@@ -528,13 +528,13 @@ $routeName = \Route::currentRouteName();
         <span>Task Manager</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="tasks-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-product-report')) ))
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-project-list')) ))
         <li>
           <a href="{{ route('overview') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Overview</span></a>
         </li>
         @endif
 
-        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-sale-report')) ))
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-project')) ))
         <li>
           <a href="{{ route('addProject') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Add Project</span></a>
         </li>
@@ -546,19 +546,19 @@ $routeName = \Route::currentRouteName();
         </li>
         @endif
 
-        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-customer-report')) ))
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-task')) ))
         <li>
           <a href="{{ route('addTask') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Add Task</span></a>
         </li>
         @endif
 
-        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-supplier-report')) ))
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-task-list')) ))
         <li>
           <a href="{{ route('allTask') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Task List</span></a>
         </li>
         @endif
 
-        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-staff-report')) ))
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-task')) ))
         <li>
           <a href="{{ route('allTaskCategory') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Task Category List</span></a>
         </li>
@@ -596,7 +596,7 @@ $routeName = \Route::currentRouteName();
 
     <!---referral--->
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && $user_role->slug == 'referral-manager' ))
-    <li class="nav-item">
+    <li class="nav-item d-none">
       <a class="nav-link collapsed" data-bs-target="#referral-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-link"></i>
         <span>Referral System</span><i class="bi bi-chevron-down ms-auto"></i>
@@ -617,14 +617,14 @@ $routeName = \Route::currentRouteName();
     ($user_role->slug == 'settings-manager' || $user_role->permissions->contains('slug', 'view-setting-menu')) ))
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#setting-nav" data-bs-toggle="collapse" href="#"
-      @if(($routeName=='generalSetting') || ($routeName=='allUpsellTemplates') || ($routeName=='addUpsellTemplate') || ($routeName=='editUpsellTemplate'))
+      @if(($routeName=='generalSetting') || ($routeName=='allUpsellTemplates') || ($routeName=='addUpsellTemplate') || ($routeName=='editUpsellTemplate') || ($routeName=='companyStructure'))
       style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-gear-fill"></i>
         <span>Settings</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="setting-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        <li class="d-none">
-          <a href="{{ route('generalSetting') }}"><i style="font-size: 100%!important;" class="bi bi-list"></i><span>Company Structure</span></a>
+        <li>
+          <a href="{{ route('companyStructure') }}"><i style="font-size: 100%!important;" class="bi bi-list"></i><span>Organizational Chart</span></a>
         </li>
         <li>
           <a href="{{ route('generalSetting') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>General Settings</span></a>

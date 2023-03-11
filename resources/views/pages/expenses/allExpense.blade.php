@@ -8,7 +8,7 @@
     <h1>Expenses</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
         <li class="breadcrumb-item active">Expenses</li>
       </ol>
     </nav>
@@ -29,7 +29,8 @@
           <div class="card-body pt-3">
             
           <div class="clearfix mb-2">
-            <div class="float-end text-end">
+            <div class="text-start"><a href="{{ route('addExpense') }}" class="btn btn-sm btn-secondary rounded-pill"><i class="bi bi-plus"></i>Add Expense</a></div>
+            <div class="float-end text-end d-none">
               <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                 <i class="bi bi-upload"></i> <span>Import</span></button>
               <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
@@ -58,10 +59,10 @@
                         <tr>
                     
                             <td>{{ $expense->expense_code }}</td>
-                            <td>{{ $expense->warehouse->name }}</td>
+                            <td>{{ isset($expense->warehouse_id) ? $expense->warehouse->name : '' }}</td>
                             <td>{{ isset($expense->expense_category_id) ? $expense->category->name : '' }}</td>
                             <td>{{ $expense->amount }}</td>
-                            <td>{{ $expense->expenseDate() }}</td>
+                            <td>{{ $expense->created_at }}</td>
         
                             <td>
                                 <div class="d-flex">

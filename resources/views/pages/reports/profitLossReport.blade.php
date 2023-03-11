@@ -16,6 +16,21 @@
     div.filter-option-inner-inner{
         color: #000 !important;
     }
+    #loader {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.75) url(assets/img/loading.gif) no-repeat center center;
+      z-index: 10000;
+    }
+    .active-tab{
+      background-color: #04512d !important;
+      color: #fff !important; 
+    }
 </style>
 @endsection
 @section('content')
@@ -23,7 +38,11 @@
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Profit & Loss Report</h1>
+    <div>
+      <h1 class="text-start">Profit & Loss Report</h1>
+      <h1 class="text-end"><span>Profit({{ $currency }}):</span> <span id="profit">{{ number_format($profit_val) }}</span></h1>
+    </div>
+    
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
@@ -40,27 +59,28 @@
 
   <section class="users-list-wrapper">
     <div class="users-list-filter px-1">
-      <form action="{{ route('saleReportQuery') }}" method="POST">@csrf
+      <form>
         <div class="row border rounded py-2 mb-2">
 
           <div class="col-12 col-md-6 col-lg-3 mb-3">
             <label for="">Start Date</label>
             <fieldset class="form-group">
-              <input type="text" name="start_date" class="form-control form_date" id="" value="">
+              <input type="text" name="start_date" class="form-control form_date" id="start_date" value="">
+              <span id="date_error" class="text-danger" style="font-size: 12px;"></span>
             </fieldset>
           </div>
           
           <div class="col-12 col-md-6 col-lg-3 mb-3">
             <label for="">End Date</label>
             <fieldset class="form-group">
-              <input type="text" name="end_date" class="form-control form_date" id="" value="">
+              <input type="text" name="end_date" class="form-control form_date" id="end_date" value="">
             </fieldset>
           </div>
 
           <div class="col-12 col-md-6 col-lg-4 mb-3">
             <label for="">Select Location</label>
             <fieldset class="form-group">
-              <select data-live-search="true" class="custom-select border form-control" name="warehouse_id" id="">
+              <select data-live-search="true" class="custom-select border form-control" name="warehouse_id" id="warehouse_id">
                 <option value="{{ $warehouse_selected != '' ? $warehouse_selected->id : '' }}">{{ $warehouse_selected != '' ? $warehouse_selected->name : 'Nothing Selected' }}</option>
                 @if (count($warehouses))
                     @foreach ($warehouses as $warehouse)
@@ -74,7 +94,7 @@
           <div class="col-12 col-md-6 col-lg-2 mb-3">
             <fieldset class="form-group">
                 <label for="" style="visibility: hidden;">Select Location</label>
-                <input type="button" name="end_date" class="form-control btn" id="" value="Submit">
+                <input type="button" name="end_date" class="form-control btn" id="btnSubmit" value="Submit">
               </fieldset>
             <div class="d-grid w-100 d-none">
               <button class="btn btn-primary btn-block glow users-list-clear mb-0"></button>
@@ -86,6 +106,8 @@
     </div>
 
   </section>
+  <!---can be in any position--->
+  <div id="loader"></div>
 
   <section>
     <div class="row">
@@ -94,18 +116,18 @@
               <div class="card-body pt-3">
                 <div class="item_outer d-flex justify-content-between align-items-center p-2 mb-3" style="background-color: #f9f9f9;">
                     <p class="item">
-                       <span class="text-dark">Openning Stock</span> <br> <span style="color:gray">(By Purchase Price)</span>
+                       <span class="text-dark">Openning Stock</span> <i class="bi bi-info-circle-fill" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Remaining Unsold Stock By Purchase Price, As Of Yesterday"></i> <br> <span style="color:gray">(By Purchase Price)</span>
                     </p>
 
-                    <p>{{ $currency }}{{ $openningStock_by_purchasePrice }}</p>
+                    <p>{{ $currency }}<span id="openningStock_by_purchasePrice">{{ number_format($openningStock_by_purchasePrice) }}</span></p>
                 </div>
 
                 <div class="item_outer d-flex justify-content-between align-items-center p-2 mb-3" style="background-color: #f9f9f9;">
                     <p class="item">
-                       <span class="text-dark">Openning Stock</span> <br> <span style="color:gray">(By Sale Price)</span>
+                       <span class="text-dark">Openning Stock</span> <i class="bi bi-info-circle-fill" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Remaining Unsold Stock By Sale Price, As Of Yesterday"></i> <br> <span style="color:gray">(By Sale Price)</span>
                     </p>
 
-                    <p>{{ $currency }}{{ $openningStock_by_salePrice }}</p>
+                    <p>{{ $currency }}<span id="openningStock_by_salePrice">{{ number_format($openningStock_by_salePrice) }}</span></p>
                 </div>
 
                 <div class="item_outer d-flex justify-content-between align-items-center p-2 mb-3" style="background-color: #f9f9f9;">
@@ -113,7 +135,7 @@
                        <span class="text-dark">Total Purchase</span> <br> <span style="color:gray"></span>
                     </p>
 
-                    <p>{{ $currency }}{{ $purchases_amount_paid }}</p>
+                    <p>{{ $currency }}<span id="purchases_amount_paid">{{ number_format($purchases_amount_paid) }}</span></p>
                 </div>
 
                 <div class="item_outer d-flex justify-content-between align-items-center p-2 mb-3" style="background-color: #f9f9f9;">
@@ -121,7 +143,7 @@
                        <span class="text-dark">Other Expenses</span> <br> <span style="color:gray"></span>
                     </p>
 
-                    <p>{{ $currency }}{{ $other_espenses }}</p>
+                    <p>{{ $currency }}<span id="other_espenses">{{ number_format($other_espenses) }}</span></p>
                 </div>
 
                 <div class="item_outer d-flex justify-content-between align-items-center p-2 mb-3" style="background-color: #f9f9f9;">
@@ -129,15 +151,15 @@
                        <span class="text-dark">Total Payroll</span> <br> <span style="color:gray"></span>
                     </p>
 
-                    <p>{{ $currency }}{{ $payroll }}</p>
+                    <p>{{ $currency }}<span id="payroll">{{ number_format($payroll) }}</span></p>
                 </div>
 
                 <div class="item_outer d-flex justify-content-between align-items-center p-2 mb-3" style="background-color: #f9f9f9;">
                     <p class="item">
-                       <span class="text-dark">Total Expenses</span> <br> <span style="color:gray"></span>
+                       <span class="text-dark">Total Expenses</span> <i class="bi bi-info-circle-fill" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Total Purchase + Other Expenses + Total Payroll"></i> <br> <span style="color:gray"></span>
                     </p>
 
-                    <p>{{ $currency }}{{ $total_expenses }}</p>
+                    <p>{{ $currency }}<span id="total_expenses">{{ number_format($total_expenses) }}</span></p>
                 </div>
 
                 <div class="item_outer d-flex justify-content-between align-items-center p-2 mb-3" style="background-color: #f9f9f9;">
@@ -160,23 +182,24 @@
             </div>
         </div>
 
+        <!---closing stock side--->
         <div class="col-md-6">
             <div class="card">
               <div class="card-body pt-3">
                 <div class="item_outer d-flex justify-content-between align-items-center p-2 mb-3" style="background-color: #f9f9f9;">
                     <p class="item">
-                       <span class="text-dark">Closing Stock</span> <br> <span style="color:gray">(By Purchase Price)</span>
+                       <span class="text-dark">Closing Stock</span> <i class="bi bi-info-circle-fill" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Currently Unsold Stock By Purchase Price"></i> <br> <span style="color:gray">(By Purchase Price)</span>
                     </p>
 
-                    <p>{{ $currency }}0.00</p>
+                    <p>{{ $currency }}<span id="closingStock_by_purchasePrice">{{ number_format($closingStock_by_purchasePrice) }}</span></p>
                 </div>
 
                 <div class="item_outer d-flex justify-content-between align-items-center p-2 mb-3" style="background-color: #f9f9f9;">
                     <p class="item">
-                       <span class="text-dark">Closing Stock</span> <br> <span style="color:gray">(By Sale Price)</span>
+                       <span class="text-dark">Closing Stock</span> <i class="bi bi-info-circle-fill" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Currently Unsold Stock By Sale Price"></i> <br> <span style="color:gray">(By Sale Price)</span>
                     </p>
 
-                    <p>{{ $currency }}0.00</p>
+                    <p>{{ $currency }}<span id="closingStock_by_salePrice">{{ number_format($closingStock_by_salePrice) }}</span></p>
                 </div>
 
                 <div class="item_outer d-flex justify-content-between align-items-center p-2 mb-3" style="background-color: #f9f9f9;">
@@ -184,7 +207,7 @@
                        <span class="text-dark">Total Sales</span> <br> <span style="color:gray">(By Sale Price)</span>
                     </p>
 
-                    <p>{{ $currency }}0.00</p>
+                    <p>{{ $currency }}<span id="sales_paid">{{ number_format($sales_paid) }}</span></p>
                 </div>
                   
               </div>
@@ -197,10 +220,10 @@
   <!---tabs--->
   <section>
     <ul class="nav nav-tabs mb-3">
-        <li class="active me-3 text-center p-1 tab" style="background-color:#fff;"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#profitByProducts" class="text-dark">Profit By Products</a></li>
-        <li class="me-3 text-center p-1 tab" style="background-color:#fff;"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#profitByCategories" class="text-dark">Profit By Categories</a></li>
-        <li class="me-3 text-center p-1 tab" style="background-color:#fff;"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#profitByLocations" class="text-dark">Profit By Locations</a></li>
-        <li class="me-3 text-center p-1 tab" style="background-color:#fff;"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#profitByDate" class="text-dark">Profit By Date</a></li>
+        <li class="active me-3 text-center rounded p-1 tab active-tab"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#profitByProducts" style="color: #fff; font-size: 14px;">Profit By Products</a></li>
+        <li class="me-3 text-center rounded p-1 tab"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#profitByCategories" style="color: #000; font-size: 14px;">Profit By Categories</a></li>
+        <li class="me-3 text-center rounded p-1 tab"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#profitByLocations" style="color: #000; font-size: 14px;">Profit By Locations</a></li>
+        <li class="me-3 text-center rounded p-1 tab" style="background-color:#fff;"><i class="bi bi-gear-fill"></i> <a data-bs-toggle="tab" href="#profitByDate" style="color: #000; font-size: 14px;">Profit By Date</a></li>
     </ul>
   </section>
 
@@ -384,7 +407,125 @@
 <script>
     $('.tab').click(function(){
         $('.default_show').hide();
+
+        $(".tab").removeClass("active-tab").css({'color':'black'});
+        $(".tab a").css({'color':'black'});
+        $(this).addClass("active-tab");
+        $(this).closest('.tab').find('a').css({'color':'white'}); 
     })
+</script>
+
+<script>
+  $('#btnSubmit').click(function(e){
+    e.preventDefault();
+    var warehouse_id = $("#warehouse_id").val();
+    var start_date = $("#start_date").val();
+    var end_date = $("#end_date").val();
+    
+    $("#loader").show();
+    // $(this).prop('disabled', true);
+
+    $.ajax({
+        type:'get',
+        url:'/reports-profit-and-loss-ajax',
+        data:{ start_date:start_date, end_date:end_date, warehouse_id:warehouse_id },
+        success:function(resp){
+            //console.log(resp)
+    
+            if (resp.data.error) {
+                var date_error = resp.data.error;
+                $('#date_error').text(date_error)
+            }
+            if (resp.data.openningStock_by_purchasePrice) {
+                var openningStock_by_purchasePrice = resp.data.openningStock_by_purchasePrice;
+                $('#openningStock_by_purchasePrice').text(openningStock_by_purchasePrice)
+            }
+            if (resp.data.openningStock_by_salePrice) {
+                var openningStock_by_salePrice = resp.data.openningStock_by_salePrice;
+                $('#openningStock_by_salePrice').text(openningStock_by_salePrice)
+            }
+            if (resp.data.purchases_amount_paid) {
+                var purchases_amount_paid = resp.data.purchases_amount_paid;
+                $('#purchases_amount_paid').text(purchases_amount_paid)
+            }
+            if (resp.data.other_espenses) {
+                var other_espenses = resp.data.other_espenses;
+                $('#other_espenses').text(other_espenses)
+            }
+            if (resp.data.payroll) {
+                var payroll = resp.data.payroll;
+                $('#total_expenses').text(payroll)
+            }
+            if (resp.data.total_expenses) {
+                var total_expenses = resp.data.total_expenses;
+                $('#total_expenses').text(total_expenses)
+            }
+            if (resp.data.closingStock_by_purchasePrice) {
+                var closingStock_by_purchasePrice = resp.data.closingStock_by_purchasePrice;
+                $('#closingStock_by_purchasePrice').text(closingStock_by_purchasePrice)
+            }
+            if (resp.data.closingStock_by_salePrice) {
+                var closingStock_by_salePrice = resp.data.closingStock_by_salePrice;
+                $('#closingStock_by_salePrice').text(closingStock_by_salePrice)
+            }
+            if (resp.data.sales_paid) {
+                var sales_paid = resp.data.sales_paid;
+                $('#sales_paid').text(sales_paid)
+            }
+            if (resp.data.profit) {
+                var profit = resp.data.profit;
+                $('#profit').text(profit)
+            }
+            
+            // console.log(resp.data.products)
+            if (resp.data.products) {
+              $(".default_show tbody tr").html('');
+                $.each(resp.data.products, function (key, product) {
+                  $('.default_show tbody').append("<tr>\
+                      <td>"+product.name+"</td>\
+                      <td>"+product.revenue+"</td>\
+                      </tr>");
+              })
+              
+              $("#profitByProducts tbody tr").html('');
+                $.each(resp.data.products, function (key, product) {
+                  $('#profitByProducts tbody').append("<tr>\
+                      <td>"+product.name+"</td>\
+                      <td>"+product.revenue+"</td>\
+                      </tr>");
+              })
+            }
+
+            if (resp.data.categories) {
+              $("#profitByCategories tbody tr").html('');
+                $.each(resp.data.categories, function (key, category) {
+                  $('#profitByCategories tbody').append("<tr>\
+                      <td>"+category.name+"</td>\
+                      <td>"+category.revenue+"</td>\
+                      </tr>");
+              })
+            }
+
+            // if (resp.data.allExpenses) {
+            //   $("#Expenses tbody tr").html('');
+            //     $.each(resp.data.allExpenses, function (key, expense) {
+            //       $('#Expenses tbody').append("<tr>\
+            //           <td>"+expense.category_name+"</td>\
+            //           <td>"+expense.amount+"</td>\
+            //           <td>"+expense.staff_name+"</td>\
+            //           </tr>");
+            //   })
+            // }
+            
+            $("#loader").hide();
+                
+        },error:function(){
+            alert("Error");
+        }
+    });
+    
+    
+  });
 </script>
     
 @endsection

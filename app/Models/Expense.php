@@ -54,4 +54,9 @@ class Expense extends Model
     {
         return $this->belongsTo(Account::class, 'account_id');  
     }
+
+    public function staff()
+    {
+        return $this->belongsTo(User::class, 'staff_id');  
+    }
 }

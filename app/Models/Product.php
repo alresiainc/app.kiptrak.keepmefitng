@@ -122,13 +122,60 @@ class Product extends Model
         return $this->hasMany(Sale::class, 'product_id');  
     }
 
-    public function revenue() {
+    //product revenue, sold_amt, gross_profit
+    public function revenue($staff_assigned_id="", $start_date="", $end_date="") {
         //
         $revenue = 0;
-        //$delivered_and_remitted_orders = Order::where('product_id', $this->id)->where('status', 'delivered_and_remitted')->pluck('id');
-        $accepted_outgoing_stock = OutgoingStock::where('product_id', $this->id)->where('customer_acceptance_status', 'accepted');
-        $revenue += $accepted_outgoing_stock->sum('amount_accrued');
+        //all empty
+        if ($staff_assigned_id=="" && $start_date=="" && $end_date=="") {
+            $delivered_order_ids = Order::where('status', 'delivered_and_remitted')->pluck('id');
+
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_order_ids)->where('product_id', $this->id)->where('customer_acceptance_status', 'accepted');
+            $revenue += $accepted_outgoing_stock->sum('amount_accrued');
+        }
+        //staff only
+        if ($staff_assigned_id != "" && $start_date=="" && $end_date=="") {
+            $delivered_order_ids = Order::where('staff_assigned_id', $staff_assigned_id)->where('status', 'delivered_and_remitted')->pluck('id');
+
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_order_ids)->where('product_id', $this->id)->where('customer_acceptance_status', 'accepted');
+            $revenue += $accepted_outgoing_stock->sum('amount_accrued');
+        }
+        //date only
+        if ($staff_assigned_id == "" && $start_date != "" && $end_date != "") {
+            $delivered_order_ids = Order::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('status', 'delivered_and_remitted')->pluck('id');
+
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_order_ids)->where('product_id', $this->id)->where('customer_acceptance_status', 'accepted');
+            $revenue += $accepted_outgoing_stock->sum('amount_accrued');
+        }
+        //all inclusive
+        if ($staff_assigned_id != "" && $start_date != "" && $end_date != "") {
+            $delivered_order_ids = Order::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('staff_assigned_id', $staff_assigned_id)->where('status', 'delivered_and_remitted')->pluck('id');
+
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_order_ids)->where('product_id', $this->id)->where('customer_acceptance_status', 'accepted');
+            $revenue += $accepted_outgoing_stock->sum('amount_accrued');
+        }
+
+        
         return $revenue;
+    }
+
+    //sold_qty
+    public function soldQty($staff_assigned_id="") {
+        //
+        $soldQty = 0;
+        if ($staff_assigned_id=="") {
+            $delivered_order_ids = Order::where('status', 'delivered_and_remitted')->pluck('id');
+
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_order_ids)->where('product_id', $this->id)->where('customer_acceptance_status', 'accepted');
+            $soldQty += $accepted_outgoing_stock->sum('quantity_removed');
+        } else {
+            $delivered_order_ids = Order::where('staff_assigned_id', $staff_assigned_id)->where('status', 'delivered_and_remitted')->pluck('id');
+
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_order_ids)->where('product_id', $this->id)->where('customer_acceptance_status', 'accepted');
+            $soldQty += $accepted_outgoing_stock->sum('quantity_removed');
+        }
+        
+        return $soldQty;
     }
 
     public function comboOriginalSalePrice() {

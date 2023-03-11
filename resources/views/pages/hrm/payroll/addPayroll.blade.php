@@ -99,8 +99,8 @@
                   @enderror
                 </div>
 
-                <div class="col-md-12">
-                    <label for="" class="form-label">Select Method</label>
+                <div class="col-md-6">
+                    <label for="" class="form-label">Select Payment Method</label>
                     <select name="paying_method" data-live-search="true" class="custom-select form-control border @error('paying_method') is-invalid @enderror">
             
                       <option value="cash">Cash</option>
@@ -115,8 +115,26 @@
                     @enderror
                 </div>
 
+                <div class="col-md-6">
+                  <label for="" class="form-label">Location | Optional</label>
+                  <select name="warehouse_id" data-live-search="true" class="custom-select form-control border @error('warehouse_id') is-invalid @enderror">
+          
+                    @foreach ($warehouses as $warehouse)
+                      <option value="{{ $warehouse->id }}">
+                          {{ $warehouse->name }}
+                      </option>
+                    @endforeach
+                    
+                  </select>
+                  @error('paying_method')
+                      <span class="invalid-feedback" role="alert">
+                          <strong>{{ $message }}</strong>
+                      </span>
+                  @enderror
+                </div>
+
                 <div class="col-md-12">
-                  <label for="" class="form-label">Note (Optional)</label>
+                  <label for="" class="form-label">Note | Optional</label>
                   <textarea name="note" id="" cols="30" rows="3" class="form-control"></textarea>
                   @error('note')
                       <span class="invalid-feedback" role="alert">

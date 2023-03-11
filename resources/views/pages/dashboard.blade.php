@@ -389,10 +389,8 @@
                   @endif
 
                   <td>
-                    
-                      @if (!isset($order->status) || $order->status=='pending')
-                        <span class="badge badge-danger">Pending</span>
-                      @endif
+            
+                    <span class="badge badge-info">{{ isset($order->status) ? ucFirst(str_replace('_', ' ', $order->status)) : '' }}</span>
                       
                   </td>
                 </tr> 

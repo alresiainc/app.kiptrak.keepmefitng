@@ -26,7 +26,7 @@
                   
                   <div class="d-grid ms-lg-3" style="padding-right: 10px; border-right: 1px solid;">
                     <div class="display-6">{{ $warehouse->name }}</div>
-                    <h5>{{ $warehouse->state }} | {{ $warehouse->country->name }}</h5>
+                    <h5>{{ $warehouse->state }} | {{ isset($warehouse->country_id) ? '| '.$warehouse->country->name : '' }}</h5>
 
                     @if ($warehouse->status == 'true')
                       <div class="d-flex justify-content-start">
@@ -73,7 +73,7 @@
                 @if (isset($warehouse->state))
                 <div class="col-lg-3">
                   <label for="">State</label>
-                  <div class="lead">{{ $warehouse->state }} | {{ $warehouse->country->name }}</div>
+                  <div class="lead">{{ $warehouse->state }} | {{ isset($warehouse->country_id) ? '| '.$warehouse->country->name : '' }}</div>
                 </div>
                 @endif
                 

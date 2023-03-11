@@ -198,16 +198,15 @@ class RoleController extends Controller
         return back()->with('success', 'Role Removed Successfully');
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    //addPermission
+    public function addPermission()
     {
-        //
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $mainPerms = Permission::where('parent_id',null)->get();
+
+        return view('pages.hrm.role.addPermission', compact('authUser', 'user_role', 'mainPerms'));
     }
 
     /**
@@ -216,8 +215,73 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function addPermissionPost(Request $request)
     {
-        //
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $request->validate([
+            'main_menu' => 'required',
+            'permission_names' => 'required',
+        ]);
+
+        $data = $request->all();
+
+        $permission_names = $data['permission_names'];
+        $main_menu = $data['main_menu']; //id
+
+        $slugs = array_map('Str::slug', $permission_names); //["create-task","edit-lorem","delete-menu"]
+
+        $check = Permission::whereIn('slug', $slugs);
+        if ($check->count() > 0) {
+            return back()->with('error', 'Permission Name(s) Already Exist. Try New Ones');
+        }
+
+        foreach ($permission_names as $key => $perm_name) {
+            if (!empty($perm_name)) {
+                $permission = new Permission();
+                $permission->name = $perm_name;
+                $permission->slug = Str::slug($perm_name);
+                $permission->parent_id = $main_menu;
+                $permission->created_by = $authUser->id;
+                $permission->save();
+            }
+            
+        }
+        return back()->with('success', 'Permission(s) Created Successfully');
+    }
+
+    public function ajaxCreatePermissionMainMenu(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $authUser = auth()->user();
+        $data = $request->all();
+
+        $exist = Permission::where('parent_id', null)->where('slug', Str::slug($data['menu_name']))->first();
+
+        if (isset($exist)) {
+            $data['data_error'] = 'Error: Main Menu Already Exists, Try Again';
+            return response()->json([
+                'status'=>true,
+                'data'=>$data
+            ]);
+        }
+        
+        $permission = new Permission();
+        $permission->name = $data['menu_name'];
+        $permission->slug = Str::slug($data['menu_name']);
+        $permission->created_by = $authUser->id;
+        $permission->save();
+       
+        
+        //store in array
+        $data['permission'] = $permission;
+
+        return response()->json([
+            'status'=>true,
+            'data'=>$data
+        ]);
     }
 }

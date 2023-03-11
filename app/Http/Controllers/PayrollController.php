@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Payroll;
 use App\Models\User;
 use App\Models\GeneralSetting;
+use App\Models\WareHouse;
 
 class PayrollController extends Controller
 {
@@ -31,8 +32,9 @@ class PayrollController extends Controller
 
         $staffs = User::where('type', 'staff')->get();
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $warehouses = WareHouse::all();
 
-        return view('pages.hrm.payroll.addPayroll', compact('authUser', 'user_role', 'staffs', 'generalSetting'));
+        return view('pages.hrm.payroll.addPayroll', compact('authUser', 'user_role', 'staffs', 'generalSetting', 'warehouses'));
     }
 
     /**
@@ -60,6 +62,7 @@ class PayrollController extends Controller
         $payroll->amount = $data['amount'];
         $payroll->bonus = !empty($data['bonus']) ? $data['bonus'] : null;
         $payroll->paying_method = $data['paying_method'];
+        $payroll->warehouse_id = isset($data['warehouse_id']) ? $data['warehouse_id'] : null;
         $payroll->note = !empty($data['note']) ? $data['note'] : null;
         $payroll->save();
 
@@ -85,8 +88,9 @@ class PayrollController extends Controller
 
         $staffs = User::where('type', 'staff')->get();
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $warehouses = WareHouse::all();
 
-        return view('pages.hrm.payroll.editPayroll', compact('authUser', 'user_role', 'staffs', 'generalSetting', 'payroll'));
+        return view('pages.hrm.payroll.editPayroll', compact('authUser', 'user_role', 'staffs', 'generalSetting', 'payroll', 'warehouses'));
     }
 
     /**
@@ -116,6 +120,7 @@ class PayrollController extends Controller
         $payroll->amount = $data['amount'];
         $payroll->bonus = !empty($data['bonus']) ? $data['bonus'] : null;
         $payroll->paying_method = $data['paying_method'];
+        $payroll->warehouse_id = isset($data['warehouse_id']) ? $data['warehouse_id'] : null;
         $payroll->note = !empty($data['note']) ? $data['note'] : null;
         $payroll->save();
 

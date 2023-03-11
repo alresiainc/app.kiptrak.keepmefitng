@@ -85,7 +85,7 @@ Route::get('/notify', function () {
     return 'Ok';
 }); 
 
-Route::get('/test', [FormBuilderController::class, 'test'])->name('test');
+Route::get('/test', [TestController::class, 'test'])->name('test');
 
 
 //login
@@ -369,6 +369,10 @@ Route::post('/edit-role/{unique_key}', [RoleController::class, 'editRolePost'])-
 Route::post('/assign-role-to-user', [RoleController::class, 'assignRoleToUserPost'])->name('assignRoleToUserPost');
 Route::get('/delete-role/{unique_key}', [RoleController::class, 'deleteRole'])->name('deleteRole');
 
+Route::get('/add-permission', [RoleController::class, 'addPermission'])->name('addPermission');
+Route::post('/add-permission', [RoleController::class, 'addPermissionPost'])->name('addPermissionPost');
+Route::get('/ajax-create-permission-main-menu', [RoleController::class, 'ajaxCreatePermissionMainMenu'])->name('ajaxCreatePermissionMainMenu');
+
 //allAttendance
 Route::get('/all-attendances', [AttendanceController::class, 'allAttendance'])->name('allAttendance');
 Route::get('/add-attendance', [AttendanceController::class, 'addAttendance'])->name('addAttendance');
@@ -413,7 +417,9 @@ Route::get('/send-sms/{phone?}', [MessageController::class, 'sendVCode'])->name(
 
 //reports
 Route::get('/reports-profit-and-loss/{start_date?}/{end_date?}/{location?}', [ReportController::class, 'profitLossReport'])->name('profitLossReport'); //profitLossReport
+Route::get('/reports-profit-and-loss-ajax', [ReportController::class, 'profitLossReportAjax'])->name('profitLossReportAjax'); //profitLossReportAjax
 Route::get('/reports-sales-rep/{staff_unique_key?}/{start_date?}/{end_date?}/{location?}', [ReportController::class, 'salesRepReport'])->name('salesRepReport'); //salesRepReport
+Route::get('/reports-sales-rep-ajax', [ReportController::class, 'salesRepReportAjax'])->name('salesRepReportAjax'); //salesRepReportAjax
 
 Route::get('/reports-activity-logs', [ReportController::class, 'activityLogReport'])->name('activityLogReport'); //activityLogReport
 

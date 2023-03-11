@@ -19,7 +19,7 @@ class EmployeeController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        $staffs = User::where('type', 'staff')->orderBy('id', 'DESC')->get();
+        $staffs = User::where('type', 'staff')->where('isSuperAdmin', false)->orderBy('id', 'DESC')->get();
         $roles = Role::all();
         return view('pages.hrm.employee.allEmployee', compact('authUser', 'user_role', 'staffs', 'roles'));
     }

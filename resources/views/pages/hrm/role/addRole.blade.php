@@ -6,6 +6,8 @@
 
     <div class="pagetitle">
       <h1>Add Role</h1>
+      <div class="float-end text-end"><a href="{{ route('addPermission') }}"><button class="btn btn-sm btn-dark rounded-pill">
+        <i class="bi bi-plus"></i> <span>Create Permission</span></button></a></div>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="/">Home</a></li>

@@ -38,6 +38,7 @@ return new class extends Migration
             
             $table->string('created_by')->nullable();
             $table->string('staff_assigned_id')->nullable();
+            $table->string('warehouse_id')->nullable(); //whr the order is coming from, if specific
 
             $table->longText('url')->nullable(); //link sent to customer, not used
             $table->string('discount')->nullable(); //10% or 10

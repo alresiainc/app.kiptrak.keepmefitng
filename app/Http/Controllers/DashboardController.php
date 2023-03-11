@@ -29,6 +29,7 @@ use App\Models\GeneralSetting;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OutgoingStock;
+use App\Models\Payroll;
 
 
 class DashboardController extends Controller
@@ -59,7 +60,9 @@ class DashboardController extends Controller
 
         $expenses = $this->shorten(Expense::sum('amount'));
 
-        $profit_val = $sales_paid - ($purchases_amount_paid + Expense::sum('amount'));
+        $payroll = Payroll::sum('amount');
+
+        $profit_val = $sales_paid - ($purchases_amount_paid + $payroll + Expense::sum('amount'));
         $purchases_amount_paid = $this->shorten($purchases_amount_paid);
         $sales_paid = $this->shorten($sales_paid);
 

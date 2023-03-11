@@ -20,7 +20,8 @@ return new class extends Migration
 
             $table->string('code')->nullable(); //reference code
             $table->string('employee_id')->nullable();
-            $table->string('account_id')->nullable();
+            $table->string('warehouse_id')->nullable();
+            $table->string('account_id')->nullable(); //not used
             $table->string('amount')->nullable();
             $table->string('bonus')->nullable();
             $table->string('paying_method')->nullable(); //late, present, absent

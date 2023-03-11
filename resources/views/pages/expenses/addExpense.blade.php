@@ -40,7 +40,8 @@
       <h1>Add Expense</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allExpense') }}">All Expenses</a></li>
           <li class="breadcrumb-item active">Add Expense</li>
         </ol>
       </nav>
@@ -68,7 +69,7 @@
               <div class="col-md-12 mb-3">The field labels marked with * are required input fields.</div>
 
                 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="" class="form-label">Select Category *</label>
 
                     <div class="d-flex">
@@ -87,16 +88,10 @@
                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCategory"><i class="bi bi-plus"></i></button>
                     </div>
 
-                    {{-- @error('category')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror --}}
-                    
                 </div>
 
-                <div class="col-md-4">
-                    <label for="" class="form-label">Select Warehouse *</label>
+                <div class="col-md-3">
+                    <label for="" class="form-label">Select Warehouse | Optional</label>
                     <select name="warehouse" class="select2 form-control border @error('warehouse') is-invalid @enderror" id="">
                       <option value="">Nothing Selected</option>
   
@@ -114,14 +109,14 @@
                     @enderror
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="" class="form-label">Expenses For | Optional</label>
                     <select name="staff_id" class="select2 form-control border @error('staff_id') is-invalid @enderror" id="">
                       <option value="">Nothing Selected</option>
   
                       @foreach ($staffs as $staff)
                           <option value="{{ $staff->id }}">
-                              {{ $staff->name }}
+                              {{ $staff->name }} {{ isset($staff->current_salary) ? '| '.$staff->current_salary : '' }}
                           </option>
                       @endforeach
                           
@@ -131,42 +126,6 @@
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
-                </div>
-
-                <div class="col-md-4 d-none">
-                  <label for="" class="form-label">Date</label>
-                  <input type="date" name="expense_date" class="form-control @error('expense_date') is-invalid @enderror" id="" >
-                  @error('expense_date')
-                      <span class="invalid-feedback" role="alert">
-                          <strong>{{ $message }}</strong>
-                      </span>
-                  @enderror
-                </div>
-
-                <div class="col-md-6 d-none">
-                    <label for="" class="form-label">Select Account *</label>
-
-                    <div class="d-flex">
-
-                        <select id="addAccountSelect" name="account" class="select2 form-control border @error('category') is-invalid @enderror" id="">
-                        <option value="">Nothing Selected</option>
-    
-                        @foreach ($accounts as $account)
-                            <option value="{{ $account->id }}">
-                                {{ $account->name }}
-                            </option>
-                        @endforeach
-                            
-                        </select>
-                        
-                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addAccount">
-                            <i class="bi bi-plus"></i></button>
-                    </div>
-                    @error('customer')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
                 </div>
 
                 <div class="col-md-12">
@@ -180,8 +139,8 @@
                 </div>
 
                 <div class="col-md-12">
-                    <label for="" class="form-label">Note</label>
-                    <textarea name="note" id="" name="note" class="form-control @error('note') is-invalid @enderror" cols="30" rows="10"></textarea>
+                    <label for="" class="form-label">Note <span class="text-danger">*</span></label>
+                    <textarea name="note" id="" name="note" class="form-control @error('note') is-invalid @enderror" cols="30" rows="5"></textarea>
                     
                     @error('note')
                         <span class="invalid-feedback" role="alert">

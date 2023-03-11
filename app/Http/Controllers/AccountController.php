@@ -14,7 +14,6 @@ class AccountController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
         $accounts = Account::all();
         return view('pages.accounts.allAccount', compact('authUser', 'user_role', 'accounts'));
     }
@@ -23,7 +22,6 @@ class AccountController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
         $account_no = 'kpa-' . date("Ymd") . '-'. date("his");
         return view('pages.accounts.addAccount', compact('authUser', 'user_role', 'account_no'));
     }

@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('upsell_settings', function (Blueprint $table) {
             $table->id();
             $table->string('unique_key')->nullable();
+            $table->string('type')->nullable(); //upsell, downsell etc. upsell by default
 
             $table->string('template_code')->nullable();
 

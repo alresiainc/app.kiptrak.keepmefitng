@@ -65,11 +65,23 @@ class Category extends Model
         return $this->hasMany(Product::class, 'category_id');    
     }
 
-    public function revenue() {
-        $products = $this->products->pluck('id');
+    public function revenue($start_date="", $end_date="", $warehouse_id="") {
+        
         $revenue = 0;
-        $accepted_outgoing_stock = OutgoingStock::whereIn('product_id', $products)->where('customer_acceptance_status', 'accepted');
-        $revenue += $accepted_outgoing_stock->sum('amount_accrued');
+    
+        //date only
+        if ($start_date == "" && $end_date == "" && $warehouse_id == "") {
+            $products = $this->products->pluck('id');
+            $accepted_outgoing_stock = OutgoingStock::whereIn('product_id', $products)->where('customer_acceptance_status', 'accepted');
+            $revenue += $accepted_outgoing_stock->sum('amount_accrued');
+        }
+
+        //date only
+        if ($start_date != "" && $end_date != "" && $warehouse_id == "") {
+            $products = $this->products()->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->pluck('id');
+            $accepted_outgoing_stock = OutgoingStock::whereIn('product_id', $products)->where('customer_acceptance_status', 'accepted');
+            $revenue += $accepted_outgoing_stock->sum('amount_accrued');
+        }
         return $revenue;
     }
 }

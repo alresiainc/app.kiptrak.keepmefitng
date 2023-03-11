@@ -10,8 +10,8 @@
         <meta content="" name="keywords">
 
         <!-- Favicons -->
-        <link href="{{asset('/customerform/assets/img/favicon.png')}}" rel="icon">
-        <link href="{{asset('/customerform/assets/img/apple-touch-icon.png')}}" rel="apple-touch-icon">
+        <link href="{{asset('/assets/img/favicon.png')}}" rel="icon">
+        <link href="{{asset('/assets/img/apple-touch-icon.png')}}" rel="apple-touch-icon">
         <!-- Google Fonts -->
         <link href="https://fonts.gstatic.com" rel="preconnect">
         <link
@@ -670,7 +670,7 @@
                         data:{unique_key:unique_key, inputValueName:contact_copy, inputVal:inputVal, cartAbandoned_id:cartAbandoned_id
                             },
                         success:function(resp){
-                            console.log(resp)
+                            //console.log(resp)
     
         
                         },error:function(){
@@ -711,7 +711,7 @@
                     data:{unique_key:unique_key, cartAbandoned_id:cartAbandoned_id, delivery_duration:delivery_duration, inputVal:inputVal
                         },
                     success:function(resp){
-                        console.log(resp)
+                        //console.log(resp)
 
                     },error:function(){
                         alert("Error");
@@ -766,7 +766,7 @@
                     data:{unique_key:unique_key, cartAbandoned_id:cartAbandoned_id, product_package:packages_copy, inputVal:inputVal
                         },
                     success:function(resp){
-                        console.log(resp)
+                        //console.log(resp)
 
                     },error:function(){
                         alert("Error");
@@ -854,7 +854,7 @@
                     active_email:active_email, state:state, city:city, address:address, delivery_duration:delivery_duration, product_packages:product_packages, 
                     },
                 success:function(resp){
-                    console.log(resp)
+                    //console.log(resp)
                     $(".main_stage").val('done')
                     localStorage.setItem('main_stage', 'done');
                     $('.current_order_id').val(resp.data.order_id);
@@ -907,7 +907,7 @@
                     url:'/ajax-save-new-form-link-orderbump',
                     data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox, current_order_id:current_order_id },
                     success:function(resp){
-                        console.log(resp)
+                        //console.log(resp)
                         localStorage.setItem('orderbump_stage', 'done');
                         if (resp.data.has_upsell) {
                             setView('upsell-section')
@@ -1000,7 +1000,7 @@
                         url:'/ajax-save-new-form-link-orderbump-refusal',
                         data:{ unique_key:unique_key, orderbump_product_checkbox:orderbump_product_checkbox, current_order_id:current_order_id },
                         success:function(resp){
-                            console.log(resp)
+                            //console.log(resp)
                             localStorage.setItem('orderbump_stage', 'done');
                             if (resp.data.has_upsell) {
                                 setView('upsell-section')

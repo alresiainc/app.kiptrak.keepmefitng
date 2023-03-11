@@ -108,11 +108,12 @@ class ProductController extends Controller
         $product->save();
 
         //warehouse
-        if (!empty($data['warehouse_id'])) {
+        if (!empty($data['warehouse'])) {
             $product_warehouse = new ProductWarehouse();
-            $warehouse = WareHouse::find($data['warehouse_id']);
+            $warehouse = WareHouse::find($data['warehouse']);
             $product_warehouse->product_id = $product->id;
-            $product_warehouse->warehouse_id = $data['warehouse_id'];
+            $product_warehouse->product_qty = $data['quantity'];
+            $product_warehouse->warehouse_id = $data['warehouse'];
             $product_warehouse->warehouse_type = $warehouse->type;
             $product_warehouse->save();
         }

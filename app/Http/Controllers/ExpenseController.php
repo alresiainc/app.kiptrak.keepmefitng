@@ -11,11 +11,6 @@ use App\Models\User;
 
 class ExpenseController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function allExpense ()
     {
         $authUser = auth()->user();
@@ -48,6 +43,7 @@ class ExpenseController extends Controller
         $request->validate([
             'note' => 'required|string',
             'category' => 'required',
+            'amount' => 'required',
         ]);
         $expense_code = 'kpe-' . date("Ymd") . '-'. date("his");
         $data = $request->all();
@@ -56,7 +52,7 @@ class ExpenseController extends Controller
 
         $expense->expense_code = $expense_code;
         $expense->expense_category_id = $data['category'];
-        $expense->warehouse_id = $data['warehouse'];
+        $expense->warehouse_id = !empty($data['warehouse']) ? $data['warehouse'] : null;
         $expense->staff_id = !empty($data['staff_id']) ? $data['staff_id'] : null;
         // $expense->expense_date = $data['expense_date'];
         $expense->amount = $data['amount'];
@@ -134,27 +130,35 @@ class ExpenseController extends Controller
         $accounts = Account::all();
         $warehouses = WareHouse::all();
 
-        return view('pages.expenses.editExpense', compact('authUser', 'user_role', 'expense', 'account_no','categories', 'accounts', 'warehouses'));
+        $staffs = User::where('type', 'staff')->get();
+
+        return view('pages.expenses.editExpense', compact('authUser', 'user_role', 'expense', 'account_no','categories', 'accounts', 'warehouses', 'staffs'));
     
     }
 
     public function editExpensePost(Request $request, $unique_key)
     {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
        $data = $request->all();
 
         $expense = Expense::where('unique_key', $unique_key)->first();
         if (!isset($expense)) {
             abort(404);
         }
+        $request->validate([
+            'note' => 'required|string',
+            'category' => 'required',
+            'amount' => 'required',
+        ]);
 
         $expense->expense_category_id = $data['category'];
-        $expense->warehouse_id = $data['warehouse'];
-        // $expense->expense_date = $data['expense_date'];
+        $expense->warehouse_id = !empty($data['warehouse']) ? $data['warehouse'] : null;
         $expense->amount = $data['amount'];
-        // $expense->account_id = $data['account'];
+        $expense->staff_id = !empty($data['staff_id']) ? $data['staff_id'] : null;
         $expense->note = !empty($data['note']) ? $data['note'] : null;
         
-        $expense->created_by = 1;
+        $expense->created_by = $authUser->id;
         $expense->status = 'true';
         $expense->save();
 

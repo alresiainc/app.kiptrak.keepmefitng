@@ -62,6 +62,22 @@
               </div>
             </div>
           <hr>
+
+          <div class="row mb-3">
+            <div class="col-lg-3 col-md-6">
+              <label for="">Start Date</label>
+              <input type="text" id="min" class="form-control filter">
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+              <label for="">End Date</label>
+              <input type="text" id="max" class="form-control filter">
+            </div>
+
+            
+
+            
+          </div>
           
           <div class="table table-responsive">
             <table id="products-table" class="table custom-table" style="width:100%">
@@ -181,5 +197,28 @@
         });
     </script>
   <?php endif ?>
+
+  <script>
+    var minDate, maxDate;
+ 
+    // Custom filtering function which will search data in column four between two values(dates)
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+            var min = minDate.val();
+            var max = maxDate.val();
+            var date = new Date( data[5] ); //5 is the date column on datatable
+      
+            if (
+                ( min === null && max === null ) ||
+                ( min === null && date <= max ) ||
+                ( min <= date   && max === null ) ||
+                ( min <= date   && date <= max )
+            ) {
+                return true;
+            }
+            return false;
+        }
+    );
+  </script>
 
 @endsection

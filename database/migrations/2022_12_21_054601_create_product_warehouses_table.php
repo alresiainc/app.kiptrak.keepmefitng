@@ -17,8 +17,10 @@ return new class extends Migration
             $table->id();
 
             $table->integer('product_id')->nullable();
+            $table->string('product_qty')->nullable();
             $table->integer('warehouse_id')->nullable();
             $table->string('warehouse_type')->nullable();
+            
             
             $table->timestamps();
         });

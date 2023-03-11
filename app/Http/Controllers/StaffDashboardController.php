@@ -97,7 +97,7 @@ class StaffDashboardController extends Controller
         $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
 
         $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
-        $sales_paid = $this->shorten($sales_paid);
+        $sales_paid = $this->shorten($sales_paid); //total revenue
 
         // yearly report
         for ( $i = 1; $i <= 12; $i++ ) {

@@ -19,6 +19,7 @@ use App\Models\CartAbandon;
 use App\Models\FormHolder;
 use App\Models\SoundNotification;
 use App\Models\Customer;
+use App\Models\WareHouse;
 
 
 class OrderController extends Controller
@@ -240,6 +241,7 @@ class OrderController extends Controller
 
         $products = Product::all();
         $customers = Customer::all();
+        $warehouses = WareHouse::all();
 
         $orderbump_outgoingStock = OutgoingStock::where(['order_id'=>$order->id, 'reason_removed'=>'as_orderbump'])->first();
         $upsell_outgoingStock = OutgoingStock::where(['order_id'=>$order->id, 'reason_removed'=>'as_upsell'])->first();
@@ -259,7 +261,7 @@ class OrderController extends Controller
         }
         
 
-        return view('pages.orders.editOrder', compact('authUser', 'user_role', 'order', 'status', 'products', 'customers', 'gross_revenue', 'currency', 'packages',
+        return view('pages.orders.editOrder', compact('authUser', 'user_role', 'order', 'status', 'products', 'customers', 'warehouses', 'gross_revenue', 'currency', 'packages',
         'orderbump_outgoingStock', 'upsell_outgoingStock'));
     }
 
@@ -289,11 +291,13 @@ class OrderController extends Controller
                 }
             }
         }
+
         $data['product_id'];
         $order->products = serialize($data['product_id']);
         $order->customer_id = $data['customer'];
         $order->status = $data['order_status'];
         $order->order_note = !empty($data['note']) ? $data['note'] : null;
+        $order->warehouse_id = !empty($data['warehouse_id']) ? $data['warehouse_id'] : null;
         $order->save();
         
         $grand_total = 0;

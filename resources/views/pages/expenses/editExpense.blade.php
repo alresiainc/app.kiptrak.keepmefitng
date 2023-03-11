@@ -67,7 +67,7 @@
                 <div class="col-md-12 mb-3">The field labels marked with * are required input fields.</div>
   
                   
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                       <label for="" class="form-label">Select Category *</label>
   
                       <div class="d-flex">
@@ -93,8 +93,8 @@
                       @enderror
                   </div>
   
-                  <div class="col-md-6">
-                      <label for="" class="form-label">Select Warehouse *</label>
+                  <div class="col-md-4">
+                      <label for="" class="form-label">Select Warehouse  | Optional</label>
                       <select name="warehouse" class="select2 form-control border @error('warehouse') is-invalid @enderror" id="">
                         <option value="{{ isset($expense->warehouse_id) ? $expense->warehouse->id : '' }}" selected>
                             {{ isset($expense->warehouse_id) ? $expense->warehouse->name : 'Nothing Selected' }}</option>
@@ -113,7 +113,24 @@
                       @enderror
                   </div>
   
-                  
+                  <div class="col-md-4">
+                    <label for="" class="form-label">Expenses For | Optional</label>
+                    <select name="staff_id" class="select2 form-control border @error('staff_id') is-invalid @enderror" id="">
+                      <option value="{{ isset($expense->staff_id) ? $expense->staff->name : '' }}">{{ isset($expense->staff_id) ? $expense->staff->name : 'Nothing Selected' }}</option>
+  
+                      @foreach ($staffs as $staff)
+                          <option value="{{ $staff->id }}">
+                              {{ $staff->name }} {{ isset($staff->current_salary) ? '| '.$staff->current_salary : '' }}
+                          </option>
+                      @endforeach
+                          
+                    </select>
+                    @error('staff_id')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
   
                   
   
@@ -128,7 +145,7 @@
                   </div>
   
                   <div class="col-md-12">
-                      <label for="" class="form-label">Note</label>
+                      <label for="" class="form-label">Note <span class="text-danger">*</span></label>
                       <textarea name="note" id="" name="note" class="form-control @error('note') is-invalid @enderror" cols="30" rows="10">{{ $expense->note }}</textarea>
                       
                       @error('note')

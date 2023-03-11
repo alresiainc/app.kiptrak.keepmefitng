@@ -206,7 +206,7 @@
                   </div>
                 @endif
                 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="" class="form-label">Order Status *</label>
                     <select name="order_status" id="order_status" data-live-search="true" class="custom-select form-control border @error('order_status') is-invalid @enderror" id="">
                       
@@ -237,8 +237,29 @@
                     @enderror
                 </div>
 
+                <div class="col-md-6">
+                    <label for="" class="form-label">Warehouse | Optional</label>
+                    <select name="warehouse_id" id="warehouse_id" data-live-search="true" class="custom-select form-control border @error('warehouse_id') is-invalid @enderror" id="">
+                      
+                      <option value="{{ isset($order->warehouse_id) ? $order->warehouse->name : '' }}">
+                        {{ isset($order->warehouse_id) ? $order->warehouse->name : 'Nothing Selected' }}
+                      </option>
+                      @foreach ($warehouses as $warehouse)
+                        <option value="{{ $warehouse->id }}">
+                            {{ $warehouse->name }}
+                        </option>
+                      @endforeach
+            
+                    </select>
+                    @error('warehouse_id')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
+
                 <div class="col-md-12">
-                    <label for="" class="form-label">Note</label>
+                    <label for="" class="form-label">Note | Optional</label>
                     <textarea name="note" id="" name="note" class="form-control @error('note') is-invalid @enderror" cols="30" rows="5">{{ isset($order->order_note) ? $order->order_note : ''}}</textarea>
                     
                     @error('note')

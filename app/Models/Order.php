@@ -119,6 +119,10 @@ class Order extends Model
         return $this->belongsTo(User::class, 'staff_assigned_id');  
     }
 
+    public function warehouse() {
+        return $this->belongsTo(WareHouse::class, 'warehouse_id');  
+    }
+
     //used in allOrders
     public function whatsappMessages() {
         $messages = '';

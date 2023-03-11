@@ -164,6 +164,13 @@ class PermissionSeeder extends Seeder
         $permission->created_by = 1;
         $permission->save();
 
+        //----Task Manager-22----------------------
+        $permission = new Permission();
+        $permission->name = 'Task Manager Menu';
+        $permission->slug = Str::slug('Task Manager Menu');
+        $permission->created_by = 1;
+        $permission->save();
+
         //////////////////////////////////////////////////////////////////////////////////////////////////
         $permission = new Permission();
         $permission->name = 'View Dashboard';
@@ -835,6 +842,63 @@ class PermissionSeeder extends Seeder
         $permission->name = 'Disable Product Category';
         $permission->slug = Str::slug('Disable Product Category');
         $permission->parent_id = 2;
+        $permission->created_by = 1;
+        $permission->save();
+
+        //----------Task Manager---Id-22--------------------
+        $permission = new Permission();
+        $permission->name = 'View Project List';
+        $permission->slug = Str::slug('View Project List');
+        $permission->parent_id = 22;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'Create Project';
+        $permission->slug = Str::slug('Create Project');
+        $permission->parent_id = 22;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'Edit Project';
+        $permission->slug = Str::slug('Edit Project');
+        $permission->parent_id = 22;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'Delete Project';
+        $permission->slug = Str::slug('Delete Project');
+        $permission->parent_id = 22;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'View Task List';
+        $permission->slug = Str::slug('View Task List');
+        $permission->parent_id = 22;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'Create Task';
+        $permission->slug = Str::slug('Create Task');
+        $permission->parent_id = 22;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'Edit Task';
+        $permission->slug = Str::slug('Edit Task');
+        $permission->parent_id = 22;
+        $permission->created_by = 1;
+        $permission->save();
+
+        $permission = new Permission();
+        $permission->name = 'Delete Task';
+        $permission->slug = Str::slug('Delete Task');
+        $permission->parent_id = 22;
         $permission->created_by = 1;
         $permission->save();
 
