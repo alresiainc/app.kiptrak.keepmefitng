@@ -113,7 +113,7 @@
                       </div>
                     </div>
                     <div class="col-12">
-                      <button type="submit" class="btn btn-primary rounded-pill w-100 sidebarColor" type="submit">Login</button>
+                      <button type="submit" class="btn btn-primary rounded-pill w-100 sidebarColor">Login</button>
                     </div>
                     <div class="col-12 d-none">
                       <p class="small mb-0">Don't have account? <a href="register">Create an account</a></p>

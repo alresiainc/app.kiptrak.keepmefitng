@@ -63,7 +63,7 @@ class AuthController extends Controller
                     $activityLog->status = 'true';
                     $activityLog->save();
                     
-                    return redirect()->route('dashboard');
+                    return redirect()->route('todayRecord');
                 } else {
 
                     $activityLog = new ActivityLog();
@@ -102,7 +102,7 @@ class AuthController extends Controller
             } catch (Exception $exception) {
                 //return back()->with('info', 'Mail Server Issue. Message Saved in System. You can Re-send later');
                 if ($user->isSuperAdmin) {
-                    return redirect()->route('dashboard');
+                    return redirect()->route('todayRecord');
                 } else {
                     return redirect()->route('staffTodayRecord');
                 }
@@ -118,7 +118,7 @@ class AuthController extends Controller
             $activityLog->save();
             
             if ($user->isSuperAdmin) {
-                return redirect()->route('dashboard');
+                return redirect()->route('todayRecord');
             } else {
                 return redirect()->route('staffTodayRecord');
             }

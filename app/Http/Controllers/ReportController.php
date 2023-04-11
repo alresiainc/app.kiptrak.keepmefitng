@@ -987,11 +987,11 @@ class ReportController extends Controller
         $start_date = '';
         $end_date = '';
         $customer_selected = '';
-
+        
         $customer_selected = Customer::inRandomOrder()->where('id', '>', 0)->first();
-
-        $customer_sales = Sale::where('parent_id', null)->where('customer_id', $customer_selected->id)->orderBy('id', 'desc')->get();
-
+        
+        $customer_sales = isset($customer_selected) ? Sale::where('parent_id', null)->where('customer_id', $customer_selected->id)->orderBy('id', 'desc')->get() : collect();
+        
         return view('pages.reports.customerReport', \compact('authUser', 'user_role', 'customers', 'start_date', 'end_date', 'customer_selected', 'customer_sales'));
     }
 
