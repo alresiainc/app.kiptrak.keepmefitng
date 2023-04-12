@@ -107,7 +107,7 @@ class ProductController extends Controller
         $product->image = $imageName;
         $product->save();
 
-        //warehouse
+        //warehouse, qty updated here
         if (!empty($data['warehouse'])) {
             $product_warehouse = new ProductWarehouse();
             $warehouse = WareHouse::find($data['warehouse']);
@@ -118,7 +118,7 @@ class ProductController extends Controller
             $product_warehouse->save();
         }
         
-        //incomingstocks
+        //incomingstocks, qty updated here
         $incomingStock = new IncomingStock();
         $incomingStock->product_id = $product->id;
         $incomingStock->quantity_added = $data['quantity'];
@@ -221,6 +221,7 @@ class ProductController extends Controller
         if(!isset($product)){
             abort(404);
         }
+
         $request->validate([
             'name' => 'required|string',
             'quantity' => 'required|numeric',
@@ -237,6 +238,11 @@ class ProductController extends Controller
         ]);
     
         $data = $request->all();
+
+        //////////////////////////
+        
+        //////////////////////////
+
         $product->name = $data['name'];
         // $product->quantity = $data['quantity'];
         $product->category_id = $data['category'];
@@ -283,7 +289,7 @@ class ProductController extends Controller
             $product_warehouse->save();
         }
 
-        if(!empty($data['quantity']) && $data['quantity'] !== 0)
+        if(!empty($data['quantity']) && $data['quantity'] != 0)
         {
             //incomingStock
             if ($data['quantity'] > 0) {
@@ -295,18 +301,126 @@ class ProductController extends Controller
                 $incomingStock->created_by = $authUser->id;
                 $incomingStock->status = 'true';
                 $incomingStock->save();
+
+                //Purchase
+                $purchase = new Purchase();
+                $purchase_code = 'kpa-' . date("Ymd") . '-'. date("his");
+                $purchase->purchase_code = $purchase_code;
+                
+                $purchase->product_id = $product->id;
+                $purchase->product_qty_purchased = $data['quantity'];
+                $purchase->incoming_stock_id = $incomingStock->id;
+
+                $purchase->product_purchase_price = $data['purchase_price']; //per unit
+                $purchase->amount_due = $data['quantity'] * $data['purchase_price'];
+                $purchase->amount_paid = $data['quantity'] * $data['purchase_price']; //u cant owe as d admin
+
+                $purchase->payment_type = 'cash';
+                $purchase->note = 'Product added from system';
+
+                $purchase->created_by = $authUser->id;
+                $purchase->status = 'received';
+                $purchase->save();
+
+                $product->update(['purchase_id'=>$purchase->id]);
             }
 
             //outgoingStock
             if ($data['quantity'] < 0) {
-                $outgoingStock = new OutgoingStock();
-                $outgoingStock->product_id = $product->id;
-                $outgoingStock->quantity_removed = abs($data['quantity']); //stay +ve
-                $outgoingStock->reason_removed = 'as_administrative'; //as_order, as_expired, as_damaged, as_administrative
-                $outgoingStock->quantity_returned = 0; //by default
-                $outgoingStock->created_by = $authUser->id;
-                $outgoingStock->status = 'true';
-                $outgoingStock->save();
+
+                //reduce purchase
+                $purchases = Purchase::where('product_id', $product->id);
+                $line_items = $purchases->orderBy('id','DESC')->get(['id', 'product_qty_purchased', 'incoming_stock_id']);
+
+                //$quantity_removed = abs($data['quantity']);
+                $quantity_removed = abs($data['quantity']);
+
+                //loop through each $line_items
+                $bucket_sum = 0;
+                $result = [];
+
+                //loop array until it stops at a particular pt
+                foreach ($line_items as $key=>$row) {
+                    $result[$key] = $row;
+                    $bucket_sum += $row->product_qty_purchased;
+                    if ($bucket_sum >= $quantity_removed) {
+                        // $bucket_sum = 0;
+                        ++$key;
+                        break;
+                    }
+                }
+                //return $result; //array so far
+
+                //extract id columns
+                $purchase_column_ids = array_column($result, 'id');
+                $incoming_stock_column_ids = array_column($result, 'incoming_stock_id');
+                
+                if ($bucket_sum == $quantity_removed) {
+                
+                    //purchase side
+                    Purchase::whereIn('id', $purchase_column_ids)->update([
+                        'product_qty_purchased' => 0,
+                        'product_purchase_price' => $data['purchase_price'],
+                        'amount_due' => 0,
+                        'amount_paid' => 0,
+                    ]);
+                    //IncomingStock side
+                    IncomingStock::whereIn('id', $incoming_stock_column_ids)->update([
+                        'quantity_added' => 0,
+                    ]);
+                    
+                } else {
+                    
+                    //purchase side
+                    $result_except_last = array_slice($purchase_column_ids, 0, count($purchase_column_ids)-1, true); //array except last-item
+                    $result_only_last = collect(end($purchase_column_ids))[0]; //array only last-item
+                    
+                    $purchases_result_except_last = Purchase::whereIn('id', $result_except_last);
+                    $sum1 = $purchases_result_except_last->sum('product_qty_purchased');
+                    
+                    $purchases_only_last = Purchase::where('id', $result_only_last)->first();
+
+                    //some calcs
+                    $diff1 = $quantity_removed - $sum1;
+                    $quantity_remaining = $purchases_only_last->product_qty_purchased - $diff1;
+                    Purchase::where('id', $result_only_last)->update([
+                        'product_qty_purchased' => $quantity_remaining,
+                        'product_purchase_price' => $data['purchase_price'],
+                        'amount_due' => $quantity_remaining * $data['purchase_price'],
+                        'amount_paid' => $quantity_remaining * $data['purchase_price'],
+                    ]);
+
+                    $purchases_result_except_last->update([
+                        'product_qty_purchased' => 0,
+                        'product_purchase_price' => $data['purchase_price'],
+                        'amount_due' => 0,
+                        'amount_paid' => 0,
+                    ]);
+
+                    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                    //incomingStock side
+                    $incomingStock_except_last = array_slice($incoming_stock_column_ids, 0, count($incoming_stock_column_ids)-1, true); //array except last-item
+                    $incomingStock_only_last = collect(end($incoming_stock_column_ids))[0]; //array only last-item
+                    
+                    $incomingStocks_result_except_last = IncomingStock::whereIn('id', $incomingStock_except_last);
+
+
+                    $incomingStocks_only_last = IncomingStock::where('id', $incomingStock_only_last)->first();
+
+                    //some calcs
+                    // $sum2 = $incomingStocks_result_except_last->sum('quantity_added');
+                    // $diff2 = $quantity_removed - $sum2;
+
+                    // $quantity_remaining = $incomingStocks_only_last->quantity_added - $diff2;
+                    IncomingStock::where('id', $incomingStock_only_last)->update([
+                        'quantity_added' => $quantity_remaining,
+                    ]);
+                    $incomingStocks_result_except_last->update([
+                        'quantity_added' => 0,
+                    ]);
+                }
+                
             }
         }
         

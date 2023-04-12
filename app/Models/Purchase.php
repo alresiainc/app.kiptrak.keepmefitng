@@ -110,4 +110,20 @@ class Purchase extends Model
     {
         return $this->hasMany(Purchase::class, 'parent_id', 'id'); //mapping categories to its 'parent_id'
     }
+
+    public function incomingStock()
+    {
+        return $this->belongsTo(IncomingStock::class, 'incoming_stock_id');  
+    }
+
+    public function next(){
+        // get next user
+        return Purchase::where('id', '>', $this->id)->orderBy('id','asc')->first();
+    
+    }
+    public  function previous(){
+        // get previous  user
+        return Purchase::where('id', '<', $this->id)->orderBy('id','desc')->first();
+    
+    }
 }

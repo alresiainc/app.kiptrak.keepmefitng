@@ -417,7 +417,7 @@
                     <th scope="col">Product Name</th>
                     <th scope="col">Category</th>
                     <th scope="col">Qty Added</th>
-                    <th scope="col">Qty Sold</th>
+                    <th scope="col">Qty Removed</th>
                     <th scope="col">Qty Remaining(Stock)</th>
                     <th scope="col">Date Added</th>
                   </tr>

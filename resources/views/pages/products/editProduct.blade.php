@@ -4,29 +4,29 @@
 @section('extra_css')
 <style>
   select{
-            -webkit-appearance: listbox !important
-        }
+      -webkit-appearance: listbox !important
+  }
 
-        /* custom-select border & inline edit */
-        .btn-light {
-            background-color: #fff !important;
-            color: #000 !important;
-        }
-        div.filter-option-inner-inner{
-            color: #000 !important;
-        }
-        /* custom-select border & inline edit */
+  /* custom-select border & inline edit */
+  .btn-light {
+      background-color: #fff !important;
+      color: #000 !important;
+  }
+  div.filter-option-inner-inner{
+      color: #000 !important;
+  }
+  /* custom-select border & inline edit */
 
-        /* select2 height proper */
-        .select2-selection__rendered {
-            line-height: 31px !important;
-        }
-        .select2-container .select2-selection--single {
-            height: 35px !important;
-        }
-        .select2-selection__arrow {
-            height: 34px !important;
-        }
+  /* select2 height proper */
+  .select2-selection__rendered {
+      line-height: 31px !important;
+  }
+  .select2-container .select2-selection--single {
+      height: 35px !important;
+  }
+  .select2-selection__arrow {
+      height: 34px !important;
+  }
 </style>
 @endsection
 
