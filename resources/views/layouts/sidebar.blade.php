@@ -167,13 +167,13 @@ $routeName = \Route::currentRouteName();
         <span>Purchases</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="purchases-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-purchase-list')) ))
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-purchase')) ))
         <li>
           <a href="{{ route('addPurchase') }}"><i style="font-size: 100%!important;" class="bi bi-plus"></i><span>Add Purchase</span></a>
         </li>
         @endif
 
-        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'create-purchase')) ))
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-purchase-list')) ))
         <li>
           <a href="{{ route('allPurchase') }}"><i style="font-size: 100%!important;" class="bi bi-cart3"></i><span>View Purchases</span></a>
         </li>

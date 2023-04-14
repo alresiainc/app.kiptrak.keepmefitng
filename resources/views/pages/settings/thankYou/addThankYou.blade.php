@@ -22,7 +22,7 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Create Upsell Template</h1>
+      <h1>Create ThankYou Template</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="/">Home</a></li>
