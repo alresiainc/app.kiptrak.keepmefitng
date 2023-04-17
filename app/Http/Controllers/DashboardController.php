@@ -48,7 +48,9 @@ class DashboardController extends Controller
         $currency = $generalSetting->country->symbol;
         $record = 'all';
         ///////////////////////////////////////////////////////////////////////
-        $purchases_amount_paid = Purchase::sum('amount_paid');
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+        $purchases_amount_paid = Purchase::whereIn('id', $product_purchase_ids)->sum('amount_paid');
+
         $sales_due = Sale::sum('amount_due');
         //$sales_paid = Sale::sum('amount_paid');
         $sales_paid = 0;
@@ -74,9 +76,9 @@ class DashboardController extends Controller
 
         $customers_count = Customer::count();
         $suppliers_count = Supplier::count();
-        $purchases_count = Purchase::count();
+        $purchases_count = Purchase::whereIn('id', $product_purchase_ids)->count();
         $salesInvoice = Sale::where('parent_id', null)->count();
-        $purchasesInvoice = Purchase::where('parent_id', null)->count();
+        $purchasesInvoice = Purchase::whereIn('id', $product_purchase_ids)->where('parent_id', null)->count();
 
         $sales_count = Sale::count();
         $sales_count += $accepted_outgoing_stock->sum('quantity_removed');
@@ -94,7 +96,7 @@ class DashboardController extends Controller
             
             $sale_amount = Sale::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
             $sale_amount += $accepted_outgoing_stock->sum('amount_accrued');
-            $purchase_amount = Purchase::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
+            $purchase_amount = Purchase::whereIn('id', $product_purchase_ids)->whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
             $profit_amount = $sale_amount - $purchase_amount;
             $expense_amount = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount') + $purchase_amount;
 
@@ -161,7 +163,9 @@ class DashboardController extends Controller
         ///////////////////////////////////////////////////////////////////////
 
         $dt = Carbon::now();
-        $purchases_amount_paid = Purchase::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount_paid');
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+        
+        $purchases_amount_paid = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount_paid');
         $sales_due = Sale::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount_due');
         $sales_paid = Sale::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount_paid');
         $expenses = $this->shorten(Expense::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount'));
@@ -178,9 +182,9 @@ class DashboardController extends Controller
 
         $customers_count = Customer::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->count();
         $suppliers_count = Supplier::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->count();
-        $purchases_count = Purchase::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->count();
+        $purchases_count = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->count();
         $salesInvoice = Sale::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->where('parent_id', null)->count();
-        $purchasesInvoice = Purchase::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->where('parent_id', null)->count();
+        $purchasesInvoice = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->where('parent_id', null)->count();
 
         $sales_count = Sale::count();
         $invoices_count = $salesInvoice + $purchasesInvoice;
@@ -196,7 +200,7 @@ class DashboardController extends Controller
             $end_date = date("Y").'-'.date('m', $start).'-'.date('t', mktime(0, 0, 0, date("m", $start), 1, date("Y", $start)));
             
             $sale_amount = Sale::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
-            $purchase_amount = Purchase::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
+            $purchase_amount = Purchase::whereIn('id', $product_purchase_ids)->whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
             $profit_amount = $sale_amount - $purchase_amount;
             $expense_amount = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount') + $purchase_amount;
 
@@ -262,7 +266,9 @@ class DashboardController extends Controller
         ///////////////////////////////////////////////////////////////////////
 
         $dt = Carbon::now();
-        $purchases_amount_paid = Purchase::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount_paid');
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+
+        $purchases_amount_paid = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount_paid');
         $sales_due = Sale::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount_due');
         $sales_paid = Sale::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount_paid');
         $expenses = $this->shorten(Expense::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount'));
@@ -279,9 +285,9 @@ class DashboardController extends Controller
 
         $customers_count = Customer::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->count();
         $suppliers_count = Supplier::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->count();
-        $purchases_count = Purchase::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->count();
+        $purchases_count = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->count();
         $salesInvoice = Sale::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->where('parent_id', null)->count();
-        $purchasesInvoice = Purchase::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->where('parent_id', null)->count();
+        $purchasesInvoice = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->where('parent_id', null)->count();
 
         $sales_count = Sale::count();
         $invoices_count = $salesInvoice + $purchasesInvoice;
@@ -297,7 +303,7 @@ class DashboardController extends Controller
             $end_date = date("Y").'-'.date('m', $start).'-'.date('t', mktime(0, 0, 0, date("m", $start), 1, date("Y", $start)));
             
             $sale_amount = Sale::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
-            $purchase_amount = Purchase::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
+            $purchase_amount = Purchase::whereIn('id', $product_purchase_ids)->whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
             $profit_amount = $sale_amount - $purchase_amount;
             $expense_amount = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount') + $purchase_amount;
 
@@ -363,7 +369,9 @@ class DashboardController extends Controller
         ///////////////////////////////////////////////////////////////////////
 
         $dt = Carbon::now();
-        $purchases_amount_paid = Purchase::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount_paid');
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+        
+        $purchases_amount_paid = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount_paid');
         $sales_due = Sale::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount_due');
         $sales_paid = Sale::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount_paid');
         $expenses = $this->shorten(Expense::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount'));
@@ -380,9 +388,9 @@ class DashboardController extends Controller
 
         $customers_count = Customer::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->count();
         $suppliers_count = Supplier::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->count();
-        $purchases_count = Purchase::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->count();
+        $purchases_count = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->count();
         $salesInvoice = Sale::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->where('parent_id', null)->count();
-        $purchasesInvoice = Purchase::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->where('parent_id', null)->count();
+        $purchasesInvoice = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->where('parent_id', null)->count();
 
         $sales_count = Sale::count();
         $invoices_count = $salesInvoice + $purchasesInvoice;
@@ -464,7 +472,9 @@ class DashboardController extends Controller
         ///////////////////////////////////////////////////////////////////////
 
         $dt = Carbon::now();
-        $purchases_amount_paid = Purchase::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount_paid');
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+        
+        $purchases_amount_paid = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount_paid');
         $sales_due = Sale::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount_due');
         $sales_paid = Sale::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount_paid');
         $expenses = $this->shorten(Expense::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount'));
@@ -481,9 +491,9 @@ class DashboardController extends Controller
 
         $customers_count = Customer::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->count();
         $suppliers_count = Supplier::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->count();
-        $purchases_count = Purchase::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->count();
+        $purchases_count = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->count();
         $salesInvoice = Sale::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->where('parent_id', null)->count();
-        $purchasesInvoice = Purchase::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->where('parent_id', null)->count();
+        $purchasesInvoice = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->where('parent_id', null)->count();
 
         $sales_count = Sale::count();
         $invoices_count = $salesInvoice + $purchasesInvoice;
@@ -499,7 +509,7 @@ class DashboardController extends Controller
             $end_date = date("Y").'-'.date('m', $start).'-'.date('t', mktime(0, 0, 0, date("m", $start), 1, date("Y", $start)));
             
             $sale_amount = Sale::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
-            $purchase_amount = Purchase::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
+            $purchase_amount = Purchase::whereIn('id', $product_purchase_ids)->whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
             $profit_amount = $sale_amount - $purchase_amount;
             $expense_amount = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount') + $purchase_amount;
 

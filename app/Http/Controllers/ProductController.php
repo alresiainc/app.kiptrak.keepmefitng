@@ -159,7 +159,8 @@ class ProductController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        $products = Product::orderBy('id','DESC')->get();
+        $products = Product::whereNull('combo_product_ids')->orderBy('id','DESC')->get();
+        
         return view('pages.products.allProducts', compact('authUser', 'user_role', 'products'));
     }
 

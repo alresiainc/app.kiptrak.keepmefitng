@@ -94,8 +94,8 @@ class ThankYouSettingController extends Controller
      */
     public function singleThankYouTemplate($unique_key, $current_order_id="")
     {
-        $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        // $authUser = auth()->user();
+        // $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
         $thankYouTemplate = ThankYou::where('unique_key', $unique_key);
         if(!$thankYouTemplate->exists()){
@@ -117,6 +117,11 @@ class ThankYouSettingController extends Controller
                 ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
 
                 $formHolder = $order->formHolder;
+
+                //update formholder or order
+                if(isset($formHolder->staff_assigned_id) && !isset($order->staff_assigned_id)){
+                    $order->update(['staff_assigned_id'=>$formHolder->staff_assigned_id]);
+                } 
 
                 //get customer
                 $customer =  $order->customer; $orderId = $order->orderId($order);
@@ -169,7 +174,7 @@ class ThankYouSettingController extends Controller
             
         } 
         
-        return view('pages.settings.thankYou.singleThankYou', \compact('authUser', 'user_role', 'thankYou', 'order', 'orderId', 'customer',
+        return view('pages.settings.thankYou.singleThankYou', \compact('thankYou', 'order', 'orderId', 'customer',
         'qty_total', 'order_total_amount', 'grand_total', 'mainProducts_outgoingStocks',
         'orderbumpProduct_revenue', 'orderbump_outgoingStock', 'upsellProduct_revenue', 'upsell_outgoingStock'));
     }
@@ -260,8 +265,8 @@ class ThankYouSettingController extends Controller
      */
     public function thankYouEmbedded($unique_key, $current_order_id="")
     {
-        $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        // $authUser = auth()->user();
+        // $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
         $thankYouTemplate = ThankYou::where('unique_key', $unique_key);
         if(!$thankYouTemplate->exists()){
@@ -335,7 +340,7 @@ class ThankYouSettingController extends Controller
             
         } 
         
-        return view('pages.settings.thankYou.thankYouEmbedded', \compact('authUser', 'user_role', 'thankYou', 'order', 'orderId', 'customer',
+        return view('pages.settings.thankYou.thankYouEmbedded', \compact('thankYou', 'order', 'orderId', 'customer',
         'qty_total', 'order_total_amount', 'grand_total', 'mainProducts_outgoingStocks',
         'orderbumpProduct_revenue', 'orderbump_outgoingStock', 'upsellProduct_revenue', 'upsell_outgoingStock'));
     }

@@ -65,11 +65,11 @@
     }
   }
 
-  if(('#btnFullscreen').length > 0) {
-    document.getElementById('btnFullscreen').addEventListener('click', function() {
-        toggleFullscreen();
-    });
-  }
+  // if(('#btnFullscreen').length > 0) {
+  //   document.getElementById('btnFullscreen').addEventListener('click', function() {
+  //       toggleFullscreen();
+  //   });
+  // }
 
   const validateInput = (form,input) => {
     var x = document.forms[form][input].value;

@@ -21,6 +21,7 @@
   </div>
   <!-- End Page Title -->
 
+
   <!-- Alert -->
   <div id="liveAlertPlaceholder d-none"></div>
   <!-- /Alert -->
@@ -317,7 +318,7 @@
                 <tbody>
                   @if ($products->count() > 0)
                       @foreach ($products as $product)
-                          @if ($product->stock_available() < 10)
+                          @if ((!isset($product->combo_product_ids)) && ($product->stock_available() < 10))
                           <tr>
                             <td>{{ $product->code }}</td>
                             <td>{{ $product->name }}</td>

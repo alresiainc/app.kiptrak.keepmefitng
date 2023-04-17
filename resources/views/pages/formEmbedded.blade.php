@@ -69,7 +69,7 @@
     <header id="header" class="header fixed-top d-flex align-items-center">
         <div class="d-flex align-items-center justify-content-between">
           <a href="/" class="logo d-flex align-items-center">
-            <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="width: 30%; !important">
+            <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="width: 30%; !important" class="d-none">
             <span class="d-none d-lg-block project-namek"></span>
           </a>
         </div>
@@ -96,6 +96,7 @@
             <input type="hidden" name="upsell_stage" class="upsell_stage" value="">
             <input type="hidden" name="thankyou_stage" class="thankyou_stage" value="">
             <input type="hidden" name="current_order_id" class="current_order_id" value="">
+            <input type="hidden" name="cartAbandoned_id" class="cartAbandoned_id" value="{{ $cartAbandoned_id }}">
             <!-- Monitoring diferent stages in the form -->
         
             <!-- CHECKOUT VIEW Main + orderbump + upsell -->
@@ -603,6 +604,7 @@
         $("input.contact-input").click(function() {
             // console.log($(this).val())
             var parentC = $(this).parent().prev();
+            var cartAbandoned_id = $(".cartAbandoned_id").val();
             var unique_key = $(".formholder_unique_key").val();
 
             //if prev exist, incase firstinput is typed, eg(firstname)
@@ -623,12 +625,12 @@
                     contacts.push( inputVal ) //store in array
                     //check for duplicates
                     var contact_copy = unique(contacts)
-                    console.log(contact_copy)
+                    //console.log(contact_copy)
                     
                     $.ajax({
                         type:'get',
                         url:'/cart-abandon-contact',
-                        data:{unique_key:unique_key, inputValueName:contact_copy, 
+                        data:{unique_key:unique_key, inputValueName:contact_copy, inputVal:inputVal, cartAbandoned_id:cartAbandoned_id
                             },
                         success:function(resp){
                             console.log(resp)
@@ -652,10 +654,41 @@
             return result;
         }
 
+        //cart-abandon-delivery-duration, & delivery addr check
+        $('.delivery_duration').change(function() {
+            var cartAbandoned_id = $('.cartAbandoned_id').val();
+            var unique_key = $(".formholder_unique_key").val();
+            var delivery_duration = $(this).val();
+            var customer_delivery_addr = $('.address').val();
+            var last_Val = $('input.contact-input:last').val();
+            var last_inputName = $('input.contact-input:last').attr('data-name');
+            
+            if (last_Val=='' || last_Val==null) {
+                var msg = last_inputName+' '+'must be filled';
+                alert(msg)
+            } else {
+                var inputVal = last_Val+'|'+last_inputName;
+                $.ajax({
+                    type:'get',
+                    url:'/cart-abandon-delivery-duration',
+                    data:{unique_key:unique_key, cartAbandoned_id:cartAbandoned_id, delivery_duration:delivery_duration, inputVal:inputVal
+                        },
+                    success:function(resp){
+                        //console.log(resp)
+
+                    },error:function(){
+                        alert("Error");
+                    }
+                });
+            }
+
+            //cart-abandon-delivery-address
+        })
+
         //cart-abandon-package
         var packages = [];
         $(".product-package").click(function() {
-
+            var cartAbandoned_id = $('.cartAbandoned_id').val();
             var unique_key = $(".formholder_unique_key").val();
             var product_packsge = $(this).val();
             var package_field_type = $(this).attr('type');
@@ -667,27 +700,36 @@
                 packages.push( product_packsge ) //store in array
                 //check for duplicates
                 var packages_copy = unique(packages)
-                console.log(packages_copy)
+                //console.log(packages_copy)
             } else {
                 packages.push( product_packsge ) //store in array
                 //check for duplicates
                 var packages_copy = unique(packages)
-                console.log(packages_copy)
+                //console.log(packages_copy)
             }
 
-            $.ajax({
-                type:'get',
-                url:'/cart-abandon-package',
-                data:{unique_key:unique_key, product_package:packages_copy, 
-                    },
-                success:function(resp){
-                    console.log(resp)
+            var last_Val = $('input.contact-input:last').val();
+            var last_inputName = $('input.contact-input:last').attr('data-name');
+
+            if (last_Val=='' || last_Val==null) {
+                var msg = last_inputName+' '+'must be filled';
+                alert(msg)
+            } else {
+                var inputVal = last_Val+'|'+last_inputName;
+                $.ajax({
+                    type:'get',
+                    url:'/cart-abandon-package',
+                    data:{unique_key:unique_key, cartAbandoned_id:cartAbandoned_id, product_package:packages_copy, inputVal:inputVal
+                        },
+                    success:function(resp){
+                        console.log(resp)
 
 
-                },error:function(){
-                    alert("Error");
-                }
-            });
+                    },error:function(){
+                        alert("Error");
+                    }
+                });
+            }
         })
         
         //main package
@@ -743,6 +785,7 @@
             }
 
             var unique_key = $(".formholder_unique_key").val();
+            var cartAbandoned_id = $('.cartAbandoned_id').val();
             var product_packages = $('input[name^="product_packages[]"]').map(function () {
                 if ($(this).is(':checked')) {
                     var selected_qty = $(this).closest(".product_package_label").find("select[name='select_product_qty']").val();
@@ -761,7 +804,7 @@
             $.ajax({
                 type:'get',
                 url:'/ajax-save-new-form-link',
-                data:{unique_key:unique_key, firstname:firstname, lastname:lastname, phone_number:phone_number, whatsapp_phone_number:whatsapp_phone_number,
+                data:{unique_key:unique_key, cartAbandoned_id:cartAbandoned_id, firstname:firstname, lastname:lastname, phone_number:phone_number, whatsapp_phone_number:whatsapp_phone_number,
                     active_email:active_email, state:state, city:city, address:address, delivery_duration:delivery_duration, product_packages:product_packages, 
                     },
                 success:function(resp){

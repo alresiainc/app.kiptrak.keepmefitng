@@ -112,9 +112,10 @@
                         <h5>Form Fields</h5>
                     </div>
                 </div>
-
+                
                 <!---used in my-form-builder.js--->
                 <input type="hidden" name="products[]" class="package_select" value="{{ $package_select }}">
+                <input type="hidden" name="former_packages2" class="package_select" value="{{ json_encode($packages) }}">
 
                 <div>
                     
@@ -164,9 +165,9 @@
                                                         @elseif($contact['form_type']=='package_multi')
                                                         <option value="package_multi" selected>Multi-Choice Package (multiple option)</option>
 
-                                                        @endif
-                                                    </option>
-                                                    <option value="number_field">Text: Simple Input Field </option>
+                                                    @endif
+                                                    
+                                                    <option value="text_field">Text: Simple Input Field </option>
                                                     <option value="number_field">Number: Simple Input Field </option>
                                                     <option value="package_single">Multi-Choice Package (single option)</option>
                                                     <option value="package_multi">Multi-Choice Package (multiple option)</option>

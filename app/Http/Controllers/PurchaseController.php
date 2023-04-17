@@ -20,8 +20,9 @@ class PurchaseController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
-        $purchases = Purchase::where('parent_id', null)->get();
+
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+        $purchases = Purchase::whereIn('id', $product_purchase_ids)->get();
         
         return view('pages.purchases.allPurchase', compact('authUser', 'user_role', 'purchases'));
     }

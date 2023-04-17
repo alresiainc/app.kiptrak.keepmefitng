@@ -31,11 +31,14 @@ class InventoryController extends Controller
         $currency = $generalSetting->country->symbol;
         $record = 'all';
 
-        $purchases_amount_paid = $this->shorten(Purchase::sum('amount_paid'));
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+        $purchases_sum = Purchase::whereIn('id', $product_purchase_ids)->sum('amount_paid');
+
+        $purchases_amount_paid = $this->shorten($purchases_sum);
         $sales_paid = $this->shorten(Sale::sum('amount_paid'));
 
-        $total_products = Product::all();
-
+        $total_products = Product::whereNull('combo_product_ids')->get();
+        
         $out_of_stock_products = [];
         foreach ($total_products as $key => $product) {
             if ($product->stock_available() < 10) {
@@ -70,8 +73,8 @@ class InventoryController extends Controller
 
         $customers = Customer::all();
 
-        $recently_products = Product::take(100)->get();
-
+        $recently_products = Product::whereNull('combo_product_ids')->orderBy('id','DESC')->take(100)->get();
+        
         $categories = Category::all();
         
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
@@ -90,7 +93,7 @@ class InventoryController extends Controller
         /////////////////////////////////////////////////////
         $dt = Carbon::now();
 
-        $total_products = Product::all();
+        $total_products = Product::whereNull('combo_product_ids')->get();
 
         $out_of_stock_products = [];
         foreach ($total_products as $key => $product) {
@@ -104,7 +107,9 @@ class InventoryController extends Controller
         $sales_sum = Sale::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount_paid'); 
         $sale_revenue = $this->shorten($sales_sum);
         
-        $purchase_sum = Purchase::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount_paid');
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+        $purchases_sum = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount_paid');
+        
         $expense_sum = Expense::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->sum('amount');
 
         $total_expenses = $this->shorten($purchase_sum + $expense_sum);
@@ -126,7 +131,7 @@ class InventoryController extends Controller
 
         $customers = Customer::all();
 
-        $recently_products = Product::take(5)->get();
+        $recently_products = Product::whereNull('combo_product_ids')->orderBy('id','DESC')->take(5)->get();
         
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
@@ -144,7 +149,7 @@ class InventoryController extends Controller
         /////////////////////////////////////////////////////
         $dt = Carbon::now();
 
-        $total_products = Product::all();
+        $total_products = Product::whereNull('combo_product_ids')->get();
 
         $out_of_stock_products = [];
         foreach ($total_products as $key => $product) {
@@ -158,7 +163,9 @@ class InventoryController extends Controller
         $sales_sum = Sale::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount_paid'); 
         $sale_revenue = $this->shorten($sales_sum);
         
-        $purchase_sum = Purchase::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount_paid');
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+        $purchases_sum = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount_paid');
+        
         $expense_sum = Expense::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->sum('amount');
 
         $total_expenses = $this->shorten($purchase_sum + $expense_sum);
@@ -180,7 +187,7 @@ class InventoryController extends Controller
 
         $customers = Customer::all();
 
-        $recently_products = Product::take(5)->get();
+        $recently_products = Product::whereNull('combo_product_ids')->orderBy('id','DESC')->take(5)->get();
         
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
@@ -198,7 +205,7 @@ class InventoryController extends Controller
         /////////////////////////////////////////////////////
         $dt = Carbon::now();
 
-        $total_products = Product::all();
+        $total_products = Product::whereNull('combo_product_ids')->get();
 
         $out_of_stock_products = [];
         foreach ($total_products as $key => $product) {
@@ -212,7 +219,9 @@ class InventoryController extends Controller
         $sales_sum = Sale::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount_paid'); 
         $sale_revenue = $this->shorten($sales_sum);
         
-        $purchase_sum = Purchase::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount_paid');
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+        $purchases_sum = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount_paid');
+        
         $expense_sum = Expense::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->sum('amount');
 
         $total_expenses = $this->shorten($purchase_sum + $expense_sum);
@@ -234,7 +243,7 @@ class InventoryController extends Controller
 
         $customers = Customer::all();
 
-        $recently_products = Product::take(5)->get();
+        $recently_products = Product::whereNull('combo_product_ids')->orderBy('id','DESC')->take(5)->get();
         
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
@@ -252,7 +261,7 @@ class InventoryController extends Controller
         /////////////////////////////////////////////////////
         $dt = Carbon::now();
 
-        $total_products = Product::all();
+        $total_products = Product::whereNull('combo_product_ids')->get();
 
         $out_of_stock_products = [];
         foreach ($total_products as $key => $product) {
@@ -266,7 +275,9 @@ class InventoryController extends Controller
         $sales_sum = Sale::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount_paid'); 
         $sale_revenue = $this->shorten($sales_sum);
         
-        $purchase_sum = Purchase::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount_paid');
+        $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
+        $purchases_sum = Purchase::whereIn('id', $product_purchase_ids)->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount_paid');
+        
         $expense_sum = Expense::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->sum('amount');
 
         $total_expenses = $this->shorten($purchase_sum + $expense_sum);
@@ -288,7 +299,7 @@ class InventoryController extends Controller
 
         $customers = Customer::all();
 
-        $recently_products = Product::take(5)->get();
+        $recently_products = Product::whereNull('combo_product_ids')->orderBy('id','DESC')->take(5)->get();
         
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'total_products', 'out_of_stock_products', 'warehouses', 'sale_revenue', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products'));
@@ -418,7 +429,6 @@ class InventoryController extends Controller
             }
         }
 
-        
         $warehouses = WareHouse::where('type','major')->get();
         return view('pages.inventory.inStockProductsByWarehouse', \compact('authUser', 'user_role', 'products', 'in_stock_products','warehouses', 'start_date', 'end_date', 'warehouse_selected'));
     }

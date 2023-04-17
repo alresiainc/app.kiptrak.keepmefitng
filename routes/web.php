@@ -91,7 +91,26 @@ Route::get('/test', [TestController::class, 'test'])->name('test');
 //login
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'loginPost'])->name('loginPost');
+Route::get('/form-embedded/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'formEmbedded'])->name('formEmbedded');
 
+Route::get('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'newFormLink'])->name('newFormLink'); //like singleform for newFormBuilder 
+Route::post('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'newFormLinkPost'])->name('newFormLinkPost'); //the post
+Route::get('/ajax-save-new-form-link', [FormBuilderController::class, 'saveNewFormFromCustomer'])->name('saveNewFormFromCustomer'); //ajax
+Route::get('/ajax-save-new-form-link-orderbump', [FormBuilderController::class, 'saveNewFormOrderBumpFromCustomer'])->name('saveNewFormOrderBumpFromCustomer'); //ajax
+Route::get('/ajax-save-new-form-link-upsell', [FormBuilderController::class, 'saveNewFormUpSellFromCustomer'])->name('saveNewFormUpSellFromCustomer'); //ajax
+Route::get('/ajax-save-new-form-link-orderbump-refusal', [FormBuilderController::class, 'saveNewFormOrderBumpRefusalFromCustomer'])->name('saveNewFormOrderBumpRefusalFromCustomer'); //ajax
+Route::get('/ajax-save-new-form-link-upsell-refusal', [FormBuilderController::class, 'saveNewFormUpSellRefusalFromCustomer'])->name('saveNewFormUpSellRefusalFromCustomer'); //ajax
+
+//cart abandoned
+Route::get('/cart-abandon-contact', [FormBuilderController::class, 'cartAbandonContact'])->name('cartAbandonContact'); //ajax
+Route::get('/cart-abandon-delivery-duration', [FormBuilderController::class, 'cartAbandonDeliveryDuration'])->name('cartAbandonDeliveryDuration'); //ajax
+Route::get('/cart-abandon-package', [FormBuilderController::class, 'cartAbandonPackage'])->name('cartAbandonPackage'); //ajax
+
+//thankyou
+Route::get('/view-thankyou-templates/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'singleThankYouTemplate'])->name('singleThankYouTemplate');
+Route::get('/thankYou-embedded/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'thankYouEmbedded'])->name('thankYouEmbedded');
+
+//auth routes
 Route::group(['middleware' => 'auth'], function() {
 
 Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
@@ -112,7 +131,6 @@ Route::get('/create-form', [FormController::class, 'addForm'])->name('addForm');
 Route::post('/create-form', [FormController::class, 'addFormPost'])->name('addFormPost');
 Route::get('/edit-form/{unique_id}', [FormController::class, 'editForm'])->name('editForm');
 Route::post('/edit-form/{unique_id}', [FormController::class, 'editFormPost'])->name('editFormPost');
-
 
 
 Route::get('/form/{unique_id}', [FormController::class, 'singleForm'])->name('singleForm'); //viewed by admin
@@ -137,18 +155,18 @@ Route::post('/edit-new-form-builder/{unique_key}', [FormBuilderController::class
 Route::get('/duplicate-form/{unique_id}', [FormBuilderController::class, 'duplicateForm'])->name('duplicateForm');
 Route::post('/duplicate-form/{unique_id}', [FormBuilderController::class, 'duplicateFormPost'])->name('duplicateFormPost');
 
-Route::get('/form-embedded/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'formEmbedded'])->name('formEmbedded');
+// Route::get('/form-embedded/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'formEmbedded'])->name('formEmbedded');
 Route::get('/form-link/{unique_key}', [FormBuilderController::class, 'formLink'])->name('formLink'); //like singleform
 Route::post('/form-link/{unique_key}/{stage?}', [FormBuilderController::class, 'formLinkPost'])->name('formLinkPost');
 Route::post('/form-link-upsell/{unique_key}', [FormBuilderController::class, 'formLinkUpsellPost'])->name('formLinkUpsellPost');
 
-Route::get('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'newFormLink'])->name('newFormLink'); //like singleform for newFormBuilder 
-Route::post('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'newFormLinkPost'])->name('newFormLinkPost'); //the post
-Route::get('/ajax-save-new-form-link', [FormBuilderController::class, 'saveNewFormFromCustomer'])->name('saveNewFormFromCustomer'); //ajax
-Route::get('/ajax-save-new-form-link-orderbump', [FormBuilderController::class, 'saveNewFormOrderBumpFromCustomer'])->name('saveNewFormOrderBumpFromCustomer'); //ajax
-Route::get('/ajax-save-new-form-link-upsell', [FormBuilderController::class, 'saveNewFormUpSellFromCustomer'])->name('saveNewFormUpSellFromCustomer'); //ajax
-Route::get('/ajax-save-new-form-link-orderbump-refusal', [FormBuilderController::class, 'saveNewFormOrderBumpRefusalFromCustomer'])->name('saveNewFormOrderBumpRefusalFromCustomer'); //ajax
-Route::get('/ajax-save-new-form-link-upsell-refusal', [FormBuilderController::class, 'saveNewFormUpSellRefusalFromCustomer'])->name('saveNewFormUpSellRefusalFromCustomer'); //ajax
+// Route::get('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'newFormLink'])->name('newFormLink'); //like singleform for newFormBuilder 
+// Route::post('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'newFormLinkPost'])->name('newFormLinkPost'); //the post
+// Route::get('/ajax-save-new-form-link', [FormBuilderController::class, 'saveNewFormFromCustomer'])->name('saveNewFormFromCustomer'); //ajax
+// Route::get('/ajax-save-new-form-link-orderbump', [FormBuilderController::class, 'saveNewFormOrderBumpFromCustomer'])->name('saveNewFormOrderBumpFromCustomer'); //ajax
+// Route::get('/ajax-save-new-form-link-upsell', [FormBuilderController::class, 'saveNewFormUpSellFromCustomer'])->name('saveNewFormUpSellFromCustomer'); //ajax
+// Route::get('/ajax-save-new-form-link-orderbump-refusal', [FormBuilderController::class, 'saveNewFormOrderBumpRefusalFromCustomer'])->name('saveNewFormOrderBumpRefusalFromCustomer'); //ajax
+// Route::get('/ajax-save-new-form-link-upsell-refusal', [FormBuilderController::class, 'saveNewFormUpSellRefusalFromCustomer'])->name('saveNewFormUpSellRefusalFromCustomer'); //ajax
 
 Route::get('/forms-list', [FormBuilderController::class, 'allFormBuilders'])->name('allFormBuilders');
 Route::post('/add-orderbump', [FormBuilderController::class, 'addOrderbumpToForm'])->name('addOrderbumpToForm');
@@ -162,9 +180,9 @@ Route::post('/edit-thankyou', [FormBuilderController::class, 'editThankYouTempla
 Route::get('/carts', [OrderController::class, 'cartAbandon'])->name('cartAbandon');
 Route::get('/carts/{unique_key}', [OrderController::class, 'singleCartAbandon'])->name('singleCartAbandon');
 Route::get('/delete-carts/{unique_key}', [OrderController::class, 'deleteCartAbandon'])->name('deleteCartAbandon');
-Route::get('/cart-abandon-contact', [FormBuilderController::class, 'cartAbandonContact'])->name('cartAbandonContact'); //ajax
-Route::get('/cart-abandon-delivery-duration', [FormBuilderController::class, 'cartAbandonDeliveryDuration'])->name('cartAbandonDeliveryDuration'); //ajax
-Route::get('/cart-abandon-package', [FormBuilderController::class, 'cartAbandonPackage'])->name('cartAbandonPackage'); //ajax
+// Route::get('/cart-abandon-contact', [FormBuilderController::class, 'cartAbandonContact'])->name('cartAbandonContact'); //ajax
+// Route::get('/cart-abandon-delivery-duration', [FormBuilderController::class, 'cartAbandonDeliveryDuration'])->name('cartAbandonDeliveryDuration'); //ajax
+// Route::get('/cart-abandon-package', [FormBuilderController::class, 'cartAbandonPackage'])->name('cartAbandonPackage'); //ajax
 
 //Orders
 Route::get('/orders/{status?}', [OrderController::class, 'allOrders'])->name('allOrders');
@@ -333,10 +351,10 @@ Route::post('/edit-upsell-templates/{unique_key}', [UpsellSettingController::cla
 Route::get('/all-thankyou-templates', [ThankYouSettingController::class, 'thankYouTemplates'])->name('thankYouTemplates');
 Route::get('/add-thankyou-templates', [ThankYouSettingController::class, 'addThankYouTemplate'])->name('addThankYouTemplate');
 Route::post('/add-thankyou-templates', [ThankYouSettingController::class, 'addThankYouTemplatePost'])->name('addThankYouTemplatePost');
-Route::get('/view-thankyou-templates/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'singleThankYouTemplate'])->name('singleThankYouTemplate');
+// Route::get('/view-thankyou-templates/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'singleThankYouTemplate'])->name('singleThankYouTemplate');
 Route::get('/edit-thankyou-templates/{unique_key}', [ThankYouSettingController::class, 'editThankYouTemplate'])->name('editThankYouTemplate');
 Route::post('/edit-thankyou-templates/{unique_key}', [ThankYouSettingController::class, 'editThankYouTemplatePost'])->name('editThankYouTemplatePost');
-Route::get('/thankYou-embedded/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'thankYouEmbedded'])->name('thankYouEmbedded');
+// Route::get('/thankYou-embedded/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'thankYouEmbedded'])->name('thankYouEmbedded');
 
 //generalSetting
 Route::get('/general-setting', [GeneralSettingController::class, 'generalSetting'])->name('generalSetting');

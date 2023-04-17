@@ -164,8 +164,8 @@
                                                         @elseif($contact['form_type']=='package_multi')
                                                         <option value="package_multi" selected>Multi-Choice Package (multiple option)</option>
 
-                                                        @endif
-                                                    </option>
+                                                    @endif
+                                                    
                                                     <option value="number_field">Text: Simple Input Field </option>
                                                     <option value="number_field">Number: Simple Input Field </option>
                                                     <option value="package_single">Multi-Choice Package (single option)</option>

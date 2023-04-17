@@ -749,7 +749,7 @@
                 packages.push( product_package ) //store in array
                 //check for duplicates
                 var packages_copy = unique(packages)
-                console.log(packages_copy)
+                //console.log(packages_copy)
             }
 
             var last_Val = $('input.contact-input:last').val();
