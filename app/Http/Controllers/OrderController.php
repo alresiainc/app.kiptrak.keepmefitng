@@ -61,15 +61,25 @@ class OrderController extends Controller
             if ($status=="delivered_and_remitted") {
                 $orders = Order::where('status', 'delivered_and_remitted')->orderBy('id', 'DESC')->get();
             }
-    
+            
             $entries = false; $formHolder = '';
+            // if ($status !== "") {
+            //     $formHolder = FormHolder::where('unique_key', $status);
+            //     if($formHolder->exists()) {
+            //         $formHolder = $formHolder->first();
+            //         // $formHolders = $formHolder->formHolders;
+            //         // $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->orderBy('id', 'DESC')->get();
+            //         $orders = Order::where('form_holder_id', $formHolder->id)->orderBy('id', 'DESC')->get();
+            //         $entries = true;
+            //     }
+            // }
+
             if ($status !== "") {
                 $formHolder = FormHolder::where('unique_key', $status);
                 if($formHolder->exists()) {
                     $formHolder = $formHolder->first();
-                    // $formHolders = $formHolder->formHolders;
-                    // $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->orderBy('id', 'DESC')->get();
-                    $orders = Order::where('form_holder_id', $formHolder->id)->orderBy('id', 'DESC')->get();
+                    $formHolders = $formHolder->formHolders;
+                    $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orderBy('id', 'DESC')->get();
                     $entries = true;
                 }
             }

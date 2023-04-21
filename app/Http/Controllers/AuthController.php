@@ -350,7 +350,7 @@ class AuthController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    
+        $user = $authUser;
         if(!isset($user)){
             abort(404);
         }

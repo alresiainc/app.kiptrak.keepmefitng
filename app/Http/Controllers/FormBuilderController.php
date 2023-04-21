@@ -164,7 +164,7 @@ class FormBuilderController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        $formHolds = FormHolder::orderBy('id', 'DESC')->get();
+        $formHolds = FormHolder::where('has_edited_duplicate',false)->orderBy('id', 'DESC')->get();
         $formHolders = [];
         foreach ($formHolds as $key => $formHolder) {
             $formHolder['form_data'] = \unserialize($formHolder->form_data);
@@ -573,65 +573,185 @@ class FormBuilderController extends Controller
         $form_code = $formHolder->slug;
         $former_packages = $data['former_packages2'];
 
-        $formHolder->form_data = \serialize($request->except(['products', 'q', 'required', 'form_name_selected', '_token', 'former_packages', 'former_packages2']));
+        //for unsed forms
+        if (count($formHolder->customers) < 1) {
+            $formHolder->form_data = \serialize($request->except(['products', 'q', 'required', 'form_name_selected', '_token', 'former_packages', 'former_packages2']));
         
-        //$formHolder->created_by = $authUser->id;
-        $formHolder->name = $data['name'];
-        $formHolder->status = 'true';
-        $formHolder->save();
+            //$formHolder->created_by = $authUser->id;
+            $formHolder->name = $data['name'];
+            $formHolder->status = 'true';
+            $formHolder->save();
 
-        //outgoingStock, in place of orderProduct
-        //remove n replace outgoing stock
-        //$former_packages = $data['former_packages2']; //["1","2"]
-        OutgoingStock::whereIn('product_id', json_decode($data['former_packages2']))->where(['order_id'=>$order->id])->delete();
+            //remove n replace outgoing stock
+            //$former_packages = $data['former_packages2']; //["1","2"]
+            OutgoingStock::whereIn('product_id', json_decode($data['former_packages2']))->where(['order_id'=>$order->id])->delete();
 
-        // $product_ids = [];
-        // foreach ($data['packages'] as $package) {
-        //     if (!empty($package)) {
-                
-        //         $product = Product::where('id', $package)->first();
-        //         $product_ids[] = $product->id;
+            $product_ids = [];
+            foreach ($data['packages'] as $package) {
+                if (!empty($package)) {
+                    $product = Product::where('id', $package)->first();
+                    $product_ids[] = $product->id;
+                    $outgoingStock = new OutgoingStock();
+                    $outgoingStock->product_id = $product->id;
+                    $outgoingStock->order_id = $order->id;
+                    $outgoingStock->quantity_removed = 1;
+                    $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    $outgoingStock->quantity_returned = 0; //by default
+                    $outgoingStock->isCombo = isset($product->combo_product_ids) ? 'true' : null;
+                    $outgoingStock->created_by = $authUser->id;
+                    $outgoingStock->status = 'true';
+                    $outgoingStock->save();
+                } 
+            }
 
-        //         //add unexisting selected package
-        //         $outgoingStock = new OutgoingStock();
-        //         $outgoingStock->product_id = $product->id;
-        //         $outgoingStock->order_id = $order->id;
-        //         $outgoingStock->quantity_removed = 1;
-        //         $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-        //         $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-        //         $outgoingStock->quantity_returned = 0; //by default
-        //         $outgoingStock->created_by = $authUser->id;
-        //         $outgoingStock->status = 'true';
-        //         $outgoingStock->save();
-                
-        //     }  
-        // }
+            //update formHolder, no need
+            //$formHolder->update(['order_id'=>$order->id]);
+            $order->update(['products'=>serialize($product_ids)]);
+            return back()->with('success', 'Form Updated Successfully');
+        } else {
+            
+            //copy from former_form
+            $formHolder_former = $formHolder;
 
-        $product_ids = [];
-        foreach ($data['packages'] as $package) {
-            if (!empty($package)) {
-                $product = Product::where('id', $package)->first();
-                $product_ids[] = $product->id;
+            //paste in new duplicate form
+            $string = 'kpf-' . date("his");
+            $randomString = $string.rand(100000, 999999);
+            $formHolder = new FormHolder();
+            $formHolder->name = $formHolder_former->name == $data['name'] ? $formHolder_former->name.rand(100000, 999999) : $formHolder_former->name;
+            $formHolder->parent_id = $formHolder_former->id; //like form_code
+            $formHolder->slug = $randomString; //like form_code
+            $formHolder->form_data = $formHolder_former->form_data;
+            $formHolder->staff_assigned_id = isset($formHolder_former->staff_assigned_id) ? $formHolder_former->staff_assigned_id : null;
+            $formHolder->order_id = $order->id;
+            
+            $formHolder->created_by = $authUser->id;
+            $formHolder->status = 'true';
+            $formHolder->has_edited_duplicate = true;
+            $formHolder->save();
+
+            //update tables where former_form->id is foreign, with formHolder->id
+            $order = $formHolder_former->order;
+            $order->update(['form_holder_id'=>$formHolder->id]);
+            Customer::where('order_id', $order->id)->update(['form_holder_id'=>$formHolder->id]);
+            
+            //update former_form with new requests
+            $formHolder_former->name = $data['name'];
+            $formHolder_former->parent_id = null; //like form_code
+            $formHolder_former->form_data = \serialize($request->except(['products', 'q', 'required', 'form_name_selected', '_token', 'former_packages', 'former_packages2']));
+            $formHolder_former->staff_assigned_id = isset($formHolder_former->staff_assigned_id) ? $formHolder_former->staff_assigned_id : null;
+            
+            $formHolder_former->created_by = $authUser->id;
+            $formHolder_former->status = 'true';
+            $formHolder_former->save();
+            
+            //save Order, based on updated former_form
+            $order = new Order();
+            $order->form_holder_id = $formHolder_former->id;
+            $order->staff_assigned_id = isset($formHolder_former->staff_assigned_id) ? $formHolder_former->staff_assigned_id : null;
+            $order->source_type = 'form_holder_module';
+            $order->status = 'new';
+            $order->save();
+
+            //outgoingStock, in place of orderProduct
+            $product_ids = [];
+            foreach ($data['packages'] as $package) {
+                if (!empty($package)) {
+                    
+                    $product = Product::where('id', $package)->first();
+                    $product_ids[] = $product->id;
+                    $outgoingStock = new OutgoingStock();
+                    $outgoingStock->product_id = $product->id;
+                    $outgoingStock->order_id = $order->id;
+                    $outgoingStock->quantity_removed = 1;
+                    $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    $outgoingStock->quantity_returned = 0; //by default
+                    $outgoingStock->created_by = $authUser->id;
+                    $outgoingStock->status = 'true';
+                    $outgoingStock->save();
+                    
+                }  
+            }
+
+            //update formHolder
+            $formHolder_former->update(['order_id'=>$order->id]);
+            $order->update(['products'=>serialize($product_ids)]);
+
+            if ( (isset($formHolder_former->orderbump_id)) && (isset($formHolder_former->orderbump->product->id)) ) {
+                //orderbump
+                $former_orderbump = $formHolder_former->orderbump;
+
+                $orderbump = new OrderBump();
+                $orderbump->orderbump_heading = $former_orderbump->orderbump_heading;
+                $orderbump->orderbump_subheading = $former_orderbump->orderbump_subheading;
+                $orderbump->product_id = $former_orderbump->product_id;
+                $orderbump->order_id = $order->id;
+                $orderbump->product_expected_quantity_to_be_sold = 1;
+                $orderbump->product_expected_amount = 0;
+                $orderbump->status = 'true';
+                $orderbump->save();
+
+                $product = $former_orderbump->product;
+
+                //outgoing stock for orderbump
                 $outgoingStock = new OutgoingStock();
                 $outgoingStock->product_id = $product->id;
                 $outgoingStock->order_id = $order->id;
                 $outgoingStock->quantity_removed = 1;
                 $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-                $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
                 $outgoingStock->quantity_returned = 0; //by default
-                $outgoingStock->isCombo = isset($product->combo_product_ids) ? 'true' : null;
                 $outgoingStock->created_by = $authUser->id;
                 $outgoingStock->status = 'true';
                 $outgoingStock->save();
-            } 
+
+                //update formHolder
+                $formHolder->update(['orderbump_id'=>$orderbump->id]);
+            }
+
+            if ( (isset($formHolder_former->upsell_id)) && (isset($formHolder_former->upsell->product->id)) ) {
+                //orderbump
+                $former_upsell = $formHolder_former->upsell;
+
+                $upsell = new UpSell();
+                $upsell->upsell_heading = $former_upsell->upsell_heading;
+                $upsell->upsell_subheading = $former_upsell->upsell_subheading;
+                $upsell->upsell_setting_id = $former_upsell->upsell_setting_id;
+                $upsell->product_id = $former_upsell->product_id;
+                $upsell->order_id = $order->id;
+                $upsell->product_expected_quantity_to_be_sold = 1;
+                $upsell->product_expected_amount = 0;
+                $upsell->status = 'true';
+                $upsell->save();
+
+                $product = $former_upsell->product;
+
+                //outgoing stock for upsell
+                $outgoingStock = new OutgoingStock();
+                $outgoingStock->product_id = $product->id;
+                $outgoingStock->order_id = $order->id;
+                $outgoingStock->quantity_removed = 1;
+                $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                $outgoingStock->quantity_returned = 0; //by default
+                $outgoingStock->created_by = $authUser->id;
+                $outgoingStock->status = 'true';
+                $outgoingStock->save();
+
+                //update formHolder
+                $formHolder->update(['upsell_id'=>$upsell->id]);
+            }
+
+            // $formHolder_former->has_edited_duplicate = true;
+            // $formHolder_former->save();
+
+            return back()->with('success', 'Form Edited Successfully');
         }
 
-        //update formHolder, no need
-        //$formHolder->update(['order_id'=>$order->id]);
-        $order->update(['products'=>serialize($product_ids)]);
-
-        return back()->with('success', 'Form Updated Successfully');
+        
     }
+    //editform-end
 
     //not used. ajax save form first time
     public function formBuilderSave(Request $request)
@@ -1124,6 +1244,17 @@ class FormBuilderController extends Controller
         // $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
         $formHolder = FormHolder::where('unique_key', $unique_key)->first();
+        
+        // $entries_count = 0;
+        // foreach ($formHolder->formHolders as $key => $formHolder) {
+        //     if (isset($formHolder->order->customer_id)) {
+        //         $entries_count += 1;
+        //     }
+        // }
+        // if (isset($formHolder->order->customer_id)) {
+        //     $entries_count += 1;
+        // }
+        
         if (!isset($formHolder)) {
             \abort(404);
         }

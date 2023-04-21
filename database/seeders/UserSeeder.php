@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Test;
 use Illuminate\Support\Facades\Hash;
 use Faker\Factory;
 
@@ -17,6 +18,11 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
+        $test = new Test();
+        $test->name = 'test name';
+        $test->description = 'test description';
+        $test->save();
+
         //superadmin
         $user = new User();
         $user->name = 'Super John Doe';

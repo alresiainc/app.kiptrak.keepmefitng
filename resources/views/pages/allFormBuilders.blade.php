@@ -95,10 +95,15 @@
                       <th scope="row">{{ ++$key }}</th>
                       <td>{{ $formHolder->name }} <br>
                         @if (count($formHolder->customers) > 0)
+                        <a class="badge badge-info" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">Edit</a>
                         <a class="badge badge-dark" href="{{ route('allOrders', $formHolder->unique_key) }}">Entries({{ count($formHolder->customers) }})</a>
+                        
                         @else
                         <a class="badge badge-info" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">Edit</a>
-                        <span class="badge badge-dark" href="">Entries({{ count($formHolder->customers) }})</span>
+                        @if($formHolder->entries() > 0) <a href="{{ route('allOrders', $formHolder->unique_key) }}">
+                          <span class="badge badge-dark" href="">Entries({{ $formHolder->entries() }})</span>
+                        </a> @else <span class="badge badge-dark" href="">Entries({{ $formHolder->entries() }})</span> @endif
+                        
                         @endif
                         
                         <a class="badge badge-success" href="{{ route('duplicateForm', $formHolder->unique_key) }}">Duplicate</a>
@@ -117,6 +122,7 @@
                         </td>
                         @endif
                       
+                        <!--orderbump-section-->
                         @if (!isset($formHolder->order->customer_id))
                           @if (isset($formHolder->orderbump_id))
                           <td>
@@ -154,12 +160,15 @@
                               class="img-thumbnail img-fluid"
                               alt="{{$formHolder->orderbump->product->name}}" style="height: 30px;">
                             </a>
+                            <br>
+                            
                             @else
                             None
                             @endif
                           </td>
                         @endif
                       
+                        <!--upsell-section-->
                       @if (!isset($formHolder->order->customer_id))
                         @if (isset($formHolder->upsell_id))
                         <td>
@@ -229,9 +238,9 @@
                         @else  
                         <td><span class="badge badge-primary" onclick="addThankYouTemplate('{{ $formHolder->unique_key }}', '{{ $formHolder->name }}')" style="cursor: pointer;">
                           <i class="bi bi-plus"></i> Add</span></td>
-                        @endif
+                      @endif
 
-                      <td><span>{{ isset($formHolder->order->customer_id) ? $formHolder->order->customer->firstname : 'No response' }} {{ $formHolder->order->customer_id ? $formHolder->order->customer->lastname : '' }}</span></td>
+                      <td><span>{{ isset($formHolder->order->customer_id) ? $formHolder->order->customer->firstname .' '.$formHolder->order->customer->lastname : 'No response' }} </span></td>
                       
                       <td>
                         {{-- <input type="hidden" id="foo" value="https://github.com/zenorocha/clipboard.js.git"> --}}
