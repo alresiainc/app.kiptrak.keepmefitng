@@ -152,7 +152,7 @@
                   @enderror
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-4 @if($product_in_warehouse->count() > 0) d-none @endif">
                   <label for="" class="form-label">Change WareHouse | optional</label>
                   <div class="d-flex @error('warehouse') is-invalid @enderror">
 
@@ -257,17 +257,8 @@
 
                     @endif
                     
-                    <div class="col-md-8">
-                      <label for="" class="form-label">Select WareHouse | optional</label>
-                      <select name="warehouse_id" class="custom-select form-control border" id="">
-                        <option value="">Nothing Selected</option>
-                        <option value="1">Warehouse 1</option>
-                        <option value="2">Warehouse 2</option>
-                      </select>
-                      
-                    </div>
     
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                       <label for="" class="form-label">Image<span class="text-danger fw-bolder">*</span></label>
                       <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" id="">
                       @error('image')

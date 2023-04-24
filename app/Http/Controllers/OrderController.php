@@ -342,8 +342,7 @@ class OrderController extends Controller
                     $outgoingStock->created_by = $authUser->id;
                     $outgoingStock->status = 'true';
                     $outgoingStock->save();
-                }
-                
+                } 
             }
         }
 

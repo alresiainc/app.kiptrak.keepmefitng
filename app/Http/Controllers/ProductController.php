@@ -195,6 +195,8 @@ class ProductController extends Controller
             abort(404);
         }
 
+        $product_in_warehouse = ProductWarehouse::where('product_id', $product->id);
+        
         $currency_nationality = $product->country->name;
         $currency_symbol = $product->country->symbol;
 
@@ -209,7 +211,7 @@ class ProductController extends Controller
 
         $agents = User::where('type', 'agent')->get();
 
-        return view('pages.products.editProduct', compact('authUser', 'user_role', 'product', 'currency_symbol', 'features',
+        return view('pages.products.editProduct', compact('authUser', 'user_role', 'product', 'product_in_warehouse', 'currency_symbol', 'features',
         'countries', 'currency_nationality', 'stock_available', 'categories', 'warehouses', 'agents'));
     }
 
@@ -238,11 +240,7 @@ class ProductController extends Controller
             'image' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp',
         ]);
     
-        $data = $request->all();
-
-        //////////////////////////
-        
-        //////////////////////////
+       $data = $request->all();
 
         $product->name = $data['name'];
         // $product->quantity = $data['quantity'];
@@ -276,19 +274,7 @@ class ProductController extends Controller
             $product->image = $imageName;
         }
         
-        //return $oldImage;
-        //Storage::disk('public')->delete($oldImagePath);
         $product->save();
-
-        //warehouse
-        if (!empty($data['warehouse_id'])) {
-            $product_warehouse = new ProductWarehouse();
-            $warehouse = WareHouse::find($data['warehouse_id']);
-            $product_warehouse->product_id = $product->id;
-            $product_warehouse->warehouse_id = $data['warehouse_id'];
-            $product_warehouse->warehouse_type = $warehouse->type;
-            $product_warehouse->save();
-        }
 
         if(!empty($data['quantity']) && $data['quantity'] != 0)
         {
@@ -424,7 +410,21 @@ class ProductController extends Controller
                 
             }
         }
-        
+
+        //warehouse
+        if (!empty($data['warehouse'])) {
+            //check if initial warehouse existed
+            $warehouse = WareHouse::find($data['warehouse']);
+            if (!in_array($product->id, $product->warehouses->pluck('id')->toArray())) {
+                $product_warehouse = new ProductWarehouse();
+                $product_warehouse->product_id = $product->id;
+                $product_warehouse->product_qty = $product->stock_available();
+                $product_warehouse->warehouse_id = $data['warehouse'];
+                $product_warehouse->warehouse_type = $warehouse->type;
+                $product_warehouse->save();
+            }
+            
+        }
         
         return back()->with('success', 'Product Updated Successfully');
 

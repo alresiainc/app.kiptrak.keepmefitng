@@ -98,7 +98,7 @@
                 </div>
                 <div class="col-lg-3">
                   <label for="">Stock</label>
-                  <div class="lead">{{ $product->stock_available() }}</div>
+                  <div class="lead">{{ $warehouse->productQtyInWarehouse($product->id) }}</div>
                 </div>
                 <div class="col-lg-3">
                   <label for="">Purchase Price</label>

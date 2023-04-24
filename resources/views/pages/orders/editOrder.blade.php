@@ -377,14 +377,6 @@
 
     var row = start + productName + customer_acceptance_status + quantity_removed + unit_price + total + btnDelete + end;
 
-    // <tr><th scope='row'>"+name+"</th>
-    //     <td><input type='hidden' name='product_id[]' value='"+id+"'>"+code+"</td>
-    //     <td style='width:150px'><input type='number' name='product_qty[]' class='form-control product-qty' value='1'></td>
-    //     <td style='width:150px'><input type='number' name='unit_price[]' class='form-control unit-price' value='"+unitprice+"'></td>
-    //     <td class='total'>"+unitprice+"</td>
-    //     <td class='btnDelete btn btn-danger btn-sm mt-1 mb-1'>Remove</td>
-    //     </tr>
-
     $("#orderTable > tbody").append(row);
 
     //$("#orderTable > tbody").append("<tr><th scope='row'>"+name+"</th><td><input type='hidden' name='product_id[]' value='"+id+"'>"+code+"</td><td style='width:150px'><input type='number' name='product_qty[]' class='form-control product-qty' value='1'></td><td style='width:150px'><input type='number' name='unit_price[]' class='form-control unit-price' value='"+unitprice+"'></td><td class='total'>"+unitprice+"</td><td class='btnDelete btn btn-danger btn-sm mt-1 mb-1'>Remove</td></tr>");

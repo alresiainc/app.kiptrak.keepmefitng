@@ -1,14 +1,49 @@
 @extends('layouts.design')
 @section('title')Add Warehouse @endsection
+@section('extra_css')
+<style>
+    /* select2 arrow */
+    select{
+        -webkit-appearance: listbox !important
+    }
+
+    /* custom-select border & inline edit */
+    .btn-light {
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+    div.filter-option-inner-inner{
+        color: #000 !important;
+    }
+    /* custom-select border & inline edit */
+
+    /* select2 height proper */
+    .select2-selection__rendered {
+        line-height: 31px !important;
+    }
+    .select2-container .select2-selection--single {
+        height: 35px !important;
+    }
+    .select2-selection__arrow {
+        height: 34px !important;
+    }
+    /* select2 height proper */
+</style>
+@endsection
 @section('content')
 
 <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Add Warehouse</h1>
+      
+      <div class="d-flex justify-content-between align-items-center">
+        <h1>Add Warehouse</h1>
+        <h1><button class="btn" data-bs-toggle="modal" data-bs-target="#productTransfer">Product Transfer</button></h1>
+    </div>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('allWarehouse') }}">All Warehouses</a></li>
           <li class="breadcrumb-item active">Add Warehouse</li>
         </ol>
       </nav>
@@ -118,7 +153,69 @@
 
 </main><!-- End #main -->
 
+<!-- Modal -->
+<div class="modal fade productTransfer" id="productTransfer" tabindex="-1" aria-labelledby="productTransferLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Product Transfer Setup</h1>
+              <button type="button" class="btn-close"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="productTransferForm" action="{{ route('productTransferSetupPost') }}" method="POST">@csrf
+              <div class="modal-body">
+
+                  <div class="d-grid mb-3">
+                      <label for="" class="form-label text-dark">From Warehouse</label>
+                      <select name="from_warehouse" class="custom-select country form-control border @error('from_warehouse') is-invalid @enderror" id="">
+                        <option value="">Nothing Selected</option>
+                        @if (count($warehouses) > 0)
+                            @foreach ($warehouses as $warehouse)
+                            <option value="{{ $warehouse->unique_key }}">{{ $warehouse->name }}</option>
+                            @endforeach
+                        @endif
+                      </select>
+                      @error('from_warehouse')
+                          <span class="invalid-feedback" role="alert">
+                              <strong>{{ $message }}</strong>
+                          </span>
+                      @enderror
+                  </div>
+
+                  <div class="d-grid mb-2">
+                    <label for="" class="form-label text-dark">To Warehouse</label>
+                    <select name="to_warehouse" class="custom-select country form-control border @error('to_warehouse') is-invalid @enderror" id="">
+                      <option value="">Nothing Selected</option>
+                      @if (count($warehouses) > 0)
+                          @foreach ($warehouses as $warehouse)
+                          <option value="{{ $warehouse->unique_key }}">{{ $warehouse->name }}</option>
+                          @endforeach
+                      @endif
+                    </select>
+                    @error('to_warehouse')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
+                  
+              </div>
+              <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary productTransferBtn">Submit</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
 @endsection
 
 @section('extra_js')
+@if ( $errors->has('from_warehouse') || $errors->has('to_warehouse') )
+    <script type="text/javascript">
+        $( document ).ready(function() {
+             $('.productTransfer').modal('show');
+        });
+    </script>
+@endif
 @endsection

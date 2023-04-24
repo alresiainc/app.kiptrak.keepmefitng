@@ -17,6 +17,7 @@ use App\Models\Country;
 use App\Models\GeneralSetting;
 use App\Models\Role;
 use App\Models\ActivityLog;
+use App\Models\WareHouse;
 
 
 class AuthController extends Controller
@@ -538,7 +539,8 @@ class AuthController extends Controller
         if(!isset($agent)){
             abort(404);
         }
-        return view('pages.agents.singleAgent', compact('authUser', 'user_role', 'agent'));
+        $warehouse = WareHouse::where('agent_id',$agent->id)->first();
+        return view('pages.agents.singleAgent', compact('authUser', 'user_role', 'agent', 'warehouse'));
     }
 
     public function editAgent($unique_key)

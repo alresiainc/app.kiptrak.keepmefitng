@@ -266,6 +266,11 @@ Route::get('/edit-warehouse/{unique_key}', [WareHouseController::class, 'editWar
 Route::post('/edit-warehouse/{unique_key}', [WareHouseController::class, 'editWarehousePost'])->name('editWarehousePost');
 Route::get('/ajax-create-warehouse', [WareHouseController::class, 'addWarehouseAjax'])->name('addWarehouseAjax'); //ajax
 
+//transfers
+Route::post('/product-transfer-setup', [ProductTransferController::class, 'productTransferSetupPost'])->name('productTransferSetupPost');
+Route::get('/product-transfer-setup/{from_warehouse_unique_key}/{to_warehouse_unique_key}', [ProductTransferController::class, 'productTransferSetup'])->name('productTransferSetup');
+Route::post('/product-transfer/{from_warehouse_unique_key}/{to_warehouse_unique_key}', [ProductTransferController::class, 'productTransferPost'])->name('productTransferPost');
+
 //supplier
 Route::get('/suppliers', [SupplierController::class, 'allSupplier'])->name('allSupplier');
 Route::get('/create-supplier', [SupplierController::class, 'addSupplier'])->name('addSupplier');

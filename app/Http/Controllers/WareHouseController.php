@@ -29,10 +29,11 @@ class WareHouseController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        $warehouses = WareHouse::all();
         
         $agents = User::where('type', 'agent')->get();
         $countries = Country::all();
-        return view('pages.warehouses.addWarehouse', compact('authUser', 'user_role', 'agents', 'countries'));
+        return view('pages.warehouses.addWarehouse', compact('authUser', 'user_role', 'warehouses', 'agents', 'countries'));
     }
 
     //addpost
