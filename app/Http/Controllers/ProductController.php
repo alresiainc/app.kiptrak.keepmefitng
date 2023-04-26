@@ -143,7 +143,7 @@ class ProductController extends Controller
         $purchase->payment_type = 'cash';
         $purchase->note = 'Product added from system';
 
-        $purchase->created_by = 1;
+        $purchase->created_by = $authUser->id;
         $purchase->status = 'received';
         $purchase->save();
 
@@ -310,6 +310,12 @@ class ProductController extends Controller
                 $purchase->save();
 
                 $product->update(['purchase_id'=>$purchase->id]);
+
+                $productWarehouse = ProductWarehouse::where('product_id', $product->id)->first();
+                if(isset($productWarehouse)){
+                    $qty = $productWarehouse->product_qty + $data['quantity'];
+                    $productWarehouse->update(['product_qty'=>$qty]);
+                }
             }
 
             //outgoingStock
@@ -407,7 +413,13 @@ class ProductController extends Controller
                         'quantity_added' => 0,
                     ]);
                 }
-                
+
+                $productWarehouse = ProductWarehouse::where('product_id', $product->id)->first();
+                if(isset($productWarehouse)){
+                    $qty = $productWarehouse->product_qty - $quantity_removed;
+                    $productWarehouse->update(['product_qty'=>$qty]);
+                }
+ 
             }
         }
 
