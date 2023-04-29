@@ -186,13 +186,25 @@ $routeName = \Route::currentRouteName();
     @if ( $authUser->isSuperAdmin || ( ($user_role !== false) &&
     ($user_role->slug == 'inventory-manager' || $user_role->permissions->contains('slug', 'view-inventory-dashboard')) ))
     <li class="nav-item">
-      <a class="nav-link"href="{{ route('inventoryDashboard') }}"
-      @if(($routeName=='inventoryDashboard') || ($routeName=='inStockProductsByWarehouse') || ($routeName=='inStockProductsByWarehouseQuery') || ($routeName=='inStockProductsByOtherAgents') || ($routeName=='allProductInventory') || ($routeName=='singleProductSales') || ($routeName=='singleProductPurchases'))
+      <a class="nav-link collapsed" data-bs-target="#inventory-nav" data-bs-toggle="collapse" href="#"
+      @if( ($routeName=='inventoryDashboard') || ($routeName=='allProductTransfers') || ($routeName=='inStockProductsByWarehouse') || ($routeName=='inStockProductsByWarehouseQuery') || ($routeName=='inStockProductsByOtherAgents') || ($routeName=='allProductInventory') || ($routeName=='singleProductSales') || ($routeName=='singleProductSales') || ($routeName=='singleProductPurchases') )
       style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
         <i class="bi bi-shop"></i>
         <span>Inventory Management</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
-      
+      <ul id="inventory-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-inventory-dashboard')) ))
+        <li>
+          <a href="{{ route('inventoryDashboard') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Stock Management</span></a>
+        </li>
+        @endif
+
+        @if ( $authUser->isSuperAdmin || ( ($user_role !== false) && ($user_role->permissions->contains('slug', 'view-inventory-dashboard')) ))
+        <li>
+          <a href="{{ route('allProductTransfers') }}"><i style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Products Transfer</span></a>
+        </li>
+        @endif
+      </ul>
     </li>
     @endif
 

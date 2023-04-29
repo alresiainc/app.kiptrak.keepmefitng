@@ -20,6 +20,7 @@ use App\Models\FormHolder;
 use App\Models\SoundNotification;
 use App\Models\Customer;
 use App\Models\WareHouse;
+use App\Models\ProductWareHouse;
 
 
 class OrderController extends Controller
@@ -224,15 +225,15 @@ class OrderController extends Controller
         $outgoingStocks = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted'])->orderBy('id', 'DESC')->get();
         $packages = [];
         foreach ($outgoingStocks as $key => $product) {
-            $products['product'] = $this->productById($product->product_id);
+            $products['product'] = $product->product;
             $products['quantity_removed'] = $product->quantity_removed;
             $products['revenue'] =  $product->amount_accrued;
             $gross_revenue += $product->amount_accrued;
-            $currency = $this->productById($product->product_id)->country->symbol;
+            $currency = $product->product->country->symbol;
 
             $packages[] = $products;
         }
-
+        
         return view('pages.orders.singleOrder', compact('authUser', 'user_role', 'url', 'order', 'packages', 'gross_revenue', 'currency', 'status'));
     }
 
@@ -270,7 +271,6 @@ class OrderController extends Controller
             $packages[] = $productArr;
         }
         
-
         return view('pages.orders.editOrder', compact('authUser', 'user_role', 'order', 'status', 'products', 'customers', 'warehouses', 'gross_revenue', 'currency', 'packages',
         'orderbump_outgoingStock', 'upsell_outgoingStock'));
     }
@@ -301,8 +301,31 @@ class OrderController extends Controller
                 }
             }
         }
+        
+        //warehouse selected
+        if (!empty($data['warehouse_id'])) {
+            $warehouse = WareHouse::find($data['warehouse_id']);
+            $warehouse_product_ids = $warehouse->products->pluck('id')->toArray(); //[1,2,5,3,4]
+            $order_product_ids = collect($data['product_id'])->toArray(); //["1","2"]
 
-        $data['product_id'];
+            if (!empty($data['orderbump_product'])) {
+                array_push($order_product_ids, $data['orderbump_product']);
+            }
+            if (!empty($data['upsell_product'])) {
+                array_push($order_product_ids, $data['upsell_product']);
+            }
+            
+            //check if warehouse contains all ordered products
+            if (!empty(array_diff($order_product_ids, $warehouse_product_ids))) {
+                return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls transfer product accordingly');
+            }
+
+            if (ProductWarehouse::whereIn('product_id',$warehouse->products->pluck('id'))->where('warehouse_id',$data['warehouse_id'])->where('product_qty', '<', 10)->exists()) {
+                return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls transfer product accordingly');
+            }
+            
+        }       
+
         $order->products = serialize($data['product_id']);
         $order->customer_id = $data['customer'];
         $order->status = $data['order_status'];
@@ -351,19 +374,102 @@ class OrderController extends Controller
 
         //accepted orderbump
         if (!empty($data['orderbump_product']) && isset($orderbump_outgoingStock)) {
-            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_orderbump')->update(['product_id'=>$data['orderbump_product'], 'customer_acceptance_status'=>'accepted']);
+            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_orderbump')->update(['product_id'=>$data['orderbump_product'], 'customer_acceptance_status'=>'accepted', 'quantity_returned'=>0]);
         }
         //rejected orderbump
         if (empty($data['orderbump_product']) && isset($orderbump_outgoingStock)) {
-            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_orderbump')->update(['customer_acceptance_status'=>'rejected']);
+            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_orderbump')->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1]);
         }
         //accepted upsell
         if (!empty($data['upsell_product'])) {
-            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_upsell')->update(['product_id'=>$data['upsell_product']]);
+            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_upsell')->update(['product_id'=>$data['upsell_product'], 'quantity_returned'=>0]);
         }
         //rejected upsell
         if (empty($data['upsell_product']) && isset($upsell_outgoingStock)) {
-            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_upsell')->update(['customer_acceptance_status'=>'rejected']);
+            OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_upsell')->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1]);
+        }
+
+        if (($data['order_status'] == 'delivered_and_remitted') && (!empty($data['warehouse_id']))) {
+            //remove product-qty from warehouse
+            foreach ($data['product_id'] as $key => $id) {
+                if (!empty($id)) {
+                    $product = Product::find($id);
+                    $stock_available = $product->stock_available(); //90
+                    //sum product_qty except current_warehouse
+                    $sum_of_product_qty = ProductWarehouse::where('product_id', $id)->where('warehouse_id', '!=', $data['warehouse_id'])->sum('product_qty'); //20
+                    $productWarehouse = ProductWarehouse::where(['product_id'=>$id, 'warehouse_id'=>$data['warehouse_id']])->first();
+                    $product_qty = $productWarehouse->product_qty; //75
+                    $final_sum = $sum_of_product_qty + $product_qty; //20 + 75 = 95
+                    //aim is to mk sure stock_available = final_sum, then we can update
+                    if ($final_sum > $stock_available) { //95 > 90 
+                        //needs to remove from the selected warehouse, 95 - x = 90
+                        $qty_to_minus = $final_sum - $stock_available;
+                        $product_qty = $productWarehouse->product_qty - $qty_to_minus; //70
+                        $final_sum = $sum_of_product_qty + $product_qty; //90
+                        $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+                    }
+                    if ($final_sum < $stock_available) { //100 < 109 
+                        //needs to add-to from the selected warehouse, 100 + x = 109
+                        $qty_to_minus = $stock_available - $final_sum;
+                        $product_qty = $productWarehouse->product_qty + $qty_to_minus; //80 + 9
+                        $final_sum = $sum_of_product_qty + $product_qty; //20 + (80+9)
+                        $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+                    }
+                    if ($final_sum == $stock_available) {
+                        //needs to add-to from the selected warehouse
+                        $qty_to_minus = $stock_available - $final_sum;
+                        $product_qty = $productWarehouse->product_qty - $data['product_qty'][$key];
+                        $final_sum = $sum_of_product_qty + $product_qty;
+                        $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+                    }
+                    
+                    //$productWarehouse->update(['product_qty'=>$product_qty]);
+                } 
+            }
+            //accepted orderbump
+            if (!empty($data['orderbump_product']) && isset($orderbump_outgoingStock)) {
+                $product = Product::find($data['orderbump_product']);
+                $stock_available = $product->stock_available();
+                //sum product_qty except current_warehouse
+                $sum_of_product_qty = ProductWarehouse::where('product_id', $data['orderbump_product'])->where('warehouse_id', '!=', $data['warehouse_id'])->sum('product_qty');
+                $productWarehouse = ProductWarehouse::where(['product_id'=>$data['orderbump_product'], 'warehouse_id'=>$data['warehouse_id']])->first();
+                $product_qty = $productWarehouse->product_qty - 1;
+                $final_sum = $sum_of_product_qty + $product_qty;
+                $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+            }
+            //rejected orderbump
+            if (empty($data['orderbump_product']) && isset($orderbump_outgoingStock)) {
+                $product = Product::find($orderbump_outgoingStock->product_id);
+                $stock_available = $product->stock_available();
+                //sum product_qty except current_warehouse
+                $sum_of_product_qty = ProductWarehouse::where('product_id', $orderbump_outgoingStock->product_id)->where('warehouse_id', '!=', $data['warehouse_id'])->sum('product_qty');
+                $productWarehouse = ProductWarehouse::where(['product_id'=>$orderbump_outgoingStock->product_id, 'warehouse_id'=>$data['warehouse_id']])->first();
+                $product_qty = $productWarehouse->product_qty + 1;
+                $final_sum = $sum_of_product_qty + $product_qty;
+                $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+            }
+            //accepted upsell
+            if (!empty($data['upsell_product']) && isset($upsell_outgoingStock)) {
+                $product = Product::find($data['upsell_product']);
+                $stock_available = $product->stock_available();
+                //sum product_qty except current_warehouse
+                $sum_of_product_qty = ProductWarehouse::where('product_id', $data['upsell_product'])->where('warehouse_id', '!=', $data['warehouse_id'])->sum('product_qty');
+                $productWarehouse = ProductWarehouse::where(['product_id'=>$data['upsell_product'], 'warehouse_id'=>$data['warehouse_id']])->first();
+                $product_qty = $productWarehouse->product_qty - 1;
+                $final_sum = $sum_of_product_qty + $product_qty;
+                $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+            }
+            //rejected upsell
+            if (empty($data['upsell_product']) && isset($upsell_outgoingStock)) {
+                $product = Product::find($upsell_outgoingStock->product_id);
+                $stock_available = $product->stock_available();
+                //sum product_qty except current_warehouse
+                $sum_of_product_qty = ProductWarehouse::where('product_id', $upsell_outgoingStock->product_id)->where('warehouse_id', '!=', $data['warehouse_id'])->sum('product_qty');
+                $productWarehouse = ProductWarehouse::where(['product_id'=>$upsell_outgoingStock->product_id, 'warehouse_id'=>$data['warehouse_id']])->first();
+                $product_qty = $productWarehouse->product_qty + 1;
+                $final_sum = $sum_of_product_qty + $product_qty;
+                $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+            }
         }
 
         return back()->with('success', 'Order Updated Successfully');

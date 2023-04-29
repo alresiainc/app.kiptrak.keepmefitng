@@ -27,7 +27,7 @@
     <h1>Products</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
         <li class="breadcrumb-item active">Products</li>
       </ol>
     </nav>
@@ -35,7 +35,7 @@
 
   @if(Session::has('success'))
     <div class="alert alert-success mb-3 text-center">
-        {{Session::get('success')}}
+        {{ Session::get('success') }}
     </div>
   @endif
 
@@ -206,7 +206,7 @@
         function( settings, data, dataIndex ) {
             var min = minDate.val();
             var max = maxDate.val();
-            var date = new Date( data[5] ); //5 is the date column on datatable
+            var date = new Date( data[5] ); //5 is the date column on datatable, starting from 0
       
             if (
                 ( min === null && max === null ) ||

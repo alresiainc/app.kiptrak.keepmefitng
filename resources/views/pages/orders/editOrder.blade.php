@@ -47,6 +47,11 @@
         {{Session::get('duplicate_error')}}
     </div>
     @endif
+    @if(Session::has('warehouse_error'))
+    <div class="alert alert-danger mb-3 text-center">
+        {{Session::get('warehouse_error')}}
+    </div>
+    @endif
     
     <section>
       <div class="row">
@@ -141,10 +146,10 @@
                                 </td>
 
                                 <td style='width:150px'><input type='number' name='unit_price[]' class='form-control unit-price'
-                                    value='{{ $package['amount_accrued']}}' readonly>
+                                    value='{{ $package['product']->sale_price}}' readonly>
                                 </td>
 
-                                <td class="total">{{ $package['amount_accrued'] * $package['quantity_removed'] }}</td>
+                                <td class="total">{{ $package['product']->sale_price * $package['quantity_removed'] }}</td>
                                 <td class='btnDelete btn btn-danger btn-sm mt-1 mb-1' style="visibility: hidden;">Remove</td>
                             </tr>
                             @endforeach
@@ -211,23 +216,13 @@
                     <select name="order_status" id="order_status" data-live-search="true" class="custom-select form-control border @error('order_status') is-invalid @enderror" id="">
                       
                       <option value="{{ $order->status }}" selected>
-                        @if ($order->status=='new')
-                            New
-                        @elseif($order->status=='delivered_and_remitted')
-                            Delivered and Remitted
-                        @elseif($order->status=='delivered_not_remitted')
-                            Delivered Not Remitted
-                        @elseif($order->status=='cancelled')
-                            Cancelled
-                        @elseif($order->status=='pending')
-                            Pending
-                        @endif
+                        {{ str_replace('_', ' ', $order->status) }}
                       </option>
                       <option value="delivered_and_remitted">Delivered and Remitted</option>
                       <option value="delivered_not_remitted">Delivered Not Remitted</option>
                       <option value="cancelled">Cancelled</option>
                       <option value="pending">Pending</option>
-                      <option value="new" selected>New</option>
+                      <option value="new">New</option>
             
                     </select>
                     @error('order_status')
@@ -241,7 +236,7 @@
                     <label for="" class="form-label">Warehouse | Optional</label>
                     <select name="warehouse_id" id="warehouse_id" data-live-search="true" class="custom-select form-control border @error('warehouse_id') is-invalid @enderror" id="">
                       
-                      <option value="{{ isset($order->warehouse_id) ? $order->warehouse->name : '' }}">
+                      <option value="{{ isset($order->warehouse_id) ? $order->warehouse_id : '' }}">
                         {{ isset($order->warehouse_id) ? $order->warehouse->name : 'Nothing Selected' }}
                       </option>
                       @foreach ($warehouses as $warehouse)

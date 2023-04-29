@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\WareHouse;
 use App\Models\User;
 use App\Models\Country;
+use App\Models\OutgoingStock;
+use App\Models\Order;
 
 class WareHouseController extends Controller
 {
@@ -80,7 +82,45 @@ class WareHouseController extends Controller
             }
         }
 
-        return view('pages.warehouses.singleWarehouse', compact('authUser', 'user_role', 'warehouse'));
+        //warehouse orders
+        $orders = $warehouse->orders()->where('status', 'delivered_and_remitted')->get(); $outgoingStocks = '';
+        if (count($orders) > 0) {
+            $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->where('customer_acceptance_status', 'accepted')->orderBy('id', 'DESC');
+    
+            if (count($outgoingStocks->get()) > 0) {
+                $packages = []; $products = []; $gross_revenue = 0; $currency = ''; $warehouseOrders = []; $total_revenue = $outgoingStocks->sum('amount_accrued');
+                foreach ($orders as $key => $order) {
+                    $outgoingStock = $order->outgoingStocks()->where('customer_acceptance_status', 'accepted')->orderBy('id', 'DESC');
+                    if (count($outgoingStock->get()) > 0) {
+                        $warehouseOrders['warehouseOrder'] = 
+                        [
+                            'order'=>$order,
+                            'outgoingStock'=>$outgoingStock->get(),
+                            'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+                }
+
+                // foreach ($packages as $key => $value) {
+                //     return $value['warehouseOrder']['orderCode'];
+                // }
+                
+                // foreach ($outgoingStocks as $key => $product) {
+                //     $products['product'] = $product->product;
+                //     $products['quantity_removed'] = $product->quantity_removed;
+                //     $products['revenue'] =  $product->amount_accrued;
+                //     $gross_revenue += $product->amount_accrued;
+                //     $currency = $product->product->country->symbol;
+                //     $products['order'] = $product->order;
+        
+                //     $packages[] = $products;
+                // }
+                return view('pages.warehouses.singleWarehouse', compact('authUser', 'user_role', 'warehouse', 'orders', 'outgoingStocks', 'packages', 'gross_revenue', 'currency', 'total_revenue'));
+            }
+        } 
+        
+        return view('pages.warehouses.singleWarehouse', compact('authUser', 'user_role', 'warehouse', 'orders', 'outgoingStocks'));
     }
 
     /**

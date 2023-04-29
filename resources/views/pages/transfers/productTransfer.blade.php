@@ -36,9 +36,9 @@
     <h1>Products Transfer from '{{ $from_warehouse->name }}' to '{{ $to_warehouse->name }}'</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-        <li class="breadcrumb-item active" data-bs-toggle="modal" data-bs-target="#productTransfer" style="cursor: pointer;">Products Transfer</li>
-        
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active" data-bs-toggle="modal" data-bs-target="#productTransfer" style="cursor: pointer;">Create Products Transfer</li>
+        <li class="breadcrumb-item"><a href="{{ route('allProductTransfers') }}">Products Transfer List</a></li>
       </ol>
     </nav>
   </div><!-- End Page Title -->

@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use App\Models\WareHouse;
 use App\Models\ProductWarehouse;
+use App\Models\ProductTransfer;
+use App\Models\Product;
 
 class ProductTransferController extends Controller
 {
@@ -87,6 +89,7 @@ class ProductTransferController extends Controller
             }
         }
 
+        $product_qty_transferred = [];
         foreach ($data['product_id'] as $key => $id) {
             if ( (!empty($data['product_qty'][$key])) && ($data['product_qty'][$key] != 0) ) {
                 //update 'from-warehouse', cos it always exists
@@ -102,20 +105,38 @@ class ProductTransferController extends Controller
                 $product_warehouse->warehouse_id = $to_warehouse->id;
                 $product_warehouse->save();
                }
+
+               //record transfer activity
+               $concat_elts = $id.'-'.$data['product_qty'][$key];
+               array_push($product_qty_transferred, $concat_elts);
             }  
         }
+        if (count($product_qty_transferred) > 0) {
+            $transfer = new ProductTransfer();
+            $transfer->from_warehouse_id = $from_warehouse->id;
+            $transfer->to_warehouse_id = $to_warehouse->id;
+            $transfer->product_qty_transferred = serialize($product_qty_transferred);
+            $transfer->created_by = $authUser->id;
+            $transfer->save();
+        }
+        
         return back()->with('success', 'Products Transferred Successfully'); 
     }
 
     /**
-     * Display the specified resource.
+     * All Product Transfers.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function allProductTransfers()
     {
-        //
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        $transfers = ProductTransfer::all();
+        $warehouses = WareHouse::all();
+
+        return view('pages.transfers.allProductTransfers', compact('authUser', 'user_role', 'transfers', 'warehouses'));
     }
 
     /**

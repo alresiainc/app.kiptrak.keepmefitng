@@ -52,6 +52,11 @@ class WareHouse extends Model
         return $this->belongsToMany(Product::class, 'product_warehouses', 'warehouse_id', 'product_id');    
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'warehouse_id');  
+    }
+
     public function productQtyInWarehouse($product_id)
     {
        $product = ProductWarehouse::where(['warehouse_id'=>$this->id, 'product_id'=>$product_id])->first();
