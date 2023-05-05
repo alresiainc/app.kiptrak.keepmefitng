@@ -476,6 +476,20 @@ class OrderController extends Controller
 
     }
 
+    //deleteOrder
+    public function deleteOrder($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $order = Order::where('unique_key', $unique_key)->first();
+        if (!isset($order)) {
+            abort(404);
+        }
+        $order->delete();
+        return back()->with('success', 'Order Deleted Successfullly');
+    }
+
     public function assignAgentToOrder(Request $request)
     {
         $authUser = auth()->user();

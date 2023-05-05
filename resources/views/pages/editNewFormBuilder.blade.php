@@ -83,14 +83,14 @@
             {{Session::get('field_error')}}
         </div>
     @endif
-
+        
     <section class="mt-5">
         <div class="container" id="form-field">
             <form id="form-data" action="{{ route('editNewFormBuilderPost', $formHolder->unique_key) }}" method="POST">@csrf
                 <div class="row">
                     <div class="col-md-12">
                         <div class="p-1">
-                            <h5 title="Unique Form Code" class="text-center">Form Code: {{ $form_code }}</h5>
+                            <h5 title="Unique Form Code" class="text-center">Form Codes: {{ $form_code }}</h5>
                             <input type="hidden" name="form_code" value="{{ $form_code }}">
                             <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" id="" placeholder="Enter Form Name" value="{{ $formHolder->name }}">
                             @error('name')
@@ -102,12 +102,52 @@
                             {{-- <h3 contenteditable="true" title="Enter Title" class="text-center" id="form-title">Enter Title Here</h3> --}}
                             {{-- <hr class="border-primary"> --}}
                             {{-- <p contenteditable="true"  id="form-description" title="Enter Description" class="form-description text-center">Enter Description Here</p> --}}
+                            
+                            <div class="mt-3 d-flex align-items-center justify-content-between">
+                                @if ( (isset($formHolder->orderbump_id)) )
+                                <div class="orderbump border rounded p-1">
+                                    <div>OrderBump Status</div>
+                                    <div class="d-flex align-items-center" style="gap: 20px;">
+                                        <div class='category'>
+                                          <input type="radio" name="switch_orderbump" value="on" id="on" checked />
+                                          <label for="on" class="ml-1">On</label>
+                                        </div>
+                                          
+                                        <div class='category'>
+                                            <input type="radio" name="switch_orderbump" value="off" id="off" />
+                                          <label for="off">Off</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+
+                                @if ( (isset($formHolder->upsell_id)) )
+                                <div class="upsell border rounded p-1">
+                                    <div>Upsell Status</div>
+                                    <div class="d-flex align-items-center" style="gap: 20px;">
+                                        <div class='category'>
+                                          <input type="radio" name="switch_upsell" value="on" id="on" checked />
+                                          <label for="on" class="ml-1">On</label>
+                                        </div>
+                                          
+                                        <div class='category'>
+                                            <input type="radio" name="switch_upsell" value="off" id="off" />
+                                          <label for="off">Off</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            
+                            
                         </div>
+
+                        
                         
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row mt-3">
                     <div class="col-md-12">
                         <h5>Form Fields</h5>
                     </div>

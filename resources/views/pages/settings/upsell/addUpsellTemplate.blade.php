@@ -234,7 +234,8 @@
 
                 <div class="col-md-12">
                     <label for="" class="form-label">Subheading Text</label>
-                    <input type="text" name="subheading_text" class="form-control @error('subheading_text') is-invalid @enderror" value="We're giving this at a giveaway price" >
+                    <input type="text" name="subheading_text2" class="form-control d-none @error('subheading_text') is-invalid @enderror" value="We're giving this at a giveaway price">
+                    <textarea name="subheading_text" id="" cols="30" rows="5" class="tinymce-editor form-control @error('subheading_text') is-invalid @enderror">We're giving this at a giveaway price</textarea>
                     @error('subheading_text')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>

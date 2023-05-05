@@ -305,9 +305,10 @@
                         <div class="mb-1"><a class="btn btn-success btn-sm" href="{{ route('singleOrder', $order->unique_key) }}">View</a></div>
                         
                         @if (isset($order->customer_id))
-                          <div><a href="{{ route('editOrder', $order->unique_key) }}" class="btn-info btn-sm w-100 p-1">Edit</a></div>
+                          <div class="mb-1"><a href="{{ route('editOrder', $order->unique_key) }}" class="btn-info btn-sm w-100 p-1">Edit</a></div>
                         @endif
-  
+                        <div><a href="{{ route('deleteOrder', $order->unique_key) }}" onclick="return confirm('Are you sure?')" class="btn-danger btn-sm w-100 p-1">Delete</a></div>
+
                       </td>
                     </tr>
                   @endforeach

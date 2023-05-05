@@ -64,7 +64,7 @@
                     
                             <td>{{ $template->template_code }}</td>
                             <td>{{ $template->heading_text}}</td>
-                            <td>{{ $template->subheading_text}}</td>
+                            <td>{!! $template->subheading_text !!}</td>
                             <td>{{ $template->created_at }}</td>
         
                             <td>

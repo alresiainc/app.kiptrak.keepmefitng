@@ -13,6 +13,20 @@
       div.filter-option-inner-inner{
           color: #000 !important;
       }
+      .tox .tox-promotion {
+        background: repeating-linear-gradient(transparent 0 1px,transparent 1px 39px) center top 39px/100% calc(100% - 39px) no-repeat;
+        background-color: #fff;
+        grid-column: 2;
+        grid-row: 1;
+        padding-inline-end: 8px;
+        padding-inline-start: 4px;
+        padding-top: 5px;
+        display: none;
+      }
+      .tox:not([dir=rtl]) .tox-statusbar__branding {
+        margin-left: 2ch;
+        display: none;
+      }
     </style>
 @endsection
 
@@ -136,7 +150,7 @@
                             alt="{{$formHolder->orderbump->product->name}}" style="height: 30px;"></a>
     
                             <br>
-                            <span class="badge badge-info" onclick="editOrderbump({{ json_encode($formHolder) }})" style="cursor: pointer;">
+                            <span class="badge badge-info" onclick="editOrderbump({{ json_encode($formHolder) }}, '{!! $formHolder->orderbump->orderbump_subheading !!}')" style="cursor: pointer;">
                               <i class="bi bi-pencil"></i> Edit</span>
     
                             <!-- Edit Ordernump-Modal Orderbump -->
@@ -181,8 +195,9 @@
                           class="img-thumbnail img-fluid"
                           alt="{{$formHolder->upsell->product->name}}" style="height: 30px;"></a>
                           <br>
-
-                          <span class="badge badge-info" onclick="editUpsell({{ json_encode($formHolder) }})" style="cursor: pointer;">
+                          
+                          <span class="badge badge-info" onclick="editUpsell({{ json_encode($formHolder) }}, '{{ htmlspecialchars($formHolder->upsell->upsell_subheading) }}')"
+                              style="cursor: pointer;">
                             <i class="bi bi-pencil"></i> Edit</span>
 
                             <!-- Edit Upsell-Modal -->
@@ -257,7 +272,8 @@
 
                           <a href="{{ route('newFormLink', $formHolder->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
                           <a href="{{ route('editForm', $formHolder->unique_key) }}" class="btn btn-success btn-sm me-2 d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                          <a class="btn btn-danger btn-sm d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
+      
+                          <a href="{{ route('deleteForm', $formHolder->unique_key) }}" onclick="return confirm('Are you sure?')" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
                         </div>
                       </td>
                     </tr>
@@ -299,7 +315,8 @@
 
           <div class="mt-3">
             <label for="" class="form-label">Sub Heading | Optional</label>
-            <input type="text" id="orderbump_subheading" name="orderbump_subheading"  class="form-control" value="">
+            <input type="text" id="orderbump_subheading2" name="orderbump_subheading"  class="form-control d-none" value="">
+            <textarea name="orderbump_subheading" id="" cols="30" rows="5" class="mytextarea form-control"></textarea>
           </div>
 
           <div class="mt-3">
@@ -370,14 +387,15 @@
 
           <div class="mt-3">
             <label for="" class="form-label">Sub Heading | Optional</label>
-            <input type="text" name="orderbump_subheading" id="editOrderbump_subheading"  class="form-control" value="">
+            <input type="text" name="orderbump_subheading2" id=""  class="form-control d-none" value="">
+            <textarea name="orderbump_subheading" id="editOrderbump_subheading" cols="30" rows="5" class="mytextarea form-control"></textarea>
           </div>
 
           <div class="mt-3">
             <label for="orderbump_product" class="form-label">Select Product Package</label>
             <select name="orderbump_product" data-live-search="true" class="custom-select form-control border btn-dark @error('orderbump_product') is-invalid @enderror"
               id="" style="color: black !important;">
-              <option value="{{ isset($formHolder->orderbump_id) ?? $formHolder->orderbump->product->id }}">{{ isset($formHolder->orderbump_id) ?? $formHolder->orderbump->product->name }}</option>
+              <option value="{{ isset($formHolder->orderbump_id) ? $formHolder->orderbump->product->id : '' }}" selected>{{ isset($formHolder->orderbump_id) ? $formHolder->orderbump->product->name : 'Nothing Selected' }}</option>
               @if (count($products) > 0)
 
                 @foreach ($products as $product)
@@ -395,15 +413,20 @@
             @enderror
           </div>
 
-          <div class="mt-3 d-none">
-            <label for="" class="form-label">Discount Type</label>
-            <select name="ordernump_discount_type" class="custom-select form-control border btn-dark">
-              <option value="">Nothing Selected</option>
-              <option value="fixed">Fixed</option>
-              <option value="percentage">Percentage</option>
-            </select>
+          @if (isset($formHolder->orderbump_id))
+          <div class="mt-3 d-flex align-items-center" style="gap: 20px;">
+            <div class='category'>
+              <input type="radio" name="switch_orderbump" value="on" id="on" checked />
+              <label for="on" class="ml-1">On</label>
+            </div>
+              
+            <div class='category'>
+                <input type="radio" name="switch_orderbump" value="off" id="off" />
+              <label for="off">Off</label>
+            </div>
           </div>
-
+          @endif
+          
           <div class="mt-3 d-none">
             <label for="" class="form-label">Discount Amount</label>
             <input type="text" name="orderbump_discount" class="form-control" value="">
@@ -435,15 +458,15 @@
 
           <input type="hidden" name="addUpsell_form_unique_key" id="addUpsell_form_unique_key" class="addUpsell_form_unique_key" value="">
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Heading | Optional</label>
             <textarea name="upsell_heading" class="form-control" id="upsell_heading" cols="30" rows="3"></textarea>
             
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Sub Heading | Optional</label>
-            <textarea name="upsell_subheading" class="form-control" id="upsell_subheading" cols="30" rows="3"></textarea>
+            <textarea name="upsell_subheading" id="" cols="30" rows="5" class="mytextarea form-control"></textarea>
           </div>
           
           <div class="mt-3">
@@ -528,21 +551,21 @@
 
         <div class="modal-body">
           <input type="hidden" id="editUpsell_form_unique_key" name="editUpsell_form_unique_key">
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Heading</label>
             <input type="text" name="upsell_heading" id="editUpsell_heading"  class="form-control" value="">
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Sub Heading</label>
-            <input type="text" name="upsell_subheading" id="editUpsell_subheading"  class="form-control" value="">
+            <textarea name="upsell_subheading" id="editUpsell_subheading" cols="30" rows="5" class="mytextarea form-control"></textarea>
           </div>
 
           <div class="mt-3">
             <label for="upsell_product" class="form-label">Select Template</label>
             <select name="upsell_setting_id" id="upsell_setting_id" data-live-search="true" class="custom-select form-control border btn-dark @error('upsell_product') is-invalid @enderror"
                       id="" style="color: black !important;">
-              <option value="{{ isset($formHolder->upsell_id) ?? $formHolder->upsell->template->id }}">{{ isset($formHolder->upsell_id) ?? $formHolder->upsell->template->template_code }}</option>
+              <option value="{{ isset($formHolder->upsell_id) ? $formHolder->upsell->template->id : '' }}">{{ isset($formHolder->upsell_id) ? $formHolder->upsell->template->template_code : 'Nothing Selected' }}</option>
               @if (count($upsellTemplates) > 0)
 
                 @foreach ($upsellTemplates as $template)
@@ -564,7 +587,7 @@
             <label for="upsell_product" class="form-label">Select Product Package</label>
             <select name="upsell_product" data-live-search="true" class="custom-select form-control border btn-dark @error('upsell_product') is-invalid @enderror"
               id="" style="color: black !important;">
-              <option value="{{ isset($formHolder->upsell_id) ?? $formHolder->upsell->product->id }}">{{ isset($formHolder->upsell_id) ?? $formHolder->upsell->product->name }}</option>
+              <option value="{{ isset($formHolder->upsell_id) ? $formHolder->upsell->product->id : '' }}" selected>{{ isset($formHolder->upsell_id) ? $formHolder->upsell->product->name : 'Nothing Selected' }}</option>
               @if (count($products) > 0)
 
                 @foreach ($products as $product)
@@ -582,7 +605,7 @@
             @enderror
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Discount Type</label>
             <select name="ordernump_discount_type" class="custom-select form-control border btn-dark">
               <option value="">Nothing Selected</option>
@@ -591,10 +614,24 @@
             </select>
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Discount Amount</label>
             <input type="text" name="orderbump_discount" class="form-control" value="">
           </div>
+
+          @if (isset($formHolder->upsell_id))
+          <div class="mt-3 d-flex align-items-center" style="gap: 20px;">
+            <div class='category'>
+              <input type="radio" name="switch_upsell" value="on" id="on" checked />
+              <label for="on" class="ml-1">On</label>
+            </div>
+              
+            <div class='category'>
+                <input type="radio" name="switch_upsell" value="off" id="off" />
+              <label for="off">Off</label>
+            </div>
+          </div>
+          @endif
 
         </div>
         
@@ -749,12 +786,13 @@
     $('#form_unique_key').val($form_unique_key);
     $('#addOrderbumpTitle').text('Add Order-Bump to this Form: '+$form_name);
   }
-  function editOrderbump($formHolder="") {
+  function editOrderbump($formHolder="", $orderbump_subheading="") {
     $('#editOrderbumpModal').modal("show");
     $('#editOrderbump_form_unique_key').val($formHolder.unique_key);
     $('#editOrderbump_topic').text('Edit Order-Bump to this Form: '+$formHolder.name);
     $('#editOrderbump_heading').val($formHolder.orderbump.orderbump_heading);
-    $('#editOrderbump_subheading').val($formHolder.orderbump.orderbump_subheading);
+    //$('#editOrderbump_subheading').val('lorem');
+    tinyMCE.get('editOrderbump_subheading').setContent($orderbump_subheading);
 
     var datas = {
         id: $formHolder.orderbump.product.id,
@@ -766,17 +804,20 @@
     //$("orderbump_product").val($formHolder.orderbump.product.id).change();
   }
 
+  //upsell side
   function addUpsell($form_unique_key="", $form_name="") {
     $('#addUpsell').modal("show");
     $('#addUpsell_form_unique_key').val($form_unique_key);
     $('#addUpsellTitle').text('Add Up-Sell to this Form: '+$form_name);
   }
-  function editUpsell($formHolder="") {
+  function editUpsell($formHolder="", $upsell_subheading="") {
     $('#editUpsellModal').modal("show");
     $('#editUpsell_form_unique_key').val($formHolder.unique_key);
     $('#editUpsell_topic').text('Edit Up-Sell to this Form: '+$formHolder.name);
-    $('#editUpsell_heading').val($formHolder.upsell.upsell_heading);
-    $('#editUpsell_subheading').val($formHolder.upsell.upsell_subheading);
+    
+    //$('#editUpsell_heading').val($formHolder.upsell.upsell_heading);
+    //$('#editUpsell_subheading').val($formHolder.upsell.upsell_subheading);
+    //tinyMCE.get('editUpsell_subheading').setContent($upsell_subheading);
 
     var datas = {
         id: $formHolder.upsell.product.id,
@@ -806,6 +847,13 @@
     $('#changeAgentModal').modal("show");
     $('.form_id').val($formId);
   }
+</script>
+
+<script>
+  tinymce.init({
+    selector: '.mytextarea',
+    height: "200",
+  });
 </script>
 
 {{-- @if ($errors->has('orderbump_product')) --}}

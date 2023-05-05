@@ -244,7 +244,8 @@
                                             <div class="d-flex justify-content-center">
                                                 <div class="content text-center p-3" style="border: 3px dashed black; background-color: #D2FFE8;">
                                                     <h3 class="heading">{{ $formHolder->orderbump->orderbump_heading }}</h3>
-                                                    <h4 class="subheading" style="color: #012970;">{{ $formHolder->orderbump->orderbump_subheading }}</h4>
+                                                    <h4 class="subheading d-none" style="color: #012970;">{{ $formHolder->orderbump->orderbump_subheading }}</h4>
+                                                    <h4 class="subheading">{!! $formHolder->orderbump->orderbump_subheading !!}</h4>
                                                     {{-- <p class="product-feature">Melts Away Fats In 2 Days!</p> --}}
     
                                                     <div class="orderbump-product-image mb-3">
@@ -342,7 +343,7 @@
                                                     style="color: {{ $formHolder->upsell->template->heading_text_color }};">{{ $formHolder->upsell->upsell_heading }}</h3>
                                                     
                                                     <h4 class="subheading text-{{ $formHolder->upsell->template->subheading_text_align }} fst-{{ $formHolder->upsell->template->subheading_text_style }}"
-                                                    style="color: {{ $formHolder->upsell->template->subheading_text_color }};">{{ $formHolder->upsell->upsell_subheading }}</h4>
+                                                    style="color: {{ $formHolder->upsell->template->subheading_text_color }};">{!! $formHolder->upsell->template->subheading_text !!}</h4>
                                                     
                                                     @if (isset($formHolder->upsell->template->description_text))
                                                     

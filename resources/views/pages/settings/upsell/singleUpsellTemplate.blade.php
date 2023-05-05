@@ -60,7 +60,7 @@
                                         style="color: {{ $upsellTemplate->heading_text_color }};">{{ $upsellTemplate->heading_text }}</p>
 
                                         <p class="subheading text-{{ $upsellTemplate->subheading_text_align }} fst-{{ $upsellTemplate->subheading_text_style }} fw-{{$upsellTemplate->subheading_text_weight}} fs-{{$upsellTemplate->subheading_text_size}}"
-                                        style="color: {{ $upsellTemplate->subheading_text_color }};">{{ $upsellTemplate->subheading_text }}</p>
+                                        style="color: {{ $upsellTemplate->subheading_text_color }};">{!! $upsellTemplate->subheading_text !!}</p>
                                         
                                         @if (isset($upsellTemplate->description_text))
                                         <p class="description text-{{$upsellTemplate->description_text_align}} fst-{{ $upsellTemplate->description_text_style }} fw-{{$upsellTemplate->description_text_weight}} fs-{{$upsellTemplate->description_text_size}}"
