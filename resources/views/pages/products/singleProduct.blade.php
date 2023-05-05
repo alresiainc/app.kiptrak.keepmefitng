@@ -43,11 +43,24 @@
                     <h5>{{ $currency_symbol }}{{ $product->price }}</h5>
 
                     @if ($stock_available > 0)
-                      <div class="d-flex justify-content-start">
-                        <small class="text-success me-2">(In-Stock)</small><small>Lagos Warehouse</small>
+                      <div class="row">
+                        
+                        @foreach ($warehouses as $warehouse)
+                            @if ($warehouse->productQtyInWarehouse($product->id) > 0 )
+                              <div class="col-md-4 border">
+                                @if ($warehouse->productQtyInWarehouse($product->id) > 10)
+                                  <small class="text-success">(In-Stock)</small>
+                                @else
+                                  <small class="text-success">(Out-Of-Stock) </small>
+                                @endif
+                                <small>{{ $warehouse->name }} : {{ $warehouse->productQtyInWarehouse($product->id) }}</small>
+                              </div>
+                              
+                            @endif
+                        @endforeach
                       </div>
                     @else
-                      <small class="text-danger">(Out-Of-Stock) | Lagos Warehouse</small>
+                      <small class="text-danger">(Out-Of-Stock) | Warehouses: </small>
                     @endif
                     
                   </div>

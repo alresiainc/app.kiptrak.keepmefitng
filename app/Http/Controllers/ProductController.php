@@ -180,8 +180,11 @@ class ProductController extends Controller
 
         //stock_available
         $stock_available = $product->stock_available();
+
+        $warehouses = $product->warehouses;
         
-        return view('pages.products.singleProduct', compact('authUser', 'user_role', 'product', 'currency_symbol', 'features', 'stock_available'));
+        
+        return view('pages.products.singleProduct', compact('authUser', 'user_role', 'product', 'currency_symbol', 'features', 'stock_available', 'warehouses'));
     }
 
     //editProduct
