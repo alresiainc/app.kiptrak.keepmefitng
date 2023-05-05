@@ -413,7 +413,6 @@
             @enderror
           </div>
 
-          @if (isset($formHolder->orderbump_id))
           <div class="mt-3 d-flex align-items-center" style="gap: 20px;">
             <div class='category'>
               <input type="radio" name="switch_orderbump" value="on" id="on" checked />
@@ -425,7 +424,6 @@
               <label for="off">Off</label>
             </div>
           </div>
-          @endif
           
           <div class="mt-3 d-none">
             <label for="" class="form-label">Discount Amount</label>

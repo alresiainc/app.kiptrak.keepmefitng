@@ -15,7 +15,6 @@ use App\Models\Expense;
 
 class PurchaseController extends Controller
 {
-    
     public function allPurchase()
     {
         $authUser = auth()->user();
@@ -27,7 +26,6 @@ class PurchaseController extends Controller
         return view('pages.purchases.allPurchase', compact('authUser', 'user_role', 'purchases'));
     }
 
-    
     public function addPurchase()
     {
         $authUser = auth()->user();
@@ -333,6 +331,21 @@ class PurchaseController extends Controller
         }
 
         return back()->with('success', 'Purchase Updated Successfully');
+    }
+
+    public function deletePurchase($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $purchase = Purchase::where('unique_key', $unique_key);
+        if(!$purchase->exists()){
+            abort(404);
+        }
+        $purchase = $purchase->first();
+        $purchase->delete();
+
+        return back()->with('success', 'Purchase Removed Successfully');
     }
 
     /**

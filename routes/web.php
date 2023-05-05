@@ -291,6 +291,7 @@ Route::post('/create-purchase', [PurchaseController::class, 'addPurchasePost'])-
 Route::get('/view-purchase/{unique_key}', [PurchaseController::class, 'singlePurchase'])->name('singlePurchase');
 Route::get('/edit-purchase/{unique_key}', [PurchaseController::class, 'editPurchase'])->name('editPurchase');
 Route::post('/edit-purchase/{unique_key}', [PurchaseController::class, 'editPurchasePost'])->name('editPurchasePost');
+Route::get('/delete-purchase/{unique_key}', [PurchaseController::class, 'deletePurchase'])->name('deletePurchase');
 
 //inventory management
 Route::get('/inventory-dashboard', [InventoryController::class, 'inventoryDashboard'])->name('inventoryDashboard'); //inventoryDashboard

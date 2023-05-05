@@ -474,6 +474,12 @@ class ProductController extends Controller
             Storage::disk('public')->delete('products/'.$oldImage);
         }
 
+        $product->purchases()->delete();
+        $product->sales()->delete();
+        $product->incomingStocks()->delete();
+        $product->outgoingStocks()->delete();
+        ProductWarehouse::where('product_id',$product->id)->delete();
+
         $product->delete();
 
         return back()->with('success', 'Product Removed Successfully');
