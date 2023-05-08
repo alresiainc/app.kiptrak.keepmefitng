@@ -138,7 +138,7 @@
                       
                         <!--orderbump-section-->
                         @if (!isset($formHolder->order->customer_id))
-                          @if (isset($formHolder->orderbump_id))
+                          @if (isset($formHolder->orderbump_id) && isset($formHolder->orderbump->product->id))
                           <td>
                             <a
                             href="{{ asset('/storage/products/'.$formHolder->orderbump->product->image) }}"
@@ -150,7 +150,7 @@
                             alt="{{$formHolder->orderbump->product->name}}" style="height: 30px;"></a>
     
                             <br>
-                            <span class="badge badge-info" onclick="editOrderbump({{ json_encode($formHolder) }}, '{!! $formHolder->orderbump->orderbump_subheading !!}')" style="cursor: pointer;">
+                            <span class="badge badge-info" onclick="editOrderbump({{ json_encode($formHolder) }}, '{!! $formHolder->orderbump->orderbump_heading !!}')" style="cursor: pointer;">
                               <i class="bi bi-pencil"></i> Edit</span>
     
                             <!-- Edit Ordernump-Modal Orderbump -->
@@ -164,7 +164,7 @@
                           @endif
                         @else
                           <td>
-                            @if (isset($formHolder->orderbump_id))
+                            @if (isset($formHolder->orderbump_id) && isset($formHolder->orderbump->product->id))
                             <a
                               href="{{ asset('/storage/products/'.$formHolder->orderbump->product->image) }}"
                               data-fancybox="gallery"
@@ -184,7 +184,7 @@
                       
                         <!--upsell-section-->
                       @if (!isset($formHolder->order->customer_id))
-                        @if (isset($formHolder->upsell_id))
+                        @if (isset($formHolder->upsell_id)  && isset($formHolder->upsell->product->id))
                         <td>
                           <a
                           href="{{ asset('/storage/products/'.$formHolder->upsell->product->image) }}"
@@ -210,7 +210,7 @@
                         @endif
                       @else
                         <td>
-                          @if (isset($formHolder->upsell_id))
+                          @if (isset($formHolder->upsell_id) && isset($formHolder->upsell->product->id))
                           <a
                             href="{{ asset('/storage/products/'.$formHolder->upsell->product->image) }}"
                             data-fancybox="gallery"
@@ -395,7 +395,9 @@
             <label for="orderbump_product" class="form-label">Select Product Package</label>
             <select name="orderbump_product" data-live-search="true" class="custom-select form-control border btn-dark @error('orderbump_product') is-invalid @enderror"
               id="" style="color: black !important;">
-              <option value="{{ isset($formHolder->orderbump_id) ? $formHolder->orderbump->product->id : '' }}" selected>{{ isset($formHolder->orderbump_id) ? $formHolder->orderbump->product->name : 'Nothing Selected' }}</option>
+              @if(isset($formHolder->orderbump_id) && isset($formHolder->orderbump->product->id))
+                <option value="{{ $formHolder->orderbump->product->id }}">{{ $formHolder->orderbump->product->name }}</option>
+              @endif
               @if (count($products) > 0)
 
                 @foreach ($products as $product)
@@ -563,7 +565,11 @@
             <label for="upsell_product" class="form-label">Select Template</label>
             <select name="upsell_setting_id" id="upsell_setting_id" data-live-search="true" class="custom-select form-control border btn-dark @error('upsell_product') is-invalid @enderror"
                       id="" style="color: black !important;">
-              <option value="{{ isset($formHolder->upsell_id) ? $formHolder->upsell->template->id : '' }}">{{ isset($formHolder->upsell_id) ? $formHolder->upsell->template->template_code : 'Nothing Selected' }}</option>
+              
+              @if(isset($formHolder->upsell_id) && isset($formHolder->upsell->template->id))
+                <option value="{{ $formHolder->upsell->template->id }}">{{ $formHolder->upsell->template->template_code }}</option>
+              @endif
+              
               @if (count($upsellTemplates) > 0)
 
                 @foreach ($upsellTemplates as $template)
@@ -585,7 +591,11 @@
             <label for="upsell_product" class="form-label">Select Product Package</label>
             <select name="upsell_product" data-live-search="true" class="custom-select form-control border btn-dark @error('upsell_product') is-invalid @enderror"
               id="" style="color: black !important;">
-              <option value="{{ isset($formHolder->upsell_id) ? $formHolder->upsell->product->id : '' }}" selected>{{ isset($formHolder->upsell_id) ? $formHolder->upsell->product->name : 'Nothing Selected' }}</option>
+              
+              @if(isset($formHolder->upsell_id) && isset($formHolder->upsell->product->id))
+                <option value="{{ $formHolder->upsell->product->id }}">{{ $formHolder->upsell->product->name }}</option>
+              @endif
+              
               @if (count($products) > 0)
 
                 @foreach ($products as $product)

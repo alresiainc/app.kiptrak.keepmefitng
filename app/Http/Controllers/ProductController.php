@@ -183,7 +183,6 @@ class ProductController extends Controller
 
         $warehouses = $product->warehouses;
         
-        
         return view('pages.products.singleProduct', compact('authUser', 'user_role', 'product', 'currency_symbol', 'features', 'stock_available', 'warehouses'));
     }
 

@@ -18,9 +18,9 @@ return new class extends Migration
 
             $table->longText('unique_key')->nullable();
             
-            $table->string('orderbump_heading')->nullable();
-            $table->string('orderbump_subheading')->nullable();
-            $table->string('orderbump_description')->nullable();
+            $table->longText('orderbump_heading')->nullable();
+            $table->longText('orderbump_subheading')->nullable();
+            $table->longText('orderbump_description')->nullable();
             
             $table->string('order_id')->nullable();
             
