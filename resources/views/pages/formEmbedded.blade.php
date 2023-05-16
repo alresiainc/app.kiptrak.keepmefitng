@@ -24,12 +24,10 @@
         <link href="{{asset('/customerform/assets/vendor/bootstrap-icons/bootstrap-icons.css')}}" rel="stylesheet">
         <!-- Latest compiled and minified CSS -->
         
-    
         <!-- Font awesome 5 -->
         <link rel="preload" href="{{asset('/customerform/assets/vendor/font-awesome/webfonts/fa-solid-900.woff2')}}" as="font" type="font/woff" crossorigin>
         <link href="{{asset('/customerform/assets/vendor/font-awesome/css/all.min.css')}}" type="text/css" rel="stylesheet">
 
-        
         <!-- upsell->Template Main CSS File -->
         <link href="{{asset('/customerform/assets/css/ui.css')}}" rel="stylesheet">
         <link href="{{asset('/customerform/assets/css/form-style.css')}}" rel="stylesheet">
@@ -68,7 +66,7 @@
     <!-- will be shown in singlelink-->
     <header id="header" class="header fixed-top d-flex align-items-center">
         <div class="d-flex align-items-center justify-content-between">
-          <a href="/" class="logo d-flex align-items-center">
+          <a href="javascript:void(0);" class="logo d-flex align-items-center">
             <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="width: 30%; !important" class="d-none">
             <span class="d-none d-lg-block project-namek"></span>
           </a>
@@ -111,11 +109,11 @@
                             {{-- <form action="{{ route('newFormLinkPost', $unique_key) }}" method="POST">@csrf --}}
                             <form action="">@csrf
                                 
-                                <div class="row">
+                                <div class="row d-flex justify-content-between">
                                     
                                     @foreach ($formContact as $contact)
                                     @if (($contact['form_name']) != 'product-package')
-                                    <div class="col-lg-6 mb-3 contact-parent">
+                                    <div class="col-lg-6 mb-3 contact-parent w-50">
                                         <label class="form-label">{{ $contact['form_label'] }}</label>
 
                                         @if($contact['form_type'] == 'text_field')
@@ -222,8 +220,10 @@
                                             <div class="d-flex justify-content-center">
                                                 <div class="content text-center p-3" style="border: 3px dashed black; background-color: #D2FFE8;">
                                                     <h3 class="heading">{{ $formHolder->orderbump->orderbump_heading }}</h3>
-                                                    <h4 class="subheading" style="color: #04512d;">{{ $formHolder->orderbump->orderbump_subheading }}</h4>
-                                                    {{-- <p class="product-feature">Melts Away Fats In 2 Days!</p> --}}
+
+                                                    @foreach ($formHolder->orderbump->orderbump_subheading as $subheading)
+                                                    <h5 class="subheading">{{ $subheading }}</h5>
+                                                    @endforeach
     
                                                     <div class="orderbump-product-image mb-3">
                                                         <img src="{{ asset('/storage/products/'.$formHolder->orderbump->product->image) }}" class="w-100 img-thumbnail img-fluid"
@@ -231,7 +231,7 @@
                                                     </div>
     
                                                     <p class="discount-info">
-                                                        Kindly click the box below to add this to your order now for just xxxx instead of paying normal price of yyyy!
+                                                        Kindly click the box below to add this to your order now for just {{ $formHolder->orderbump->product->sale_price }} instead of paying normal price of {{ $formHolder->orderbump->product_assumed_selling_price }}!
                                                     </p>
     
                                                     <p class="more-info">
@@ -319,8 +319,10 @@
                                                     <h3 class="heading text-{{ $formHolder->upsell->template->heading_text_align }} fst-{{ $formHolder->upsell->template->heading_text_style }}"
                                                     style="color: {{ $formHolder->upsell->template->heading_text_color }};">{{ $formHolder->upsell->upsell_heading }}</h3>
                                                     
-                                                    <h4 class="subheading text-{{ $formHolder->upsell->template->subheading_text_align }} fst-{{ $formHolder->upsell->template->subheading_text_style }}"
-                                                    style="color: {{ $formHolder->upsell->template->subheading_text_color }};">{{ $formHolder->upsell->upsell_subheading }}</h4>
+                                                    @foreach ($formHolder->upsell->template->subheading_text as $subheading)
+                                                    <h5 class="subheading text-{{ $formHolder->upsell->template->subheading_text_align }} fst-{{ $formHolder->upsell->template->subheading_text_style }}"
+                                                        style="color: {{ $formHolder->upsell->template->subheading_text_color }};">{{ $subheading }}</h5>
+                                                    @endforeach
                                                     
                                                     @if (isset($formHolder->upsell->template->description_text))
                                                     
@@ -826,12 +828,12 @@
                         var thankyou_unique_key = $(".thankyou_unique_key").val();
 
                         if (thankyou_unique_key=='') {
-                            window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                            window.parent.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
                             $('.current_order_id').val('');
                             setView('thankyou-section')
                         } else {
                             $('.current_order_id').val('');
-                            window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                            window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                         }
                     }
 
@@ -872,12 +874,12 @@
                             var thankyou_unique_key = $(".thankyou_unique_key").val();
 
                             if (thankyou_unique_key=='') {
-                                window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                                window.parent.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
                                 $('.current_order_id').val('');
                                 setView('thankyou-section')
                             } else {
                                 $('.current_order_id').val('');
-                                window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                                window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                             }
                     
                         }
@@ -914,12 +916,12 @@
                         var thankyou_unique_key = $(".thankyou_unique_key").val();
 
                         if (thankyou_unique_key=='') {
-                            window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                            window.parent.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
                             $('.current_order_id').val('');
                             setView('thankyou-section')
                         } else {
                             $('.current_order_id').val('');
-                            window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                            window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                         }
                             
                     },error:function(){
@@ -959,12 +961,12 @@
                                 var thankyou_unique_key = $(".thankyou_unique_key").val();
 
                                 if (thankyou_unique_key=='') {
-                                    window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                                    window.parent.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
                                     $('.current_order_id').val('');
                                     setView('thankyou-section')
                                 } else {
                                     $('.current_order_id').val('');
-                                    window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                                    window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                                 }
                         
                             }
@@ -1005,12 +1007,12 @@
                             var thankyou_unique_key = $(".thankyou_unique_key").val();
 
                             if (thankyou_unique_key=='') {
-                                window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                                window.parent.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
                                 $('.current_order_id').val('');
                                 setView('thankyou-section')
                             } else {
                                 $('.current_order_id').val('');
-                                window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                                window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                             }
                                 
                         },error:function(){

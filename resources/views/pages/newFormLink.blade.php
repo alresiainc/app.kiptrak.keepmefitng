@@ -90,7 +90,7 @@
     <!-- will be shown in singlelink-->
     <header id="header" class="header fixed-top d-flex align-items-center">
         <div class="d-flex align-items-center justify-content-between">
-          <a href="/" class="logo d-flex align-items-center">
+          <a href="javascript:void(0);" class="logo d-flex align-items-center">
             <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="width: 30%; !important">
             <span class="d-none d-lg-block project-namek"></span>
           </a>
@@ -244,8 +244,10 @@
                                             <div class="d-flex justify-content-center">
                                                 <div class="content text-center p-3" style="border: 3px dashed black; background-color: #D2FFE8;">
                                                     <h3 class="heading">{{ $formHolder->orderbump->orderbump_heading }}</h3>
-                                                    <h4 class="subheading d-none" style="color: #012970;">{{ $formHolder->orderbump->orderbump_subheading }}</h4>
-                                                    <h4 class="subheading">{!! $formHolder->orderbump->orderbump_subheading !!}</h4>
+                                                    
+                                                    @foreach ($formHolder->orderbump->orderbump_subheading as $subheading)
+                                                    <h5 class="subheading">{{ $subheading }}</h5>
+                                                    @endforeach
                                                     {{-- <p class="product-feature">Melts Away Fats In 2 Days!</p> --}}
     
                                                     <div class="orderbump-product-image mb-3">
@@ -254,7 +256,7 @@
                                                     </div>
     
                                                     <p class="discount-info">
-                                                        Kindly click the box below to add this to your order now for just xxxx instead of paying normal price of yyyy!
+                                                        Kindly click the box below to add this to your order now for just {{ $formHolder->orderbump->product->sale_price }} instead of paying normal price of {{ $formHolder->orderbump->product_assumed_selling_price }}!
                                                     </p>
     
                                                     <p class="more-info">
@@ -342,8 +344,10 @@
                                                     <h3 class="heading text-{{ $formHolder->upsell->template->heading_text_align }} fst-{{ $formHolder->upsell->template->heading_text_style }}"
                                                     style="color: {{ $formHolder->upsell->template->heading_text_color }};">{{ $formHolder->upsell->upsell_heading }}</h3>
                                                     
-                                                    <h4 class="subheading text-{{ $formHolder->upsell->template->subheading_text_align }} fst-{{ $formHolder->upsell->template->subheading_text_style }}"
-                                                    style="color: {{ $formHolder->upsell->template->subheading_text_color }};">{!! $formHolder->upsell->template->subheading_text !!}</h4>
+                                                    @foreach ($formHolder->upsell->template->subheading_text as $subheading)
+                                                    <h5 class="subheading text-{{ $formHolder->upsell->template->subheading_text_align }} fst-{{ $formHolder->upsell->template->subheading_text_style }}"
+                                                        style="color: {{ $formHolder->upsell->template->subheading_text_color }};">{{ $subheading }}</h5>
+                                                    @endforeach
                                                     
                                                     @if (isset($formHolder->upsell->template->description_text))
                                                     
@@ -870,12 +874,13 @@
                         var thankyou_unique_key = $(".thankyou_unique_key").val();
 
                         if (thankyou_unique_key=='') {
-                            window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                            window.parent.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
                             $('.current_order_id').val('');
                             setView('thankyou-section')
                         } else {
                             $('.current_order_id').val('');
-                            window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                            //window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                            window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                         }
  
                         
@@ -918,12 +923,12 @@
                             var thankyou_unique_key = $(".thankyou_unique_key").val();
 
                             if (thankyou_unique_key=='') {
-                                window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                                window.parent.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
                                 $('.current_order_id').val('');
                                 setView('thankyou-section')
                             } else {
                                 $('.current_order_id').val('');
-                                window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                                window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                             }
                         
                         }
@@ -965,12 +970,12 @@
                         var thankyou_unique_key = $(".thankyou_unique_key").val();
 
                         if (thankyou_unique_key=='') {
-                            window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                            window.parent.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
                             $('.current_order_id').val('');
                             setView('thankyou-section')
                         } else {
                             $('.current_order_id').val('');
-                            window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                            window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                         }
                         
                             
@@ -1015,12 +1020,12 @@
                                 var thankyou_unique_key = $(".thankyou_unique_key").val();
 
                                 if (thankyou_unique_key=='') {
-                                    window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                                    window.parent.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
                                         $('.current_order_id').val('');
                                         setView('thankyou-section')
                                 } else {
                                     $('.current_order_id').val('');
-                                    window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                                    window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                                 }
                             }
                                 
@@ -1064,12 +1069,12 @@
                             var thankyou_unique_key = $(".thankyou_unique_key").val();
 
                             if (thankyou_unique_key=='') {
-                                window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
+                                window.parent.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou";
                                     $('.current_order_id').val('');
                                     setView('thankyou-section')
                             } else {
                                 $('.current_order_id').val('');
-                                window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                                window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                             }
                                 
                         },error:function(){

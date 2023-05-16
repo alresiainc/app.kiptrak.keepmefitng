@@ -39,4 +39,9 @@ class OrderBump extends Model
         return $this->belongsTo(Product::class, 'product_id');  
     }
 
+    public function getOrderbumpSubheadingAttribute($value) {
+        $subheadings = unserialize($value);
+        return $subheadings;
+    }
+
 }

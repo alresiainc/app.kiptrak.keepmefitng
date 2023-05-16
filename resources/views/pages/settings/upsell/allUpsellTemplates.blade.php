@@ -64,7 +64,12 @@
                     
                             <td>{{ $template->template_code }}</td>
                             <td>{{ $template->heading_text}}</td>
-                            <td>{!! $template->subheading_text !!}</td>
+                            <td>
+                              @foreach ($template->subheading_text as $subheading)
+                                  <p>{{ $subheading }}</p>
+                              @endforeach
+                            </td>
+                            
                             <td>{{ $template->created_at }}</td>
         
                             <td>

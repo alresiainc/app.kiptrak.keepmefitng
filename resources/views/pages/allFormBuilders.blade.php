@@ -6,6 +6,12 @@
       td{
         font-size: 14px;
       }
+      /* select2 arrow */
+      select{
+          -webkit-appearance: listbox !important
+      }
+
+      /* custom-select border & inline edit */
       .btn-light {
           background-color: #fff !important;
           color: #000 !important;
@@ -13,6 +19,19 @@
       div.filter-option-inner-inner{
           color: #000 !important;
       }
+      /* custom-select border & inline edit */
+
+      /* select2 height proper */
+      .select2-selection__rendered {
+          line-height: 31px !important;
+      }
+      .select2-container .select2-selection--single {
+          height: 35px !important;
+      }
+      .select2-selection__arrow {
+          height: 34px !important;
+      }
+      /* select2 height proper */
       .tox .tox-promotion {
         background: repeating-linear-gradient(transparent 0 1px,transparent 1px 39px) center top 39px/100% calc(100% - 39px) no-repeat;
         background-color: #fff;
@@ -150,7 +169,7 @@
                             alt="{{$formHolder->orderbump->product->name}}" style="height: 30px;"></a>
     
                             <br>
-                            <span class="badge badge-info" onclick="editOrderbump({{ json_encode($formHolder) }}, '{!! $formHolder->orderbump->orderbump_heading !!}')" style="cursor: pointer;">
+                            <span class="badge badge-info editOrderbumpSpan" onclick="editOrderbump({{ json_encode($formHolder) }}, {{ json_encode($formHolder->orderbump->orderbump_subheading) }})" style="cursor: pointer;">
                               <i class="bi bi-pencil"></i> Edit</span>
     
                             <!-- Edit Ordernump-Modal Orderbump -->
@@ -243,7 +262,7 @@
                               <i class="bi bi-archive"></i>
                             </a>
   
-                            <a href="{{ route('singleThankYouTemplate', $formHolder->thankyou->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
+                            <a href="{{ route('showThankYouTemplate', $formHolder->thankyou->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
                           </div>
 
                             <!-- Edit Upsell-Modal -->
@@ -313,10 +332,29 @@
             <input type="text" id="orderbump_heading" name="orderbump_heading"  class="form-control" value="">
           </div>
 
-          <div class="mt-3">
+          <div class="mt-3 d-none">
             <label for="" class="form-label">Sub Heading | Optional</label>
             <input type="text" id="orderbump_subheading2" name="orderbump_subheading"  class="form-control d-none" value="">
             <textarea name="orderbump_subheading" id="" cols="30" rows="5" class="mytextarea form-control"></textarea>
+          </div>
+
+          <div class="mt-3">
+            <div class="product-clone-section wrapper">
+              <div class="col-md-12 mt-1 element">
+                <label for="" class="form-label">Sub Heading | Optional</label>
+                <input type="text" name="orderbump_subheading[]" class="form-control" placeholder="" value="It is an Amazing Offer">
+              </div>
+
+              <!--append elements to-->
+              <div class="results"></div>
+
+              <div class="buttons d-flex justify-content-between">
+                <button type="button" class="clone btn btn-success btn-sm rounded-pill"><i class="bi bi-plus"></i></button>
+                <button type="button" class="remove btn btn-danger btn-sm rounded-pill"><i class="bi bi-dash"></i></button>
+              </div>
+
+              
+            </div>
           </div>
 
           <div class="mt-3">
@@ -387,21 +425,57 @@
 
           <div class="mt-3">
             <label for="" class="form-label">Sub Heading | Optional</label>
-            <input type="text" name="orderbump_subheading2" id=""  class="form-control d-none" value="">
-            <textarea name="orderbump_subheading" id="editOrderbump_subheading" cols="30" rows="5" class="mytextarea form-control"></textarea>
+            <div class="row" id="myList">
+              {{-- <div class="col-md-12 mb-2">
+                <input type="text" class="form-control" value="lorem color">
+              </div> --}}
+              
+              
+            </div>
           </div>
 
           <div class="mt-3">
+            <div class="product-clone-section wrapper2">
+
+              <div class="col-md-12 mt-1 element2">
+                <label for="" class="form-label">More Sub Headings | Optional</label>
+                <input type="text" name="orderbump_subheading[]" class="form-control" placeholder="" value="">
+              </div>
+
+              <!--append elements to-->
+              <div class="results2"></div>
+
+              <div class="buttons d-flex justify-content-between">
+                <button type="button" class="clone2 btn btn-success btn-sm rounded-pill"><i class="bi bi-plus"></i></button>
+                <button type="button" class="remove2 btn btn-danger btn-sm rounded-pill"><i class="bi bi-dash"></i></button>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="" class="form-label">Actual Sale Price</label>
+                <input type="number" name="product_actual_selling_price" id="productActualSellingPrice" class="form-control" placeholder="" readonly value="">
+              </div>
+              <div class="col-md-6">
+                <label for="" class="form-label">Assumed Sale Price</label>
+                <input type="number" name="product_assumed_selling_price" id="productAssumedSellingPrice" class="form-control" placeholder="" value="">
+              </div>
+            </div>
+          </div>
+          
+
+          <div class="mt-3" id="orderbumpProductSelectWrapper">
             <label for="orderbump_product" class="form-label">Select Product Package</label>
-            <select name="orderbump_product" data-live-search="true" class="custom-select form-control border btn-dark @error('orderbump_product') is-invalid @enderror"
-              id="" style="color: black !important;">
-              @if(isset($formHolder->orderbump_id) && isset($formHolder->orderbump->product->id))
-                <option value="{{ $formHolder->orderbump->product->id }}">{{ $formHolder->orderbump->product->name }}</option>
-              @endif
+            <select id="orderbumpProductSelect" name="orderbump_product" data-live-search="true" class="custom-select form-control border btn-dark @error('orderbump_product') is-invalid @enderror"
+                   style="color: black !important;">
+              <option value="">Nothing Selected</option>
               @if (count($products) > 0)
 
                 @foreach ($products as $product)
-                  <option value="{{ $product->id }}">{{ $product->name }}</option>
+                  <option value="{{ $product->id }}" class="selected_option">{{ $product->name }} @<span class="product_sale_price">{{ $product->sale_price }}</span></option>
                 @endforeach
 
               @endif
@@ -589,7 +663,7 @@
 
           <div class="mt-3">
             <label for="upsell_product" class="form-label">Select Product Package</label>
-            <select name="upsell_product" data-live-search="true" class="custom-select form-control border btn-dark @error('upsell_product') is-invalid @enderror"
+            <select name="upsell_product" id="upsellProductSelect" data-live-search="true" class="custom-select form-control border btn-dark @error('upsell_product') is-invalid @enderror"
               id="" style="color: black !important;">
               
               @if(isset($formHolder->upsell_id) && isset($formHolder->upsell->product->id))
@@ -613,21 +687,6 @@
             @enderror
           </div>
 
-          <div class="mt-3 d-none">
-            <label for="" class="form-label">Discount Type</label>
-            <select name="ordernump_discount_type" class="custom-select form-control border btn-dark">
-              <option value="">Nothing Selected</option>
-              <option value="fixed">Fixed</option>
-              <option value="percentage">Percentage</option>
-            </select>
-          </div>
-
-          <div class="mt-3 d-none">
-            <label for="" class="form-label">Discount Amount</label>
-            <input type="text" name="orderbump_discount" class="form-control" value="">
-          </div>
-
-          @if (isset($formHolder->upsell_id))
           <div class="mt-3 d-flex align-items-center" style="gap: 20px;">
             <div class='category'>
               <input type="radio" name="switch_upsell" value="on" id="on" checked />
@@ -639,8 +698,7 @@
               <label for="off">Off</label>
             </div>
           </div>
-          @endif
-
+          
         </div>
         
         <div class="modal-footer">
@@ -789,28 +847,51 @@
 <?php endif ?>
 
 <script>
+  
   function addOrderbump($form_unique_key="", $form_name="") {
     $('#addOrderbump').modal("show");
     $('#form_unique_key').val($form_unique_key);
     $('#addOrderbumpTitle').text('Add Order-Bump to this Form: '+$form_name);
   }
   function editOrderbump($formHolder="", $orderbump_subheading="") {
+    $("#myList").html('');
     $('#editOrderbumpModal').modal("show");
     $('#editOrderbump_form_unique_key').val($formHolder.unique_key);
     $('#editOrderbump_topic').text('Edit Order-Bump to this Form: '+$formHolder.name);
     $('#editOrderbump_heading').val($formHolder.orderbump.orderbump_heading);
-    //$('#editOrderbump_subheading').val('lorem');
-    tinyMCE.get('editOrderbump_subheading').setContent($orderbump_subheading);
+    $('#editOrderbump_subheading').val($orderbump_subheading);
+    //tinyMCE.get('editOrderbump_subheading').setContent($orderbump_subheading);
+    $('#productActualSellingPrice').val($formHolder.orderbump.product_actual_selling_price)
+    $('#productAssumedSellingPrice').val($formHolder.orderbump.product_assumed_selling_price)
 
-    var datas = {
-        id: $formHolder.orderbump.product.id,
-        text: $formHolder.orderbump.product.name
-    };
-    var newOption = new Option(datas.text, datas.id, false, false);
-    $('#editOrderbumpModal').prepend(newOption).trigger('change');
+    // Get the select element
+    var $select = $('#orderbumpProductSelect');
 
-    //$("orderbump_product").val($formHolder.orderbump.product.id).change();
+    // Prepend the new option
+    $select.prepend('<option value="'+$formHolder.orderbump.product.id+'">'+$formHolder.orderbump.product.name+'</option>');
+
+    // Update the custom-select UI
+    $select.closest('.bootstrap-select').find('.filter-option-inner-inner').html($formHolder.orderbump.product.name);
+    $select.closest('.bootstrap-select').find('.dropdown-toggle .filter-option-inner-inner').html($formHolder.orderbump.product.name);
+
+    // Set the selected option
+    $select.val($formHolder.orderbump.product.id);
+
+    //create new subheading input
+    var options = $orderbump_subheading
+    $.each(options, function(index) {
+      $("#myList").append($("<div class='col-md-12'><input type='text' name='orderbump_subheading[]' class='form-control mb-2' value='"+options[index]+"'></div>"));
+    });
+
   }
+
+  $('#orderbumpProductSelect').on('change', function() {
+    var selectedOption = $("#orderbumpProductSelect :selected").text();
+    var spanText = selectedOption.split('@')[1]
+    //console.log(spanText);
+    $('#productActualSellingPrice').val(spanText)
+  });
+
 
   //upsell side
   function addUpsell($form_unique_key="", $form_name="") {
@@ -827,12 +908,18 @@
     //$('#editUpsell_subheading').val($formHolder.upsell.upsell_subheading);
     //tinyMCE.get('editUpsell_subheading').setContent($upsell_subheading);
 
-    var datas = {
-        id: $formHolder.upsell.product.id,
-        text: $formHolder.upsell.product.name
-    };
-    var newOption = new Option(datas.text, datas.id, false, false);
-    $('#editUpsellModal').prepend(newOption).trigger('change');
+    // Get the select element
+    var $select = $('#upsellProductSelect');
+
+    // Prepend the new option
+    $select.prepend('<option value="'+$formHolder.upsell.product.id+'">'+$formHolder.upsell.product.name+'</option>');
+
+    // Update the custom-select UI
+    $select.closest('.bootstrap-select').find('.filter-option-inner-inner').html($formHolder.upsell.product.name);
+    $select.closest('.bootstrap-select').find('.dropdown-toggle .filter-option-inner-inner').html($formHolder.upsell.product.name);
+
+    // Set the selected option
+    $select.val($formHolder.upsell.product.id);
 
     //$("orderbump_product").val($formHolder.orderbump.product.id).change();
   }
@@ -855,6 +942,26 @@
     $('#changeAgentModal').modal("show");
     $('.form_id').val($formId);
   }
+</script>
+
+<script>
+  //clone
+  $('.wrapper').on('click', '.remove', function() {
+      $('.remove').closest('.wrapper').find('.element').not(':first').last().remove();
+  });
+  $('.wrapper').on('click', '.clone', function() {
+      $('.clone').closest('.wrapper').find('.element').first().clone().appendTo('.results');
+  });
+</script>
+
+<script>
+  //clone
+  $('.wrapper2').on('click', '.remove2', function() {
+      $('.remove2').closest('.wrapper2').find('.element2').not(':first').last().remove();
+  });
+  $('.wrapper2').on('click', '.clone2', function() {
+      $('.clone2').closest('.wrapper2').find('.element2').first().clone().appendTo('.results2');
+  });
 </script>
 
 <script>

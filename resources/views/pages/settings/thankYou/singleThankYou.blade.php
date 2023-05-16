@@ -66,7 +66,7 @@
         <span class="project-namek"></span>
         </a> --}}
 
-        <a href="/" class="logo d-flex align-items-center">
+        <a href="javascript:void(0);" class="logo d-flex align-items-center">
             <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="max-height: 130px; margin-right: 6px;">
             {{-- <span class="d-none d-lg-block project-name"></span> --}}
         </a>
@@ -75,7 +75,7 @@
 
 <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="d-flex align-items-center justify-content-between">
-      <a href="/" class="logo d-flex align-items-center">
+      <a href="javascript:void(0);" class="logo d-flex align-items-center d-none">
         <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="width: 30%; !important">
         <span class="d-none d-lg-block project-namek"></span>
       </a>
@@ -111,7 +111,7 @@
         
     <div class="view" id="thankyou-section" style="margin-top: 10px;">
         <div class="row">
-            <div class="col-lg-12 mb-3">
+            <div class="col-lg-12 mb-3 d-none">
                 <article class="card shadow-sm">
                     <div class="card-body"> 
                         <div class="mt-4 mx-auto text-center" style="max-width:600px">

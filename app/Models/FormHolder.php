@@ -23,8 +23,8 @@ class FormHolder extends Model
             $url = url('/').'/new-form-link/'.$model->unique_key;
             $embedded_url = url('/').'/form-embedded/'.$model->unique_key;
             $model->url = 'new-form-link/'.$model->unique_key;
-            $model->embedded_tag = '<embed type="text/html" src="'.$embedded_url.'"  width="100%" height="700">';
-            $model->iframe_tag = '<iframe src="'.$embedded_url.'" width="100%" height="700" style="border:0"></iframe>';
+            $model->embedded_tag = '<embed type="text/html" src="'.$embedded_url.'"  width="100%" height="1024px">';
+            $model->iframe_tag = '<iframe src="'.$embedded_url.'" width="100%" height="1024px" style="border:0"></iframe>';
             
         });
 

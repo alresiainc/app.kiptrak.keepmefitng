@@ -15,6 +15,10 @@
         div.filter-option-inner-inner{
             color: #000 !important;
         }
+        .ck-editor__editable[role="textbox"] {
+                /* editing area */
+                min-height: 200px;
+            }
     </style>
 @endsection
 @section('content')
@@ -232,10 +236,33 @@
                     <h4>Subheading</h4>
                 </div>
 
-                <div class="col-md-12">
+                <div class="col-md-12 d-none">
                     <label for="" class="form-label">Subheading Text</label>
+                    
                     <input type="text" name="subheading_text2" class="form-control d-none @error('subheading_text') is-invalid @enderror" value="We're giving this at a giveaway price">
-                    <textarea name="subheading_text" id="" cols="30" rows="5" class="tinymce-editor form-control @error('subheading_text') is-invalid @enderror">We're giving this at a giveaway price</textarea>
+                    {{-- <textarea name="subheading_text" id="" cols="30" rows="5" class="tinymce-editor form-control @error('subheading_text') is-invalid @enderror">We're giving this at a giveaway price</textarea> --}}
+                    <textarea name="subheading_text" id="ckeditor" class="ckeditor"></textarea>
+                    @error('subheading_text')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                    @enderror
+                </div>
+
+                <div class="product-clone-section wrapper">
+                    <div class="col-md-12 mt-1 element">
+                      <label for="" class="form-label">Subheading Text</label>
+                      <input type="text" name="subheading_text[]" class="form-control @error('subheading_text') is-invalid @enderror" placeholder="" value="">
+                    </div>
+  
+                    <!--append elements to-->
+                    <div class="results"></div>
+  
+                    <div class="buttons d-flex justify-content-between">
+                      <button type="button" class="clone btn btn-success btn-sm rounded-pill"><i class="bi bi-plus"></i></button>
+                      <button type="button" class="remove btn btn-danger btn-sm rounded-pill"><i class="bi bi-dash"></i></button>
+                    </div>
+
                     @error('subheading_text')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -725,4 +752,23 @@
 @endsection
 
 @section('extra_js')
+<script>
+    //clone
+    $('.wrapper').on('click', '.remove', function() {
+        $('.remove').closest('.wrapper').find('.element').not(':first').last().remove();
+    });
+    $('.wrapper').on('click', '.clone', function() {
+        $('.clone').closest('.wrapper').find('.element').first().clone().appendTo('.results');
+    });
+</script>
+
+<script src="https://cdn.ckeditor.com/ckeditor5/34.2.0/classic/ckeditor.js"></script>
+
+  <script>
+    ClassicEditor
+        .create( document.querySelector( '.ckeditor' ) )
+        .catch( error => {
+            console.error( error );
+        } );
+</script>
 @endsection

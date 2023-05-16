@@ -64,11 +64,13 @@ class UpsellSettingController extends Controller
         $data = $request->all();
         $request->validate([
             'heading_text' => 'required|string',
-            'subheading_text' => 'required|string',
+            'subheading_text' => 'required|array',
             'description_text' => 'nullable|string',
         ]);
 
         $data = $request->all();
+
+        $subheading_text = array_filter($data['subheading_text'], fn($value) => !is_null($value) && $value !== '');
 
         $upsellTemplate = new UpsellSetting();
         
@@ -87,7 +89,7 @@ class UpsellSettingController extends Controller
         $upsellTemplate->heading_text_weight = $data['heading_text_weight'];
         $upsellTemplate->heading_text_size = $data['heading_text_size'];
 
-        $upsellTemplate->subheading_text = $data['subheading_text'];
+        $upsellTemplate->subheading_text = serialize($subheading_text);
         $upsellTemplate->subheading_text_style = $data['subheading_text_style']; //normal, italic
         $upsellTemplate->subheading_text_align = $data['subheading_text_align']; //left, center, right
         $upsellTemplate->subheading_text_color = $data['subheading_text_color'];
@@ -173,12 +175,15 @@ class UpsellSettingController extends Controller
 
         $request->validate([
             'heading_text' => 'required|string',
-            'subheading_text' => 'required|string',
+            'subheading_text' => 'required|array',
             'description_text' => 'nullable|string',
         ]);
 
         $data = $request->all();
-
+        
+        //remove empty or null values
+        $subheading_text = array_filter($data['subheading_text'], fn($value) => !is_null($value) && $value !== '');
+        
         $upsellTemplate->template_code = $data['template_code'];
 
         $upsellTemplate->body_bg_color = $data['body_bg_color'];
@@ -192,7 +197,7 @@ class UpsellSettingController extends Controller
         $upsellTemplate->heading_text_align = $data['heading_text_align']; //left, center, right
         $upsellTemplate->heading_text_color = $data['heading_text_color'];
 
-        $upsellTemplate->subheading_text = $data['subheading_text'];
+        $upsellTemplate->subheading_text = serialize($subheading_text);
         $upsellTemplate->subheading_text_style = $data['subheading_text_style']; //normal, italic
         $upsellTemplate->subheading_text_align = $data['subheading_text_align']; //left, center, right
         $upsellTemplate->subheading_text_color = $data['subheading_text_color'];

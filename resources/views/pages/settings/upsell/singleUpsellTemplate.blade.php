@@ -58,9 +58,11 @@
                                     <div class="content p-3">
                                         <p class="heading text-{{ $upsellTemplate->heading_text_align }} fst-{{ $upsellTemplate->heading_text_style }} fw-{{$upsellTemplate->heading_text_weight}} fs-{{$upsellTemplate->heading_text_size}}"
                                         style="color: {{ $upsellTemplate->heading_text_color }};">{{ $upsellTemplate->heading_text }}</p>
-
+                                        
+                                        @foreach ($upsellTemplate->subheading_text as $subheading)
                                         <p class="subheading text-{{ $upsellTemplate->subheading_text_align }} fst-{{ $upsellTemplate->subheading_text_style }} fw-{{$upsellTemplate->subheading_text_weight}} fs-{{$upsellTemplate->subheading_text_size}}"
-                                        style="color: {{ $upsellTemplate->subheading_text_color }};">{!! $upsellTemplate->subheading_text !!}</p>
+                                        style="color: {{ $upsellTemplate->subheading_text_color }};">{!! $subheading !!}</p>
+                                        @endforeach
                                         
                                         @if (isset($upsellTemplate->description_text))
                                         <p class="description text-{{$upsellTemplate->description_text_align}} fst-{{ $upsellTemplate->description_text_style }} fw-{{$upsellTemplate->description_text_weight}} fs-{{$upsellTemplate->description_text_size}}"

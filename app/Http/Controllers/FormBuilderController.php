@@ -163,7 +163,7 @@ class FormBuilderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $formHolds = FormHolder::where('has_edited_duplicate',false)->orderBy('id', 'DESC')->get();
         $formHolders = [];
         foreach ($formHolds as $key => $formHolder) {
@@ -302,7 +302,7 @@ class FormBuilderController extends Controller
         if (!isset($formHolder_former)) {
             abort(404);
         }
-
+        
         $request->validate([
             'name' => 'required|string|unique:form_holders',
             'packages' => 'required',
@@ -351,6 +351,7 @@ class FormBuilderController extends Controller
         $order->staff_assigned_id = isset($formHolder_former->staff_assigned_id) ? $formHolder_former->staff_assigned_id : null;
         $order->source_type = 'form_holder_module';
         $order->status = 'new';
+
         $order->save();
 
         //outgoingStock, in place of orderProduct
@@ -384,7 +385,7 @@ class FormBuilderController extends Controller
 
             $orderbump = new OrderBump();
             $orderbump->orderbump_heading = $former_orderbump->orderbump_heading;
-            $orderbump->orderbump_subheading = $former_orderbump->orderbump_subheading;
+            $orderbump->orderbump_subheading = serialize($former_orderbump->orderbump_subheading);
             $orderbump->product_id = $former_orderbump->product_id;
             $orderbump->order_id = $order->id;
             $orderbump->product_expected_quantity_to_be_sold = 1;
@@ -416,7 +417,7 @@ class FormBuilderController extends Controller
 
             $upsell = new UpSell();
             $upsell->upsell_heading = $former_upsell->upsell_heading;
-            $upsell->upsell_subheading = $former_upsell->upsell_subheading;
+            $upsell->upsell_subheading = serialize($former_upsell->upsell_subheading);
             $upsell->upsell_setting_id = $former_upsell->upsell_setting_id;
             $upsell->product_id = $former_upsell->product_id;
             $upsell->order_id = $order->id;
@@ -697,7 +698,7 @@ class FormBuilderController extends Controller
 
                 $orderbump = new OrderBump();
                 $orderbump->orderbump_heading = $former_orderbump->orderbump_heading;
-                $orderbump->orderbump_subheading = $former_orderbump->orderbump_subheading;
+                $orderbump->orderbump_subheading = serialize($former_orderbump->orderbump_subheading);
                 $orderbump->product_id = $former_orderbump->product_id;
                 $orderbump->order_id = $order->id;
                 $orderbump->product_expected_quantity_to_be_sold = 1;
@@ -730,7 +731,7 @@ class FormBuilderController extends Controller
 
                 $upsell = new UpSell();
                 $upsell->upsell_heading = $former_upsell->upsell_heading;
-                $upsell->upsell_subheading = $former_upsell->upsell_subheading;
+                $upsell->upsell_subheading = serialize($former_upsell->upsell_subheading);
                 $upsell->upsell_setting_id = $former_upsell->upsell_setting_id;
                 $upsell->product_id = $former_upsell->product_id;
                 $upsell->order_id = $order->id;
@@ -897,15 +898,25 @@ class FormBuilderController extends Controller
         if (!isset($formHolder)) {
             abort(404);
         }
+
+        if (!empty($data['orderbump_subheading'])) {
+            $orderbump_subheading = serialize(array_filter($data['orderbump_subheading'], fn($value) => !is_null($value) && $value !== ''));
+        } else {
+            $orderbump_subheading = serialize(['It\'s an Amazing Offer']);
+        }
+
+        $product = Product::find($data['orderbump_product']);
         
         //orderbump
         $orderbump = new OrderBump();
         $orderbump->orderbump_heading = !empty($data['orderbump_heading']) ? $data['orderbump_heading'] : 'Would You Like to Add this Package to your Order';
-        $orderbump->orderbump_subheading = !empty($data['orderbump_subheading']) ? $data['orderbump_subheading'] : 'It\'s an Amazing Offer';
+        $orderbump->orderbump_subheading = $orderbump_subheading;
         $orderbump->product_id = $data['orderbump_product'];
-        $orderbump->order_id = $formHolder->order->id;
+        $orderbump->order_id = isset($formHolder->order_id) ? $formHolder->order->id : null;
         $orderbump->product_expected_quantity_to_be_sold = 1;
         $orderbump->product_expected_amount = 0;
+        $orderbump->product_actual_selling_price = $product->sale_price;
+        $orderbump->product_assumed_selling_price = $product->sale_price + 500;
         // $outgoingStock->created_by = $authUser->id;
         $orderbump->status = 'true';
         $orderbump->save();
@@ -915,7 +926,7 @@ class FormBuilderController extends Controller
         //outgoing stock
         $outgoingStock = new OutgoingStock();
         $outgoingStock->product_id = $data['orderbump_product'];
-        $outgoingStock->order_id = $formHolder->order->id;
+        $outgoingStock->order_id = isset($formHolder->order_id) ? $formHolder->order->id : null;
         $outgoingStock->quantity_removed = 1;
         $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
         $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
@@ -950,14 +961,19 @@ class FormBuilderController extends Controller
             $formHolder->update(['orderbump_id'=>null]);
             return back()->with('success', 'OrderBump Removed Successfully');
         }
-        //orderbump
         
+        if (!empty($data['orderbump_subheading'])) {
+            $orderbump_subheading = array_filter($data['orderbump_subheading'], fn($value) => !is_null($value) && $value !== '');
+        }
+
+        //orderbump
         $orderbump->orderbump_heading = !empty($data['orderbump_heading']) ? $data['orderbump_heading'] : 'Would You Like to Add this Package to your Order';
-        $orderbump->orderbump_subheading = !empty($data['orderbump_subheading']) ? $data['orderbump_subheading'] : 'It\'s an Amazing Offer';
+        $orderbump->orderbump_subheading = !empty($data['orderbump_subheading']) ? serialize($orderbump_subheading) : serialize(['It\'s an Amazing Offer']);
         $orderbump->product_id = $data['orderbump_product'];
         $orderbump->order_id = $formHolder->order->id;
         $orderbump->product_expected_quantity_to_be_sold = 1;
         $orderbump->product_expected_amount = 0;
+        $orderbump->product_assumed_selling_price = $data['product_assumed_selling_price'];
         // $outgoingStock->created_by = $authUser->id;
         $orderbump->status = 'true';
         $orderbump->save();
@@ -998,11 +1014,11 @@ class FormBuilderController extends Controller
         }
         
         $templ = UpsellSetting::where('id', $data['upsell_setting_id'])->first();
-
+        
         //upsell
         $upsell = new UpSell();
         $upsell->upsell_heading = !empty($data['upsell_heading']) ? $data['upsell_heading'] : $templ->heading_text;
-        $upsell->upsell_subheading = !empty($data['upsell_subheading']) ? $data['upsell_subheading'] : $templ->subheading_text;
+        $upsell->upsell_subheading = !empty($data['upsell_subheading']) ? $data['upsell_subheading'] : serialize($templ->subheading_text);
         $upsell->upsell_setting_id = $data['upsell_setting_id'];
         $upsell->product_id = $data['upsell_product'];
         $upsell->order_id = $formHolder->order->id;

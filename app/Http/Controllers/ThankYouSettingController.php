@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
+
 use App\Models\ThankYou;
 use App\Models\OutgoingStock;
 use App\Models\FormHolder;
@@ -92,10 +94,103 @@ class ThankYouSettingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+     public function showThankYouTemplate($unique_key, $current_order_id="")
+     {
+         // $authUser = auth()->user();
+         // $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+ 
+         $thankYouTemplate = ThankYou::where('unique_key', $unique_key);
+         if(!$thankYouTemplate->exists()){
+             abort(404);
+         }
+         $thankYou = $thankYouTemplate->first();
+ 
+         $customer = ''; // to check against when the thankyou pg will be rendered
+         
+         $order = ''; $orderId = ''; $qty_total = 0; $order_total_amount = 0; $grand_total = 0; $mainProducts_outgoingStocks = '';
+         $orderbumpProduct_revenue = 0; $orderbump_outgoingStock = ''; $upsellProduct_revenue = 0; $upsell_outgoingStock = '';
+         if ($current_order_id !== "") {
+             $order = Order::where('id', $current_order_id)->first();
+             if (!isset($order)) {
+                 \abort(404);
+             }
+             if (isset($order->customer)) {
+                 $order->outgoingStocks()->where(['customer_acceptance_status'=>NULL])
+                 ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
+ 
+                 $formHolder = $order->formHolder;
+ 
+                 //update formholder or order
+                 if(isset($formHolder->staff_assigned_id) && !isset($order->staff_assigned_id)){
+                     $order->update(['staff_assigned_id'=>$formHolder->staff_assigned_id]);
+                 } 
+ 
+                 //get customer
+                 $customer =  $order->customer; $orderId = $order->orderId($order);
+ 
+                 $mainProduct_revenue = 0;  //price * qty
+                 $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
+                 'customer_acceptance_status'=>'accepted'])->get();
+ 
+                 if ( count($mainProducts_outgoingStocks) > 0 ) {
+                     foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
+                         $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                     }
+                 }
+ 
+                 //orderbump
+                 $orderbumpProduct_revenue = 0; //price * qty
+                 $orderbump_outgoingStock = '';
+                 if (isset($formHolder->orderbump_id)) {
+                     $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
+                     if ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+                         $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+                     }
+                 }
+ 
+                 //upsell
+                 $upsellProduct_revenue = 0; //price * qty
+                 $upsell_outgoingStock = '';
+                 if (isset($formHolder->upsell_id)) {
+                     $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
+                     if ($upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+                         $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+                     }
+                 }
+                 
+                 //order total amt
+                 $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
+                 $grand_total = $order_total_amount; //might include discount later
+                 
+                 $orderId = ''; //used in thankYou section
+                 if (isset($order->id)) {
+                     $orderId = $order->orderId($order);
+                 }
+                 
+                 //package or product qty. sum = 0, if it doesnt exist
+                 $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
+                 $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
+                 $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
+                 $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
+             }
+             
+         } 
+         
+         return view('pages.settings.thankYou.singleThankYou', \compact('thankYou', 'order', 'orderId', 'customer',
+         'qty_total', 'order_total_amount', 'grand_total', 'mainProducts_outgoingStocks',
+         'orderbumpProduct_revenue', 'orderbump_outgoingStock', 'upsellProduct_revenue', 'upsell_outgoingStock'));
+     } 
     public function singleThankYouTemplate($unique_key, $current_order_id="")
     {
         // $authUser = auth()->user();
         // $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $username = 'john';
+        $url = 'https://wordpress.com';
+
+        $redirectUrl = Redirect::away($url . '?username=' . urlencode($username));
+        return $redirectUrl;
 
         $thankYouTemplate = ThankYou::where('unique_key', $unique_key);
         if(!$thankYouTemplate->exists()){

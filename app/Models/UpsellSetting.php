@@ -25,7 +25,7 @@ class UpsellSetting extends Model
     }
 
     //check if unique_key exists
-    private function createUniqueKey($string){
+    private function createUniqueKey($string) {
         if (static::whereUniqueKey($unique_key = $string)->exists()) {
             $random = rand(1000, 9000);
             $unique_key = $string.''.$random;
@@ -33,5 +33,11 @@ class UpsellSetting extends Model
         }
 
         return $string;
+    }
+
+    public function getSubheadingTextAttribute($value) {
+        $subheadings = unserialize($value);
+
+        return $subheadings;
     }
 }

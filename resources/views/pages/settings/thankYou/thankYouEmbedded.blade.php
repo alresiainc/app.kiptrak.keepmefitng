@@ -111,7 +111,7 @@
         
     <div class="view" id="thankyou-section" style="margin-top: 10px;">
         <div class="row">
-            <div class="col-lg-12 mb-3">
+            <div class="col-lg-12 mb-3 d-none">
                 <article class="card shadow-sm">
                     <div class="card-body"> 
                         <div class="mt-4 mx-auto text-center" style="max-width:600px">

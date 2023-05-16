@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Support\Facades\Session;
 use App\Notifications\UserLogin;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Redirect;
 
 use App\Models\User;
 use App\Models\Country;
@@ -28,6 +29,11 @@ class AuthController extends Controller
         if (!Auth::guest()) {
             return back();
         }
+        // $username = 'john';
+        // $url = 'https://wordpress.com';
+
+        // $redirectUrl = Redirect::away($url . '?username=' . urlencode($username));
+        // return $redirectUrl;
         return view('pages.auth.login');
     }
 

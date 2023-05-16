@@ -212,4 +212,7 @@ class Product extends Model
         return $products; 
     }
 
+    //used in orderbump modal
+    
+
 }

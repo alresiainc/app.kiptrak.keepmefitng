@@ -85,7 +85,9 @@ Route::get('/notify', function () {
     return 'Ok';
 }); 
 
-Route::get('/test', [TestController::class, 'test'])->name('test');
+Route::get('/test', [TestController::class, 'createCkeditor'])->name('test');
+Route::post('/test', [TestController::class, 'createCkeditorPost'])->name('createCkeditorPost');
+
 
 
 //login
@@ -109,6 +111,7 @@ Route::get('/cart-abandon-package', [FormBuilderController::class, 'cartAbandonP
 
 //thankyou
 Route::get('/view-thankyou-templates/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'singleThankYouTemplate'])->name('singleThankYouTemplate');
+Route::get('/show-thankyou-templates/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'showThankYouTemplate'])->name('showThankYouTemplate');
 Route::get('/thankYou-embedded/{unique_key}/{current_order_id?}', [ThankYouSettingController::class, 'thankYouEmbedded'])->name('thankYouEmbedded');
 
 //auth routes
