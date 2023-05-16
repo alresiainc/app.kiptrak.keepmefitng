@@ -186,17 +186,18 @@ class ThankYouSettingController extends Controller
         // $authUser = auth()->user();
         // $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        $username = 'john';
-        $url = 'https://wordpress.com';
-
-        $redirectUrl = Redirect::away($url . '?username=' . urlencode($username));
-        return $redirectUrl;
-
         $thankYouTemplate = ThankYou::where('unique_key', $unique_key);
         if(!$thankYouTemplate->exists()){
             abort(404);
         }
         $thankYou = $thankYouTemplate->first();
+
+        $template_name = $thankYou->template_name;
+        $url = $thankYou->template_external_url;
+
+        // $redirectUrl = Redirect::away($url . '?templ=' . urlencode($template_name));
+        $redirectUrl = Redirect::away($url);
+        return $redirectUrl;
 
         $customer = ''; // to check against when the thankyou pg will be rendered
         

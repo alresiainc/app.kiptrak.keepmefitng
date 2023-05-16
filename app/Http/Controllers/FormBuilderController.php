@@ -1125,6 +1125,7 @@ class FormBuilderController extends Controller
         $thankyou->url = 'view-thankyou-templates/'.$thankyou->unique_key.'/'.$order->id;
         $thankyou->embedded_tag = '<embed type="text/html" src="'.$embedded_url.'"  width="100%" height="700">';
         $thankyou->iframe_tag = '<iframe src="'.$embedded_url.'" width="100%" height="700" style="border:0"></iframe>';
+        $thankyou->template_external_url = $data['template_external_url'];
         $thankyou->save();
     
         //update formHolder

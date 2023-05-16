@@ -247,7 +247,7 @@
 
                       @if (isset($formHolder->thankyou_id))
                         <td>
-                          {{ $formHolder->thankyou->template_name }} <span class="badge badge-info" onclick="addThankYouTemplate('{{ $formHolder->unique_key }}', '{{ $formHolder->name }}')" style="cursor: pointer;">
+                          {{ $formHolder->thankyou->template_name }} <span class="badge badge-info" onclick="addThankYouTemplate('{{ $formHolder->unique_key }}', '{{ $formHolder->name }}', {{ json_encode($formHolder->thankyou) }})" style="cursor: pointer;">
                             <i class="bi bi-pencil"></i> Edit</span>
                           <br>
 
@@ -270,7 +270,7 @@
                             <!--edit Upsell-modal-end--->
                         </td> 
                         @else  
-                        <td><span class="badge badge-primary" onclick="addThankYouTemplate('{{ $formHolder->unique_key }}', '{{ $formHolder->name }}')" style="cursor: pointer;">
+                        <td><span class="badge badge-primary" onclick="addThankYouTemplate('{{ $formHolder->unique_key }}', '{{ $formHolder->name }}', '')" style="cursor: pointer;">
                           <i class="bi bi-plus"></i> Add</span></td>
                       @endif
 
@@ -728,7 +728,7 @@
           <div class="mt-3">
             <label for="upsell_product" class="form-label">Select Template</label>
             <select name="thankyou_template_id" data-live-search="true" class="custom-select form-control border btn-dark @error('thankyou_template_id') is-invalid @enderror"
-              id="" style="color: black !important;">
+              id="thankyou_template_selected" style="color: black !important;">
               <option value="">Nothing Selected</option>
               @if (count($thankYouTemplates) > 0)
 
@@ -741,6 +741,17 @@
             </select>
 
             @error('product')
+              <span class="invalid-feedback mb-3" role="alert">
+                  <strong>{{ $message }}</strong>
+              </span>
+            @enderror
+          </div>
+
+          <div class="mt-3">
+            <label for="template_external_url" class="form-label">External Url (Redirection)</label>
+            <input type="text" name="template_external_url" id="template_external_url" class="form-control" placeholder="https://..." required>
+
+            @error('template_external_url')
               <span class="invalid-feedback mb-3" role="alert">
                   <strong>{{ $message }}</strong>
               </span>
@@ -892,7 +903,6 @@
     $('#productActualSellingPrice').val(spanText)
   });
 
-
   //upsell side
   function addUpsell($form_unique_key="", $form_name="") {
     $('#addUpsell').modal("show");
@@ -924,10 +934,44 @@
     //$("orderbump_product").val($formHolder.orderbump.product.id).change();
   }
 
-  function addThankYouTemplate($form_unique_key="", $form_name="") {
+  function addThankYouTemplate($form_unique_key="", $form_name="", $thankyou="") {
     $('#addThankYou').modal("show");
     $('#addThankYou_form_unique_key').val($form_unique_key);
     $('#addThankYouTitle').text('Add Thank-you template to this Form: '+$form_name);
+
+    if($thankyou == "") {
+      // Get the select element
+      var $select = $('#thankyou_template_selected');
+
+      // Prepend the new option
+      $select.prepend('<option value="">Nothing Selected</option>');
+
+      // Update the custom-select UI
+      //$select.closest('.bootstrap-select').find('.filter-option-inner-inner').html('');
+      //$select.closest('.bootstrap-select').find('.dropdown-toggle .filter-option-inner-inner').html('');
+
+      // Set the selected option
+      $select.val('');
+
+      $("#template_external_url").val('')
+      
+    } else {
+      // Get the select element
+      var $select = $('#thankyou_template_selected');
+
+      // Prepend the new option
+      $select.prepend('<option value="'+$thankyou.id+'">'+$thankyou.template_name+'</option>');
+
+      // Update the custom-select UI
+      $select.closest('.bootstrap-select').find('.filter-option-inner-inner').html($thankyou.template_name);
+      $select.closest('.bootstrap-select').find('.dropdown-toggle .filter-option-inner-inner').html($thankyou.template_name);
+
+      // Set the selected option
+      $select.val($thankyou.id);
+
+      $("#template_external_url").val($thankyou.template_external_url)
+    }
+    
   }
 
 </script>
