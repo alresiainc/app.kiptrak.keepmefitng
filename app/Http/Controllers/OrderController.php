@@ -490,6 +490,17 @@ class OrderController extends Controller
         return back()->with('success', 'Order Deleted Successfullly');
     }
 
+    //bulk delete
+    public function deleteAllOrders(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $ids = $request->ids;
+        DB::table("orders")->whereIn('id',explode(",",$ids))->delete();
+        return response()->json(['success'=>"Selected Orders Deleted Successfully."]);
+    }
+
     public function assignAgentToOrder(Request $request)
     {
         $authUser = auth()->user();

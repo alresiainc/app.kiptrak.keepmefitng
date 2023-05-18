@@ -200,6 +200,7 @@ Route::post('/assign-agent-to-order', [OrderController::class, 'assignAgentToOrd
 Route::post('/assign-staff-to-order', [OrderController::class, 'assignStaffToOrder'])->name('assignStaffToOrder');
 Route::post('/update-order-date-status', [OrderController::class, 'updateOrderDateStatus'])->name('updateOrderDateStatus');
 Route::get('/delete-order/{unique_key}', [OrderController::class, 'deleteOrder'])->name('deleteOrder');
+Route::get('/delete-all-orders', [OrderController::class, 'deleteAllOrders'])->name('deleteAllOrders');
 
 //register any user, customer or agent, staff, etc
 //staff

@@ -171,8 +171,8 @@ class FormBuilderController extends Controller
             $formHolders[] = $formHolder;
         }
         //return $formHolders;
-
-        $products = Product::where('status', 'true')->get();
+        
+        $products = Product::whereNull('combo_product_ids')->where('status', 'true')->orderBy('id','DESC')->get();
         $upsellTemplates = UpsellSetting::all();
         $staffs = User::where('type','staff')->get();
         $thankYouTemplates = ThankYou::all();

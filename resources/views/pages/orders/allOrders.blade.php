@@ -50,6 +50,10 @@
           font-size: 12px;
           padding: 3px 6px;
         }
+        .delete_all{
+          background-color: #DC3545 !important;
+          border-color: #DC3545 !important; 
+        }
 
     </style>
 @endsection
@@ -131,6 +135,7 @@
                 <i class="bi bi-upload"></i> <span>Import</span></button>
               <button class="btn btn-sm btn-secondary rounded-pill d-none" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
               <button class="btn btn-sm btn-info rounded-pill mail_all" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Mail All"><i class="bi bi-chat-left"></i> <span>Mail All</span></button>
+              <button class="btn btn-sm btn-info rounded-pill delete_all" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All" data-url="{{ url('/delete-all-orders') }}"><i class="bi bi-trash"></i> <span>Delete All</span></button>
             </div>
           </div>
           <hr>
@@ -172,145 +177,146 @@
                     <tr id="tr_{{ isset($order->customer_id) ? $order->customer->id : '' }}">
 
                       <td><input type="checkbox" class="sub_chk" data-id="{{ isset($order->customer_id) ? $order->customer->id : '' }}" data-order_id="{{ $order->id }}"></td>
-                        @if (!$entries)<td>{{ $order->orderCode($order->id) }}</td>@endif
-                        <td>{{ $order->customer_id ? $order->customer->firstname : 'No response' }} {{ $order->customer_id ? $order->customer->lastname : '' }}</td>
+                      @if (!$entries)<td>{{ $order->orderCode($order->id) }}</td>@endif
+
+                      <td>{{ $order->customer_id ? $order->customer->firstname : 'No response' }} {{ $order->customer_id ? $order->customer->lastname : '' }}</td>
                         
                         <!--Delivery Due Date-->
-                        <td>
-                          @if (isset($order->expected_delivery_date))
-                          {{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('D, jS M Y') }}
+                      <td>
+                        @if (isset($order->expected_delivery_date))
+                        {{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('D, jS M Y') }}
 
-                          <span class="badge badge-dark" onclick="changeDeliveryDateModal('{{ $order->id }}', '{{ $order->orderCode($order->id) }}', '{{ ucFirst($order->status) }}', '{{ $order->customer->firstname.' '.$order->customer->lastname }}',
-                          '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')" style="cursor: pointer;">
-                          <i class="bi bi-plus"></i> <span>Change Delivery Date</span></span>
-                          
-                          @else
-                          No reponse   
-                          @endif
-                          
-                        </td>
+                        <span class="badge badge-dark" onclick="changeDeliveryDateModal('{{ $order->id }}', '{{ $order->orderCode($order->id) }}', '{{ ucFirst($order->status) }}', '{{ $order->customer->firstname.' '.$order->customer->lastname }}',
+                        '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')" style="cursor: pointer;">
+                        <i class="bi bi-plus"></i> <span>Change Delivery Date</span></span>
                         
-                        <td>{{ $order->customer_id ? $order->customer->delivery_address : 'No response' }}</td>
-
-                        <!--Assign Staff-->
-                        @if (isset($order->staff_assigned_id))
-                        <td>
-                          {{ $order->staff->name }} <br>
-                          <span class="badge badge-dark" onclick="changeStaffModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Staff" style="cursor: pointer">
-                            <i class="bi bi-plus"></i> <span>Change Staff</span></span>
-                        </td>
                         @else
-                        <td style="width: 120px">
-                          <span class="badge badge-success" onclick="addStaffModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Staff" style="cursor: pointer">
-                            <i class="bi bi-plus"></i> <span>Assign Staff</span></span> 
-                        </td>
+                        No reponse   
                         @endif
+                        
+                      </td>
+                        
+                      <td>{{ $order->customer_id ? $order->customer->delivery_address : 'No response' }}</td>
 
-                        <!--Assign Agent-->
-                        @if (isset($order->agent_assigned_id))
-                        <td>
-                          {{ $order->agent->name }} <br>
-                          <span class="badge badge-dark" onclick="changeAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Agent" style="cursor: pointer">
-                            <i class="bi bi-plus"></i> <span>Change Agent</span></span>
-                        </td>
-                        @else
-                        <td style="width: 120px">
-                          <span class="badge badge-success" onclick="addAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Agent" style="cursor: pointer">
-                            <i class="bi bi-plus"></i> <span>Assign Agent</span></span> 
-                        </td>
-                        @endif
+                      <!--Assign Staff-->
+                      @if (isset($order->staff_assigned_id))
+                      <td>
+                        {{ $order->staff->name }} <br>
+                        <span class="badge badge-dark" onclick="changeStaffModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Staff" style="cursor: pointer">
+                          <i class="bi bi-plus"></i> <span>Change Staff</span></span>
+                      </td>
+                      @else
+                      <td style="width: 120px">
+                        <span class="badge badge-success" onclick="addStaffModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Staff" style="cursor: pointer">
+                          <i class="bi bi-plus"></i> <span>Assign Staff</span></span> 
+                      </td>
+                      @endif
 
-                        <!--messages--->
-                        <td>
-                          <div class="d-flex justify-content-between border">
-                            <a href="javascript:void(0);" onclick="whatsappModal({{ json_encode($order) }}, '{{ $order->whatsappNewOrderMessage($order) }}')" class="btn btn-success btn-sm rounded-circle m-1 whatsapp-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Whatsapp">
-                              <i class="bi bi-whatsapp"></i>
-                              @if ($order->whatsappMessages() !== '')
-                                <span class="badge badge-dark whatsapp-icon-number">{{ $order->whatsappMessages()->count() }}</span>
-                              @endif
-                            </a>
+                      <!--Assign Agent-->
+                      @if (isset($order->agent_assigned_id))
+                      <td>
+                        {{ $order->agent->name }} <br>
+                        <span class="badge badge-dark" onclick="changeAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Change Agent" style="cursor: pointer">
+                          <i class="bi bi-plus"></i> <span>Change Agent</span></span>
+                      </td>
+                      @else
+                      <td style="width: 120px">
+                        <span class="badge badge-success" onclick="addAgentModal('{{ $order->id }}')" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Assign Agent" style="cursor: pointer">
+                          <i class="bi bi-plus"></i> <span>Assign Agent</span></span> 
+                      </td>
+                      @endif
+
+                      <!--messages--->
+                      <td>
+                        <div class="d-flex justify-content-between border">
+                          <a href="javascript:void(0);" onclick="whatsappModal({{ json_encode($order) }}, '{{ $order->whatsappNewOrderMessage($order) }}')" class="btn btn-success btn-sm rounded-circle m-1 whatsapp-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Whatsapp">
+                            <i class="bi bi-whatsapp"></i>
                             @if ($order->whatsappMessages() !== '')
-                            <a href="{{ route('sentWhatsappMessage', $order->unique_key) }}" class="btn btn-success btn-sm rounded-circle m-1 whatsapp-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Whatsapp Messages">
-                              <i class="bi bi-eye"></i></a>
+                              <span class="badge badge-dark whatsapp-icon-number">{{ $order->whatsappMessages()->count() }}</span>
                             @endif
-                          </div>
-                          
-                          <div class="d-flex justify-content-between border">
-                            <a href="javascript:void(0);" class="btn btn-info btn-sm rounded-circle m-1 whatsapp-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Whatsapp">
-                              <i class="bi bi-chat"></i>
-                              @if ($order->emailMessages() !== '')
-                                <span class="badge badge-dark whatsapp-icon-number">{{ $order->emailMessages()->count() }}</span>
-                              @endif
-                            </a>
-                            @if ($order->emailMessages() !== '')
-                            <a href="javascript:void(0);" class="btn btn-info btn-sm rounded-circle m-1 whatsapp-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Email Messages">
-                              <i class="bi bi-eye"></i></a>
-                            @endif
-                          </div>
-                          
-                        </td>
-
-                        <td>{{ $order->created_at->format('Y-m-d') }}</td>
-                        
-                        <td>
-    
-                          <div class="btn-group">
-                            @if (!isset($order->status) || $order->status=='new')
-                            <button type="button" class="btn btn-info btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
-                              <span>new</span>
-                            </button>
-                            @elseif($order->status=='pending')
-                            <button type="button" class="btn btn-danger btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
-                              <span>pending</span>
-                            </button>
-                            @elseif($order->status=='cancelled')
-                            <button type="button" class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
-                              <span>cancelled</span>
-                            </button>
-                            @elseif($order->status=='delivered_not_remitted')
-                            <button type="button" class="btn btn-warning btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
-                              <span>delivered not remitted</span>
-                            </button>
-                            @elseif($order->status=='delivered_and_remitted')
-                            <button type="button" class="btn btn-success btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
-                              <span>delivered & remitted</span>
-                            </button>
-                            
-
-                            @endif
-                            <ul class="dropdown-menu">
-
-                              <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'new']) }}">New</a></li>
-                              <li><hr class="dropdown-divider"></li>
-                                
-                              <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'pending']) }}">Pending</a></li>
-                              <li><hr class="dropdown-divider"></li>
-
-                              <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'cancelled']) }}">Cancelled</a></li>
-                              <li><hr class="dropdown-divider"></li>
-
-                              <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_not_remitted']) }}">Delivered Not Remitted</a></li>
-                              <li><hr class="dropdown-divider"></li>
-
-                              <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_and_remitted']) }}">Delivered & Remitted</a></li>
-                              <li><hr class="dropdown-divider"></li>
-
-                            </ul>
-                          </div>
-
-                          
-
-                        </td>
-
-                        <td>
-                          <div class="mb-1"><a class="btn btn-success btn-sm" href="{{ route('singleOrder', $order->unique_key) }}">View</a></div>
-                          
-                          @if (isset($order->customer_id))
-                            <div class="mb-1"><a href="{{ route('editOrder', $order->unique_key) }}" class="btn-info btn-sm w-100 p-1">Edit</a></div>
+                          </a>
+                          @if ($order->whatsappMessages() !== '')
+                          <a href="{{ route('sentWhatsappMessage', $order->unique_key) }}" class="btn btn-success btn-sm rounded-circle m-1 whatsapp-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Whatsapp Messages">
+                            <i class="bi bi-eye"></i></a>
                           @endif
-                          <div><a href="{{ route('deleteOrder', $order->unique_key) }}" onclick="return confirm('Are you sure?')" class="btn-danger btn-sm w-100 p-1">Delete</a></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between border">
+                          <a href="javascript:void(0);" class="btn btn-info btn-sm rounded-circle m-1 whatsapp-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Whatsapp">
+                            <i class="bi bi-chat"></i>
+                            @if ($order->emailMessages() !== '')
+                              <span class="badge badge-dark whatsapp-icon-number">{{ $order->emailMessages()->count() }}</span>
+                            @endif
+                          </a>
+                          @if ($order->emailMessages() !== '')
+                          <a href="javascript:void(0);" class="btn btn-info btn-sm rounded-circle m-1 whatsapp-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View Email Messages">
+                            <i class="bi bi-eye"></i></a>
+                          @endif
+                        </div>
+                        
+                      </td>
 
-                        </td>
+                      <td>{{ $order->created_at->format('Y-m-d') }}</td>
+                        
+                      <td>
+  
+                        <div class="btn-group">
+                          @if (!isset($order->status) || $order->status=='new')
+                          <button type="button" class="btn btn-info btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
+                            <span>new</span>
+                          </button>
+                          @elseif($order->status=='pending')
+                          <button type="button" class="btn btn-danger btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
+                            <span>pending</span>
+                          </button>
+                          @elseif($order->status=='cancelled')
+                          <button type="button" class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
+                            <span>cancelled</span>
+                          </button>
+                          @elseif($order->status=='delivered_not_remitted')
+                          <button type="button" class="btn btn-warning btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
+                            <span>delivered not remitted</span>
+                          </button>
+                          @elseif($order->status=='delivered_and_remitted')
+                          <button type="button" class="btn btn-success btn-sm dropdown-toggle rounded-pill fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
+                            <span>delivered & remitted</span>
+                          </button>
+                          
+
+                          @endif
+                          <ul class="dropdown-menu">
+
+                            <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'new']) }}">New</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                              
+                            <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'pending']) }}">Pending</a></li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'cancelled']) }}">Cancelled</a></li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_not_remitted']) }}">Delivered Not Remitted</a></li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li><a class="dropdown-item" href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_and_remitted']) }}">Delivered & Remitted</a></li>
+                            <li><hr class="dropdown-divider"></li>
+
+                          </ul>
+                        </div>
+
+                        
+
+                      </td>
+
+                      <td>
+                        <div class="mb-1"><a class="btn btn-success btn-sm" href="{{ route('singleOrder', $order->unique_key) }}">View</a></div>
+                        
+                        @if (isset($order->customer_id))
+                          <div class="mb-1"><a href="{{ route('editOrder', $order->unique_key) }}" class="btn-info btn-sm w-100 p-1">Edit</a></div>
+                        @endif
+                        <div><a href="{{ route('deleteOrder', $order->unique_key) }}" onclick="return confirm('Are you sure?')" class="btn-danger btn-sm w-100 p-1">Delete</a></div>
+
+                      </td>
                     </tr>
                   @endif
                   @endforeach
@@ -670,24 +676,24 @@
 
 <!---sending whatsapp---->
 <script>
-function whatsappModal($order="", $message="") {
-  //console.log($orderId);
-  $('#whatsappModal').modal("show");
-  $('#whatsapp_customer_id').val($order.customer.id);
-  $('#whatsapp_customer_order_id').val($order.id);
-  $('#whatsapp_message').val($message);
-  $part = $order.customer.whatsapp_phone_number.substring(0,1);
-  if ($part == '0') {
-    $whatsapp_phone_number = '234'+$order.customer.whatsapp_phone_number.substring(1);
-    $('#recepient_phone_number').val($whatsapp_phone_number);
-  } else {
-    $('#recepient_phone_number').val($order.customer.whatsapp_phone_number);
+  function whatsappModal($order="", $message="") {
+    //console.log($orderId);
+    $('#whatsappModal').modal("show");
+    $('#whatsapp_customer_id').val($order.customer.id);
+    $('#whatsapp_customer_order_id').val($order.id);
+    $('#whatsapp_message').val($message);
+    $part = $order.customer.whatsapp_phone_number.substring(0,1);
+    if ($part == '0') {
+      $whatsapp_phone_number = '234'+$order.customer.whatsapp_phone_number.substring(1);
+      $('#recepient_phone_number').val($whatsapp_phone_number);
+    } else {
+      $('#recepient_phone_number').val($order.customer.whatsapp_phone_number);
+    }
+    $name = $order.customer.firstname+' '+$order.customer.lastname;
+    $('#whatsappModalLabel span').text($name);
+    //console.log($whatsapp_phone_number)
+    
   }
-  $name = $order.customer.firstname+' '+$order.customer.lastname;
-  $('#whatsappModalLabel span').text($name);
-  //console.log($whatsapp_phone_number)
-  
-}
 </script>
 
 <!---network connect b4 sending whatsapp---->
@@ -755,5 +761,55 @@ function whatsappModal($order="", $message="") {
  );
 </script>
 <?php endif ?>
+
+<script>
+  //delete_all
+  $('.delete_all').on('click', function(e) {
+
+var allVals = [];  
+$(".sub_chk:checked").each(function() {  
+    allVals.push($(this).attr('data-order_id'));
+});  
+
+//check if any is checked
+if(allVals.length <=0)  
+{  
+    alert("Please select row(s) to delete.");  
+}  else {  
+    var check = confirm("Are you sure you want to delete this row?");  
+    if(check == true){  
+
+        var join_selected_values = allVals.join(",");
+
+        $.ajax({
+            url: $(this).data('url'),
+            type: 'GET',
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            data: 'ids='+join_selected_values,
+            success: function (data) {
+                if (data['success']) {
+                    $(".sub_chk:checked").each(function() {  
+                        $(this).parents("tr").remove();
+                    });
+                    alert(data['success']);
+                } else if (data['error']) {
+                    alert(data['error']);
+                } else {
+                    alert('Whoops Something went wrong!!');
+                }
+            },
+            error: function (data) {
+                alert(data.responseText);
+            }
+        });
+
+
+    $.each(allVals, function( index, value ) {
+        $('table tr').filter("[data-row-id='" + value + "']").remove();
+    });
+    }  
+}  
+});
+</script>
     
 @endsection
