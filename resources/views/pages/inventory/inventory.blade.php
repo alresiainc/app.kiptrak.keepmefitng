@@ -29,6 +29,10 @@
       height: 34px !important;
   }
   /* select2 height proper */
+  .order-status, #show-orders, #hide-orders, #show-transfers, #hide-transfers{
+    cursor: pointer;
+  }
+  
 </style>
 @endsection
 
@@ -36,11 +40,11 @@
     
 <main id="main" class="main">
   <div class="pagetitle">
-    <h1>Inventory Management</h1>
+    <h1>{{ $selected_warehouse !== '' ? $selected_warehouse->name : '' }} Inventory Management</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active">Inventory Management</li>
+        <li class="breadcrumb-item active"><a href="{{ route('inventoryDashboard') }}">Inventory Management</a></li>
       </ol>
     </nav>
   </div>
@@ -49,32 +53,100 @@
   <!-- Alert -->
   <div id="liveAlertPlaceholder d-none"></div>
   <!-- /Alert -->
+
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="text-center mb-3">
+      <div class="btn-group">
+        
+        <button type="button" class="btn btn-info btn-sm dropdown-toggle fw-bolder" data-bs-toggle="dropdown" style="font-size: 10px;">
+          <span>{{ $selected_warehouse !== '' ? $selected_warehouse->name : 'Select Warehouse' }}</span>
+        </button>
+        
+        @if (count($warehouses) > 0)
+        @if ($record == 'all')
+        <ul class="dropdown-menu">
+          
+          @foreach ($warehouses as $warehouse)
+          <li><a class="dropdown-item" href="{{ route('inventoryDashboard', $warehouse->unique_key) }}">{{ $warehouse->name }}</a></li>
+          <li><hr class="dropdown-divider"></li>
+          @endforeach
+          
+        </ul> 
+        @endif
+        @if ($record == 'today')
+        <ul class="dropdown-menu">
+          
+          @foreach ($warehouses as $warehouse)
+          <li><a class="dropdown-item" href="{{ route('inventoryDashboardToday', $warehouse->unique_key) }}">{{ $warehouse->name }}</a></li>
+          <li><hr class="dropdown-divider"></li>
+          @endforeach
+          
+        </ul> 
+        @endif
+        @if ($record == 'weekly')
+        <ul class="dropdown-menu">
+          
+          @foreach ($warehouses as $warehouse)
+          <li><a class="dropdown-item" href="{{ route('inventoryDashboardWeekly', $warehouse->unique_key) }}">{{ $warehouse->name }}</a></li>
+          <li><hr class="dropdown-divider"></li>
+          @endforeach
+          
+        </ul> 
+        @endif
+        @if ($record == 'monthly')
+        <ul class="dropdown-menu">
+          
+          @foreach ($warehouses as $warehouse)
+          <li><a class="dropdown-item" href="{{ route('inventoryDashboardMonthly', $warehouse->unique_key) }}">{{ $warehouse->name }}</a></li>
+          <li><hr class="dropdown-divider"></li>
+          @endforeach
+          
+        </ul> 
+        @endif
+        @if ($record == 'yearly')
+        <ul class="dropdown-menu">
+          
+          @foreach ($warehouses as $warehouse)
+          <li><a class="dropdown-item" href="{{ route('inventoryDashboardYearly', $warehouse->unique_key) }}">{{ $warehouse->name }}</a></li>
+          <li><hr class="dropdown-divider"></li>
+          @endforeach
+          
+        </ul> 
+        @endif
+        
+        @endif
+        
   
-  <div class="text-lg-end text-center mb-3">
-    <div class="btn-group" role="group" aria-label="Basic example">
-      
-      <a href="{{ route('inventoryDashboardToday') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'today' ? 'active' : '' }}">
-        Today
-      </button></a>
-
-      <a href="{{ route('inventoryDashboardWeekly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'weekly' ? 'active' : '' }}">
-        This Week
-      </button></a>
-
-      <a href="{{ route('inventoryDashboardMonthly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'monthly' ? 'active' : '' }}">
-        This Month
-      </button></a>
-
-      <a href="{{ route('inventoryDashboardYearly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'yearly' ? 'active' : '' }}">
-        This Year
-      </button></a>
-
-      <a href="/"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'all' ? 'active' : '' }}">
-        All
-      </button></a>
-      
+      </div>
+    </div>
+    
+    <div class="text-center mb-3">
+      <div class="btn-group" role="group" aria-label="Basic example">
+        
+        <a href="{{ route('inventoryDashboardToday') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'today' ? 'active' : '' }}">
+          Today
+        </button></a>
+  
+        <a href="{{ route('inventoryDashboardWeekly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'weekly' ? 'active' : '' }}">
+          This Week
+        </button></a>
+  
+        <a href="{{ route('inventoryDashboardMonthly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'monthly' ? 'active' : '' }}">
+          This Month
+        </button></a>
+  
+        <a href="{{ route('inventoryDashboardYearly') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'yearly' ? 'active' : '' }}">
+          This Year
+        </button></a>
+  
+        <a href="{{route('inventoryDashboard') }}"><button type="button" class="btn btn-sm btn-light-success {{ $record == 'all' ? 'active' : '' }}">
+          All
+        </button></a>
+        
+      </div>
     </div>
   </div>
+  
   <hr />
 
   <section class="section m-0">
@@ -216,7 +288,7 @@
                 <i class="bi bi-cash-stack display-1 text-light-black"></i>
               </div>
               <div class="text-start">
-                <h2 class="fw-bold">{{ $currency }}{{ $sale_revenue }}</h2>
+                <h2 class="fw-bold">{{ $currency }}{{ $sales_sum }}</h2>
                 <small class="text-uppercase text-muted small pt-1 fw-bold">Revenue</small>
               </div>
             </div>
@@ -374,6 +446,339 @@
 
   </section>
 
+  <section>
+    <!---warehouse-orders--->
+    
+    @if ($outgoingStocks != '')
+    @if (count($packages) > 0)
+    
+    
+    <div class="d-flex justify-content-start align-items-center mb-3 gap-3">
+      <div class="btn-group">
+        
+        <button type="button" class="btn btn-info btn-sm dropdown-toggle fw-bolder" data-bs-toggle="dropdown">
+          <span><span id="active-order-status">All Orders</span> {{ $selected_warehouse !== '' ? 'in '. $selected_warehouse->name : '' }}</span>
+        </button>
+        
+        <ul class="dropdown-menu">
+          
+          <li class="dropdown-item order-status">All Orders</li>
+          <li><hr class="dropdown-divider"></li>
+
+          <li class="dropdown-item order-status">Delivered and Remitted</li>
+          <li><hr class="dropdown-divider"></li>
+
+          <li class="dropdown-item order-status">Delivered Not Remitted</li>
+          <li><hr class="dropdown-divider"></li>
+
+          <li class="dropdown-item order-status">Cancelled</li>
+          <li><hr class="dropdown-divider"></li>
+
+          <li class="dropdown-item order-status">Pending</li>
+          <li><hr class="dropdown-divider"></li>
+
+          <li class="dropdown-item order-status">New</li>
+          <li><hr class="dropdown-divider"></li>
+          
+        </ul> 
+        
+      </div>
+      <div class="display-6" id="show-orders"><i class="bi bi-eye"></i></div>
+      <div class="display-6" id="hide-orders" style="display: none;"><i class="bi bi-eye-slash"></i></div>
+    </div>
+      
+
+    <div id="orders-section">
+
+      @foreach ($packages as $package)
+
+      <div class="row each-order">
+        <div class="col-md-12">
+          <div class="card">
+            
+            <div class="card-body pt-3">
+              
+              <div class="row g-3 m-1">
+                <div class="col-lg-3">
+                    <label for="" class="fw-bolder">Order Code</label>
+                    <div class="text-dark display-7 fw-bold">{{ $package['warehouseOrder']['order']->orderCode($package['warehouseOrder']['order']->id) }}</div>
+                    <div class="each-order-status">{{ ucFirst(str_replace('_', ' ', $package['warehouseOrder']['order']->status )) }}</div>
+                    
+                </div>
+                <div class="col-lg-5">
+                    <label for="" class="fw-bolder">Customer</label>
+                    <div class="text-dark">{{ $package['warehouseOrder']['order']->customer_id ? $package['warehouseOrder']['order']->customer->firstname : 'N/A' }} 
+                      {{ $package['warehouseOrder']['order']->customer_id ? $package['warehouseOrder']['order']->customer->lastname : 'N/A' }}
+                        | Email: <span class="lead">{{ $package['warehouseOrder']['order']->customer_id ? $package['warehouseOrder']['order']->customer->email : 'N/A' }}</div>
+                    <div>Phone:  <span class="lead">{{ $package['warehouseOrder']['order']->customer_id ? $package['warehouseOrder']['order']->customer->phone_number : 'N/A' }}</span><br>
+                        @if ($package['warehouseOrder']['order']->customer_id)
+                    
+                        @php
+                            $whatsapp = substr($package['warehouseOrder']['order']->customer->whatsapp_phone_number, 1)
+                        @endphp
+                        Whatsapp:  <span class="lead"><a href="https://wa.me/{{ '234'.$whatsapp }}?text=Hi" target="_blank">
+                            {{ $package['warehouseOrder']['order']->customer->whatsapp_phone_number }}</a></span>
+                        @else
+                            Whatsapp:  <span class="lead">None</span>
+                        @endif
+                        {{-- <a href="https://wa.me/2348066216874?text=Hi">Whatsapp link</a> --}}
+                    </div>
+                    <div>Location:  <span class="lead">{{ $package['warehouseOrder']['order']->customer_id ? $package['warehouseOrder']['order']->customer->city : 'None' }}, {{ $package['warehouseOrder']['order']->customer_id ? $package['warehouseOrder']['order']->customer->state : 'None' }}</span></div>
+                    <div>Delivery Address:  <span class="lead">{{ $package['warehouseOrder']['order']->customer_id ? $package['warehouseOrder']['order']->customer->delivery_address : 'None' }}</span></div>
+                    
+                </div>
+                <div class="col-lg-2">
+                    <label for="" class="fw-bolder">Expected Revenue({{ $currency }})</label>
+                    <div class="text-dark display-7 fw-bold">{{ number_format($package['warehouseOrder']['orderRevenue']) }}</div>
+                </div>
+                <div class="col-lg-2">
+                    <label for="" class="fw-bolder">Agent</label>
+                    <div class="text-dark">{{ $package['warehouseOrder']['order']->agent_assigned_id ? $package['warehouseOrder']['order']->agent->name : 'None' }}</div>
+                </div>
+              </div>
+              
+              @foreach ($package['warehouseOrder']['outgoingStock'] as $outgoingStock)
+              <div class="row g-3 m-1 border {{ $outgoingStock->customer_acceptance_status == 'accepted' ? 'border-success' : 'border-danger' }} rounded">
+                
+                <div class="col-lg-6">
+                    <label for="" class="fw-bolder">Product Name</label>
+                    <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock->product->name }}</div>
+                </div>
+
+                <div class="col-lg-1">
+                    <label for="" class="fw-bolder">Qty Ordered</label>
+                    <div class="text-dark d-none" style="font-size: 14px;">{{ $outgoingStock->quantity_removed.' @'. $outgoingStock->product->price }}</div>
+                    <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock->quantity_removed }}</div>
+                </div>
+                
+                <div class="col-lg-3">
+                    <label for="" class="fw-bolder">Revenue</label>
+                    <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock->amount_accrued }}</div>
+                </div>
+
+                <div class="col-lg-2">
+                  <label for="" class="fw-bolder">Customer Action</label>
+                  <div class="{{ $outgoingStock->customer_acceptance_status == 'accepted' ? 'text-success' : 'text-danger' }}" style="font-size: 14px;">{{ $outgoingStock->customer_acceptance_status }}</div>
+              </div>
+            
+              </div>
+              
+              @endforeach
+              
+              
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      @endforeach  
+    
+    </div>
+    @endif
+    @endif
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-top-border border-top-primary">
+          <div class="card-body">
+            <div class="card-title">
+              <div class="d-flex justify-content-start align-items-center gap-3">
+                <div>Products Transfers {{ $selected_warehouse !== '' ? 'in '. $selected_warehouse->name : '' }}</div>
+                <div class="display-7" id="show-transfers"><i class="bi bi-eye"></i></div>
+                <div class="display-7" id="hide-transfers" style="display: none;"><i class="bi bi-eye-slash"></i></div>
+              </div>
+              
+            </div>
+
+            @if ($selected_warehouse !== '')
+            <div id="transfers-section">
+
+              <div class="row mb-3">
+                <div class="col-lg-3 col-md-6">
+                  <label for="">Start Date</label>
+                  <input type="text" name="start_date" id="min" class="form-control filter">
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                  <label for="">End Date</label>
+                  <input type="text" name="end_date" id="max" class="form-control filter">
+                </div>
+                
+              </div>
+
+              <div class="table table-responsive">
+                <table id="products-table" class="table custom-table" style="width:100%">
+                  <thead>
+                      <tr>
+                          <th>From Warehouse</th>
+                          <th>Products Transferred</th>
+                          <th>To Warehouse</th>
+                          <th>Done By</th>
+                          <th>Date Added</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                    @if (count($transfers) > 0)
+                        @foreach ($transfers as $transfer)
+                        <tr>
+                        
+                          <td class="@if($transfer->fromWarehouse->name==$selected_warehouse->name) fw-bold @endif">{{ $transfer->fromWarehouse->name }}</td>
+                          <td>
+                            @php
+                                $product_qty_transferred = $transfer->product_qty_transferred
+                            @endphp
+                            @foreach ($product_qty_transferred as $productQty)
+                                <div class="badge badge-secondary">{!! isset($productQty['each_product'][0]) ? $productQty['each_product'][0] : '' !!}</div>
+                            @endforeach
+                          </td>
+                          <td class="@if($transfer->toWarehouse->name==$selected_warehouse->name) fw-bold @endif">{{ $transfer->toWarehouse->name }}</td>
+                          <td>{{ $transfer->createdBy->name }}</td>
+                          <td>{{ $transfer->created_at }}</td>
+                          
+                      </tr>
+                        @endforeach
+                    @endif
+                      
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+            @endif
+
+            @if ($selected_warehouse == '')
+            <div id="transfers-section">
+
+              <div class="row mb-3">
+                <div class="col-lg-3 col-md-6">
+                  <label for="">Start Date</label>
+                  <input type="text" name="start_date" id="min" class="form-control filter">
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                  <label for="">End Date</label>
+                  <input type="text" name="end_date" id="max" class="form-control filter">
+                </div>
+                
+              </div>
+
+              <div class="table table-responsive">
+                <table id="products-table" class="table custom-table" style="width:100%">
+                  <thead>
+                      <tr>
+                          <th>From Warehouse</th>
+                          <th>Products Transferred</th>
+                          <th>To Warehouse</th>
+                          <th>Done By</th>
+                          <th>Date Added</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                    @if (count($transfers) > 0)
+                        @foreach ($transfers as $transfer)
+                        <tr>
+                        
+                          <td>{{ $transfer->fromWarehouse->name }}</td>
+                          <td>
+                            @php
+                                $product_qty_transferred = $transfer->product_qty_transferred
+                            @endphp
+                            @foreach ($product_qty_transferred as $productQty)
+                                <div class="badge badge-secondary">{!! isset($productQty['each_product'][0]) ? $productQty['each_product'][0] : '' !!}</div>
+                            @endforeach
+                          </td>
+                          <td>{{ $transfer->toWarehouse->name }}</td>
+                          <td>{{ $transfer->createdBy->name }}</td>
+                          <td>{{ $transfer->created_at }}</td>
+                          
+                      </tr>
+                        @endforeach
+                    @endif
+                      
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+            @endif
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--warehouse-products-section--->
+  @if ($selected_warehouse !== '')
+  <section class="section">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-top-border border-top-primary">
+          <div class="card-body">
+            <div class="card-title">Products in {{ $selected_warehouse->name }}</div>
+
+            <div class="row mb-3">
+              <div class="col-lg-3 col-md-6">
+                <label for="">Start Date</label>
+                <input type="text" name="start_date" id="min" class="form-control filter">
+              </div>
+
+              <div class="col-lg-3 col-md-6">
+                <label for="">End Date</label>
+                <input type="text" name="end_date" id="max" class="form-control filter">
+              </div>
+
+            </div>
+
+            <div class="table table-responsive">
+              <table id="warehouse-stock-table" class="table custom-table table-striped" style="width:100%">
+                <thead>
+                  <tr>
+                    <th scope="col">Product Image</th>
+                    <th scope="col">Product Name</th>
+                    <th scope="col">Qty In Warehouse</th>
+                    <th scope="col">Date Added</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if ($recently_products->count() > 0)
+                      @foreach ($recently_products as $product)
+                          
+                          <tr>
+                            <th scope="row">
+                                <a
+                                  href="{{ asset('/storage/products/'.$product->image) }}"
+                                  data-fancybox="gallery"
+                                  data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
+                                  >   
+                                  <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid"
+                                  alt="{{$product->name}}" style="height: 30px;"></a>
+                            </th>
+                            <td>{{ $product->name }}</td>
+                            
+                            <td>{{ $selected_warehouse->productQtyInWarehouse($product->id) }}</td>
+                            <td>{{ $product->created_at->format('Y-m-d') }}</td>
+                          </tr>
+                          
+                      @endforeach
+                  @endif
+                  
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  @endif
+  
+  <!--all-products-section--->
+  @if ($selected_warehouse == '')
   <section class="section">
     <div class="row">
       <div class="col-md-12">
@@ -456,6 +861,7 @@
       </div>
     </div>
   </section>
+  @endif
 
   <hr />
   
@@ -489,6 +895,62 @@
 @endsection
 
 @section('extra_js')
+
+<script>
+  $('#show-orders').on('click', function () {
+    $('#hide-orders').show();
+    $('#orders-section').toggle();
+    $(this).hide();
+  });
+  $('#hide-orders').on('click', function () {
+    $('#show-orders').show();
+    $('#orders-section').toggle();
+    $(this).hide();
+  });
+</script>
+
+<script>
+  $('#show-transfers').on('click', function () {
+    $('#hide-transfers').show();
+    $('#transfers-section').toggle();
+    $(this).hide();
+  });
+  $('#hide-transfers').on('click', function () {
+    $('#show-transfers').show();
+    $('#transfers-section').toggle();
+    $(this).hide();
+  });
+</script>
+
+<script>
+  $(".order-status").click(function(){
+  
+  // Retrieve the input field text and reset the count to zero
+  var order_status = $(this).text() == 'All Orders' ? $(this).text() : $(this).text() + ' Orders', count = 0;
+  //console.log(filter);
+  $('#active-order-status').text(order_status)
+
+  var filter = $(this).text() != 'All Orders' ? $(this).text() : ''
+  
+  // Loop through the comment list
+  $(".each-order").each(function(){
+
+    // If the list item does not contain the text phrase fade it out
+    if ($(this).find('.each-order-status').text().search(new RegExp(filter, "i")) < 0) {
+        $(this).fadeOut();
+
+    // Show the list item if the phrase matches and increase the count by 1
+    } else {
+        $(this).show();
+        count++;
+    }
+  });
+
+  // Update the count,if need be
+  // var numberItems = count;
+  // $("#filter-count").text("Articles = "+count);
+  });
+</script>
 
 <script>
   $('.filter').change(function(){
@@ -573,22 +1035,5 @@
      }
  );
 
-  // $(document).ready(function() {
-  //   // Create date inputs
-  //   minDate = new DateTime($('#min'), {
-  //       format: 'MMMM Do YYYY'
-  //   });
-  //   maxDate = new DateTime($('#max'), {
-  //       format: 'MMMM Do YYYY'
-  //   });
- 
-  //   // DataTables initialisation
-  //   var table = $('.custom-table').DataTable({ "bSort" : false });
- 
-  //   // Refilter the table
-  //   $('#min, #max').on('change', function () {
-  //       table.draw();
-  //   });
-  // });
 </script>
 @endsection

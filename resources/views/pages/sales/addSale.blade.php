@@ -56,6 +56,16 @@
         {{Session::get('success')}}
     </div>
     @endif
+    @if(Session::has('duplicate_error'))
+    <div class="alert alert-danger mb-3 text-center">
+        {{Session::get('duplicate_error')}}
+    </div>
+    @endif
+    @if(Session::has('warehouse_error'))
+    <div class="alert alert-danger mb-3 text-center">
+        {!! Session::get('warehouse_error') !!}
+    </div>
+    @endif
 
     <section>
       <div class="row">

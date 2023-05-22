@@ -193,12 +193,7 @@ class ThankYouSettingController extends Controller
         $thankYou = $thankYouTemplate->first();
 
         $template_name = $thankYou->template_name;
-        $url = $thankYou->template_external_url;
-
-        // $redirectUrl = Redirect::away($url . '?templ=' . urlencode($template_name));
-        $redirectUrl = Redirect::away($url);
-        return $redirectUrl;
-
+        
         $customer = ''; // to check against when the thankyou pg will be rendered
         
         $order = ''; $orderId = ''; $qty_total = 0; $order_total_amount = 0; $grand_total = 0; $mainProducts_outgoingStocks = '';
@@ -269,6 +264,11 @@ class ThankYouSettingController extends Controller
             }
             
         } 
+        $url = $thankYou->template_external_url;
+
+        // $redirectUrl = Redirect::away($url . '?templ=' . urlencode($template_name));
+        $redirectUrl = Redirect::away($url);
+        return $redirectUrl;
         
         return view('pages.settings.thankYou.singleThankYou', \compact('thankYou', 'order', 'orderId', 'customer',
         'qty_total', 'order_total_amount', 'grand_total', 'mainProducts_outgoingStocks',

@@ -315,7 +315,7 @@
 <!---search-product--->
 <script>
     $("#product_filter").keyup(function(){
-    console.log('lorem')
+    //console.log('lorem')
     // Retrieve the input field text and reset the count to zero
     var filter = $(this).val(), count = 0;
 
@@ -336,7 +336,7 @@
     // Update the count,if need be
     // var numberItems = count;
     // $("#filter-count").text("Articles = "+count);
- });
+    });
 </script>
 
 <!---append each product to table--->

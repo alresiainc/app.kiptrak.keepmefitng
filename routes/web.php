@@ -298,11 +298,11 @@ Route::post('/edit-purchase/{unique_key}', [PurchaseController::class, 'editPurc
 Route::get('/delete-purchase/{unique_key}', [PurchaseController::class, 'deletePurchase'])->name('deletePurchase');
 
 //inventory management
-Route::get('/inventory-dashboard', [InventoryController::class, 'inventoryDashboard'])->name('inventoryDashboard'); //inventoryDashboard
-Route::get('/inventory-dashboard-today', [InventoryController::class, 'inventoryDashboardToday'])->name('inventoryDashboardToday'); //inventoryDashboardToday
-Route::get('/inventory-dashboard-weekly', [InventoryController::class, 'inventoryDashboardWeekly'])->name('inventoryDashboardWeekly'); //inventoryDashboardWeekly
-Route::get('/inventory-dashboard-monthly', [InventoryController::class, 'inventoryDashboardMonthly'])->name('inventoryDashboardMonthly'); //inventoryDashboardMonthly
-Route::get('/inventory-dashboard-yearly', [InventoryController::class, 'inventoryDashboardYearly'])->name('inventoryDashboardYearly'); //inventoryDashboardYearly
+Route::get('/inventory-dashboard/{warehouse_unique_key?}', [InventoryController::class, 'inventoryDashboard'])->name('inventoryDashboard'); //inventoryDashboard
+Route::get('/inventory-dashboard-today/{warehouse_unique_key?}', [InventoryController::class, 'inventoryDashboardToday'])->name('inventoryDashboardToday'); //inventoryDashboardToday
+Route::get('/inventory-dashboard-weekly/{warehouse_unique_key?}', [InventoryController::class, 'inventoryDashboardWeekly'])->name('inventoryDashboardWeekly'); //inventoryDashboardWeekly
+Route::get('/inventory-dashboard-monthly/{warehouse_unique_key?}', [InventoryController::class, 'inventoryDashboardMonthly'])->name('inventoryDashboardMonthly'); //inventoryDashboardMonthly
+Route::get('/inventory-dashboard-yearly/{warehouse_unique_key?}', [InventoryController::class, 'inventoryDashboardYearly'])->name('inventoryDashboardYearly'); //inventoryDashboardYearly
 Route::get('/in-stock-products-warehouse', [InventoryController::class, 'inStockProductsByWarehouse'])->name('inStockProductsByWarehouse'); //inStockProductsByWarehouse
 Route::post('/in-stock-products-warehouse', [InventoryController::class, 'inStockProductsByWarehouseQuery'])->name('inStockProductsByWarehouseQuery'); //inStockProductsByWarehouseQuery
 Route::get('/in-stock-products-other-agents', [InventoryController::class, 'inStockProductsByOtherAgents'])->name('inStockProductsByOtherAgents'); //inStockProductsByOtherAgents

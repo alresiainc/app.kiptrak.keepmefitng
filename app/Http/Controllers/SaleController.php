@@ -19,6 +19,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Account;
 use App\Models\Payment;
+use App\Models\ProductWarehouse;
 
 class SaleController extends Controller
 {
@@ -62,7 +63,7 @@ class SaleController extends Controller
             'customer' => 'required|string',
             'warehouse' => 'required|string',
             // 'sale_date' => 'required|string',
-            'product' => 'required|string',
+            'product_id' => 'required',
             'sale_status' => 'required|string',
             'payment_status' => 'required|string',
             'note' => 'nullable|string',
@@ -82,8 +83,23 @@ class SaleController extends Controller
                     return back()->with('duplicate_error', 'Duplicate Product Detected. You can increase quantity accordingly');
                 }
             }
-  
         }
+
+        //warehouse selected
+        if (!empty($data['warehouse'])) {
+            $warehouse = WareHouse::find($data['warehouse']);
+            $warehouse_product_ids = $warehouse->products->pluck('id')->toArray(); //[1,2,5,3,4]
+            $order_product_ids = collect($data['product_id'])->toArray(); //["1","2"]
+
+            //check if warehouse contains all ordered products
+            if (!empty(array_diff($order_product_ids, $warehouse_product_ids))) {
+                return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls <a href="/all-product-transfers" class="btn">transfer</a> product accordingly');
+            }
+
+            if (ProductWarehouse::whereIn('product_id',$warehouse->products->pluck('id'))->where('warehouse_id',$data['warehouse'])->where('product_qty', '<', 10)->exists()) {
+                return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls <a href="/all-product-transfers" class="btn">transfer</a> product accordingly');
+            } 
+        } 
 
         $sale_code = 'kps-' . date("Ymd") . '-'. date("his");
 
@@ -100,6 +116,7 @@ class SaleController extends Controller
         $order->source_type = 'sale_module';
         $order->customer_id = $data['customer'];
         $order->products = serialize($data['product_id']);
+        $order->warehouse_id = !empty($data['warehouse']) ? $data['warehouse'] : null;
         $order->status = $data['sale_status'];
         $order->save();
 
@@ -208,16 +225,16 @@ class SaleController extends Controller
         }
 
         //for balanceSheet accounting
-        $account = Account::where('name','Sales Account')->first();
+        //$account = Account::where('name','Sales Account')->first();
 
-        $payment = new Payment;
-        $payment->sale_id = $data['sale_code']; 
-        $payment->account_id = $account->id;
-        $payment->amount = $grand_total;
-        $payment->paying_method = 'cash';
-        $payment->created_by = $authUser->id;
-        $payment->status = 'true';
-        $payment->save();
+        // $payment = new Payment;
+        // $payment->sale_id = $data['sale_code']; 
+        // $payment->account_id = $account->id;
+        // $payment->amount = $grand_total;
+        // $payment->paying_method = 'cash';
+        // $payment->created_by = $authUser->id;
+        // $payment->status = 'true';
+        // $payment->save();
 
         
         return back()->with('success', 'Sale Order Added Successfully');
@@ -273,7 +290,7 @@ class SaleController extends Controller
             'customer' => 'required|string',
             'warehouse' => 'required|string',
             // 'sale_date' => 'required|string',
-            'product' => 'nullable|string',
+            'product_id' => 'required',
             'sale_status' => 'required|string',
             'payment_status' => 'required|string',
             'note' => 'nullable|string',
@@ -293,6 +310,22 @@ class SaleController extends Controller
                     return back()->with('duplicate_error', 'Duplicate Product Detected. You can increase quantity accordingly');
                 }
             }
+        }
+
+        //warehouse selected
+        if (!empty($data['warehouse'])) {
+            $warehouse = WareHouse::find($data['warehouse']);
+            $warehouse_product_ids = $warehouse->products->pluck('id')->toArray(); //[1,2,5,3,4]
+            $order_product_ids = collect($data['product_id'])->toArray(); //["1","2"]
+
+            //check if warehouse contains all ordered products
+            if (!empty(array_diff($order_product_ids, $warehouse_product_ids))) {
+                return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls <a href="/all-product-transfers" class="btn">transfer</a> product accordingly');
+            }
+
+            if (ProductWarehouse::whereIn('product_id',$warehouse->products->pluck('id'))->where('warehouse_id',$data['warehouse'])->where('product_qty', '<', 10)->exists()) {
+                return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls <a href="/all-product-transfers" class="btn">transfer</a> product accordingly');
+            } 
         }
 
         $sale_code = $sale->sale_code;
@@ -320,6 +353,7 @@ class SaleController extends Controller
         $order = Order::find($order_id);
         $order->source_type = 'sale_module';
         $order->products = serialize($data['product_id']);
+        $order->warehouse_id = !empty($data['warehouse']) ? $data['warehouse'] : null;
         $order->save();
 
         $grand_total = 0;
@@ -415,14 +449,14 @@ class SaleController extends Controller
                     Product::where(['id'=>$id])->update(['sale_id'=>$sale->id,'sale_price'=>$data['unit_price'][$key]]);
 
                     //for balanceSheet accounting
-                    $payment = new Payment;
-                    $payment->sale_id = $sale->id;
-                    $payment->account_id = $account->id;
-                    $payment->amount = $data['product_qty'][$key] * $data['unit_price'][$key];
-                    $payment->paying_method = 'cash';
-                    $payment->created_by = $authUser->id;
-                    $payment->status = 'true';
-                    $payment->save();
+                    // $payment = new Payment;
+                    // $payment->sale_id = $sale->id;
+                    // $payment->account_id = $account->id;
+                    // $payment->amount = $data['product_qty'][$key] * $data['unit_price'][$key];
+                    // $payment->paying_method = 'cash';
+                    // $payment->created_by = $authUser->id;
+                    // $payment->status = 'true';
+                    // $payment->save();
 
                 }
                   
@@ -431,12 +465,12 @@ class SaleController extends Controller
 
         //for balanceSheet accounting
         //since sale code is still same
-        $payment = Payment::where('sale_id', $sale_code)->first();
-        $payment->amount = $grand_total;
-        $payment->paying_method = 'cash';
-        $payment->created_by = $authUser->id;
-        $payment->status = 'true';
-        $payment->save();
+        // $payment = Payment::where('sale_id', $sale_code)->first();
+        // $payment->amount = $grand_total;
+        // $payment->paying_method = 'cash';
+        // $payment->created_by = $authUser->id;
+        // $payment->status = 'true';
+        // $payment->save();
 
         return back()->with('success', 'Sales Updated Successfully');
     }

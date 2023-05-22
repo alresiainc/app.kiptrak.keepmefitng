@@ -317,7 +317,7 @@ class OrderController extends Controller
             
             //check if warehouse contains all ordered products
             if (!empty(array_diff($order_product_ids, $warehouse_product_ids))) {
-                return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls transfer product accordingly');
+                return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls <a href="/all-product-transfers" class="btn">transfer</a> product accordingly');
             }
 
             if (ProductWarehouse::whereIn('product_id',$warehouse->products->pluck('id'))->where('warehouse_id',$data['warehouse_id'])->where('product_qty', '<', 10)->exists()) {

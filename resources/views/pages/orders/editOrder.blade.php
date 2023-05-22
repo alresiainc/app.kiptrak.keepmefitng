@@ -49,7 +49,7 @@
     @endif
     @if(Session::has('warehouse_error'))
     <div class="alert alert-danger mb-3 text-center">
-        {{Session::get('warehouse_error')}}
+        {!! Session::get('warehouse_error') !!}
     </div>
     @endif
     
