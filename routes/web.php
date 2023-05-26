@@ -226,7 +226,9 @@ Route::post('/create-customer', [CustomerController::class, 'addCustomerPost'])-
 Route::get('/view-customer/{unique_key}', [CustomerController::class, 'singleCustomer'])->name('singleCustomer');
 Route::get('/edit-customer/{unique_key}', [CustomerController::class, 'editCustomer'])->name('editCustomer');
 Route::post('/edit-customer/{unique_key}', [CustomerController::class, 'editCustomerPost'])->name('editCustomerPost');
+Route::get('/delete-customer/{unique_key}', [CustomerController::class, 'deleteCustomer'])->name('deleteCustomer');
 Route::get('/single-customer-sales/{unique_key}', [CustomerController::class, 'singleCustomerSales'])->name('singleCustomerSales');
+Route::get('/delete-all-customers', [CustomerController::class, 'deleteAllCustomers'])->name('deleteAllCustomers'); //ajax
 
 Route::get('/ajax-create-customer', [CustomerController::class, 'addCustomerAjax'])->name('addCustomerAjax');
 

@@ -2,60 +2,60 @@
 @section('title')Orders @endsection
 
 @section('extra_css')
-    <style>
-        /* select2 arrow */
-        select{
-            -webkit-appearance: listbox !important
-        }
+  <style>
+      /* select2 arrow */
+      select{
+          -webkit-appearance: listbox !important
+      }
 
-        .btn-light {
-            background-color: #fff !important;
-            color: #000 !important;
-        }
-    
-        div.filter-option-inner-inner{
-            color: #000 !important;
-        }
-          
-        /* select2 height proper */
-        .select2-selection__rendered {
-            line-height: 31px !important;
-        }
-        .select2-container .select2-selection--single {
-            height: 35px !important;
-        }
-        .select2-selection__arrow {
-            height: 34px !important;
-        }
-        /* select2 height proper */
+      .btn-light {
+          background-color: #fff !important;
+          color: #000 !important;
+      }
+  
+      div.filter-option-inner-inner{
+          color: #000 !important;
+      }
+        
+      /* select2 height proper */
+      .select2-selection__rendered {
+          line-height: 31px !important;
+      }
+      .select2-container .select2-selection--single {
+          height: 35px !important;
+      }
+      .select2-selection__arrow {
+          height: 34px !important;
+      }
+      /* select2 height proper */
 
-        table .dropdown-menu{
-          position: fixed !important;
-          top: 50% !important;
-          left:92% !important;
-          transform: translate(-92%, -50%) !important;
-        }
+      table .dropdown-menu{
+        position: fixed !important;
+        top: 50% !important;
+        left:92% !important;
+        transform: translate(-92%, -50%) !important;
+      }
 
-        .whatsapp-icon {
-          /* font-size: 22px;
-          color: #012970;
-          margin-right: 25px; */
-          position: relative;
-        }
+      .whatsapp-icon {
+        /* font-size: 22px;
+        color: #012970;
+        margin-right: 25px; */
+        position: relative;
+      }
 
-        .whatsapp-icon .whatsapp-icon-number {
-          position: absolute;
-          inset: -2px -5px auto auto;
-          font-weight: normal;
-          font-size: 12px;
-          padding: 3px 6px;
-        }
-        .delete_all{
-          background-color: #DC3545 !important;
-          border-color: #DC3545 !important; 
-        }
+      .whatsapp-icon .whatsapp-icon-number {
+        position: absolute;
+        inset: -2px -5px auto auto;
+        font-weight: normal;
+        font-size: 12px;
+        padding: 3px 6px;
+      }
+      .delete_all{
+        background-color: #DC3545 !important;
+        border-color: #DC3545 !important; 
+      }
 
-    </style>
+  </style>
 @endsection
 
 @section('content')
@@ -181,7 +181,7 @@
 
                       <td>{{ $order->customer_id ? $order->customer->firstname : 'No response' }} {{ $order->customer_id ? $order->customer->lastname : '' }}</td>
                         
-                        <!--Delivery Due Date-->
+                      <!--Delivery Due Date-->
                       <td>
                         @if (isset($order->expected_delivery_date))
                         {{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('D, jS M Y') }}
@@ -774,7 +774,7 @@ $(".sub_chk:checked").each(function() {
 //check if any is checked
 if(allVals.length <=0)  
 {  
-    alert("Please select row(s) to delete.");  
+  alert("Please select row(s) to delete.");  
 }  else {  
     var check = confirm("Are you sure you want to delete this row?");  
     if(check == true){  

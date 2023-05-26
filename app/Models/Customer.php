@@ -38,4 +38,14 @@ class Customer extends Model
     {
         return $this->belongsTo(Country::class, 'country_id');  
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'customer_id');  
+    }
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class, 'customer_id');  
+    }
 }

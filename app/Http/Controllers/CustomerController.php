@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Customer;
 use App\Models\Country;
@@ -248,6 +249,48 @@ class CustomerController extends Controller
             'status'=>true,
             'data'=>$data
         ]);
+    }
+
+    //deleteOrder
+    public function deleteCustomer($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $customer = Customer::where('unique_key', $unique_key)->first();
+        if (!isset($customer)) {
+            abort(404);
+        }
+        $oldImage = $customer->profile_picture;
+        if(Storage::disk('public')->exists('customer/'.$oldImage)){
+            Storage::disk('public')->delete('customer/'.$oldImage);
+        }
+        $customer->sales()->delete();
+        $customer->orders()->delete();
+        $customer->delete();
+        return back()->with('success', 'Customer Deleted Successfullly');
+    }
+
+    //bulk delete
+    public function deleteAllCustomers(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $ids = $request->ids;
+        $customers = DB::table("customers")->whereIn('id',explode(",",$ids))->get();
+        
+        foreach($customers as $customer){
+            $oldImage = $customer->profile_picture;
+            if(Storage::disk('public')->exists('customer/'.$oldImage)){
+                Storage::disk('public')->delete('customer/'.$oldImage);
+            }
+            $customer->sales()->delete();
+            $customer->orders()->delete();
+        }
+        
+        DB::table("customers")->whereIn('id',explode(",",$ids))->delete();
+        return response()->json(['success'=>"Selected Customers Deleted Successfully."]);
     }
 
     /**

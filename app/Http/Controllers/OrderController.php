@@ -487,6 +487,9 @@ class OrderController extends Controller
             abort(404);
         }
         $order->delete();
+        if(isset($order->customer_id) && isset($order->customer->id)) {
+            $order->customer()->delete();
+        }
         return back()->with('success', 'Order Deleted Successfullly');
     }
 

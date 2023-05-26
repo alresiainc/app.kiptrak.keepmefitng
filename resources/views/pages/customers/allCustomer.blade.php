@@ -1,5 +1,13 @@
 @extends('layouts.design')
 @section('title')Customer @endsection
+@section('extra_css')
+  <style>
+    .delete_all{
+        background-color: #DC3545 !important;
+        border-color: #DC3545 !important; 
+      }
+  </style>
+@endsection
 @section('content')
 
 <main id="main" class="main">
@@ -8,7 +16,7 @@
     <h1>Customer</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
         <li class="breadcrumb-item active">Customer</li>
       </ol>
     </nav>
@@ -45,6 +53,7 @@
               <a href="{{ route('customersExport') }}"><button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                 <i class="bi bi-download"></i> <span>Export</span></button></a>
               <button class="btn btn-sm btn-info rounded-pill mail_all" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Mail All"><i class="bi bi-chat-left"></i> <span>Mail All</span></button>
+              <button class="btn btn-sm btn-info rounded-pill delete_all" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All" data-url="{{ url('/delete-all-customers') }}"><i class="bi bi-trash"></i> <span>Delete All</span></button>
             </div>
           </div>
           <hr>
@@ -109,7 +118,7 @@
                             <i class="bi bi-whatsapp"></i></a>
                           <a href="{{ route('singleCustomer', $customer->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
                           <a href="{{ route('editCustomer', $customer->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                          <a class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
+                          <a href="{{ route('deleteCustomer', $customer->unique_key) }}" onclick="return confirm('Are you sure?')" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
                         </div>
                       </td>
                   </tr>
@@ -249,6 +258,55 @@
     //console.log($whatsapp_phone_number)
     
   }
+</script>
+
+<script>
+  //delete_all
+  $('.delete_all').on('click', function(e) {
+
+  var allVals = [];  
+  $(".sub_chk:checked").each(function() {  
+      allVals.push($(this).attr('data-id'));
+  });  
+
+  //check if any is checked
+  if(allVals.length <=0)  
+  {  
+    alert("Please select row(s) to delete.");  
+  }  else {  
+    var check = confirm("Are you sure you want to delete this row?");  
+    if(check == true){  
+
+      var join_selected_values = allVals.join(",");
+
+      $.ajax({
+          url: $(this).data('url'),
+          type: 'GET',
+          headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+          data: 'ids='+join_selected_values,
+          success: function (data) {
+            if (data['success']) {
+                $(".sub_chk:checked").each(function() {  
+                    $(this).parents("tr").remove();
+                });
+                alert(data['success']);
+            } else if (data['error']) {
+                alert(data['error']);
+            } else {
+                alert('Whoops Something went wrong!!');
+            }
+          },
+          error: function (data) {
+              alert(data.responseText);
+          }
+      });
+
+      $.each(allVals, function( index, value ) {
+          $('table tr').filter("[data-row-id='" + value + "']").remove();
+      });
+    }  
+  }  
+  });
 </script>
 
 @endsection

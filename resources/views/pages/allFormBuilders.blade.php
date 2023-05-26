@@ -129,7 +129,7 @@
                       <td>{{ $formHolder->name }} <br>
                         @if (count($formHolder->customers) > 0)
                         <a class="badge badge-info" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">Edit</a>
-                        <a class="badge badge-dark" href="{{ route('allOrders', $formHolder->unique_key) }}">Entries({{ count($formHolder->customers) }})</a>
+                        <a class="badge badge-dark" href="{{ route('allOrders', $formHolder->unique_key) }}">Entries({{ $formHolder->entries() }})</a>
                         
                         @else
                         <a class="badge badge-info" href="{{ route('editNewFormBuilder', $formHolder->unique_key) }}">Edit</a>
