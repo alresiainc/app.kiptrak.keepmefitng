@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 use App\Models\WareHouse;
 use App\Models\ExpenseCategory;
 use App\Models\Expense;
@@ -178,6 +180,33 @@ class ExpenseController extends Controller
 
         $categories = ExpenseCategory::all();
         return view('pages.expenses.allExpenseCategory', compact('authUser', 'user_role', 'categories'));
+    }
+
+    //deleteOrder
+    public function deleteExpense($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        
+        $expense = Expense::where('unique_key', $unique_key)->first();
+        if (!isset($expense)) {
+            abort(404);
+        }
+        
+        $expense->delete();
+        return back()->with('success', 'Expense Deleted Successfullly');
+    }
+
+    //bulk delete
+    public function deleteAllExpenses(Request $request)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $ids = $request->ids;
+    
+        DB::table("customers")->whereIn('id',explode(",",$ids))->delete();
+        return response()->json(['success'=>"Selected Expenses Deleted Successfully."]);
     }
 
     

@@ -166,7 +166,7 @@
       //disable default alpha
       // Create date inputs
       minDate = new DateTime($('#min'), {
-          format: 'MMMM Do YYYY'
+        format: 'MMMM Do YYYY'
       });
       maxDate = new DateTime($('#max'), {
           format: 'MMMM Do YYYY'
@@ -196,54 +196,7 @@
     var timeInterval = 300000; //5mins
     var sound_notification = "{{ asset('/assets/audio/sound_notification.mp3') }}";
 
-    //initially
-    // if (localStorage.getItem("sound_value") === null) {
-    //   localStorage.setItem("sound_value", 0);
-    // } else {
-    //   var stored_sound_value = localStorage.getItem("sound_value");
-    // }
-
     var sound_value = $('.sound_value').val();
-    
-    // var soundNotification = function() {
-    //   $.ajax({
-    //     url: "{{ route('soundNotification') }}",
-    //     type: 'GET',
-    //     dataType: 'json',
-    //     headers: {
-    //       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    //     },
-    //     success: function(resp) {
-    //       if(resp.status){
-    //         $('.alarm_count').text(resp.count);
-    //         //console.log(resp.data)
-    //         var notes = resp.data;
-
-    //         $("ul.messages notes").html('');
-
-    //         $('ul.messages').append('<li class="dropdown-header">You have <span class="alarm_count">'+resp.count+'</span> new messages<a href="/orders/new_from_alarm"><span class="badge rounded-pill bg-primary p-2 ms-2">View all</span></a></li><li><hr class="dropdown-divider" /></li>')
-
-    //           $.each(notes,function(key,note){
-                
-    //               $('ul.messages').append('<li class="message-item" onclick="deleteNotification('+note.id+')"><div><h4>'+note.topic+' #000'+note.order_id+'</h4><p>'+note.content+'</p><p>'+momentsAgo(note.created_at)+'</p></div></li><li><hr class="dropdown-divider"/></li>');
-    //           });
-
-              
-    //         var audio = new Audio(sound_notification);
-
-    //         $("body").hover(function(){
-    //           // audio.play();
-    //         });
-
-    //       } else {
-    //         console.log('no')
-    //       }
-    //     },
-    //     error: function(data){
-    //       console.log(data);
-    //     }
-    //   });
-    // }
     
     $(document).ready(function(){
           

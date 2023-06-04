@@ -82,7 +82,7 @@ class InventoryController extends Controller
                 $profit = $this->shorten($profit_val);
             }
     
-            $orders = Order::all();
+            $orders = Order::whereNotNull('customer_id')->get();
     
             $suppliers = Supplier::all();
     
@@ -97,7 +97,7 @@ class InventoryController extends Controller
             $categories = Category::all();
 
             //warehouse orders
-            $orders = $selected_warehouse->orders; $outgoingStocks = ''; $total_revenue = 0; $packages = [];
+            $orders = $selected_warehouse->orders()->whereNotNull('customer_id')->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
             if (count($orders) > 0) {
                 $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'));
         
@@ -173,7 +173,7 @@ class InventoryController extends Controller
             
             $categories = Category::all();
 
-            $orders = Order::all(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
+            $orders = Order::whereNotNull('customer_id')->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
             if (count($orders) > 0) {
                 $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'));
         
@@ -281,7 +281,7 @@ class InventoryController extends Controller
             $categories = Category::all();
 
             //warehouse orders
-            $orders = $selected_warehouse->orders()->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
+            $orders = $selected_warehouse->orders()->whereNotNull('customer_id')->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
             if (count($orders) > 0) {
                 $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()]);
         

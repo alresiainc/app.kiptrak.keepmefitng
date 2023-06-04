@@ -19,8 +19,13 @@
     <div class="users-list-filter px-1">
       
     </div>
-
   </section>
+
+  @if(Session::has('success'))
+    <div class="alert alert-success mb-3 text-center">
+        {{Session::get('success')}}
+    </div>
+  @endif
 
   <section>
     <div class="row">
@@ -30,11 +35,11 @@
             
           <div class="clearfix mb-2">
             <div class="text-start"><a href="{{ route('addExpense') }}" class="btn btn-sm btn-secondary rounded-pill"><i class="bi bi-plus"></i>Add Expense</a></div>
-            <div class="float-end text-end d-none">
-              <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
+            <div class="float-end text-end">
+              <button data-bs-target="#importModal" class="btn btn-sm btn-dark rounded-pill d-none" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Export Data">
                 <i class="bi bi-upload"></i> <span>Import</span></button>
-              <button class="btn btn-sm btn-secondary rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
-              <button class="btn btn-sm btn-danger rounded-pill" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
+              <button class="btn btn-sm btn-secondary rounded-pill d-none" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Import Data"><i class="bi bi-download"></i> <span>Export</span></button>
+              <button class="btn btn-sm btn-info rounded-pill delete_all" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All" data-url="{{ url('/delete-all-expenses') }}"><i class="bi bi-trash"></i> <span>Delete All</span></button>
             </div>
           </div>
           <hr>
@@ -43,6 +48,7 @@
             <table id="products-table" class="table custom-table" style="width:100%">
               <thead>
                   <tr>
+                      <th><input type="checkbox" id="users-master"></th>
                       <th>Expense Code</th>
                       <th>Warehouse</th>
                       <th>Category</th>
@@ -57,7 +63,7 @@
                     @foreach ($expenses as $expense)
                     
                         <tr>
-                    
+                            <td><input type="checkbox" class="sub_chk" data-id="{{ $expense->id }}" ></td>
                             <td>{{ $expense->expense_code }}</td>
                             <td>{{ isset($expense->warehouse_id) ? $expense->warehouse->name : '' }}</td>
                             <td>{{ isset($expense->expense_category_id) ? $expense->category->name : '' }}</td>
@@ -68,7 +74,7 @@
                                 <div class="d-flex">
                                 <a href="{{ route('singleExpense', $expense->unique_key) }}" class="btn btn-primary btn-sm me-2 d-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
                                 <a href="{{ route('editExpense', $expense->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                                <a class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
+                                <a href="{{ route('deleteExpense', $expense->unique_key) }}" onclick="return confirm('Are you sure?')" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -110,4 +116,65 @@
   </div>
 </div>
 
+@endsection
+
+@section('extra_js')
+
+<script>
+  $('#users-master').on('click', function(e) {
+    if($(this).is(':checked',true))  
+    {
+      $(".sub_chk").prop('checked', true);  
+    } else {  
+      $(".sub_chk").prop('checked',false);  
+    }  
+  });
+  //delete_all
+  $('.delete_all').on('click', function(e) {
+
+  var allVals = [];  
+  $(".sub_chk:checked").each(function() {  
+      allVals.push($(this).attr('data-id'));
+  });  
+
+  //check if any is checked
+  if(allVals.length <=0)  
+  {  
+    alert("Please select row(s) to delete.");  
+  }  else {  
+    var check = confirm("Are you sure you want to delete this row?");  
+    if(check == true){  
+
+      var join_selected_values = allVals.join(",");
+
+      $.ajax({
+          url: $(this).data('url'),
+          type: 'GET',
+          headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+          data: 'ids='+join_selected_values,
+          success: function (data) {
+            if (data['success']) {
+                $(".sub_chk:checked").each(function() {  
+                    $(this).parents("tr").remove();
+                });
+                alert(data['success']);
+            } else if (data['error']) {
+                alert(data['error']);
+            } else {
+                alert('Whoops Something went wrong!!');
+            }
+          },
+          error: function (data) {
+              alert(data.responseText);
+          }
+      });
+
+      $.each(allVals, function( index, value ) {
+          $('table tr').filter("[data-row-id='" + value + "']").remove();
+      });
+    }  
+  }  
+  });
+</script>
+    
 @endsection

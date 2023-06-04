@@ -65,19 +65,19 @@
 
           <div class="row mb-3 productsTable">
             <div class="col-lg-3 col-md-6">
-              <label for="min">Start Date1</label>
-              <input type="text" id="min" class="form-control filter form_date" readonly>
+              <label for="min">Start Date</label>
+              <input type="text" id="min" class="form-control filter" readonly>
             </div>
 
             <div class="col-lg-3 col-md-6">
-              <label for="max">End Date1</label>
-              <input type="text" id="max" class="form-control filter form_date" readonly>
+              <label for="max">End Date</label>
+              <input type="text" id="max" class="form-control filter" readonly>
             </div>
 
           </div>
           
           <div class="table table-responsive">
-            <table id="products-table" class="table custom-table2" style="width:100%">
+            <table id="products-table" class="table custom-table" style="width:100%">
               <thead>
                   <tr>
                       <th>Photo</th>
@@ -117,7 +117,7 @@
                       <td>{{ isset($product->size) ? $product->size : 'None' }}</td> --}}
                       <td>{{ $product->stock_available() }}</td>
                       <td>{{ $product->country->symbol }}{{ $product->purchase_price }}</td>
-                      <td>{{ $product->created_at->format('Y-m-d') }}</td>
+                      <td>{{ $product->created_at }}</td>
                       <td>
                         <div class="d-flex">
                           <a href="{{ route('singleProduct', $product->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
@@ -132,79 +132,6 @@
               </tbody>
             </table>
           </div>
-
-          <!---dup--->
-          <div class="row mb-3 productsTable2">
-            <div class="col-lg-3 col-md-6">
-              <label for="min2">Start Date</label>
-              <input type="text" id="min2" class="form-control filter form_date" readonly>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-              <label for="max2">End Date</label>
-              <input type="text" id="max2" class="form-control filter form_date" readonly>
-            </div>
-
-          </div>
-          
-          <div class="table table-responsive">
-            <table id="products-table2" class="table custom-table2" style="width:100%">
-              <thead>
-                  <tr>
-                      <th>Photo</th>
-                      <th>Name</th>
-                      <th>Code</th>
-                      {{-- <th>Colour</th>
-                      <th>Size</th> --}}
-                      <th>Quantity</th>
-                      <th>Price</th>
-                      <th>Date Added</th>
-                      <th>Action</th>
-                  </tr>
-              </thead>
-              <tbody>
-                @if (count($products) > 0)
-                    @foreach ($products as $product)
-                    <tr>
-                      <td>
-                        @if (isset($product->image))
-                        <a
-                        href="{{ asset('/storage/products/'.$product->image) }}"
-                        data-fancybox="gallery"
-                        data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
-                        >   
-                        <img src="{{ asset('/storage/products/'.$product->image) }}" style="width: 50px; height: 50px;" class="rounded-circle img-thumbnail img-fluid"
-                        alt="{{$product->name}}"></a>
-                        @else
-                        <img src="{{ asset('/storage/products/default.png') }}" width="50" class="rounded-circle img-thumbnail img-fluid"
-                        alt="{{$product->name}}"></a> 
-                        @endif
-                        
-                      </td>
-
-                      <td>{{ $product->name }}</td>
-                      <td>{{ $product->code  }}</td>
-                      {{-- <td>{{ isset($product->color) ? $product->color : 'None' }}</td>
-                      <td>{{ isset($product->size) ? $product->size : 'None' }}</td> --}}
-                      <td>{{ $product->stock_available() }}</td>
-                      <td>{{ $product->country->symbol }}{{ $product->purchase_price }}</td>
-                      <td>{{ $product->created_at->format('Y-m-d') }}</td>
-                      <td>
-                        <div class="d-flex">
-                          <a href="{{ route('singleProduct', $product->unique_key) }}" class="btn btn-primary btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View"><i class="bi bi-eye"></i></a>
-                          <a href="{{ route('editProduct', $product->unique_key) }}" class="btn btn-success btn-sm me-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="bi bi-pencil-square"></i></a>
-                          <a href="{{ route('deleteProduct', $product->unique_key) }}" onclick="return confirm('Are you sure?')" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete"><i class="bi bi-trash"></i></a>
-                        </div>
-                      </td>
-                  </tr>
-                    @endforeach
-                @endif
-                  
-              </tbody>
-            </table>
-          </div>
-          <!---dup-end--->
-
           </div>
         </div>
       </div>
@@ -259,83 +186,6 @@
 @endsection
 
 @section('extra_js')
-<link href="{{asset('/assets/css/jquery.datetimepicker.min.css')}}" rel="stylesheet">
-<script src="{{asset('/assets/js/jquery.datetimepicker.min.js')}}"></script>
-<script>
-  jQuery('.form_date').datetimepicker({
-    datepicker:true,
-    //showPeriod: true,
-    format:'Y-m-d',
-    timepicker:false,
-  });
-</script>
-
-<script>
-  
-
-  $(document).ready(function() {
-    var table1 = $('#products-table').DataTable({
-      // DataTable configuration options for the first table
-    });
-
-    var table2 = $('#products-table2').DataTable({
-      // DataTable configuration options for the second table
-    });
-
-    // Event handler for datetimepicker value change on the first table
-    $('#min, #max').on('change', function() {
-      table1.draw();
-    });
-
-    // Event handler for datetimepicker value change on the second table
-    $('#min2, #max2').on('change', function() {
-      table2.draw();
-    });
-
-    // Add custom filtering functions for the first table
-    $.fn.dataTable.ext.search.push(function(settings, searchData) {
-      var min = $('#min').val();
-      var max = $('#max').val();
-      var date = searchData[5]; // Assuming the date column is at index 5
-
-      if ((min === '' && max === '') ||
-          (min === '' && date <= max) ||
-          (min <= date && max === '') ||
-          (min <= date && date <= max)) {
-        return true;
-      }
-
-      return false;
-    });
-
-    // Add custom filtering functions for the second table
-    $.fn.dataTable.ext.search.push(function(settings, searchData) {
-      var min = $('#min2').val();
-      var max = $('#max2').val();
-      var date = searchData[5]; // Assuming the date column is at index 5
-
-      if ((min === '' && max === '') ||
-          (min === '' && date <= max) ||
-          (min <= date && max === '') ||
-          (min <= date && date <= max)) {
-        return true;
-      }
-
-      return false;
-    });
-
-    // Apply filtering on the first table
-    $('#min, #max').on('keyup', function() {
-      table1.draw();
-    });
-
-    // Apply filtering on the second table
-    $('#min2, #max2').on('keyup', function() {
-      table2.draw();
-    });
-});
-
-</script>
 
   
   <?php if(count($errors) > 0) : ?>
@@ -345,5 +195,32 @@
         });
     </script>
   <?php endif ?>
+
+  <script>
+    
+    var minDate = $("div.productsTable #min"); var maxDate = $("div.productsTable #max");
+ 
+    // Custom filtering function which will search data in column four between two values(dates)
+    $.fn.dataTable.ext.search.push(
+      function( settings, data, dataIndex ) {
+          var min = minDate.val();
+          var max = maxDate.val();
+          var date = new Date( data[5] ); //5 is the date column on datatable, starting from 0
+    
+          if (
+              ( min === null && max === null ) ||
+              ( min === null && date <= max ) ||
+              ( min <= date   && max === null ) ||
+              ( min <= date   && date <= max )
+          ) {
+            //console.log(min);
+              return true;
+          }
+          //console.log(min);
+          return false;
+      }
+    );
+    
+  </script>
 
 @endsection

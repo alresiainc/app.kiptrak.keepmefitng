@@ -39,7 +39,6 @@ class Expense extends Model
         return $newformat;
     }
 
-
     public function category()
     {
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');  

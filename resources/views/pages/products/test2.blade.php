@@ -65,13 +65,13 @@
 
           <div class="row mb-3 productsTable">
             <div class="col-lg-3 col-md-6">
-              <label for="min">Start Date1</label>
-              <input type="text" id="min" class="form-control filter form_date" readonly>
+              <label for="min">Start Date</label>
+              <input type="text" id="min" class="form-control filter form_date">
             </div>
 
             <div class="col-lg-3 col-md-6">
-              <label for="max">End Date1</label>
-              <input type="text" id="max" class="form-control filter form_date" readonly>
+              <label for="max">End Date</label>
+              <input type="text" id="max" class="form-control filter form_date">
             </div>
 
           </div>
@@ -137,12 +137,12 @@
           <div class="row mb-3 productsTable2">
             <div class="col-lg-3 col-md-6">
               <label for="min2">Start Date</label>
-              <input type="text" id="min2" class="form-control filter form_date" readonly>
+              <input type="text" id="min2" class="form-control filter form_date">
             </div>
 
             <div class="col-lg-3 col-md-6">
               <label for="max2">End Date</label>
-              <input type="text" id="max2" class="form-control filter form_date" readonly>
+              <input type="text" id="max2" class="form-control filter form_date">
             </div>
 
           </div>

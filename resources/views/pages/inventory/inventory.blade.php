@@ -500,13 +500,13 @@
               
               <div class="row g-3 m-1">
                 <div class="col-lg-3">
-                    <label for="" class="fw-bolder">Order Code</label>
+                    <label class="fw-bolder">Order Code</label>
                     <div class="text-dark display-7 fw-bold">{{ $package['warehouseOrder']['order']->orderCode($package['warehouseOrder']['order']->id) }}</div>
                     <div class="each-order-status">{{ ucFirst(str_replace('_', ' ', $package['warehouseOrder']['order']->status )) }}</div>
                     
                 </div>
                 <div class="col-lg-5">
-                    <label for="" class="fw-bolder">Customer</label>
+                    <label class="fw-bolder">Customer</label>
                     <div class="text-dark">{{ $package['warehouseOrder']['order']->customer_id ? $package['warehouseOrder']['order']->customer->firstname : 'N/A' }} 
                       {{ $package['warehouseOrder']['order']->customer_id ? $package['warehouseOrder']['order']->customer->lastname : 'N/A' }}
                         | Email: <span class="lead">{{ $package['warehouseOrder']['order']->customer_id ? $package['warehouseOrder']['order']->customer->email : 'N/A' }}</div>
@@ -528,11 +528,11 @@
                     
                 </div>
                 <div class="col-lg-2">
-                    <label for="" class="fw-bolder">Expected Revenue({{ $currency }})</label>
+                    <label class="fw-bolder">Expected Revenue({{ $currency }})</label>
                     <div class="text-dark display-7 fw-bold">{{ number_format($package['warehouseOrder']['orderRevenue']) }}</div>
                 </div>
                 <div class="col-lg-2">
-                    <label for="" class="fw-bolder">Agent</label>
+                    <label class="fw-bolder">Agent</label>
                     <div class="text-dark">{{ $package['warehouseOrder']['order']->agent_assigned_id ? $package['warehouseOrder']['order']->agent->name : 'None' }}</div>
                 </div>
               </div>
@@ -541,23 +541,23 @@
               <div class="row g-3 m-1 border {{ $outgoingStock->customer_acceptance_status == 'accepted' ? 'border-success' : 'border-danger' }} rounded">
                 
                 <div class="col-lg-6">
-                    <label for="" class="fw-bolder">Product Name</label>
+                    <label class="fw-bolder">Product Name</label>
                     <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock->product->name }}</div>
                 </div>
 
                 <div class="col-lg-1">
-                    <label for="" class="fw-bolder">Qty Ordered</label>
+                    <label class="fw-bolder">Qty Ordered</label>
                     <div class="text-dark d-none" style="font-size: 14px;">{{ $outgoingStock->quantity_removed.' @'. $outgoingStock->product->price }}</div>
                     <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock->quantity_removed }}</div>
                 </div>
                 
                 <div class="col-lg-3">
-                    <label for="" class="fw-bolder">Revenue</label>
+                    <label class="fw-bolder">Revenue</label>
                     <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock->amount_accrued }}</div>
                 </div>
 
                 <div class="col-lg-2">
-                  <label for="" class="fw-bolder">Customer Action</label>
+                  <label class="fw-bolder">Customer Action</label>
                   <div class="{{ $outgoingStock->customer_acceptance_status == 'accepted' ? 'text-success' : 'text-danger' }}" style="font-size: 14px;">{{ $outgoingStock->customer_acceptance_status }}</div>
               </div>
             
@@ -596,21 +596,21 @@
             @if ($selected_warehouse !== '')
             <div id="transfers-section">
 
-              <div class="row mb-3">
+              <div class="row mb-3 d-none">
                 <div class="col-lg-3 col-md-6">
-                  <label for="">Start Date</label>
-                  <input type="text" name="start_date" id="min" class="form-control filter">
+                  <label for="minTransferDate">Start Date</label>
+                  <input type="text" id="minTransferDate" class="form-control filter" readonly>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
-                  <label for="">End Date</label>
-                  <input type="text" name="end_date" id="max" class="form-control filter">
+                  <label for="maxTransferDate">End Date</label>
+                  <input type="text" id="maxTransferDate" class="form-control filter" readonly>
                 </div>
                 
               </div>
 
               <div class="table table-responsive">
-                <table id="products-table" class="table custom-table" style="width:100%">
+                <table class="table custom-table" style="width:100%">
                   <thead>
                       <tr>
                           <th>From Warehouse</th>
@@ -650,23 +650,23 @@
             @endif
 
             @if ($selected_warehouse == '')
-            <div id="transfers-section">
+            <div id="transfers-section2">
 
-              <div class="row mb-3">
+              <div class="row mb-3 d-none">
                 <div class="col-lg-3 col-md-6">
-                  <label for="">Start Date</label>
-                  <input type="text" name="start_date" id="min" class="form-control filter">
+                  <label for="minTransferDate2">Start Date..</label>
+                  <input type="text" id="minTransferDate2" class="form-control filter form_date">
                 </div>
 
                 <div class="col-lg-3 col-md-6">
-                  <label for="">End Date</label>
-                  <input type="text" name="end_date" id="max" class="form-control filter">
+                  <label for="maxTransferDate2">End Date</label>
+                  <input type="text" id="maxTransferDate2" class="form-control filter form_date">
                 </div>
                 
               </div>
 
               <div class="table table-responsive">
-                <table id="products-table" class="table custom-table" style="width:100%">
+                <table class="table custom-table" style="width:100%">
                   <thead>
                       <tr>
                           <th>From Warehouse</th>
@@ -722,19 +722,19 @@
 
             <div class="row mb-3">
               <div class="col-lg-3 col-md-6">
-                <label for="">Start Date</label>
-                <input type="text" name="start_date" id="min" class="form-control filter">
+                <label for="minDateWarehouseStock">Start Date</label>
+                <input type="text" id="minDateWarehouseStock" class="form-control filter minDateStock form_date">
               </div>
 
               <div class="col-lg-3 col-md-6">
-                <label for="">End Date</label>
-                <input type="text" name="end_date" id="max" class="form-control filter">
+                <label for="maxDateWarehouseStock">End Date</label>
+                <input type="text" id="maxDateWarehouseStock" class="form-control filter maxDateStock form_date">
               </div>
 
             </div>
 
             <div class="table table-responsive">
-              <table id="warehouse-stock-table" class="table custom-table table-striped" style="width:100%">
+              <table id="warehouse-stock-table" class="table custom-table2 table-striped" style="width:100%">
                 <thead>
                   <tr>
                     <th scope="col">Product Image</th>
@@ -784,21 +784,21 @@
       <div class="col-md-12">
         <div class="card card-top-border border-top-primary">
           <div class="card-body">
-            <div class="card-title">Recently Added Products</div>
+            <div class="card-title">Recent Stock Report</div>
 
             <div class="row mb-3">
               <div class="col-lg-3 col-md-6">
-                <label for="">Start Date</label>
-                <input type="text" name="start_date" id="min" class="form-control filter">
+                <label for="minDateStock">Start Date</label>
+                <input type="text" id="minDateStock" class="form-control filter minDateStock form_date" readonly>
               </div>
 
               <div class="col-lg-3 col-md-6">
-                <label for="">End Date</label>
-                <input type="text" name="end_date" id="max" class="form-control filter">
+                <label for="maxDateStock">End Date</label>
+                <input type="text" id="maxDateStock" class="form-control filter maxDateStock form_date" readonly>
               </div>
 
               <div class="col-lg-3 col-md-6">
-                <label for="">Category</label>
+                <label for="filter-categoryname">Category</label>
                 <select id="filter-categoryname" type="select" class="custom-select border form-control filter">
                   <option value="">Nothing Selected</option>
                   @if (count($categories))
@@ -806,32 +806,31 @@
                       <option value="{{ $category->name }}">{{ $category->name }}</option>
                       @endforeach
                   @endif
-                  
-    
                 </select>
               </div>
-
-              
             </div>
-
+            
             <div class="table table-responsive">
-              <table id="stock-table" class="table custom-table table-striped" style="width:100%">
+              <table id="stock-table" class="table custom-table2 table-striped" style="width:100%">
                 <thead>
                   <tr>
+                    <th scope="col">S/N</th>
                     <th scope="col">Product Image</th>
                     <th scope="col">Product Name</th>
-                    <th scope="col">Category</th>
-                    <th scope="col">Qty Added</th>
-                    <th scope="col">Qty Removed</th>
+                    {{-- <th scope="col">Category</th> --}}
+                    <th scope="col">Qty Recieved</th>
+                    <th scope="col">Qty Sold</th>
                     <th scope="col">Qty Remaining(Stock)</th>
-                    <th scope="col">Date Added</th>
+                    <th scope="col">Date Last Updated</th>
                   </tr>
                 </thead>
                 <tbody>
                   @if ($recently_products->count() > 0)
+                      
                       @foreach ($recently_products as $product)
                           
                           <tr>
+                            <td>{{ $loop->iteration }}</td>
                             <th scope="row">
                                 <a
                                   href="{{ asset('/storage/products/'.$product->image) }}"
@@ -841,12 +840,13 @@
                                   <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid"
                                   alt="{{$product->name}}" style="height: 30px;"></a>
                             </th>
-                            <td>{{ $product->name }}</td>
-                            <td data-categoryname="{{ $product->category->name }}" class="categoryname">{{ $product->category->name }}</td>
+                            <td>{{ $product->name }}<input type="hidden" data-categoryname="{{ $product->category->name }}" class="categoryname" value="{{ $product->category->name }}"></td>
+                            
+                            
                             <td>{{ $product->purchases->sum('product_qty_purchased') }}</td>
                             <td>{{ $product->purchases->sum('product_qty_purchased') - $product->stock_available() }}</td>
                             <td>{{ $product->stock_available() }}</td>
-                            <td>{{ $product->created_at->format('Y-m-d') }}</td>
+                            <td>{{ $product->updated_at->format('Y-m-d') }}</td>
                           </tr>
                           
                       @endforeach
@@ -896,6 +896,17 @@
 
 @section('extra_js')
 
+<link href="{{asset('/assets/css/jquery.datetimepicker.min.css')}}" rel="stylesheet">
+<script src="{{asset('/assets/js/jquery.datetimepicker.min.js')}}"></script>
+<script>
+  jQuery('.form_date').datetimepicker({
+    datepicker:true,
+    //showPeriod: true,
+    format:'Y-m-d',
+    timepicker:false,
+  });
+</script>
+
 <script>
   $('#show-orders').on('click', function () {
     $('#hide-orders').show();
@@ -913,11 +924,13 @@
   $('#show-transfers').on('click', function () {
     $('#hide-transfers').show();
     $('#transfers-section').toggle();
+    $('#transfers-section2').toggle();
     $(this).hide();
   });
   $('#hide-transfers').on('click', function () {
     $('#show-transfers').show();
     $('#transfers-section').toggle();
+    $('#transfers-section2').toggle();
     $(this).hide();
   });
 </script>
@@ -980,7 +993,7 @@
             if(categorynameValue == 0){   //if no value then display row
                 categorynameFlag = 1;
             }
-            else if(categorynameValue == $(this).find('td.categoryname').data('categoryname')){ 
+            else if(categorynameValue == $(this).find('input.categoryname').data('categoryname')){ 
                 categorynameFlag = 1;       //if value is same display row
             }
             else{
@@ -1014,26 +1027,38 @@
 </script>
 
 <script>
-  var minDate, maxDate;
- 
- // Custom filtering function which will search data in column four between two values(dates)
- $.fn.dataTable.ext.search.push(
-     function( settings, data, dataIndex ) {
-         var min = minDate.val();
-         var max = maxDate.val();
-         var date = new Date( data[6] ); //6 is the date column on datatable
+          
+      var tableStock = $('.custom-table2').DataTable({
+        
+      });
+
+      // Event handler for datetimepicker value change on the tableStock table
+      $('.minDateStock, .maxDateStock').on('change', function() {
+        tableStock.draw();
+      });
+
+      // Add custom filtering functions for the tableStock table
+      $.fn.dataTable.ext.search.push(function(settings, searchData) {
+        var min = $('.minDateStock').val();
+        var max = $('.maxDateStock').val();
+        var date = searchData[6]; // Assuming the date column is at index 5
+
+        if ((min === '' && max === '') ||
+            (min === '' && date <= max) ||
+            (min <= date && max === '') ||
+            (min <= date && date <= max)) {
+              //console.log('up');
+          return true;
+        }
+        return false;
+      });
+
+      // Apply filtering on the tableStock table
+      $('.minDateStock, .maxDateStock').on('keyup', function() {
+        tableStock.draw();
+      });
   
-         if (
-             ( min === null && max === null ) ||
-             ( min === null && date <= max ) ||
-             ( min <= date   && max === null ) ||
-             ( min <= date   && date <= max )
-         ) {
-             return true;
-         }
-         return false;
-     }
- );
 
 </script>
+
 @endsection

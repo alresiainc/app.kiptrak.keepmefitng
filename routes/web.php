@@ -328,6 +328,8 @@ Route::post('/create-expense', [ExpenseController::class, 'addExpensePost'])->na
 Route::get('/view-expense/{unique_key}', [ExpenseController::class, 'singleExpense'])->name('singleExpense');
 Route::get('/edit-expense/{unique_key}', [ExpenseController::class, 'editExpense'])->name('editExpense');
 Route::post('/edit-expense/{unique_key}', [ExpenseController::class, 'editExpensePost'])->name('editExpensePost');
+Route::get('/delete-expense/{unique_key}', [ExpenseController::class, 'deleteExpense'])->name('deleteExpense');
+Route::get('/delete-all-expenses', [ExpenseController::class, 'deleteAllExpenses'])->name('deleteAllExpenses'); //ajax
 
 //expense category
 Route::get('/expense-categories', [ExpenseController::class, 'allExpenseCategory'])->name('allExpenseCategory');
