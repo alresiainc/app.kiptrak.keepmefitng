@@ -120,7 +120,26 @@ class InventoryController extends Controller
             
             //warehouse product transfers
             $transfers = ProductTransfer::where('from_warehouse_id', $selected_warehouse->id)->orWhere('to_warehouse_id', $selected_warehouse->id)->get();
-            
+            $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
+            foreach($transfers as $key=>$transfer) {
+                if($transfer->from_warehouse_id==$selected_warehouse->id){
+                    $product_qty_transferred = $transfer->product_qty_transferred;
+                    foreach ($product_qty_transferred as $productQty) {
+                        $qty = strtok($productQty['each_product'][0], " "); //10
+                        $qty_int = (int) $qty;
+                        $outgoing_product_transfers += $qty_int;
+                    } 
+                }
+                if($transfer->to_warehouse_id==$selected_warehouse->id){
+                    $product_qty_transferred = $transfer->product_qty_transferred;
+                    foreach ($product_qty_transferred as $productQty) {
+                        $qty = strtok($productQty['each_product'][0], " "); //10
+                        $qty_int = (int) $qty;
+                        $incomgoing_product_transfers += $qty_int;
+                    } 
+                }
+            }
+
         } else {
             $product_purchase_ids = Product::whereNull('combo_product_ids')->pluck('purchase_id');
             $purchases_sum = Purchase::whereIn('id', $product_purchase_ids)->sum('amount_paid');
@@ -195,13 +214,13 @@ class InventoryController extends Controller
             }
             //warehouse product transfers
             $transfers = ProductTransfer::all();
-
+            $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
             
         }
 
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'selected_warehouse', 'total_products', 'out_of_stock_products', 'warehouses', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products', 'purchases_amount_paid', 'sales_paid', 'categories',
-        'outgoingStocks', 'total_revenue', 'packages', 'transfers'));
+        'outgoingStocks', 'total_revenue', 'packages', 'transfers', 'incomgoing_product_transfers', 'outgoing_product_transfers'));
     }
 
     //today
@@ -304,7 +323,27 @@ class InventoryController extends Controller
             
             //warehouse product transfers
             $transfers = ProductTransfer::where('from_warehouse_id', $selected_warehouse->id)->orWhere('to_warehouse_id', $selected_warehouse->id)
-            ->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->get(); 
+            ->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->get();
+            
+            $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
+            foreach($transfers as $key=>$transfer) {
+                if($transfer->from_warehouse_id==$selected_warehouse->id){
+                    $product_qty_transferred = $transfer->product_qty_transferred;
+                    foreach ($product_qty_transferred as $productQty) {
+                        $qty = strtok($productQty['each_product'][0], " "); //10
+                        $qty_int = (int) $qty;
+                        $outgoing_product_transfers += $qty_int;
+                    } 
+                }
+                if($transfer->to_warehouse_id==$selected_warehouse->id){
+                    $product_qty_transferred = $transfer->product_qty_transferred;
+                    foreach ($product_qty_transferred as $productQty) {
+                        $qty = strtok($productQty['each_product'][0], " "); //10
+                        $qty_int = (int) $qty;
+                        $incomgoing_product_transfers += $qty_int;
+                    } 
+                }
+            }
             
         } else {
             
@@ -389,11 +428,12 @@ class InventoryController extends Controller
             
             //warehouse product transfers
             $transfers = ProductTransfer::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->get();
+            $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
         }
 
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'selected_warehouse', 'total_products', 'out_of_stock_products', 'warehouses', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products', 'purchases_amount_paid', 'sales_paid', 'categories',
-        'outgoingStocks', 'total_revenue', 'packages', 'transfers'));
+        'outgoingStocks', 'total_revenue', 'packages', 'transfers', 'incomgoing_product_transfers', 'outgoing_product_transfers'));
     }
 
     //weekly
@@ -497,6 +537,26 @@ class InventoryController extends Controller
             //warehouse product transfers
             $transfers = ProductTransfer::where('from_warehouse_id', $selected_warehouse->id)->orWhere('to_warehouse_id', $selected_warehouse->id)
             ->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->get(); 
+
+            $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
+            foreach($transfers as $key=>$transfer) {
+                if($transfer->from_warehouse_id==$selected_warehouse->id){
+                    $product_qty_transferred = $transfer->product_qty_transferred;
+                    foreach ($product_qty_transferred as $productQty) {
+                        $qty = strtok($productQty['each_product'][0], " "); //10
+                        $qty_int = (int) $qty;
+                        $outgoing_product_transfers += $qty_int;
+                    } 
+                }
+                if($transfer->to_warehouse_id==$selected_warehouse->id){
+                    $product_qty_transferred = $transfer->product_qty_transferred;
+                    foreach ($product_qty_transferred as $productQty) {
+                        $qty = strtok($productQty['each_product'][0], " "); //10
+                        $qty_int = (int) $qty;
+                        $incomgoing_product_transfers += $qty_int;
+                    } 
+                }
+            }
             
         } else {
             
@@ -581,11 +641,12 @@ class InventoryController extends Controller
             
             //warehouse product transfers
             $transfers = ProductTransfer::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->get();
+            $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
         }
 
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'selected_warehouse', 'total_products', 'out_of_stock_products', 'warehouses', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products', 'purchases_amount_paid', 'sales_paid', 'categories',
-        'outgoingStocks', 'total_revenue', 'packages', 'transfers'));
+        'outgoingStocks', 'total_revenue', 'packages', 'transfers', 'incomgoing_product_transfers', 'outgoing_product_transfers'));
     }
     
     //monthly
@@ -689,6 +750,26 @@ class InventoryController extends Controller
             //warehouse product transfers
             $transfers = ProductTransfer::where('from_warehouse_id', $selected_warehouse->id)->orWhere('to_warehouse_id', $selected_warehouse->id)
             ->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->get(); 
+
+            $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
+            foreach($transfers as $key=>$transfer) {
+                if($transfer->from_warehouse_id==$selected_warehouse->id){
+                    $product_qty_transferred = $transfer->product_qty_transferred;
+                    foreach ($product_qty_transferred as $productQty) {
+                        $qty = strtok($productQty['each_product'][0], " "); //10
+                        $qty_int = (int) $qty;
+                        $outgoing_product_transfers += $qty_int;
+                    } 
+                }
+                if($transfer->to_warehouse_id==$selected_warehouse->id){
+                    $product_qty_transferred = $transfer->product_qty_transferred;
+                    foreach ($product_qty_transferred as $productQty) {
+                        $qty = strtok($productQty['each_product'][0], " "); //10
+                        $qty_int = (int) $qty;
+                        $incomgoing_product_transfers += $qty_int;
+                    } 
+                }
+            }
             
         } else {
             
@@ -773,11 +854,12 @@ class InventoryController extends Controller
             
             //warehouse product transfers
             $transfers = ProductTransfer::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->get();
+            $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
         }
 
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'selected_warehouse', 'total_products', 'out_of_stock_products', 'warehouses', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products', 'purchases_amount_paid', 'sales_paid', 'categories',
-        'outgoingStocks', 'total_revenue', 'packages', 'transfers'));
+        'outgoingStocks', 'total_revenue', 'packages', 'transfers', 'incomgoing_product_transfers', 'outgoing_product_transfers'));
     }
     
     //yearly
@@ -881,6 +963,26 @@ class InventoryController extends Controller
             //warehouse product transfers
             $transfers = ProductTransfer::where('from_warehouse_id', $selected_warehouse->id)->orWhere('to_warehouse_id', $selected_warehouse->id)
             ->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->get(); 
+
+            $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
+            foreach($transfers as $key=>$transfer) {
+                if($transfer->from_warehouse_id==$selected_warehouse->id){
+                    $product_qty_transferred = $transfer->product_qty_transferred;
+                    foreach ($product_qty_transferred as $productQty) {
+                        $qty = strtok($productQty['each_product'][0], " "); //10
+                        $qty_int = (int) $qty;
+                        $outgoing_product_transfers += $qty_int;
+                    } 
+                }
+                if($transfer->to_warehouse_id==$selected_warehouse->id){
+                    $product_qty_transferred = $transfer->product_qty_transferred;
+                    foreach ($product_qty_transferred as $productQty) {
+                        $qty = strtok($productQty['each_product'][0], " "); //10
+                        $qty_int = (int) $qty;
+                        $incomgoing_product_transfers += $qty_int;
+                    } 
+                }
+            }
             
         } else {
             
@@ -965,11 +1067,12 @@ class InventoryController extends Controller
             
             //warehouse product transfers
             $transfers = ProductTransfer::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->get();
+            $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
         }
 
         return view('pages.inventory.inventory', \compact('authUser', 'user_role', 'record', 'currency', 'selected_warehouse', 'total_products', 'out_of_stock_products', 'warehouses', 'total_expenses',
         'profit', 'profit_val', 'orders', 'suppliers', 'purchase_sum', 'customers', 'sales_sum', 'recently_products', 'purchases_amount_paid', 'sales_paid', 'categories',
-        'outgoingStocks', 'total_revenue', 'packages', 'transfers'));
+        'outgoingStocks', 'total_revenue', 'packages', 'transfers', 'incomgoing_product_transfers', 'outgoing_product_transfers'));
     }
     
     //by major warehouse

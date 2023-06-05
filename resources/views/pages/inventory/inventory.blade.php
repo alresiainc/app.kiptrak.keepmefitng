@@ -152,6 +152,119 @@
   <section class="section m-0">
     <div class="row">
 
+      <!-- Products Cost Card -->
+      <div class="col-lg-{{$selected_warehouse !== '' ? '3' : '6'}} col-md-6">
+        <div class="card bg-4">
+            
+              <div class="card-body p-2">
+                <div class="d-flex align-items-center justify-content-between">
+                <div class="text-start">
+                    <h2 class="fw-bold">{{ $purchases_amount_paid }}</h2>
+                    <small class="text-uppercase small pt-1 fw-bold">Products Cost</small>
+                </div>
+                <div class="rounded-circle float-end">
+                    <i class="bi bi-box display-1 text-light-black"></i>
+                </div>
+                </div>
+              </div>
+        </div>
+      </div>
+      <!-- Products Cost Card -->
+
+      <!-- Total Revenue Card -->
+      <div class="col-lg-{{$selected_warehouse !== '' ? '3' : '6'}} col-md-6" style="cursor: pointer;">
+        
+          <div class="card bg-2">
+            
+            <div class="card-body p-2">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="text-start">
+                  <h2 class="fw-bold">{{ $sales_paid }}</h2>
+                  <small class="text-uppercase small pt-1 fw-bold">Total Revenue</small>
+                </div>
+                <div class="rounded-circle float-end">
+                  <i class="bi bi-calendar-minus display-1 text-light-black"></i>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+
+      </div>
+      <!-- Total Revenue Card -->
+
+      @if ($selected_warehouse !== '')
+          <!-- Incoming Product Transfers Card -->
+      <div class="col-lg-3 col-md-6" style="cursor: pointer;">
+        <div class="card bg-3">
+          
+          <div class="card-body p-2">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="text-start">
+                <h2 class="fw-bold">{{ $incomgoing_product_transfers }}</h2>
+                <small class="text-uppercase small pt-1 fw-bold">Incoming Product Transfers</small
+                >
+              </div>
+              <div class="rounded-circle float-end">
+                <i class="bi bi-cart-check display-1 text-light-black"></i>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      <!-- Incoming Product Transfers Card -->
+
+      <!-- Outgoing Product Transfers Card -->
+      <div class="col-lg-3 col-md-6" style="cursor: pointer;">
+        <div class="card bg-1">
+          
+          <div class="card-body p-2">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="text-start">
+                <h2 class="fw-bold">{{ $outgoing_product_transfers }}</h2>
+                <small class="text-uppercase small pt-1 fw-bold">Outgoing Product Transfers</small
+                >
+              </div>
+              <div class="rounded-circle float-end">
+                <i class="bi bi-cart-check display-1 text-light-black"></i>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      <!-- Outgoing Product Transfers Card -->
+      @endif
+      
+
+      <!-- Warehouses Card -->
+      <div class="col-lg-3 col-md-6 d-none">
+        <div class="card bg-1">
+          <div class="card-body p-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="text-start">
+                <h2 class="fw-bold">{{ count($warehouses) }}</h2>
+                <small class="text-uppercase small pt-1 fw-bold">Warehouses</small
+                >
+              </div>
+              <div class="rounded-circle float-end">
+                <i class="bi bi-house display-1 text-light-black"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End Warehouses Card -->
+
+      
+    </div>
+
+  </section>
+
+  <section class="section m-0 d-none">
+    <div class="row">
+
       <!-- Total Products Card -->
       <div class="col-lg-3 col-md-6">
         <div class="card bg-4">
