@@ -41,7 +41,7 @@ class SoundNotification extends Model
         $newOrders = collect([])->all();
         $order_ids = static::where('id', '>=', 1)->pluck('order_id');
         if ($order_ids->count() > 0) {
-            $newOrders = Order::whereIn('id', $order_ids)->where('status', 'new')->get();
+            $newOrders = Order::whereIn('id', $order_ids)->whereNotNull('customer_id')->where('status', 'new')->get();
             return $newOrders;
         }
         return $newOrders;
@@ -52,7 +52,7 @@ class SoundNotification extends Model
         $pendingOrders = collect([])->all();
         $order_ids = static::where('id', '>=', 1)->pluck('order_id');
         if ($order_ids->count() > 0) {
-            $pendingOrders = Order::whereIn('id', $order_ids)->where('status', 'pending')->get();
+            $pendingOrders = Order::whereIn('id', $order_ids)->whereNotNull('customer_id')->where('status', 'pending')->get();
             return $pendingOrders;
         }
         return $pendingOrders;

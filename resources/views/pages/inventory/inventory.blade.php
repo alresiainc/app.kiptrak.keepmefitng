@@ -850,31 +850,39 @@
               <table id="warehouse-stock-table" class="table custom-table2 table-striped" style="width:100%">
                 <thead>
                   <tr>
+                    <th scope="col">S/N</th>
                     <th scope="col">Product Image</th>
                     <th scope="col">Product Name</th>
-                    <th scope="col">Qty In Warehouse</th>
-                    <th scope="col">Date Added</th>
+                    {{-- <th scope="col">Category</th> --}}
+                    <th scope="col">Qty Recieved</th>
+                    <th scope="col">Qty Sold</th>
+                    <th scope="col">Qty Remaining(Stock)</th>
+                    <th scope="col">Date Last Updated</th>
                   </tr>
                 </thead>
                 <tbody>
                   @if ($recently_products->count() > 0)
                       @foreach ($recently_products as $product)
                           
-                          <tr>
-                            <th scope="row">
-                                <a
-                                  href="{{ asset('/storage/products/'.$product->image) }}"
-                                  data-fancybox="gallery"
-                                  data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
-                                  >   
-                                  <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid"
-                                  alt="{{$product->name}}" style="height: 30px;"></a>
-                            </th>
-                            <td>{{ $product->name }}</td>
-                            
-                            <td>{{ $selected_warehouse->productQtyInWarehouse($product->id) }}</td>
-                            <td>{{ $product->created_at->format('Y-m-d') }}</td>
-                          </tr>
+                      <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <th scope="row">
+                            <a
+                              href="{{ asset('/storage/products/'.$product->image) }}"
+                              data-fancybox="gallery"
+                              data-caption="{{ isset($product->name) ? $product->name : 'no caption' }}"
+                              >   
+                              <img src="{{ asset('/storage/products/'.$product->image) }}" width="50" class="img-thumbnail img-fluid"
+                              alt="{{$product->name}}" style="height: 30px;"></a>
+                        </th>
+                        <td>{{ $product->name }}<input type="hidden" data-categoryname="{{ $product->category->name }}" class="categoryname" value="{{ $product->category->name }}"></td>
+                        
+                        
+                        <td>{{ $product->purchases->sum('product_qty_purchased') }}</td>
+                        <td>{{ $product->purchases->sum('product_qty_purchased') - $product->stock_available() }}</td>
+                        <td>{{ $product->stock_available() }}</td>
+                        <td>{{ $product->updated_at->format('Y-m-d') }}</td>
+                      </tr>
                           
                       @endforeach
                   @endif
