@@ -183,7 +183,6 @@ class WareHouseController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        $authUser = auth()->user();
         $data = $request->all();
         $warehouse = new WareHouse();
         if ($data['agent_id'] != "" || $data['agent_id'] != null) {

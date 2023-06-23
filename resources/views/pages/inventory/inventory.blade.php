@@ -605,6 +605,8 @@
 
       @foreach ($packages as $package)
 
+      @if (isset($package['warehouseOrder']['order']->customer_id) && isset($package['warehouseOrder']['order']->customer->id))
+          
       <div class="row each-order">
         <div class="col-md-12">
           <div class="card">
@@ -651,6 +653,7 @@
               </div>
               
               @foreach ($package['warehouseOrder']['outgoingStock'] as $outgoingStock)
+              @if (isset($outgoingStock->product))
               <div class="row g-3 m-1 border {{ $outgoingStock->customer_acceptance_status == 'accepted' ? 'border-success' : 'border-danger' }} rounded">
                 
                 <div class="col-lg-6">
@@ -672,9 +675,11 @@
                 <div class="col-lg-2">
                   <label class="fw-bolder">Customer Action</label>
                   <div class="{{ $outgoingStock->customer_acceptance_status == 'accepted' ? 'text-success' : 'text-danger' }}" style="font-size: 14px;">{{ $outgoingStock->customer_acceptance_status }}</div>
-              </div>
+                </div>
             
-              </div>
+              </div> 
+              @endif
+              
               
               @endforeach
               
@@ -684,6 +689,8 @@
           </div>
         </div>
       </div>
+      
+      @endif
 
       @endforeach  
     

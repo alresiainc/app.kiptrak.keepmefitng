@@ -135,7 +135,9 @@ class ThankYouSettingController extends Controller
  
                  if ( count($mainProducts_outgoingStocks) > 0 ) {
                      foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-                         $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                        if(isset($main_outgoingStock->product)) {
+                            $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                        }
                      }
                  }
  
@@ -144,7 +146,7 @@ class ThankYouSettingController extends Controller
                  $orderbump_outgoingStock = '';
                  if (isset($formHolder->orderbump_id)) {
                      $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
-                     if ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+                     if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
                          $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
                      }
                  }
@@ -154,7 +156,7 @@ class ThankYouSettingController extends Controller
                  $upsell_outgoingStock = '';
                  if (isset($formHolder->upsell_id)) {
                      $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
-                     if ($upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+                     if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
                          $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
                      }
                  }
@@ -223,7 +225,9 @@ class ThankYouSettingController extends Controller
 
                 if ( count($mainProducts_outgoingStocks) > 0 ) {
                     foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-                        $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                        if(isset($main_outgoingStock->product)) {
+                            $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                        }
                     }
                 }
 
@@ -232,7 +236,7 @@ class ThankYouSettingController extends Controller
                 $orderbump_outgoingStock = '';
                 if (isset($formHolder->orderbump_id)) {
                     $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
-                    if ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+                    if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
                         $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
                     }
                 }
@@ -242,7 +246,7 @@ class ThankYouSettingController extends Controller
                 $upsell_outgoingStock = '';
                 if (isset($formHolder->upsell_id)) {
                     $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
-                    if ($upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+                    if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
                         $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
                     }
                 }
@@ -394,7 +398,9 @@ class ThankYouSettingController extends Controller
 
                 if ( count($mainProducts_outgoingStocks) > 0 ) {
                     foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-                        $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                        if(isset($main_outgoingStock->product)) {
+                            $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                        }
                     }
                 }
 
@@ -403,7 +409,7 @@ class ThankYouSettingController extends Controller
                 $orderbump_outgoingStock = '';
                 if (isset($formHolder->orderbump_id)) {
                     $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
-                    if ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+                    if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
                         $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
                     }
                 }
@@ -413,7 +419,7 @@ class ThankYouSettingController extends Controller
                 $upsell_outgoingStock = '';
                 if (isset($formHolder->upsell_id)) {
                     $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
-                    if ($upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+                    if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
                         $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
                     }
                 }

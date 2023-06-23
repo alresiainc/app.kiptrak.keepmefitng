@@ -75,7 +75,7 @@
 
 <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="d-flex align-items-center justify-content-between">
-      <a href="/" class="logo d-flex align-items-center">
+      <a href="javascript:void(0);" class="logo d-flex align-items-center">
         <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="width: 30%; !important">
         <span class="d-none d-lg-block project-namek"></span>
       </a>
@@ -200,6 +200,7 @@
                         <ul class="row g-3">
                             <div class="text-center"><p class="fw-bold mb-0 text-success">Products you ordered</p> <hr></div>
                             @foreach ($mainProducts_outgoingStocks as $main_outgoingStock)
+                            @if (isset($main_outgoingStock->product))
                             <li class="col-lg-4 col-md-6"> 
                                 <div class="itemside mb-3"> 
                                     <div class="aside"> 
@@ -211,10 +212,12 @@
                                     </div> 
                                 </div> 
                             </li>
+                            @endif
+                            
                             @endforeach
                             
                             <!---for orderbump or upsell--->
-                            @if ($orderbumpProduct_revenue !== 0)
+                            @if (isset($orderbump_outgoingStock->product) && $orderbumpProduct_revenue !== 0)
                             <li class="col-lg-4 col-md-6"> 
                                 <div class="itemside mb-3"> 
                                     <div class="aside"> 
@@ -228,7 +231,7 @@
                             </li>
                             @endif
                             
-                            @if ($upsellProduct_revenue !== 0)
+                            @if (isset($upsell_outgoingStock->product) && $upsellProduct_revenue !== 0)
                             <li class="col-lg-4 col-md-6"> 
                                 <div class="itemside mb-3"> 
                                     <div class="aside"> 

@@ -166,7 +166,6 @@ class CategoryController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         
-        $authUser = auth()->user();
         $data = $request->all();
         
         $category = new Category();

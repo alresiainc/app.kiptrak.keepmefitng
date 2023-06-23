@@ -162,7 +162,8 @@
                     </select>
                     
                     <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addWarehouse">
-                        <i class="bi bi-plus"></i></button>
+                        <i class="bi bi-plus"></i>
+                    </button>
                 </div>
                 @error('warehouse')
                   <span class="invalid-feedback" role="alert">

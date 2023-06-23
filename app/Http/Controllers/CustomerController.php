@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Customer;
 use App\Models\Country;
 use App\Models\Sale;
+use App\Models\Order;
 
 class CustomerController extends Controller
 {
@@ -285,8 +286,12 @@ class CustomerController extends Controller
             if(Storage::disk('public')->exists('customer/'.$oldImage)){
                 Storage::disk('public')->delete('customer/'.$oldImage);
             }
-            $customer->sales()->delete();
-            $customer->orders()->delete();
+            if(Sale::where('customer_id', $customer->id)->exists()) {
+                Sale::where('customer_id', $customer->id)->delete();
+            }
+            if(Order::where('customer_id', $customer->id)->exists()) {
+                Order::where('customer_id', $customer->id)->delete();
+            }   
         }
         
         DB::table("customers")->whereIn('id',explode(",",$ids))->delete();
