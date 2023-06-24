@@ -25,9 +25,10 @@ class ProductTransfer extends Model
         foreach ($idQtys as $key => $idQty) {
             $id = strtok($idQty, '-');
             $product = Product::where('id', $id)->first();
+            $category = isset($product->category) ? $product->category->name : '';
             $qty = substr($idQty, strpos($idQty, "-") + 1);
             if (isset($product)) {
-                $new = ['each_product'=>[$qty.' quantity of '.$product->name]];
+                $new = ['each_product'=>[$qty.' qty of '.$product->name], 'category'=>[$category]];
                 $idQtys[$key] = $new;
             }
         }

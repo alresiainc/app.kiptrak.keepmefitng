@@ -92,8 +92,7 @@ class Product extends Model
             $delivered_order_ids = Order::where('status', 'delivered_and_remitted')->pluck('id');
             //$sum_outgoingStocks = $this->outgoingStocks->sum->outgoingStockTotal();
             $sum_outgoingStocks = count($delivered_order_ids) > 0 ?
-            $this->outgoingStocks()->whereIn('order_id', $delivered_order_ids)->sum(DB::raw('quantity_removed - quantity_returned')) : 
-            $this->outgoingStocks()->sum(DB::raw('quantity_removed - quantity_returned'));
+            $this->outgoingStocks()->whereIn('order_id', $delivered_order_ids)->sum(DB::raw('quantity_removed - quantity_returned')) : 0;
             
             $stock_available = $sum_incomingStocks - $sum_outgoingStocks;
         }

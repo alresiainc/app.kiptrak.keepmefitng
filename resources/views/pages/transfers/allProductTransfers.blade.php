@@ -61,56 +61,70 @@
                 <button class="btn btn-sm btn-danger rounded-pill d-none" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Delete All"><i class="bi bi-trash"></i> <span>Delete All</span></button>
               </div>
             </div>
-          <hr>
+            <hr>
 
-          <div class="row mb-3">
-            <div class="col-lg-3 col-md-6">
-              <label for="">Start Date</label>
-              <input type="text" id="min" class="form-control filter">
-            </div>
+            <div class="row mb-3">
+              <div class="col-lg-3 col-md-6">
+                <label for="">Start Date</label>
+                <input type="text" id="min" class="form-control filter">
+              </div>
 
-            <div class="col-lg-3 col-md-6">
-              <label for="">End Date</label>
-              <input type="text" id="max" class="form-control filter">
+              <div class="col-lg-3 col-md-6">
+                <label for="">End Date</label>
+                <input type="text" id="max" class="form-control filter">
+              </div>
+
+              <div class="col-lg-6 col-md-6">
+                <label for="transfer-filter-categoryname">Category</label>
+                <select id="transfer-filter-categoryname" type="select" class="custom-select border form-control filter">
+                  <option value="">Nothing Selected</option>
+                  @if (count($categories))
+                      @foreach ($categories as $category)
+                      <option value="{{ $category->name }}">{{ $category->name }}</option>
+                      @endforeach
+                  @endif
+                </select>
+              </div>
             </div>
-          </div>
           
-          <div class="table table-responsive">
-            <table id="products-table" class="table custom-table" style="width:100%">
-              <thead>
-                  <tr>
-                      <th>From Warehouse</th>
-                      <th>Products Transferred</th>
-                      <th>To Warehouse</th>
-                      <th>Added By</th>
-                      <th>Date Added</th>
-                  </tr>
-              </thead>
-              <tbody>
-                @if (count($transfers) > 0)
-                    @foreach ($transfers as $transfer)
+            <div class="table table-responsive" id="transfers-section2">
+              <table id="products-table" class="table custom-table" style="width:100%">
+                <thead>
                     <tr>
-                     
-                      <td>{{ $transfer->fromWarehouse->name }}</td>
-                      <td>
-                        @php
-                            $product_qty_transferred = $transfer->product_qty_transferred
-                        @endphp
-                        @foreach ($product_qty_transferred as $productQty)
-                            <div class="badge badge-secondary">{!! isset($productQty['each_product'][0]) ? $productQty['each_product'][0] : '' !!}</div>
-                        @endforeach
-                      </td>
-                      <td>{{ $transfer->toWarehouse->name }}</td>
-                      <td>{{ $transfer->createdBy->name }}</td>
-                      <td>{{ $transfer->created_at }}</td>
+                        <th>From Warehouse</th>
+                        <th>Products Transferred</th>
+                        <th>To Warehouse</th>
+                        <th>Added By</th>
+                        <th>Date Added</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  @if (count($transfers) > 0)
+                      @foreach ($transfers as $transfer)
+                      <tr>
                       
-                  </tr>
-                    @endforeach
-                @endif
-                  
-              </tbody>
-            </table>
-          </div>
+                        <td>{{ $transfer->fromWarehouse->name }}</td>
+                        <td>
+                          @php
+                              $product_qty_transferred = $transfer->product_qty_transferred
+                          @endphp
+                          @foreach ($product_qty_transferred as $productQty)
+                              <div class="badge badge-secondary">{!! isset($productQty['each_product'][0]) ? $productQty['each_product'][0] : '' !!}</div>
+                              <input type="hidden" class="product_categoryname" value="{!! $productQty['category'][0] !!}"
+                              data-product_categoryname="{!! $productQty['category'][0] !!}">
+                          @endforeach
+                        </td>
+                        <td>{{ $transfer->toWarehouse->name }}</td>
+                        <td>{{ $transfer->createdBy->name }}</td>
+                        <td>{{ $transfer->created_at }}</td>
+                        
+                    </tr>
+                      @endforeach
+                  @endif
+                    
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -217,5 +231,42 @@
     });
 </script>
 @endif
+
+<script>
+    
+    //////////
+    $('#transfer-filter-categoryname').change(function() {
+        product_filter_function();
+    });
+
+    $('#transfers-section2 table tbody tr').show();
+
+    function product_filter_function() {
+        $('#transfers-section2 table tbody tr').hide();
+        var categorynameValue = $('#transfer-filter-categoryname').val();
+
+        //traversing each row one by one
+        $('#transfers-section2 table tr').each(function() {
+            var categorynameFlag = 0;
+            
+            if (categorynameValue == 0) {
+                categorynameFlag = 1;
+            } else {
+                // Check if any hidden input in the row has a value matching the selected value
+                $(this).find('input.product_categoryname').each(function() {
+                    if ($(this).val() == categorynameValue) {
+                        categorynameFlag = 1;
+                        return false; // Exit the loop if a match is found
+                    }
+                });
+            }
+
+            if (categorynameFlag) {
+                $(this).show();
+            }
+        });
+    }
+
+</script>
 
 @endsection

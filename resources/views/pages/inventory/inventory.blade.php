@@ -714,17 +714,20 @@
             </div>
 
             @if ($selected_warehouse !== '')
-            <div id="transfers-section">
+            <div id="product-section">
 
-              <div class="row mb-3 d-none">
-                <div class="col-lg-3 col-md-6">
-                  <label for="minTransferDate">Start Date</label>
-                  <input type="text" id="minTransferDate" class="form-control filter" readonly>
-                </div>
+              <div class="row mb-3">
 
                 <div class="col-lg-3 col-md-6">
-                  <label for="maxTransferDate">End Date</label>
-                  <input type="text" id="maxTransferDate" class="form-control filter" readonly>
+                  <label for="transfer-filter-categoryname">Category</label>
+                  <select id="transfer-filter-categoryname" type="select" class="custom-select border form-control filter">
+                    <option value="">Nothing Selected</option>
+                    @if (count($categories))
+                        @foreach ($categories as $category)
+                        <option value="{{ $category->name }}">{{ $category->name }}</option>
+                        @endforeach
+                    @endif
+                  </select>
                 </div>
                 
               </div>
@@ -733,7 +736,7 @@
                 <table class="table custom-table" style="width:100%">
                   <thead>
                       <tr>
-                          <th>From Warehouse</th>
+                          <th>From Warehouse1</th>
                           <th>Products Transferred</th>
                           <th>To Warehouse</th>
                           <th>Done By</th>
@@ -772,15 +775,17 @@
             @if ($selected_warehouse == '')
             <div id="transfers-section2">
 
-              <div class="row mb-3 d-none">
-                <div class="col-lg-3 col-md-6">
-                  <label for="minTransferDate2">Start Date..</label>
-                  <input type="text" id="minTransferDate2" class="form-control filter form_date">
-                </div>
-
-                <div class="col-lg-3 col-md-6">
-                  <label for="maxTransferDate2">End Date</label>
-                  <input type="text" id="maxTransferDate2" class="form-control filter form_date">
+              <div class="row mb-3">
+                <div class="col-lg-5 col-md-6">
+                  <label for="transfer-filter-categoryname">Category</label>
+                  <select id="transfer-filter-categoryname" type="select" class="custom-select border form-control filter">
+                    <option value="">Nothing Selected</option>
+                    @if (count($categories))
+                        @foreach ($categories as $category)
+                        <option value="{{ $category->name }}">{{ $category->name }}</option>
+                        @endforeach
+                    @endif
+                  </select>
                 </div>
                 
               </div>
@@ -789,7 +794,7 @@
                 <table class="table custom-table" style="width:100%">
                   <thead>
                       <tr>
-                          <th>From Warehouse</th>
+                          <th>From Warehouse2</th>
                           <th>Products Transferred</th>
                           <th>To Warehouse</th>
                           <th>Done By</th>
@@ -802,12 +807,14 @@
                         <tr>
                         
                           <td>{{ $transfer->fromWarehouse->name }}</td>
+                          
                           <td>
                             @php
                                 $product_qty_transferred = $transfer->product_qty_transferred
                             @endphp
                             @foreach ($product_qty_transferred as $productQty)
                                 <div class="badge badge-secondary">{!! isset($productQty['each_product'][0]) ? $productQty['each_product'][0] : '' !!}</div>
+                                <input type="hidden" class="product_categoryname" value="{!! $productQty['category'][0] !!}">
                             @endforeach
                           </td>
                           <td>{{ $transfer->toWarehouse->name }}</td>
@@ -884,10 +891,9 @@
                         </th>
                         <td>{{ $product->name }}<input type="hidden" data-categoryname="{{ $product->category->name }}" class="categoryname" value="{{ $product->category->name }}"></td>
                         
-                        
-                        <td>{{ $product->purchases->sum('product_qty_purchased') }}</td>
-                        <td>{{ $product->purchases->sum('product_qty_purchased') - $product->stock_available() }}</td>
-                        <td>{{ $product->stock_available() }}</td>
+                        <td>{{ $selected_warehouse->productQtyInWarehouse($product->id) }}</td>
+                        <td>{{ $selected_warehouse->productQtySoldInWarehouse($product->id) }}</td>
+                        <td>{{ $selected_warehouse->productQtyInWarehouse($product->id) - $selected_warehouse->productQtySoldInWarehouse($product->id) }}</td>
                         <td>{{ $product->updated_at->format('Y-m-d') }}</td>
                       </tr>
                           
@@ -1146,12 +1152,51 @@
   
   
         if(categorynameFlag){
-        $(this).show();  //displaying row which satisfies all conditions
+          $(this).show();  //displaying row which satisfies all conditions
         }
 
         });
 
     }
+</script>
+
+<!--category-filter-transfers-->
+<script>
+    
+  //////////
+  $('#transfer-filter-categoryname').change(function() {
+      product_filter_function();
+  });
+
+  $('#transfers-section2 table tbody tr').show();
+
+  function product_filter_function() {
+      $('#transfers-section2 table tbody tr').hide();
+      var categorynameValue = $('#transfer-filter-categoryname').val();
+
+      //traversing each row one by one
+      $('#transfers-section2 table tr').each(function() {
+          var categorynameFlag = 0;
+          
+          if (categorynameValue == 0) {
+              categorynameFlag = 1;
+          } else {
+              // Check if any hidden input in the row has a value matching the selected value
+              $(this).find('input.product_categoryname').each(function() {
+                  if ($(this).val() == categorynameValue) {
+                      categorynameFlag = 1;
+                      return false; // Exit the loop if a match is found
+                  }
+              });
+          }
+
+          //show if flag is true
+          if (categorynameFlag) {
+              $(this).show();
+          }
+      });
+  }
+
 </script>
 
 <script>

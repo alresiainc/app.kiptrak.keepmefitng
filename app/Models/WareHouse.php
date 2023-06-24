@@ -57,9 +57,18 @@ class WareHouse extends Model
         return $this->hasMany(Order::class, 'warehouse_id');  
     }
 
+    //incoming products i.e products recieved into this warehouse
     public function productQtyInWarehouse($product_id)
     {
        $product = ProductWarehouse::where(['warehouse_id'=>$this->id, 'product_id'=>$product_id])->first();
        return isset($product) ? $product->product_qty : 0;
+    }
+
+    public function productQtySoldInWarehouse($product_id) {
+        //warehouse orders
+        $orders = $this->orders()->where('status', 'delivered_and_remitted')->get();
+        $sum_outgoingStocks = count($orders) > 0 ? OutgoingStock::whereIn('order_id', $orders->pluck('id'))->where('product_id', $product_id)
+            ->where('customer_acceptance_status', 'accepted')->sum('quantity_removed') : 0;
+        return $sum_outgoingStocks; 
     }
 }

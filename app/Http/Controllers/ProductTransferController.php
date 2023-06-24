@@ -8,6 +8,7 @@ use App\Models\WareHouse;
 use App\Models\ProductWarehouse;
 use App\Models\ProductTransfer;
 use App\Models\Product;
+use App\Models\Category;
 
 class ProductTransferController extends Controller
 {
@@ -135,8 +136,9 @@ class ProductTransferController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $transfers = ProductTransfer::all();
         $warehouses = WareHouse::all();
+        $categories = Category::all();
 
-        return view('pages.transfers.allProductTransfers', compact('authUser', 'user_role', 'transfers', 'warehouses'));
+        return view('pages.transfers.allProductTransfers', compact('authUser', 'user_role', 'transfers', 'warehouses', 'categories'));
     }
 
     /**
