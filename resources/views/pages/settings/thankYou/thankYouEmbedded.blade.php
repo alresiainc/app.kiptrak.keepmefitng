@@ -66,7 +66,7 @@
         <span class="project-namek"></span>
         </a> --}}
 
-        <a href="/" class="logo d-flex align-items-center">
+        <a href="/" class="logo d-flex align-items-center d-none">
             <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="max-height: 130px; margin-right: 6px;">
             {{-- <span class="d-none d-lg-block project-name"></span> --}}
         </a>
@@ -258,7 +258,7 @@
 </main>
 
 <!-- <hr> will be shown in singlelink-->
-<footer class="container-fluid position-relative bg-dark py-5 text-white bottom-0" style="position: relative; bottom: 0;">
+<footer class="container-fluid position-relative bg-dark py-5 text-white bottom-0 d-none" style="position: relative; bottom: 0;">
     <div class="container">
     <div class="row">
         <div class="col-md-12 text-center">

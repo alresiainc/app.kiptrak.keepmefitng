@@ -7,6 +7,7 @@
     "require": {
         "php": "^8.0.2",
         "akaunting/laravel-apexcharts": "^2.0",
+        "cloudinary-labs/cloudinary-laravel": "^2.0",
         "fedeisas/laravel-mail-css-inliner": "^5.0",
         "guzzlehttp/guzzle": "^7.2",
         "infobip/infobip-api-php-client": "4.0.0",
