@@ -54,7 +54,176 @@ class SaleController extends Controller
      * @return \Illuminate\Http\Response
      */
     
-    public function addSalePost(Request $request)
+     public function addSalePost(Request $request)
+     {
+         $authUser = auth()->user();
+         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+         
+         $request->validate([
+             'customer' => 'required|string',
+             'warehouse' => 'required|string',
+             // 'sale_date' => 'required|string',
+             'product_id' => 'required',
+             'sale_status' => 'required|string',
+             'payment_status' => 'required|string',
+             'note' => 'nullable|string',
+             'attached_document' => 'nullable|mimes:jpg, jpeg, png, pdf, csv, docx, xlsx, txt, gif, svg, webp|max:2048',
+         ]);
+ 
+         $data = $request->all();
+         
+         //duplicate. break fxn here
+         $dup = [];
+         foreach($data['product_id'] as $key => $id){
+             if(!empty($id)){
+                 
+                 if(!in_array($id, $dup)){
+                     $dup[] = $id;
+                 
+                 } else {
+                     return back()->with('duplicate_error', 'Duplicate Product Detected. You can increase quantity accordingly');
+                 }
+             }
+         }
+ 
+         //warehouse selected
+         if (!empty($data['warehouse'])) {
+             $warehouse = WareHouse::find($data['warehouse']);
+             $warehouse_product_ids = $warehouse->products->pluck('id')->toArray(); //[1,2,5,3,4]
+             $order_product_ids = collect($data['product_id'])->toArray(); //["1","2"]
+ 
+             //check if warehouse contains all ordered products
+             if (!empty(array_diff($order_product_ids, $warehouse_product_ids))) {
+                 return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls <a href="/all-product-transfers" class="btn">transfer</a> product accordingly');
+             }
+ 
+             if (ProductWarehouse::whereIn('product_id',$warehouse->products->pluck('id'))->where('warehouse_id',$data['warehouse'])->where('product_qty', '<', 10)->exists()) {
+                 return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls <a href="/all-product-transfers" class="btn">transfer</a> product accordingly');
+             } 
+         } 
+ 
+         $sale_code = 'kps-' . date("Ymd") . '-'. date("his");
+ 
+         $imageName = '';
+         if ($request->attached_document) {
+             //image
+             $imageName = time().'.'.$request->attached_document->extension();
+             //store products in folder
+             $request->attached_document->storeAs('sale', $imageName, 'public');
+         }
+ 
+         //save Order, for order stage
+         $order = new Order();
+         $order->source_type = 'sale_module';
+         $order->customer_id = $data['customer'];
+         $order->products = serialize($data['product_id']);
+         $order->warehouse_id = !empty($data['warehouse']) ? $data['warehouse'] : null;
+         $order->status = $data['sale_status'];
+         $order->save();
+ 
+         //upd customer
+         Customer::where('id',$data['customer'])->update(['order_id'=>$order->id]);
+ 
+         $grand_total = 0; 
+ 
+         $package_bundle = [];
+         
+         //for stocking
+         foreach ($data['product_id'] as $key => $id) {
+             if(!empty($id)){
+                     //$parent_sale = Sale::where('sale_code', $data['sale_code']);
+ 
+                     $grand_total += $data['product_qty'][$key] * $data['unit_price'][$key];
+     
+                     //update product stock
+                     // $outgoingStock = new OutgoingStock();
+                     // $outgoingStock->product_id = $id;
+                     // $outgoingStock->order_id = $order->id;
+                     // $outgoingStock->quantity_removed = $data['product_qty'][$key];
+                     // $outgoingStock->customer_acceptance_status = $data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null;
+                     // $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
+                     // $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                     // $outgoingStock->quantity_returned = 0; //by default
+                     // $outgoingStock->created_by = $authUser->id;
+                     // $outgoingStock->status = 'true';
+                     // $outgoingStock->save();
+ 
+                     // Create a new package array for each product ID
+                     $package_bundles = [
+                         'product_id'=>$id,
+                         'quantity_removed'=>$data['product_qty'][$key],
+                         'amount_accrued'=>$data['product_qty'][$key] * $data['unit_price'][$key],
+                         'customer_acceptance_status'=>$data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null,
+                         'reason_removed'=>'as_order_firstphase',
+                         'quantity_returned'=>0,
+                         'reason_returned'=>null,
+                         'isCombo'=>null,
+                     ];
+                     $package_bundle[] = $package_bundles;
+                     ///////////////////////////////////////////////
+                     
+                     $sale = new Sale();
+                     $sale->sale_code = $data['sale_code'];
+                     // $sale->parent_id = $parent_sale->exists() ? $parent_sale->first()->id : null;
+                     $sale->customer_id = $data['customer'];
+                     $sale->warehouse_id = $data['warehouse'];
+                     // $sale->sale_date = $data['sale_date'];
+     
+                     $sale->product_id = $id;
+     
+                     $sale->product_qty_sold = $data['product_qty'][$key];
+                     $sale->product_selling_price = $data['unit_price'][$key];
+                     $sale->outgoing_stock_id = 1;
+                     $sale->amount_due = $data['payment_status'] == 'paid' ? 0 : $data['product_qty'][$key] * $data['unit_price'][$key];
+                     $sale->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key];
+     
+                     $sale->payment_status = $data['payment_status'];
+                     $sale->note = !empty($data['note']) ? $data['note'] : null;
+     
+                     $sale->attached_document = $imageName == '' ? null : $imageName;
+     
+                     $sale->created_by = $authUser->id;
+                     $sale->status = $data['sale_status'];
+     
+                     $sale->save();
+ 
+                     $parent_sale_id = Session::put('parent_sale_id', $sale->id); //for grouping sales
+                     
+                     //update product <price></price>
+                     Product::where(['id'=>$id])->update(['sale_id'=>$sale->id,'sale_price'=>$data['unit_price'][$key]]);
+                     
+                 
+             }
+         } //endforeach
+         //return $package_bundle;
+         $outgoingStock = new OutgoingStock();
+         $outgoingStock->order_id = $order->id;
+         $outgoingStock->package_bundle = $package_bundle;
+         $outgoingStock->created_by = $authUser->id;
+         $outgoingStock->status = 'true';
+         $outgoingStock->save();
+         
+         //return $package_bundle;
+ 
+         //for balanceSheet accounting
+         //$account = Account::where('name','Sales Account')->first();
+ 
+         // $payment = new Payment;
+         // $payment->sale_id = $data['sale_code']; 
+         // $payment->account_id = $account->id;
+         // $payment->amount = $grand_total;
+         // $payment->paying_method = 'cash';
+         // $payment->created_by = $authUser->id;
+         // $payment->status = 'true';
+         // $payment->save();
+ 
+         
+         return back()->with('success', 'Sale Order Added Successfully');
+ 
+         
+     }
+
+    public function addSalePost2(Request $request)
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
@@ -71,6 +240,7 @@ class SaleController extends Controller
         ]);
 
         $data = $request->all();
+        
         //duplicate. break fxn here
         $dup = [];
         foreach($data['product_id'] as $key => $id){
@@ -123,8 +293,9 @@ class SaleController extends Controller
         //upd customer
         Customer::where('id',$data['customer'])->update(['order_id'=>$order->id]);
 
-        $grand_total = 0;
+        $grand_total = 0; 
 
+        $package_bundle = [];
         //for stocking
         foreach ($data['product_id'] as $key => $id) {
             if(!empty($id)){
@@ -134,17 +305,31 @@ class SaleController extends Controller
                     $grand_total += $data['product_qty'][$key] * $data['unit_price'][$key];
     
                     //update product stock
-                    $outgoingStock = new OutgoingStock();
-                    $outgoingStock->product_id = $id;
-                    $outgoingStock->order_id = $order->id;
-                    $outgoingStock->quantity_removed = $data['product_qty'][$key];
-                    $outgoingStock->customer_acceptance_status = $data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null;
-                    $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
-                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-                    $outgoingStock->quantity_returned = 0; //by default
-                    $outgoingStock->created_by = $authUser->id;
-                    $outgoingStock->status = 'true';
-                    $outgoingStock->save();
+                    // $outgoingStock = new OutgoingStock();
+                    // $outgoingStock->product_id = $id;
+                    // $outgoingStock->order_id = $order->id;
+                    // $outgoingStock->quantity_removed = $data['product_qty'][$key];
+                    // $outgoingStock->customer_acceptance_status = $data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null;
+                    // $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
+                    // $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    // $outgoingStock->quantity_returned = 0; //by default
+                    // $outgoingStock->created_by = $authUser->id;
+                    // $outgoingStock->status = 'true';
+                    // $outgoingStock->save();
+
+                    // Create a new package array for each product ID
+                    $package_bundle = [
+                        'product_id'=>$id,
+                        'quantity_removed'=>$data['product_qty'][$key],
+                        'amount_accrued'=>$data['product_qty'][$key] * $data['unit_price'][$key],
+                        'customer_acceptance'=>$data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null,
+                        'reason_removed'=>'as_order_firstphase',
+                        'quantity_returned'=>0,
+                        'reason_returned'=>null,
+                        'isCombo'=>null,
+                    ];
+                    $package_bundle[] = $package_bundle;
+                    ////////////
                     
                     $sale = new Sale();
                     $sale->sale_code = $data['sale_code'];
@@ -157,7 +342,7 @@ class SaleController extends Controller
     
                     $sale->product_qty_sold = $data['product_qty'][$key];
                     $sale->product_selling_price = $data['unit_price'][$key];
-                    $sale->outgoing_stock_id = $outgoingStock->id;
+                    $sale->outgoing_stock_id = 1;
                     $sale->amount_due = $data['payment_status'] == 'paid' ? 0 : $data['product_qty'][$key] * $data['unit_price'][$key];
                     $sale->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key];
     
@@ -181,17 +366,30 @@ class SaleController extends Controller
                     $grand_total += $data['product_qty'][$key] * $data['unit_price'][$key];
     
                     //update product stock
-                    $outgoingStock = new OutgoingStock();
-                    $outgoingStock->product_id = $id;
-                    $outgoingStock->order_id = $order->id;
-                    $outgoingStock->quantity_removed = $data['product_qty'][$key];
-                    $outgoingStock->customer_acceptance_status = $data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null;
-                    $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
-                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-                    $outgoingStock->quantity_returned = 0; //by default
-                    $outgoingStock->created_by = $authUser->id;
-                    $outgoingStock->status = 'true';
-                    $outgoingStock->save();
+                    // $outgoingStock = new OutgoingStock();
+                    // $outgoingStock->product_id = $id;
+                    // $outgoingStock->order_id = $order->id;
+                    // $outgoingStock->quantity_removed = $data['product_qty'][$key];
+                    // $outgoingStock->customer_acceptance_status = $data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null;
+                    // $outgoingStock->amount_accrued = $data['product_qty'][$key] * $data['unit_price'][$key];
+                    // $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    // $outgoingStock->quantity_returned = 0; //by default
+                    // $outgoingStock->created_by = $authUser->id;
+                    // $outgoingStock->status = 'true';
+                    // $outgoingStock->save();
+
+                    // Create a new package array for each product ID
+                    $package_bundle = [
+                        'product_id'=>$id,
+                        'quantity_removed'=>$data['product_qty'][$key],
+                        'amount_accrued'=>$data['product_qty'][$key] * $data['unit_price'][$key],
+                        'customer_acceptance'=>$data['sale_status'] == 'delivered_and_remitted' ? 'accepted' : null,
+                        'reason_removed'=>'as_order_firstphase',
+                        'quantity_returned'=>0,
+                        'reason_returned'=>null,
+                        'isCombo'=>null,
+                    ];
+                    $package_bundle[] = $package_bundle;
                     
                     $sale = new Sale();
                     $sale->sale_code = $data['sale_code'];
@@ -204,7 +402,7 @@ class SaleController extends Controller
     
                     $sale->product_qty_sold = $data['product_qty'][$key];
                     $sale->product_selling_price = $data['unit_price'][$key];
-                    $sale->outgoing_stock_id = $outgoingStock->id;
+                    $sale->outgoing_stock_id = 1;
                     $sale->amount_due = $data['payment_status'] == 'paid' ? 0 : $data['product_qty'][$key] * $data['unit_price'][$key];
                     $sale->amount_paid = $data['product_qty'][$key] * $data['unit_price'][$key];
     
@@ -222,7 +420,15 @@ class SaleController extends Controller
                     Product::where(['id'=>$id])->update(['sale_id'=>$sale->id,'sale_price'=>$data['unit_price'][$key]]);
                 }
             }
-        }
+        } //endforeach
+        $outgoingStock = new OutgoingStock();
+        $outgoingStock->order_id = $order->id;
+        $outgoingStock->package_bundle = $package_bundle;
+        $outgoingStock->created_by = $authUser->id;
+        $outgoingStock->status = 'true';
+        $outgoingStock->save();
+        
+        return $package_bundle;
 
         //for balanceSheet accounting
         //$account = Account::where('name','Sales Account')->first();

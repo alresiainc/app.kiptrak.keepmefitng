@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Throwable;
 use Illuminate\Support\Facades\Http;
+use App\Helpers\Helper;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
@@ -42,8 +43,8 @@ class DashboardController extends Controller
 
         if (!$authUser->isSuperAdmin) {
             return redirect()->route('staffTodayRecord');
-        } 
-        
+        }
+        $helper = new Helper();
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency = $generalSetting->country->symbol;
         $record = 'all';
@@ -53,12 +54,12 @@ class DashboardController extends Controller
 
         $sales_due = Sale::sum('amount_due');
         //$sales_paid = Sale::sum('amount_paid');
-        $sales_paid = 0;
+        $sales_paid = $helper->totalSalesRevenue();
+        $sales_count = $helper->totalSalesCount();
+ 
+        // return $sales_paid;
 
-        $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
-        $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
-
-        $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+        // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
 
         $expenses = $this->shorten(Expense::sum('amount'));
 
@@ -80,8 +81,8 @@ class DashboardController extends Controller
         $salesInvoice = Sale::where('parent_id', null)->count();
         $purchasesInvoice = Purchase::whereIn('id', $product_purchase_ids)->where('parent_id', null)->count();
 
-        $sales_count = Sale::count();
-        $sales_count += $accepted_outgoing_stock->sum('quantity_removed');
+        //$sales_count = Sale::count();
+        //$sales_count += $accepted_outgoing_stock->sum('quantity_removed');
         $invoices_count = $salesInvoice + $purchasesInvoice;
 
         /////////yearly report purchase, sales, expenses/////////////recent products///
@@ -95,7 +96,7 @@ class DashboardController extends Controller
             $end_date = date("Y").'-'.date('m', $start).'-'.date('t', mktime(0, 0, 0, date("m", $start), 1, date("Y", $start)));
             
             $sale_amount = Sale::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
-            $sale_amount += $accepted_outgoing_stock->sum('amount_accrued');
+            $sale_amount += (int) $sales_paid;
             $purchase_amount = Purchase::whereIn('id', $product_purchase_ids)->whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount_paid');
             $profit_amount = $sale_amount - $purchase_amount;
             $expense_amount = Expense::whereDate('created_at', '>=' , $start_date)->whereDate('created_at', '<=' , $end_date)->sum('amount') + $purchase_amount;

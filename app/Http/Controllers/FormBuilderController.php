@@ -130,26 +130,46 @@ class FormBuilderController extends Controller
         $order->save();
 
         //outgoingStock, in place of orderProduct
-        $product_ids = [];
+        $product_ids = []; $package_bundle = [];
         foreach ($data['packages'] as $package) {
             if (!empty($package)) {
                 $product = Product::where('id', $package)->first();
                 $product_ids[] = $product->id;
-                $outgoingStock = new OutgoingStock();
-                $outgoingStock->product_id = $product->id;
-                $outgoingStock->order_id = $order->id;
-                $outgoingStock->quantity_removed = 1;
-                $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-                $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-                $outgoingStock->quantity_returned = 0; //by default
-                $outgoingStock->isCombo = isset($product->combo_product_ids) ? 'true' : null;
-                $outgoingStock->created_by = $authUser->id;
-                $outgoingStock->status = 'true';
-                $outgoingStock->save();
+                // $outgoingStock = new OutgoingStock();
+                // $outgoingStock->product_id = $product->id;
+                // $outgoingStock->order_id = $order->id;
+                // $outgoingStock->quantity_removed = 1;
+                // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                // $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                // $outgoingStock->quantity_returned = 0; //by default
+                // $outgoingStock->isCombo = isset($product->combo_product_ids) ? 'true' : null;
+                // $outgoingStock->created_by = $authUser->id;
+                // $outgoingStock->status = 'true';
+                // $outgoingStock->save();
+
+                // Create a new package array for each product ID
+                $package_bundles = [
+                    'product_id'=>$product->id,
+                    'quantity_removed'=>1,
+                    'amount_accrued'=>$product->sale_price,
+                    'customer_acceptance_status'=>null,
+                    'reason_removed'=>'as_order_firstphase',
+                    'quantity_returned'=>0,
+                    'reason_returned'=>null,
+                    'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+                ];
+                $package_bundle[] = $package_bundles;
+                ////////////////////////////////////////////
     
-            }
-            
+            } 
         }
+
+        $outgoingStock = new OutgoingStock();
+        $outgoingStock->order_id = $order->id;
+        $outgoingStock->package_bundle = $package_bundle;
+        $outgoingStock->created_by = $authUser->id;
+        $outgoingStock->status = 'true';
+        $outgoingStock->save();
     
         //update formHolder
         $formHolder->update(['order_id'=>$order->id]);
@@ -356,25 +376,46 @@ class FormBuilderController extends Controller
         $order->save();
 
         //outgoingStock, in place of orderProduct
-        $product_ids = [];
+        $product_ids = []; $package_bundle = [];
         foreach ($data['packages'] as $package) {
             if (!empty($package)) {
                 
                 $product = Product::where('id', $package)->first();
                 $product_ids[] = $product->id;
-                $outgoingStock = new OutgoingStock();
-                $outgoingStock->product_id = $product->id;
-                $outgoingStock->order_id = $order->id;
-                $outgoingStock->quantity_removed = 1;
-                $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-                $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-                $outgoingStock->quantity_returned = 0; //by default
-                $outgoingStock->created_by = $authUser->id;
-                $outgoingStock->status = 'true';
-                $outgoingStock->save();
-                
+                // $outgoingStock = new OutgoingStock();
+                // $outgoingStock->product_id = $product->id;
+                // $outgoingStock->order_id = $order->id;
+                // $outgoingStock->quantity_removed = 1;
+                // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                // $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                // $outgoingStock->quantity_returned = 0; //by default
+                // $outgoingStock->created_by = $authUser->id;
+                // $outgoingStock->status = 'true';
+                // $outgoingStock->save();
+
+                // Create a new package array for each product ID
+                $package_bundles = [
+                    'product_id'=>$product->id,
+                    'quantity_removed'=>1,
+                    'amount_accrued'=>$product->sale_price,
+                    'customer_acceptance_status'=>null,
+                    'reason_removed'=>'as_order_firstphase',
+                    'quantity_returned'=>0,
+                    'reason_returned'=>null,
+                    'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+                ];
+                $package_bundle[] = $package_bundles;
             }  
         }
+
+        //create new OutgoingStock
+        $outgoingStock = new OutgoingStock();
+        $outgoingStock->order_id = $order->id;
+        $outgoingStock->package_bundle = $package_bundle;
+        $outgoingStock->created_by = $authUser->id;
+        $outgoingStock->status = 'true';
+        $outgoingStock->save();
+        ///////////////////////////////////
 
         //update formHolder
         $formHolder->update(['order_id'=>$order->id]);
@@ -397,16 +438,40 @@ class FormBuilderController extends Controller
             $product = $former_orderbump->product;
 
             //outgoing stock for orderbump
-            $outgoingStock = new OutgoingStock();
-            $outgoingStock->product_id = $product->id;
+            // $outgoingStock = new OutgoingStock();
+            // $outgoingStock->product_id = $product->id;
+            // $outgoingStock->order_id = $order->id;
+            // $outgoingStock->quantity_removed = 1;
+            // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+            // $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+            // $outgoingStock->quantity_returned = 0; //by default
+            // $outgoingStock->created_by = $authUser->id;
+            // $outgoingStock->status = 'true';
+            // $outgoingStock->save();
+
+            // Create a new package array for each product ID
+            $package_bundles = [
+                'product_id'=>$product->id,
+                'quantity_removed'=>1,
+                'amount_accrued'=>$product->sale_price,
+                'customer_acceptance_status'=>null,
+                'reason_removed'=>'as_orderbump',
+                'quantity_returned'=>0,
+                'reason_returned'=>null,
+                'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+            ];
+            //$package_bundle[] = $package_bundles;
+            $orderPackageBundle = $order->outgoingStock->package_bundle;
+            array_push($orderPackageBundle, $package_bundles);
+
+            //create new OutgoingStock
+            $outgoingStock = OutgoingStock::where('order_id', $order->id)->first();
             $outgoingStock->order_id = $order->id;
-            $outgoingStock->quantity_removed = 1;
-            $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-            $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-            $outgoingStock->quantity_returned = 0; //by default
+            $outgoingStock->package_bundle = $orderPackageBundle;
             $outgoingStock->created_by = $authUser->id;
             $outgoingStock->status = 'true';
             $outgoingStock->save();
+            ////////////////////////////////
 
             //update formHolder
             $formHolder->update(['orderbump_id'=>$orderbump->id]);
@@ -430,16 +495,40 @@ class FormBuilderController extends Controller
             $product = $former_upsell->product;
 
             //outgoing stock for upsell
+            // $outgoingStock = new OutgoingStock();
+            // $outgoingStock->product_id = $product->id;
+            // $outgoingStock->order_id = $order->id;
+            // $outgoingStock->quantity_removed = 1;
+            // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+            // $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+            // $outgoingStock->quantity_returned = 0; //by default
+            // $outgoingStock->created_by = $authUser->id;
+            // $outgoingStock->status = 'true';
+            // $outgoingStock->save();
+
+            // Create a new package array for each product ID
+            $package_bundles = [
+                'product_id'=>$product->id,
+                'quantity_removed'=>1,
+                'amount_accrued'=>$product->sale_price,
+                'customer_acceptance_status'=>null,
+                'reason_removed'=>'as_upsell',
+                'quantity_returned'=>0,
+                'reason_returned'=>null,
+                'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+            ];
+            //$package_bundle[] = $package_bundles;
+            $orderPackageBundle = $order->outgoingStock->package_bundle;
+            array_push($orderPackageBundle, $package_bundles);
+
+            //create new OutgoingStock
             $outgoingStock = new OutgoingStock();
-            $outgoingStock->product_id = $product->id;
             $outgoingStock->order_id = $order->id;
-            $outgoingStock->quantity_removed = 1;
-            $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-            $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-            $outgoingStock->quantity_returned = 0; //by default
+            $outgoingStock->package_bundle = $orderPackageBundle;
             $outgoingStock->created_by = $authUser->id;
             $outgoingStock->status = 'true';
             $outgoingStock->save();
+            ////////////////////////////////
 
             //update formHolder
             $formHolder->update(['upsell_id'=>$upsell->id]);
@@ -599,26 +688,47 @@ class FormBuilderController extends Controller
 
             //remove n replace outgoing stock
             //$former_packages = $data['former_packages2']; //["1","2"]
-            OutgoingStock::whereIn('product_id', json_decode($data['former_packages2']))->where(['order_id'=>$order->id])->delete();
+            //OutgoingStock::whereIn('product_id', json_decode($data['former_packages2']))->where(['order_id'=>$order->id])->delete();
+            OutgoingStock::where(['order_id'=>$order->id])->forceDelete();
 
-            $product_ids = [];
+            $product_ids = []; $package_bundle = [];
             foreach ($data['packages'] as $package) {
                 if (!empty($package)) {
                     $product = Product::where('id', $package)->first();
                     $product_ids[] = $product->id;
-                    $outgoingStock = new OutgoingStock();
-                    $outgoingStock->product_id = $product->id;
-                    $outgoingStock->order_id = $order->id;
-                    $outgoingStock->quantity_removed = 1;
-                    $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-                    $outgoingStock->quantity_returned = 0; //by default
-                    $outgoingStock->isCombo = isset($product->combo_product_ids) ? 'true' : null;
-                    $outgoingStock->created_by = $authUser->id;
-                    $outgoingStock->status = 'true';
-                    $outgoingStock->save();
+                    // $outgoingStock = new OutgoingStock();
+                    // $outgoingStock->product_id = $product->id;
+                    // $outgoingStock->order_id = $order->id;
+                    // $outgoingStock->quantity_removed = 1;
+                    // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                    // $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    // $outgoingStock->quantity_returned = 0; //by default
+                    // $outgoingStock->isCombo = isset($product->combo_product_ids) ? 'true' : null;
+                    // $outgoingStock->created_by = $authUser->id;
+                    // $outgoingStock->status = 'true';
+                    // $outgoingStock->save();
+
+                    // Create a new package array for each product ID
+                    $package_bundles = [
+                        'product_id'=>$product->id,
+                        'quantity_removed'=>1,
+                        'amount_accrued'=>$product->sale_price,
+                        'customer_acceptance_status'=>null,
+                        'reason_removed'=>'as_order_firstphase',
+                        'quantity_returned'=>0,
+                        'reason_returned'=>null,
+                        'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+                    ];
+                    $package_bundle[] = $package_bundles;
                 } 
             }
+
+            $outgoingStock = new OutgoingStock();
+            $outgoingStock->order_id = $order->id;
+            $outgoingStock->package_bundle = $package_bundle;
+            $outgoingStock->created_by = $authUser->id;
+            $outgoingStock->status = 'true';
+            $outgoingStock->save();
 
             //update formHolder, no need
             //$formHolder->update(['order_id'=>$order->id]);
@@ -669,30 +779,52 @@ class FormBuilderController extends Controller
             $order->save();
 
             //outgoingStock, in place of orderProduct
-            $product_ids = [];
+            $product_ids = []; $package_bundle = [];
             foreach ($data['packages'] as $package) {
                 if (!empty($package)) {
                     
                     $product = Product::where('id', $package)->first();
                     $product_ids[] = $product->id;
-                    $outgoingStock = new OutgoingStock();
-                    $outgoingStock->product_id = $product->id;
-                    $outgoingStock->order_id = $order->id;
-                    $outgoingStock->quantity_removed = 1;
-                    $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-                    $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-                    $outgoingStock->quantity_returned = 0; //by default
-                    $outgoingStock->created_by = $authUser->id;
-                    $outgoingStock->status = 'true';
-                    $outgoingStock->save();
+                    // $outgoingStock = new OutgoingStock();
+                    // $outgoingStock->product_id = $product->id;
+                    // $outgoingStock->order_id = $order->id;
+                    // $outgoingStock->quantity_removed = 1;
+                    // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                    // $outgoingStock->reason_removed = 'as_order_firstphase'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                    // $outgoingStock->quantity_returned = 0; //by default
+                    // $outgoingStock->created_by = $authUser->id;
+                    // $outgoingStock->status = 'true';
+                    // $outgoingStock->save();
+
+                    // Create a new package array for each product ID
+                    $package_bundles = [
+                        'product_id'=>$product->id,
+                        'quantity_removed'=>1,
+                        'amount_accrued'=>$product->sale_price,
+                        'customer_acceptance_status'=>null,
+                        'reason_removed'=>'as_order_firstphase',
+                        'quantity_returned'=>0,
+                        'reason_returned'=>null,
+                        'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+                    ];
+                    $package_bundle[] = $package_bundles;
                     
                 }  
             }
+
+            //create new OutgoingStock
+            $outgoingStock = new OutgoingStock();
+            $outgoingStock->order_id = $order->id;
+            $outgoingStock->package_bundle = $package_bundle;
+            $outgoingStock->created_by = $authUser->id;
+            $outgoingStock->status = 'true';
+            $outgoingStock->save();
 
             //update formHolder
             $formHolder_former->update(['order_id'=>$order->id]);
             $order->update(['products'=>serialize($product_ids)]);
 
+            //$package_bundle = [];
             if ( (isset($formHolder_former->orderbump_id)) && (isset($formHolder_former->orderbump->id)) && (isset($formHolder_former->orderbump->product->id)) ) {
                 //orderbump
                 $former_orderbump = $formHolder_former->orderbump;
@@ -710,13 +842,36 @@ class FormBuilderController extends Controller
                 $product = $former_orderbump->product;
 
                 //outgoing stock for orderbump
-                $outgoingStock = new OutgoingStock();
-                $outgoingStock->product_id = $product->id;
+                // $outgoingStock = new OutgoingStock();
+                // $outgoingStock->product_id = $product->id;
+                // $outgoingStock->order_id = $order->id;
+                // $outgoingStock->quantity_removed = 1;
+                // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                // $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                // $outgoingStock->quantity_returned = 0; //by default
+                // $outgoingStock->created_by = $authUser->id;
+                // $outgoingStock->status = 'true';
+                // $outgoingStock->save();
+
+                // Create a new package array for each product ID
+                $package_bundles = [
+                    'product_id'=>$product->id,
+                    'quantity_removed'=>1,
+                    'amount_accrued'=>$product->sale_price,
+                    'customer_acceptance_status'=>null,
+                    'reason_removed'=>'as_orderbump',
+                    'quantity_returned'=>0,
+                    'reason_returned'=>null,
+                    'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+                ];
+                //$package_bundle[] = $package_bundles;
+                $orderOutgoingStockPackageBundle = $order->outgoingStock->package_bundle;
+                array_push($orderOutgoingStockPackageBundle, $package_bundles);
+
+                //create new OutgoingStock
+                $outgoingStock = OutgoingStock::where('order_id', $order->id)->first();
                 $outgoingStock->order_id = $order->id;
-                $outgoingStock->quantity_removed = 1;
-                $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-                $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-                $outgoingStock->quantity_returned = 0; //by default
+                $outgoingStock->package_bundle = $orderOutgoingStockPackageBundle;
                 $outgoingStock->created_by = $authUser->id;
                 $outgoingStock->status = 'true';
                 $outgoingStock->save();
@@ -726,6 +881,7 @@ class FormBuilderController extends Controller
                 
             } 
 
+            //$package_bundle = [];
             if ( (isset($formHolder_former->upsell_id))  && (isset($formHolder_former->upsell->id)) && (isset($formHolder_former->upsell->product->id)) ) {
                 //orderbump
                 $former_upsell = $formHolder_former->upsell;
@@ -744,13 +900,36 @@ class FormBuilderController extends Controller
                 $product = $former_upsell->product;
     
                 //outgoing stock for upsell
-                $outgoingStock = new OutgoingStock();
-                $outgoingStock->product_id = $product->id;
+                // $outgoingStock = new OutgoingStock();
+                // $outgoingStock->product_id = $product->id;
+                // $outgoingStock->order_id = $order->id;
+                // $outgoingStock->quantity_removed = 1;
+                // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+                // $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+                // $outgoingStock->quantity_returned = 0; //by default
+                // $outgoingStock->created_by = $authUser->id;
+                // $outgoingStock->status = 'true';
+                // $outgoingStock->save();
+
+                // Create a new package array for each product ID
+                $package_bundles = [
+                    'product_id'=>$product->id,
+                    'quantity_removed'=>1,
+                    'amount_accrued'=>$product->sale_price,
+                    'customer_acceptance_status'=>null,
+                    'reason_removed'=>'as_upsell',
+                    'quantity_returned'=>0,
+                    'reason_returned'=>null,
+                    'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+                ];
+                //$package_bundle[] = $package_bundles;
+                $orderOutgoingStockPackageBundle = $order->outgoingStock->package_bundle;
+                array_push($orderOutgoingStockPackageBundle, $package_bundles);
+
+                //create new OutgoingStock
+                $outgoingStock = OutgoingStock::where('order_id', $order->id)->first();
                 $outgoingStock->order_id = $order->id;
-                $outgoingStock->quantity_removed = 1;
-                $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-                $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-                $outgoingStock->quantity_returned = 0; //by default
+                $outgoingStock->package_bundle = $orderOutgoingStockPackageBundle;
                 $outgoingStock->created_by = $authUser->id;
                 $outgoingStock->status = 'true';
                 $outgoingStock->save();
@@ -925,13 +1104,39 @@ class FormBuilderController extends Controller
         $product = Product::where('id', $data['orderbump_product'])->first();
         
         //outgoing stock
-        $outgoingStock = new OutgoingStock();
-        $outgoingStock->product_id = $data['orderbump_product'];
+        // $outgoingStock = new OutgoingStock();
+        // $outgoingStock->product_id = $data['orderbump_product'];
+        // $outgoingStock->order_id = isset($formHolder->order_id) ? $formHolder->order->id : null;
+        // $outgoingStock->quantity_removed = 1;
+        // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+        // $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+        // $outgoingStock->quantity_returned = 0; //by default
+        // $outgoingStock->created_by = $authUser->id;
+        // $outgoingStock->status = 'true';
+        // $outgoingStock->save();
+
+        //$package_bundle = [];
+        // Create a new package array for each product ID
+        $package_bundles = [
+            'product_id'=>$data['orderbump_product'],
+            'quantity_removed'=>1,
+            'amount_accrued'=>$product->sale_price,
+            'customer_acceptance_status'=>null,
+            'reason_removed'=>'as_orderbump',
+            'quantity_returned'=>0,
+            'reason_returned'=>null,
+            'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+        ];
+        // $package_bundle[] = $package_bundles;
+        $orderPackageBundle = $formHolder->order->outgoingStock->package_bundle;
+
+        //push to existing array
+        array_push($orderPackageBundle,$package_bundles);
+
+        //update existing OutgoingStock row
+        $outgoingStock = OutgoingStock::where('order_id', $formHolder->order->id)->first();
         $outgoingStock->order_id = isset($formHolder->order_id) ? $formHolder->order->id : null;
-        $outgoingStock->quantity_removed = 1;
-        $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-        $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-        $outgoingStock->quantity_returned = 0; //by default
+        $outgoingStock->package_bundle = $orderPackageBundle;
         $outgoingStock->created_by = $authUser->id;
         $outgoingStock->status = 'true';
         $outgoingStock->save();
@@ -982,16 +1187,43 @@ class FormBuilderController extends Controller
         $product = Product::where('id', $data['orderbump_product'])->first();
         
         //outgoing stock
-        $outgoingStock = OutgoingStock::where('order_id', $formHolder->order->id)->where('reason_removed', 'as_orderbump')->first();
-        $outgoingStock->product_id = $data['orderbump_product'];
-        $outgoingStock->order_id = $formHolder->order->id;
-        $outgoingStock->quantity_removed = 1;
-        $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-        $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-        $outgoingStock->quantity_returned = 0; //by default
-        $outgoingStock->created_by = $authUser->id;
-        $outgoingStock->status = 'true';
-        $outgoingStock->save();
+        // $outgoingStock = OutgoingStock::where('order_id', $formHolder->order->id)->where('reason_removed', 'as_orderbump')->first();
+        // $outgoingStock->product_id = $data['orderbump_product'];
+        // $outgoingStock->order_id = $formHolder->order->id;
+        // $outgoingStock->quantity_removed = 1;
+        // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+        // $outgoingStock->reason_removed = 'as_orderbump'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+        // $outgoingStock->quantity_returned = 0; //by default
+        // $outgoingStock->created_by = $authUser->id;
+        // $outgoingStock->status = 'true';
+        // $outgoingStock->save();
+        
+        //now update each row package_bundle
+        $outgoingStockPackageBundle = OutgoingStock::where('order_id', $formHolder->order->id)->first()->package_bundle;
+
+        //loop to get new copy of $outgoingStockPackageBundle array
+        foreach ($outgoingStockPackageBundle as $key => $value) {
+            // Update values with similar keys
+            if ( !empty($value['reason_removed']) && $value['reason_removed'] == 'as_orderbump' ) {
+                // Merge the data from $package_bundle_1 into the $outgoingStockPackageBundle
+                $outgoingStockPackageBundle[$key]['product_id'] = $data['orderbump_product'];
+                $outgoingStockPackageBundle[$key]['quantity_removed'] = 1;
+                $outgoingStockPackageBundle[$key]['amount_accrued'] = $product->sale_price;
+                $outgoingStockPackageBundle[$key]['customer_acceptance_status'] = null;
+                $outgoingStockPackageBundle[$key]['reason_removed'] = 'as_orderbump';
+                $outgoingStockPackageBundle[$key]['quantity_returned'] = 0;
+                $outgoingStockPackageBundle[$key]['reason_returned'] = null;
+                $outgoingStockPackageBundle[$key]['isCombo'] = isset($product->combo_product_ids) ? 'true' : null;
+            }
+        }
+
+        //pudate db column with new copy of $outgoingStockPackageBundle
+        OutgoingStock::where('order_id', $formHolder->order->id)->update([
+            'package_bundle' => $outgoingStockPackageBundle,
+            'created_by' => $authUser->id,
+            'status' => 'true',
+        ]);
+        ////////////////////////////////////////////////////
 
         //update formHolder
         $formHolder->update(['orderbump_id'=>$orderbump->id]);
@@ -1032,13 +1264,37 @@ class FormBuilderController extends Controller
         $product = Product::where('id', $data['upsell_product'])->first();
         
         //outgoing stock
-        $outgoingStock = new OutgoingStock();
-        $outgoingStock->product_id = $data['upsell_product'];
-        $outgoingStock->order_id = $formHolder->order->id;
-        $outgoingStock->quantity_removed = 1;
-        $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-        $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-        $outgoingStock->quantity_returned = 0; //by default
+        // $outgoingStock = new OutgoingStock();
+        // $outgoingStock->product_id = $data['upsell_product'];
+        // $outgoingStock->order_id = $formHolder->order->id;
+        // $outgoingStock->quantity_removed = 1;
+        // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+        // $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+        // $outgoingStock->quantity_returned = 0; //by default
+        // $outgoingStock->created_by = $authUser->id;
+        // $outgoingStock->status = 'true';
+        // $outgoingStock->save();
+
+        //$package_bundle = [];
+        // Create a new package array for each product ID
+        $package_bundles = [
+            'product_id'=>$data['upsell_product'],
+            'quantity_removed'=>1,
+            'amount_accrued'=>$product->sale_price,
+            'customer_acceptance_status'=>null,
+            'reason_removed'=>'as_upsell',
+            'quantity_returned'=>0,
+            'reason_returned'=>null,
+            'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+        ];
+        // $package_bundle[] = $package_bundles;
+        $orderPackageBundle = $formHolder->order->outgoingStock->package_bundle;
+        array_push($orderPackageBundle,$package_bundles);
+
+        //update existing OutgoingStock row
+        $outgoingStock = OutgoingStock::where('order_id', $formHolder->order->id)->first();
+        $outgoingStock->order_id = isset($formHolder->order_id) ? $formHolder->order->id : null;
+        $outgoingStock->package_bundle = $orderPackageBundle;
         $outgoingStock->created_by = $authUser->id;
         $outgoingStock->status = 'true';
         $outgoingStock->save();
@@ -1086,16 +1342,43 @@ class FormBuilderController extends Controller
         $product = Product::where('id', $data['upsell_product'])->first();
         
         //outgoing stock
-        $outgoingStock = OutgoingStock::where('order_id', $formHolder->order->id)->where('reason_removed', 'as_upsell')->first();
-        $outgoingStock->product_id = $data['upsell_product'];
-        $outgoingStock->order_id = $formHolder->order->id;
-        $outgoingStock->quantity_removed = 1;
-        $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
-        $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
-        $outgoingStock->quantity_returned = 0; //by default
-        $outgoingStock->created_by = $authUser->id;
-        $outgoingStock->status = 'true';
-        $outgoingStock->save();
+        // $outgoingStock = OutgoingStock::where('order_id', $formHolder->order->id)->where('reason_removed', 'as_upsell')->first();
+        // $outgoingStock->product_id = $data['upsell_product'];
+        // $outgoingStock->order_id = $formHolder->order->id;
+        // $outgoingStock->quantity_removed = 1;
+        // $outgoingStock->amount_accrued = $product->sale_price; //since qty is always one
+        // $outgoingStock->reason_removed = 'as_upsell'; //as_order_firstphase, as_orderbump, as_upsell as_expired, as_damaged,
+        // $outgoingStock->quantity_returned = 0; //by default
+        // $outgoingStock->created_by = $authUser->id;
+        // $outgoingStock->status = 'true';
+        // $outgoingStock->save();
+        
+        //now update each row package_bundle
+        $outgoingStockPackageBundle = OutgoingStock::where('order_id', $formHolder->order->id)->first()->package_bundle;
+
+        //loop to get new copy of $outgoingStockPackageBundle array
+        foreach ($outgoingStockPackageBundle as $key => $value) {
+            // Update values with similar keys
+            if ( !empty($value['reason_removed']) && $value['reason_removed'] == 'as_upsell' ) {
+                // Merge the data from $package_bundle_1 into the $outgoingStockPackageBundle
+                $outgoingStockPackageBundle[$key]['product_id'] = $data['upsell_product'];
+                $outgoingStockPackageBundle[$key]['quantity_removed'] = 1;
+                $outgoingStockPackageBundle[$key]['amount_accrued'] = $product->sale_price;
+                $outgoingStockPackageBundle[$key]['customer_acceptance_status'] = null;
+                $outgoingStockPackageBundle[$key]['reason_removed'] = 'as_upsell';
+                $outgoingStockPackageBundle[$key]['quantity_returned'] = 0;
+                $outgoingStockPackageBundle[$key]['reason_returned'] = null;
+                $outgoingStockPackageBundle[$key]['isCombo'] = isset($product->combo_product_ids) ? 'true' : null;
+            }
+        }
+
+        //pudate db column with new copy of $outgoingStockPackageBundle
+        OutgoingStock::where('order_id', $formHolder->order->id)->update([
+            'package_bundle' => $outgoingStockPackageBundle,
+            'created_by' => $authUser->id,
+            'status' => 'true',
+        ]);
+        ////////////////////////////////////////////////////
 
         //update formHolder
         $formHolder->update(['upsell_id'=>$upsell->id]);
@@ -1202,7 +1485,6 @@ class FormBuilderController extends Controller
             }
         }
         
-        //products package
         //products package
         foreach ($packages as $key => $package) {
             $product = Product::where('id', $package)->first();
@@ -1323,8 +1605,26 @@ class FormBuilderController extends Controller
             if (!isset($order)) {
                 \abort(404);
             }
-            $order->outgoingStocks()->where(['customer_acceptance_status'=>NULL])
-            ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
+            // $order->outgoingStocks()->where(['customer_acceptance_status'=>NULL])
+            // ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
+
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+            $package_bundle_1 = [];
+
+            // Loop through the $outgoingStockPackageBundle array with access to keys
+            foreach ($outgoingStockPackageBundle as $key => $value) {
+                if ( empty($value['customer_acceptance_status']) ) {
+                    // Merge the data from $package_bundle_1 into the $outgoingStockPackageBundle
+                    $outgoingStockPackageBundle[$key]['customer_acceptance_status'] = 'rejected';
+                    $outgoingStockPackageBundle[$key]['reason_removed'] = 'as_order_firstphase';
+                    $outgoingStockPackageBundle[$key]['quantity_returned'] = 1;
+                    $outgoingStockPackageBundle[$key]['reason_returned'] = 'declined';
+                }
+            }
+
+            //pudate db column with new copy of $outgoingStockPackageBundle
+            $order->outgoingStock()->update(['package_bundle' => $outgoingStockPackageBundle]);
+            
         } else {
             $order = $formHolder->order;
         }
@@ -1396,36 +1696,111 @@ class FormBuilderController extends Controller
         //for thankyou part
         // $order = $formHolder->order;
         $mainProduct_revenue = 0;  //price * qty
-        $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
-        'customer_acceptance_status'=>'accepted'])->get();
+        $qty_main_product = 0;
+        // $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
+        // 'customer_acceptance_status'=>'accepted'])->get();
 
-        if ( count($mainProducts_outgoingStocks) > 0 ) {
-            foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-                if(isset($main_outgoingStock->product)) {
-                    $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
-                } 
+        // if ( count($mainProducts_outgoingStocks) > 0 ) {
+        //     foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
+        //         if(isset($main_outgoingStock->product)) {
+        //             $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+        //         } 
+        //     }
+        // }
+
+        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+        foreach ($outgoingStockPackageBundle as $key=>&$main_outgoingStock) {
+            
+            if ( ($main_outgoingStock['reason_removed'] == 'as_order_firstphase') && ($main_outgoingStock['customer_acceptance_status'] == 'accepted') ) {
+                 $product = Product::where('id', $main_outgoingStock['product_id'])->first();
+                 if (isset($product)) {
+                    //array_push($mainProducts_outgoingStocks, array('product' => $product)); 
+                    $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                    $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
+                    $qty_main_product += $main_outgoingStock['quantity_removed'];
+                 }
+            } else {
+                // Remove the element from the array if the condition is not met
+                unset($outgoingStockPackageBundle[$key]);
             }
         }
+        //converting array immediate & nested(product) array to object. json_decode alone will not do it.
+        // if ($mainProduct_revenue > 0) {
+        //     $mainProducts_outgoingStocks = array_map(function ($item) {
+        //         return (object) $item;
+        //     }, $outgoingStockPackageBundle);
+        // } else {
+        //     $mainProducts_outgoingStocks = collect([]);
+        // }
+        
+        //convert to array to array-of-object
+        $mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
+        //$mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? $outgoingStockPackageBundle : collect([]);
 
         //orderbump
         $orderbumpProduct_revenue = 0; //price * qty
         $orderbump_outgoingStock = '';
+        $qty_orderbump = 0;
+        // if (isset($formHolder->orderbump_id)) {
+        //     $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
+        //     if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+        //         $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+        //     }
+        // }
+
+        
+
+        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+        
         if (isset($formHolder->orderbump_id)) {
-            $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
-            if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
-                $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+            foreach ($outgoingStockPackageBundle as $key => &$orderbump_stock) {
+                if ( ($orderbump_stock['reason_removed'] == 'as_orderbump') && ($orderbump_stock['customer_acceptance_status'] == 'accepted') ) {
+                    $product = Product::where('id', $orderbump_stock['product_id'])->first();
+                     if (isset($product)) {
+                        $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                        $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
+                        $qty_orderbump += $orderbump_stock['quantity_removed'];
+                     }
+                } else {
+                    // Remove the element from the array if the condition is not met
+                    unset($outgoingStockPackageBundle[$key]);
+                }
             }
         }
+        //array_values to re-index the array numerically
+        //array_merge to remove block brackets
+        //json_encode & json_decode to allow $x->y in view
+        $orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockPackageBundle)))) : '';
 
         //upsell
         $upsellProduct_revenue = 0; //price * qty
         $upsell_outgoingStock = '';
+        $qty_upsell = 0;
+        // if (isset($formHolder->upsell_id)) {
+        //     $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
+        //     if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+        //         $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+        //     }
+        // }
+
+        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+        
         if (isset($formHolder->upsell_id)) {
-            $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
-            if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
-                $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+            foreach ($outgoingStockPackageBundle as $key => &$upsell_stock) {
+                if ( ($upsell_stock['reason_removed'] == 'as_upsell') && ($upsell_stock['customer_acceptance_status'] == 'accepted') ) {
+                    $product = Product::where('id', $upsell_stock['product_id'])->first();
+                     if (isset($product)) {
+                        $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                        $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
+                        $qty_upsell += $upsell_stock['quantity_removed'];
+                     }
+                } else {
+                    // Remove the element from the array if the condition is not met
+                    unset($outgoingStockPackageBundle[$key]);
+                }
             }
         }
+        $upsell_outgoingStock = $upsellProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockPackageBundle)))) : '';
         
         //order total amt
         $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
@@ -1437,9 +1812,9 @@ class FormBuilderController extends Controller
         }
         
         //package or product qty. sum = 0, if it doesnt exist
-        $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
-        $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
-        $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
+        // $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
+        // $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
+        // $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
         $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
 
         //end thankyou part
@@ -1452,8 +1827,9 @@ class FormBuilderController extends Controller
             $receipients = Arr::collapse([[$authUser->email],[$customer->email]]);
 
             // event(new TestEvent($invoiceData));
+            $this->invoiceData($formHolder, $customer, $order);
         }
-        
+
         return view('pages.newFormLink', compact('authUser', 'unique_key', 'formHolder', 'formName', 'formContact', 'formPackage', 'products',
         'mainProducts_outgoingStocks', 'order', 'orderId', 'mainProduct_revenue', 'orderbump_outgoingStock', 'orderbumpProduct_revenue', 'upsell_outgoingStock',
         'upsellProduct_revenue', 'customer', 'qty_total', 'order_total_amount', 'grand_total', 'stage', 'cartAbandoned_id'));
@@ -1573,13 +1949,13 @@ class FormBuilderController extends Controller
         if($cartAbandon->exists()) {
             $cartAbandon->delete();
         }
-
+        
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
         $order = $formHolder->order;
 
         //cos order was created initially @ newFormBuilderPost, incase the form originted from edited or duplicate form
         if (isset($order->customer_id)) {
-            
+    
             //save Order
             $newOrder = new Order();
             $newOrder->form_holder_id = $formHolder->id;
@@ -1588,25 +1964,132 @@ class FormBuilderController extends Controller
             $newOrder->save();
 
             //making a copy from the former outgoingStocks, in the case of dealing with an edited or duplicated form
-            $outgoingStocks = $order->outgoingStocks;
-            foreach($outgoingStocks as $i => $outgoingStock)
-            {
-                //make copy of rows, and create new records
-                if(isset($outgoingStock->product)) {
-                    $outgoingStocks[$i]->order_id = $newOrder->id;
-                    $outgoingStocks[$i]->quantity_returned = 0;
-                    $outgoingStocks[$i]->quantity_removed = 1;
-                    $outgoingStocks[$i]->amount_accrued = $outgoingStock->product->sale_price;
-                    $outgoingStocks[$i]->isCombo = isset($outgoingStock->product->combo_product_ids) ? 'true' : null;
+            // $outgoingStocks = $order->outgoingStocks;
+            
+            // foreach($outgoingStocks as $i => $outgoingStock)
+            // {
+            //     //make copy of rows, and create new records
+            //     if(isset($outgoingStock->product)) {
+            //         $outgoingStocks[$i]->order_id = $newOrder->id;
+            //         $outgoingStocks[$i]->quantity_returned = 0;
+            //         $outgoingStocks[$i]->quantity_removed = 1;
+            //         $outgoingStocks[$i]->amount_accrued = $outgoingStock->product->sale_price;
+            //         $outgoingStocks[$i]->isCombo = isset($outgoingStock->product->combo_product_ids) ? 'true' : null;
     
-                    $x[$i] = (new OutgoingStock())->create($outgoingStock->only(['product_id', 'order_id', 'quantity_removed', 'amount_accrued',
-                    'reason_removed', 'quantity_returned', 'created_by', 'status']));
-                }
-                
-            }
+            //         $x[$i] = (new OutgoingStock())->create($outgoingStock->only(['product_id', 'order_id', 'quantity_removed', 'amount_accrued',
+            //         'reason_removed', 'quantity_returned', 'created_by', 'status']));
+            //     }
+            // }
             // return $x;
 
+            //making a copy from the former outgoingStocks, in the case of dealing with an edited or duplicated form
+
+            //update $outgoingStockPackageBundle array
+            $outgoingStock = $order->outgoingStock;
+            // Check if $outgoingStock exists and is not null
+            if ($outgoingStock) {
+                // Convert the 'package_bundle' JSON into an associative array
+                $packageBundle = $outgoingStock->package_bundle;
+
+                // Loop through each package in the 'package_bundle' array
+                foreach ($packageBundle as &$item) {
+                    // Extract the 'product_id' from the package data
+                    $productId = $item['product_id'];
+
+                    // Find the related Product using 'Product::find($productId)'
+                    $product = Product::find($productId);
+
+                    // Check if a valid Product is found
+                    if ($product) {
+                        // Update the packageBundle data with additional information
+                        $item['quantity_returned'] = 0;
+                        $item['quantity_removed'] = 1;
+                        $item['amount_accrued'] = $product->sale_price;
+                        $item['isCombo'] = isset($product->combo_product_ids) ? 'true' : null;
+                    }
+                }
+
+                // Convert the updated $packageBundle back to a JSON string
+                // and update the 'package_bundle' property of $outgoingStock
+                $outgoingStock->package_bundle = $packageBundle;
+
+                // Create a new OutgoingStock record using the updated package data
+                $newOutgoingStock = OutgoingStock::create([
+                    'order_id' => $newOrder->id,
+                    'created_by' => $outgoingStock->created_by,
+                    'status' => $outgoingStock->status,
+                    'package_bundle' => $outgoingStock->package_bundle,
+                ]);
+
+                // Return the new OutgoingStock object that we just created
+                //return $newOutgoingStock;
+            }
+
+            // If $outgoingStock is not set or doesn't exist, we return null
+            //return null;
+
+            //////////////////////////////////////////////////////////
+            //making a copy from the former outgoingStocks, in the case of dealing with an edited or duplicated form
+
+            // $orderOutgoingStock = $order->outgoingStock;
+
+            //update $outgoingStockPackageBundle array
+            // $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+            // $package_bundle_1 = [];
+            // //loop to get $package_bundle_1 array, if customer is null
+            // foreach ($outgoingStockPackageBundle as &$main_outgoingStock) {
+            //     if ( $main_outgoingStock['customer_acceptance_status'] == null ) {
+
+            //         $package_bundles = [
+            //             'quantity_returned'=>0,
+            //             'quantity_removed'=>1,
+            //         ];
+            //         $package_bundle_1[] = $package_bundles;
+            //     }
+            // }
+
+            // //loop to get new copy of $outgoingStockPackageBundle array
+            // foreach ($outgoingStockPackageBundle as $key => &$value) {
+            //     // Update values with similar keys
+            //     if (isset($package_bundle_1[$key])) {
+            //         $value = array_merge($value, $package_bundle_1[$key]);
+            //     }
+            // }
+            ///////////////////////////////////////////////////////////
+
+            // $newOutgoingStock = new OutgoingStock();
+            // $newOutgoingStock->order_id = $newOrder->id;
+            // $newOutgoingStock->package_bundle = $outgoingStockPackageBundle;
+            // $newOutgoingStock->created_by = $order->outgoingStock->created_by;
+            // $newOutgoingStock->status = $order->outgoingStock->status;
+            // $newOutgoingStock->save();
+        
+            ///////////////////////////////////////////////////////////////////////////
+
+            $mainProduct_revenue = 0;  //price * qty
+            $qty_main_product = 0;
+            // $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
+            // 'customer_acceptance_status'=>'accepted'])->get();
+
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+            foreach ($outgoingStockPackageBundle as &$main_outgoingStock) {
+                if ( ($main_outgoingStock['reason_removed'] == 'as_order_firstphase') && ($main_outgoingStock['customer_acceptance_status'] == 'accepted') ) {
+                    $product = Product::where('id', $main_outgoingStock['product_id'])->first();
+                    if (isset($product)) {
+                        //array_push($mainProducts_outgoingStocks, array('product' => $product)); 
+                        $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                        $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
+                        $qty_main_product += $main_outgoingStock['quantity_removed'];
+                    }
+                }
+            }
+    
+            //convert to array to array-of-object
+            $mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
+            ///////////////////////////////////////////////////////////////
+
             // $order = $order;
+            $package_bundle_1 = [];
             //updated package in outgoingstock, created above
             foreach ($data['product_packages'] as $key => $product_id) {
                 $data['product_id'] = $product_id;
@@ -1619,8 +2102,17 @@ class FormBuilderController extends Controller
 
                     //accepted updated
                     $amount_accrued = $qtyRemoved * $saleUnitPrice;
-                    OutgoingStock::where(['product_id'=>$productId, 'order_id'=>$newOrder->id, 'reason_removed'=>'as_order_firstphase'])
-                    ->update(['quantity_removed'=>$qtyRemoved, 'amount_accrued'=>$amount_accrued, 'customer_acceptance_status'=>'accepted']);
+                    // OutgoingStock::where(['product_id'=>$productId, 'order_id'=>$newOrder->id, 'reason_removed'=>'as_order_firstphase'])
+                    // ->update(['quantity_removed'=>$qtyRemoved, 'amount_accrued'=>$amount_accrued, 'customer_acceptance_status'=>'accepted']);
+
+                    // Create a new package array for each product ID
+                    $package_bundles = [
+                        'product_id'=>$productId,
+                        'quantity_removed'=>$qtyRemoved,
+                        'amount_accrued'=>$amount_accrued,
+                        'customer_acceptance_status'=>'accepted',
+                    ];
+                    $package_bundle_1[] = $package_bundles;
                     
                     //rejected or declined updated
                     // $rejected_products = OutgoingStock::where('product_id', '!=', $productId)->where('order_id', $newOrder->id)
@@ -1631,6 +2123,26 @@ class FormBuilderController extends Controller
                     
                 } 
             }
+
+            //now update each row package_bundle
+            $outgoingStockPackageBundle = OutgoingStock::where('order_id', $newOrder->id)->first()->package_bundle;
+
+            foreach ($outgoingStockPackageBundle as &$package_bundle) {
+                // Find the corresponding package_bundle in $package_bundle_1 based on product_id
+                $matching_package = collect($package_bundle_1)->firstWhere('product_id', $package_bundle['product_id']);
+            
+                // If a matching package is found, update the row in $outgoingStockPackageBundle
+                if ($matching_package && $package_bundle['reason_removed']=='as_order_firstphase') {
+                    // Merge the matching keys and values from $matching_package into $package_bundle
+                    $package_bundle = array_merge($package_bundle, array_intersect_key($matching_package, $package_bundle));
+                }
+            }
+        
+            // Now $outgoingStockPackageBundle has the updated data
+            //return $outgoingStockPackageBundle;
+
+            //update outgoingStock
+            OutgoingStock::where(['order_id'=>$newOrder->id])->update(['package_bundle' => $outgoingStockPackageBundle]);
                     
             $customer = new Customer();
             $customer->order_id = $newOrder->id;
@@ -1675,6 +2187,7 @@ class FormBuilderController extends Controller
         } else {
             
             //update package in OutgoingStock
+            $package_bundle_1 = [];
             foreach ($data['product_packages'] as $key => $product_id) {
                 $data['product_id'] = $product_id;
                 if (!empty($product_id)) {
@@ -1687,8 +2200,17 @@ class FormBuilderController extends Controller
                     //accepted updated
                     $amount_accrued = $qtyRemoved * $saleUnitPrice;
                     //accepted updated
-                    OutgoingStock::where(['product_id'=>$productId, 'order_id'=>$order->id, 'reason_removed'=>'as_order_firstphase'])
-                    ->update(['quantity_removed'=>$qtyRemoved, 'amount_accrued'=>$amount_accrued, 'customer_acceptance_status'=>'accepted']);
+                    // OutgoingStock::where(['product_id'=>$productId, 'order_id'=>$order->id, 'reason_removed'=>'as_order_firstphase'])
+                    // ->update(['quantity_removed'=>$qtyRemoved, 'amount_accrued'=>$amount_accrued, 'customer_acceptance_status'=>'accepted']);
+
+                    // Create a new package array for each product ID
+                    $package_bundles = [
+                        'product_id'=>$productId,
+                        'quantity_removed'=>$qtyRemoved,
+                        'amount_accrued'=>$amount_accrued,
+                        'customer_acceptance_status'=>'accepted',
+                    ];
+                    $package_bundle_1[] = $package_bundles;
                     
                     //rejected or declined updated
                     // $rejected_products = OutgoingStock::where('product_id', '!=', $productId)->where('order_id', $order->id)
@@ -1699,6 +2221,26 @@ class FormBuilderController extends Controller
                     
                 } 
             }
+
+            //now update each row package_bundle
+            $outgoingStockPackageBundle = OutgoingStock::where('order_id', $order->id)->first()->package_bundle;
+
+            foreach ($outgoingStockPackageBundle as &$package_bundle) {
+                // Find the corresponding package_bundle in $package_bundle_1 based on product_id
+                $matching_package = collect($package_bundle_1)->firstWhere('product_id', $package_bundle['product_id']);
+            
+                // If a matching package is found, update the row in $outgoingStockPackageBundle
+                if ($matching_package && $package_bundle['reason_removed']=='as_order_firstphase') {
+                    // Merge the matching keys and values from $matching_package into $package_bundle
+                    $package_bundle = array_merge($package_bundle, array_intersect_key($matching_package, $package_bundle));
+                }
+            }
+        
+            // Now $outgoingStockPackageBundle has the updated data
+            //return $outgoingStockPackageBundle;
+
+            //update outgoingStock
+            OutgoingStock::where(['order_id'=>$order->id])->update(['package_bundle' => $outgoingStockPackageBundle]);
         
             $customer = new Customer();
             $customer->order_id = $order->id;
@@ -1728,6 +2270,8 @@ class FormBuilderController extends Controller
             $data['has_orderbump'] = $has_orderbump; 
             $data['has_upsell'] = $has_upsell;
             $data['order_id'] = $order->id;
+
+            $data['order'] = $order->outgoingStock->package_bundle;
             
             //call notify fxn
             if ($has_orderbump==false && $has_upsell==false) {
@@ -1754,13 +2298,38 @@ class FormBuilderController extends Controller
         // $order = $formHolder->order;
         $order = Order::where('id', $data['current_order_id'])->first();
 
-        //accepted orderbump
+        $package_bundle_1 = [];
+        //accepted orderbump, update OutgoingStock
         if (!empty($data['orderbump_product_checkbox'])) {
             //accepted updated
             $product = Product::where('id', $data['orderbump_product_checkbox'])->first();
             $isCombo = isset($product->combo_product_ids) ? 'true' : null;
-            OutgoingStock::where(['product_id'=>$product->id, 'order_id'=>$order->id, 'reason_removed'=>'as_orderbump'])
-            ->update(['customer_acceptance_status'=>'accepted', 'isCombo'=>$isCombo]);
+            // OutgoingStock::where(['product_id'=>$product->id, 'order_id'=>$order->id, 'reason_removed'=>'as_orderbump'])
+            // ->update(['customer_acceptance_status'=>'accepted', 'isCombo'=>$isCombo]);
+
+            // Create a new package array for each product ID
+            $package_bundles = [
+                'product_id'=>$product->id,
+                'customer_acceptance_status'=>'accepted',
+                'isCombo'=>$isCombo,
+            ];
+            $package_bundle_1[] = $package_bundles;
+
+            //now update each row package_bundle
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle;
+
+            foreach ($outgoingStockPackageBundle as &$package_bundle) {
+                // Find the corresponding package_bundle in $package_bundle_1 based on product_id
+                $matching_package = collect($package_bundle_1)->firstWhere('product_id', $package_bundle['product_id']);
+            
+                // If a matching package is found, update the row in $outgoingStockPackageBundle
+                if ($matching_package && $package_bundle['reason_removed']=='as_orderbump') {
+                    // Merge the matching keys and values from $matching_package into $package_bundle
+                    $package_bundle = array_merge($package_bundle, array_intersect_key($matching_package, $package_bundle));
+                }
+            }
+            //update outgoingStock
+            OutgoingStock::where(['order_id'=>$order->id])->update(['package_bundle' => $outgoingStockPackageBundle, 'order_id'=>$order->id]);
         }
 
         //update order with same orderbump as formholder
@@ -1784,7 +2353,7 @@ class FormBuilderController extends Controller
         ]);
     }
 
-    //saveNewFormOrderBumpFromCustomer
+    //saveNewFormUpSellFromCustomer
     public function saveNewFormUpSellFromCustomer(Request $request)
     {
         // $authUser = auth()->user();
@@ -1796,13 +2365,38 @@ class FormBuilderController extends Controller
         // $order = $formHolder->order;
         $order = Order::where('id', $data['current_order_id'])->first();
 
+        $package_bundle_1 = [];
         //accepted orderbump
         if (!empty($data['upsell_product_checkbox'])) {
             //accepted updated
             $product = Product::where('id', $data['upsell_product_checkbox'])->first();
             $isCombo = isset($product->combo_product_ids) ? 'true' : null;
-            OutgoingStock::where(['product_id'=>$product->id, 'order_id'=>$order->id, 'reason_removed'=>'as_upsell'])
-            ->update(['customer_acceptance_status'=>'accepted', 'isCombo'=>$isCombo]);
+            // OutgoingStock::where(['product_id'=>$product->id, 'order_id'=>$order->id, 'reason_removed'=>'as_upsell'])
+            // ->update(['customer_acceptance_status'=>'accepted', 'isCombo'=>$isCombo]);
+
+            // Create a new package array for each product ID
+            $package_bundles = [
+                'product_id'=>$product->id,
+                'customer_acceptance_status'=>'accepted',
+                'isCombo'=>$isCombo,
+            ];
+            $package_bundle_1[] = $package_bundles;
+
+            //now update each row package_bundle
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle;
+
+            foreach ($outgoingStockPackageBundle as &$package_bundle) {
+                // Find the corresponding package_bundle in $package_bundle_1 based on product_id
+                $matching_package = collect($package_bundle_1)->firstWhere('product_id', $package_bundle['product_id']);
+            
+                // If a matching package is found, update the row in $outgoingStockPackageBundle
+                if ($matching_package && $package_bundle['reason_removed']=='as_upsell') {
+                    // Merge the matching keys and values from $matching_package into $package_bundle
+                    $package_bundle = array_merge($package_bundle, array_intersect_key($matching_package, $package_bundle));
+                }
+            }
+            //update outgoingStock
+            OutgoingStock::where(['order_id'=>$order->id])->update(['package_bundle' => $outgoingStockPackageBundle, 'order_id'=>$order->id]);
         }
 
         //update order with same orderbump as formholder
@@ -1820,7 +2414,7 @@ class FormBuilderController extends Controller
         ]);
     }
 
-    //declined orderbump
+    //declined orderbump. refusal
     public function saveNewFormOrderBumpRefusalFromCustomer(Request $request)
     {
         // $authUser = auth()->user();
@@ -1832,13 +2426,41 @@ class FormBuilderController extends Controller
         // $order = $formHolder->order;
         $order = Order::where('id', $data['current_order_id'])->first();
 
+        $package_bundle_1 = [];
         //accepted orderbump
         if (!empty($data['orderbump_product_checkbox'])) {
             //accepted updated
             $product = Product::where('id', $data['orderbump_product_checkbox'])->first();
             $isCombo = isset($product->combo_product_ids) ? 'true' : null;
-            OutgoingStock::where(['product_id'=>$product->id, 'order_id'=>$order->id, 'reason_removed'=>'as_orderbump'])
-            ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined', 'isCombo'=>$isCombo]);
+            // OutgoingStock::where(['product_id'=>$product->id, 'order_id'=>$order->id, 'reason_removed'=>'as_orderbump'])
+            // ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined', 'isCombo'=>$isCombo]);
+
+            // Create a new package array for each product ID
+            $package_bundles = [
+                'product_id'=>$product->id,
+                'customer_acceptance_status'=>'rejected',
+                'quantity_returned'=>1,
+                'reason_returned'=>'declined',
+                'isCombo'=>$isCombo,
+            ];
+            $package_bundle_1[] = $package_bundles;
+
+            //now update each row package_bundle
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle;
+
+            foreach ($outgoingStockPackageBundle as &$package_bundle) {
+                // Find the corresponding package_bundle in $package_bundle_1 based on product_id
+                $matching_package = collect($package_bundle_1)->firstWhere('product_id', $package_bundle['product_id']);
+            
+                // If a matching package is found, update the row in $outgoingStockPackageBundle
+                if ($matching_package && $package_bundle['reason_removed']=='as_orderbump') {
+                    // Merge the matching keys and values from $matching_package into $package_bundle
+                    $package_bundle = array_merge($package_bundle, array_intersect_key($matching_package, $package_bundle));
+                }
+            }
+            //update outgoingStock
+            OutgoingStock::where(['order_id'=>$order->id])->update(['package_bundle' => $outgoingStockPackageBundle, 'order_id'=>$order->id]);
+            //////////////////////////////////////////////////////////////
         }
 
         //update order with same orderbump as formholder
@@ -1865,13 +2487,41 @@ class FormBuilderController extends Controller
         // $order = $formHolder->order;
         $order = Order::where('id', $data['current_order_id'])->first();
 
+        $package_bundle_1 = [];
         //declined upsell
         if (!empty($data['upsell_product_checkbox'])) {
             //accepted updated
             $product = Product::where('id', $data['upsell_product_checkbox'])->first();
             $isCombo = isset($product->combo_product_ids) ? 'true' : null;
-            OutgoingStock::where(['product_id'=>$product->id, 'order_id'=>$order->id, 'reason_removed'=>'as_upsell'])
-            ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined', 'isCombo'=>$isCombo]);
+            // OutgoingStock::where(['product_id'=>$product->id, 'order_id'=>$order->id, 'reason_removed'=>'as_upsell'])
+            // ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined', 'isCombo'=>$isCombo]);
+
+            // Create a new package array for each product ID
+            $package_bundles = [
+                'product_id'=>$product->id,
+                'customer_acceptance_status'=>'rejected',
+                'quantity_returned'=>1,
+                'reason_returned'=>'declined',
+                'isCombo'=>$isCombo,
+            ];
+            $package_bundle_1[] = $package_bundles;
+
+            //now update each row package_bundle
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle;
+
+            foreach ($outgoingStockPackageBundle as &$package_bundle) {
+                // Find the corresponding package_bundle in $package_bundle_1 based on product_id
+                $matching_package = collect($package_bundle_1)->firstWhere('product_id', $package_bundle['product_id']);
+            
+                // If a matching package is found, update the row in $outgoingStockPackageBundle
+                if ($matching_package && $package_bundle['reason_removed']=='as_upsell') {
+                    // Merge the matching keys and values from $matching_package into $package_bundle
+                    $package_bundle = array_merge($package_bundle, array_intersect_key($matching_package, $package_bundle));
+                }
+            }
+            //update outgoingStock
+            OutgoingStock::where(['order_id'=>$order->id])->update(['package_bundle' => $outgoingStockPackageBundle, 'order_id'=>$order->id]);
+            //////////////////////////////////////////////////////////////
         }
 
         //update order with same upsell as formholder
@@ -1914,7 +2564,6 @@ class FormBuilderController extends Controller
             $cartAbandon->save();
         }
         
-    
         return response()->json([
             'status'=>true,
             'data'=>$data,
@@ -2012,35 +2661,100 @@ class FormBuilderController extends Controller
         
         //mainProduct_revenue
         $mainProduct_revenue = 0;  //price * qty
-        $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase', 'customer_acceptance_status'=>'accepted'])->get();
+        $qty_main_product = 0;
+        // $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase', 'customer_acceptance_status'=>'accepted'])->get();
 
-        if ( count($mainProducts_outgoingStocks) > 0 ) {
-            foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-                if(isset($main_outgoingStock->product)) {
-                    $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
-                } 
+        // if ( count($mainProducts_outgoingStocks) > 0 ) {
+        //     foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
+        //         if(isset($main_outgoingStock->product)) {
+        //             $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+        //         } 
+        //     }
+        // }
+
+        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+        foreach ($outgoingStockPackageBundle as $key => &$main_outgoingStock) {
+            if ( ($main_outgoingStock['reason_removed'] == 'as_order_firstphase') && ($main_outgoingStock['customer_acceptance_status'] == 'accepted') ) {
+                $product = Product::where('id', $main_outgoingStock['product_id'])->first();
+                 if (isset($product)) {
+                    //array_push($mainProducts_outgoingStocks, array('product' => $product)); 
+                    $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                    $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
+                    $qty_main_product += $main_outgoingStock['quantity_removed'];
+                 }
+            } else {
+                // Remove the element from the array if the condition is not met
+                unset($outgoingStockPackageBundle[$key]);
             }
         }
+
+        //converting array immediate & nested(product) array to object. json_decode alone will not do it.
+        // $mainProducts_outgoingStocks = array_map(function ($item) {
+        //     return (object) $item;
+        // }, $outgoingStockPackageBundle);
+        
+        $mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
 
         //orderbump
         $orderbumpProduct_revenue = 0; //price * qty
         $orderbump_outgoingStock = '';
+        $qty_orderbump = 0;
+        // if (isset($formHolder->orderbump_id)) {
+        //     $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
+        //     if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+        //         $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+        //     }
+        // }
+
+        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+        
         if (isset($formHolder->orderbump_id)) {
-            $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
-            if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
-                $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+            foreach ($outgoingStockPackageBundle as $key => &$orderbump_stock) {
+                if ( ($orderbump_stock['reason_removed'] == 'as_orderbump') && ($orderbump_stock['customer_acceptance_status'] == 'accepted') ) {
+                    $product = Product::where('id', $orderbump_stock['product_id'])->first();
+                     if (isset($product)) {
+                        $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                        $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
+                        $qty_orderbump += $orderbump_stock['quantity_removed'];
+                     }
+                } else {
+                    // Remove the element from the array if the condition is not met
+                    unset($outgoingStockPackageBundle[$key]);
+                }
             }
         }
+        //$orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : '';
+        $orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockPackageBundle)))) : '';
         
         //upsell
         $upsellProduct_revenue = 0; //price * qty
         $upsell_outgoingStock = '';
+        $qty_upsell = 0;
+        // if (isset($formHolder->upsell_id)) {
+        //     $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
+        //     if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+        //         $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+        //     }
+        // }
+
+        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+        
         if (isset($formHolder->upsell_id)) {
-            $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
-            if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
-                $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+            foreach ($outgoingStockPackageBundle as $key => &$upsell_stock) {
+                if ( ($upsell_stock['reason_removed'] == 'as_upsell') && ($upsell_stock['customer_acceptance_status'] == 'accepted') ) {
+                    $product = Product::where('id', $upsell_stock['product_id'])->first();
+                     if (isset($product)) {
+                        $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                        $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
+                        $qty_upsell += $upsell_stock['quantity_removed'];
+                     }
+                } else {
+                    // Remove the element from the array if the condition is not met
+                    unset($outgoingStockPackageBundle[$key]);
+                }
             }
         }
+        $upsell_outgoingStock = $upsellProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockPackageBundle)))) : '';
         
         //order total amt
 
@@ -2062,9 +2776,9 @@ class FormBuilderController extends Controller
         }
 
         //package or product qty. sum = 0, if it doesnt exist
-        $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
-        $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
-        $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
+        // $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
+        // $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
+        // $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
         $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
 
         $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
@@ -2086,7 +2800,9 @@ class FormBuilderController extends Controller
         
         $whatsapp_msg .= "";
         foreach($mainProducts_outgoingStocks as $main_outgoingStock):
-            $whatsapp_msg .= " [Product: ".$main_outgoingStock->product->name.". Price: ".$mainProduct_revenue.". Qty: ".$main_outgoingStock->quantity_removed."], ";
+            if ($main_outgoingStock->customer_acceptance_status):
+                $whatsapp_msg .= " [Product: ".$main_outgoingStock->product->name.". Price: ".$mainProduct_revenue.". Qty: ".$main_outgoingStock->quantity_removed."], ";
+            endif;
         endforeach;
 
         if(isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock != ''):
@@ -2376,7 +3092,7 @@ class FormBuilderController extends Controller
         return view('pages.forms.editForm', compact('authUser', 'user_role', 'formLabel', 'orderProducts', 'orderBump_product', 'upSell_product'));
     }
 
-    public function productById($id){
+    public function productById($id) {
         $product = Product::where('id',$id)->first();
         if(isset($product)){
             return $product;

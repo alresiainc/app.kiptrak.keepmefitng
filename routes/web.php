@@ -25,6 +25,21 @@ use Illuminate\Support\Facades\Http;
 |
 */
 
+Route::get('run', function () {
+
+    //Artisan::call('cache:clear');
+    //Artisan::call('make:migration add_extra_cost_amount_to_orders_table --table=orders');
+    //Artisan::call('make:migration add_extra_cost_reason_to_orders_table --table=orders');
+    //Artisan::call('migrate'); //remember to change env to local, to avoid 'STDIN' constant error
+    
+    // Artisan::call('db:seed', [
+    // '--force' => true //to avoid 'STDIN' constant error, while in production
+    // ]);
+
+    dd("artisan success");
+
+});
+
 // Route::get('/', function () {
 //     return view('welcome');
 // });
@@ -201,6 +216,7 @@ Route::post('/assign-staff-to-order', [OrderController::class, 'assignStaffToOrd
 Route::post('/update-order-date-status', [OrderController::class, 'updateOrderDateStatus'])->name('updateOrderDateStatus');
 Route::get('/delete-order/{unique_key}', [OrderController::class, 'deleteOrder'])->name('deleteOrder');
 Route::get('/delete-all-orders', [OrderController::class, 'deleteAllOrders'])->name('deleteAllOrders');
+Route::post('/add-extra-cost-to-order', [OrderController::class, 'extraCostToOrder'])->name('extraCostToOrder');
 
 //register any user, customer or agent, staff, etc
 //staff

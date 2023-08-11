@@ -126,15 +126,15 @@
                           </tr>
                         </thead>
                         <tbody>
-                            @foreach ($packages as $package)
+                            @foreach ($mainProducts_outgoingStocks as $package)
                             <tr>
                                 <input type='hidden' name='outgoing_stock_id[]' value=''>
-                                <th scope='row'>{{ $package['product']->name }}</th>
+                                <th scope='row'>{{ $package->product->name }}</th>
 
-                                <td><input type='hidden' name='product_id[]' value='{{ $package['product']->id }}'>
+                                <td><input type='hidden' name='product_id[]' value='{{ $package->product->id }}'>
                                     <select name="customer_acceptance_status[]" id="" class="form-control">
-                                        <option value="{{ $package['customer_acceptance_status'] }}" selected>
-                                            {{ $package['customer_acceptance_status'] == 'accepted' ? 'Accepted' : 'Declined' }}
+                                        <option value="{{ $package->customer_acceptance_status  == 'accepted' ? 'accepted' : 'rejected' }}" selected>
+                                            {{ $package->customer_acceptance_status == 'accepted' ? 'Accepted' : 'Declined' }}
                                         </option>
                                         <option value="accepted">Accepted</option>
                                         <option value="rejected">Declined</option>
@@ -142,14 +142,14 @@
                                 </td>
                                 
                                 <td style='width:150px'><input type='number' name='product_qty[]' class='form-control product-qty'
-                                    value='{{ $package['quantity_removed'] }}'>
+                                    value='{{ $package->quantity_removed }}'>
                                 </td>
 
                                 <td style='width:150px'><input type='number' name='unit_price[]' class='form-control unit-price'
-                                    value='{{ $package['product']->sale_price}}' readonly>
+                                    value='{{ $package->product->sale_price}}' readonly>
                                 </td>
 
-                                <td class="total">{{ $package['product']->sale_price * $package['quantity_removed'] }}</td>
+                                <td class="total">{{ $package->product->sale_price * $package->quantity_removed }}</td>
                                 <td class='btnDelete btn btn-danger btn-sm mt-1 mb-1' style="visibility: hidden;">Remove</td>
                             </tr>
                             @endforeach
@@ -158,10 +158,11 @@
                 </div>
 
                 <!----orderbump--->
-                @if (isset($orderbump_outgoingStock))
+                @if ($orderbump_outgoingStock !== '')
                 <div class="col-md-12">
                     <label for="" class="form-label">Order-bump | {{ $orderbump_outgoingStock->customer_acceptance_status == 'accepted' ? 'Accepted' : 'Declined' }} |
                         {{ $orderbump_outgoingStock->product->name }}
+                        <input type="hidden" name="hidden_orderbump_product" value="{{ isset($orderbump_outgoingStock->product) ? $orderbump_outgoingStock->product->id : '' }}">
                     </label>
                     <select name="orderbump_product" data-live-search="true" class="custom-select form-control border @error('product') is-invalid @enderror" id="">
                     
@@ -169,7 +170,7 @@
                         {{ $orderbump_outgoingStock->customer_acceptance_status == 'accepted' ? $orderbump_outgoingStock->product->name : 'Nothing Selected' }}
                       </option>
 
-                      <option value="">Nothing Selected</option>
+                      <option value="">Nothing Selected | Reject Orderbump</option>
                       
                       @foreach ($products as $product)
                           <!---1-30-3000--->
@@ -185,10 +186,11 @@
                 @endif
 
                 <!----upsell--->
-                @if (isset($upsell_outgoingStock))
+                @if ($upsell_outgoingStock !== '')
                 <div class="col-md-12">
                     <label for="" class="form-label">Upsell | {{ $upsell_outgoingStock->customer_acceptance_status == 'accepted' ? 'Accepted' : 'Declined' }} |
                         {{ $upsell_outgoingStock->product->name }}
+                        <input type="hidden" name="hidden_upsell_product" value="{{ isset($upsell_outgoingStock->product) ? $upsell_outgoingStock->product->id : '' }}">
                     </label>
                     <select name="upsell_product" data-live-search="true" class="custom-select form-control border @error('product') is-invalid @enderror" id="">
                     

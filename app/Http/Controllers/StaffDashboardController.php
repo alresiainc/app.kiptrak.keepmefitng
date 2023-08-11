@@ -45,66 +45,132 @@ class StaffDashboardController extends Controller
         $record = 'all';
         ///////////////////////////////////////////////////////////////////////
         
-        $expenses = Expense::where('staff_id', $authUser->id)->sum('amount');
-        $expenses = $this->shorten($expenses);
-        
-        $allOrders = $authUser->assignedOrders->count();
-        $newOrders = $authUser->assignedOrders()->where('status', 'new')->count();
-        $pendingOrders = $authUser->assignedOrders()->where('status', 'pending')->count();
-        $remittedOrders = $authUser->assignedOrders()->where('status', 'delivered_and_remitted')->count();
-        $notRemittedOrders = $authUser->assignedOrders()->where('status', 'delivered_not_remitted')->count();
-        $deliveredOrders = $remittedOrders + $notRemittedOrders;
-        $cancelledOrders = $authUser->assignedOrders()->where('status', 'cancelled')->count();
-        
-        //orders whose dates are greater-than today
-        $totalFollowUpOrders1 = []; $today = Carbon::now(); $expected_date;
-        foreach ($authUser->assignedOrders as $order) {
-            $expected_date = Carbon::parse($order->expected_delivery_date);
-            $result = $expected_date->gt($today);
-            if ($result) {
-                $totalFollowUpOrders1[] = $order;
+        if ($authUser->isSuperAdmin || $user_role->permissions->contains('slug', 'view-staff-dashboard')) {
+            $expenses = Expense::sum('amount');
+            $expenses = $this->shorten($expenses);
+            
+            $allOrders = Order::count();
+            $newOrders = Order::where('status', 'new')->count();
+            $pendingOrders = Order::where('status', 'pending')->count();
+            $remittedOrders = Order::where('status', 'delivered_and_remitted')->count();
+            $notRemittedOrders = Order::where('status', 'delivered_not_remitted')->count();
+            $deliveredOrders = $remittedOrders + $notRemittedOrders;
+            $cancelledOrders = Order::where('status', 'cancelled')->count();
+
+            $theOrders = Order::where('status', 'new')->orWhere('status', 'pending')->orWhere('status', 'delivered_not_remitted')->get();
+            
+            //orders whose dates are greater-than today
+            $totalFollowUpOrders1 = []; $today = Carbon::now(); $expected_date;
+            foreach ($theOrders as $order) {
+                $expected_date = Carbon::parse($order->expected_delivery_date);
+                $result = $expected_date->gt($today);
+                if ($result) {
+                    $totalFollowUpOrders1[] = $order;
+                }
+            } 
+            $totalFollowUpOrders = collect($totalFollowUpOrders1)->count();
+            
+            //today only
+            $todayFollowUpOrders1 = [];
+            foreach ($theOrders as $order) {
+                $expected_date = Carbon::parse($order->expected_delivery_date);
+                $result = $expected_date->isToday();
+                if ($result) {
+                    $todayFollowUpOrders1[] = $order;
+                }
             }
-        } 
-        $totalFollowUpOrders = collect($totalFollowUpOrders1)->count();
-        
-        //today only
-        $todayFollowUpOrders1 = [];
-        foreach ($authUser->assignedOrders as $order) {
-            $expected_date = Carbon::parse($order->expected_delivery_date);
-            $result = $expected_date->isToday();
-            if ($result) {
-                $todayFollowUpOrders1[] = $order;
+            $todayFollowUpOrders = collect($todayFollowUpOrders1)->count();
+            
+            //tomorrow only
+            $tomorrowFollowUpOrders1 = []; $tomorrow = Carbon::now()->addDays(1)->format('Y-m-d');
+            foreach ($theOrders as $order) {
+                $expected_date = Carbon::parse($order->expected_delivery_date)->format('Y-m-d');
+                if ($expected_date == $tomorrow) {
+                    $tomorrowFollowUpOrders1[] = $order;
+                }
             }
-        }
-        $todayFollowUpOrders = collect($todayFollowUpOrders1)->count();
-        
-        //tomorrow only
-        $tomorrowFollowUpOrders1 = []; $tomorrow = Carbon::now()->addDays(1)->format('Y-m-d');
-        foreach ($authUser->assignedOrders as $order) {
-            $expected_date = Carbon::parse($order->expected_delivery_date)->format('Y-m-d');
-            if ($expected_date == $tomorrow) {
-                $tomorrowFollowUpOrders1[] = $order;
+            $tomorrowFollowUpOrders = collect($tomorrowFollowUpOrders1)->count();
+    
+            $otherOrders = Order::where(['customer_id'=>null])->count();
+    
+            //////////////////////////////chart/////////////////////////////////////////////////////
+            
+            $sales_paid = 0;
+            $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+    
+            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            $sales_paid = $this->shorten($sales_paid); //total revenue
+    
+            // yearly report
+            for ( $i = 1; $i <= 12; $i++ ) {
+                $sale_amount = DB::table('outgoing_stocks')->whereYear('created_at', (string) Carbon::now()->year)->whereMonth('created_at',$i)
+                    ->whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+                    ->sum('amount_accrued');
+                $yearly_sale_amount[] = number_format((float)$sale_amount, 2, '.', '');
             }
-        }
-        $tomorrowFollowUpOrders = collect($tomorrowFollowUpOrders1)->count();
-
-        $otherOrders = $authUser->assignedOrders()->where(['customer_id'=>null])->count();
-
-        //////////////////////////////chart/////////////////////////////////////////////////////
-        
-        $sales_paid = 0;
-        $delivered_and_remitted_orders = $authUser->assignedOrders()->where('status', 'delivered_and_remitted')->pluck('id');
-        $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
-
-        $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
-        $sales_paid = $this->shorten($sales_paid); //total revenue
-
-        // yearly report
-        for ( $i = 1; $i <= 12; $i++ ) {
-            $sale_amount = DB::table('outgoing_stocks')->whereYear('created_at', (string) Carbon::now()->year)->whereMonth('created_at',$i)
-                ->whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
-                ->sum('amount_accrued');
-            $yearly_sale_amount[] = number_format((float)$sale_amount, 2, '.', '');
+        } else {
+            $expenses = Expense::where('staff_id', $authUser->id)->sum('amount');
+            $expenses = $this->shorten($expenses);
+            
+            $allOrders = $authUser->assignedOrders->count();
+            $newOrders = $authUser->assignedOrders()->where('status', 'new')->count();
+            $pendingOrders = $authUser->assignedOrders()->where('status', 'pending')->count();
+            $remittedOrders = $authUser->assignedOrders()->where('status', 'delivered_and_remitted')->count();
+            $notRemittedOrders = $authUser->assignedOrders()->where('status', 'delivered_not_remitted')->count();
+            $deliveredOrders = $remittedOrders + $notRemittedOrders;
+            $cancelledOrders = $authUser->assignedOrders()->where('status', 'cancelled')->count();
+            
+            //orders whose dates are greater-than today
+            $totalFollowUpOrders1 = []; $today = Carbon::now(); $expected_date;
+            foreach ($authUser->assignedOrders as $order) {
+                $expected_date = Carbon::parse($order->expected_delivery_date);
+                $result = $expected_date->gt($today);
+                if ($result) {
+                    $totalFollowUpOrders1[] = $order;
+                }
+            } 
+            $totalFollowUpOrders = collect($totalFollowUpOrders1)->count();
+            
+            //today only
+            $todayFollowUpOrders1 = [];
+            foreach ($authUser->assignedOrders as $order) {
+                $expected_date = Carbon::parse($order->expected_delivery_date);
+                $result = $expected_date->isToday();
+                if ($result) {
+                    $todayFollowUpOrders1[] = $order;
+                }
+            }
+            $todayFollowUpOrders = collect($todayFollowUpOrders1)->count();
+            
+            //tomorrow only
+            $tomorrowFollowUpOrders1 = []; $tomorrow = Carbon::now()->addDays(1)->format('Y-m-d');
+            foreach ($authUser->assignedOrders as $order) {
+                $expected_date = Carbon::parse($order->expected_delivery_date)->format('Y-m-d');
+                if ($expected_date == $tomorrow) {
+                    $tomorrowFollowUpOrders1[] = $order;
+                }
+            }
+            $tomorrowFollowUpOrders = collect($tomorrowFollowUpOrders1)->count();
+    
+            $otherOrders = $authUser->assignedOrders()->where(['customer_id'=>null])->count();
+    
+            //////////////////////////////chart/////////////////////////////////////////////////////
+            
+            $sales_paid = 0;
+            $delivered_and_remitted_orders = $authUser->assignedOrders()->where('status', 'delivered_and_remitted')->pluck('id');
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+    
+            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            $sales_paid = $this->shorten($sales_paid); //total revenue
+    
+            // yearly report
+            for ( $i = 1; $i <= 12; $i++ ) {
+                $sale_amount = DB::table('outgoing_stocks')->whereYear('created_at', (string) Carbon::now()->year)->whereMonth('created_at',$i)
+                    ->whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+                    ->sum('amount_accrued');
+                $yearly_sale_amount[] = number_format((float)$sale_amount, 2, '.', '');
+            }
         }
 
         return view('pages.staffDashboard', compact('authUser', 'user_role', 'generalSetting', 'currency', 'record',

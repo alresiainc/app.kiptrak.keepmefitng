@@ -147,6 +147,7 @@
                     <option value="">Nothing Selected</option>
 
                     @foreach ($products as $product)
+                        
                         <!---1-30-3000--->
                         <option value="{{ $product->code }}|{{ $product->name }}|{{ $product->id }}|{{ isset($product->sale_price) ? $product->sale_price : $product->purchase_price }}">
                             {{ $product->code }} | {{ $product->name }} | Stock: {{ $product->stock_available() }}

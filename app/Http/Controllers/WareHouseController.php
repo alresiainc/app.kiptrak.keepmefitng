@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Models\Country;
 use App\Models\OutgoingStock;
 use App\Models\Order;
+use App\Models\GeneralSetting;
+use App\Models\Product;
 
 class WareHouseController extends Controller
 {
@@ -75,6 +77,9 @@ class WareHouseController extends Controller
             abort(404);
         }
 
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency = $generalSetting->country->symbol;
+
         $products = $warehouse->products;
         if (count($products) > 0) {
             foreach ($products as $key => $product) {
@@ -85,39 +90,40 @@ class WareHouseController extends Controller
         //warehouse orders
         $orders = $warehouse->orders()->where('status', 'delivered_and_remitted')->get(); $outgoingStocks = '';
         if (count($orders) > 0) {
-            $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->where('customer_acceptance_status', 'accepted')->orderBy('id', 'DESC');
-    
-            if (count($outgoingStocks->get()) > 0) {
-                $packages = []; $products = []; $gross_revenue = 0; $currency = ''; $warehouseOrders = []; $total_revenue = $outgoingStocks->sum('amount_accrued');
-                foreach ($orders as $key => $order) {
-                    $outgoingStock = $order->outgoingStocks()->where('customer_acceptance_status', 'accepted')->orderBy('id', 'DESC');
-                    if (count($outgoingStock->get()) > 0) {
-                        $warehouseOrders['warehouseOrder'] = 
-                        [
-                            'order'=>$order,
-                            'outgoingStock'=>$outgoingStock->get(),
-                            'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                        ];
-                        $packages[] = $warehouseOrders;
+
+            //grab accepted OutgoingStocks from these orders
+            //$outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->where('customer_acceptance_status', 'accepted')->orderBy('id', 'DESC');
+            $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+
+            // Flatten the multidimensional array into a single array
+            $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+
+            $packages = []; $total_revenue = 0; //total revenue in warehouse
+            if (count($outgoingStocks) > 0) {
+                foreach ($flattenedArray as $key => $package) {
+                    if ($package['customer_acceptance_status'] == 'accepted') {
+                        $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                     }
                 }
 
-                // foreach ($packages as $key => $value) {
-                //     return $value['warehouseOrder']['orderCode'];
-                // }
-                
-                // foreach ($outgoingStocks as $key => $product) {
-                //     $products['product'] = $product->product;
-                //     $products['quantity_removed'] = $product->quantity_removed;
-                //     $products['revenue'] =  $product->amount_accrued;
-                //     $gross_revenue += $product->amount_accrued;
-                //     $currency = $product->product->country->symbol;
-                //     $products['order'] = $product->order;
-        
-                //     $packages[] = $products;
-                // }
-                return view('pages.warehouses.singleWarehouse', compact('authUser', 'user_role', 'warehouse', 'orders', 'outgoingStocks', 'packages', 'gross_revenue', 'currency', 'total_revenue'));
+                foreach ($orders as $key => $order) {
+                    $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                    $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                    foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                        $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                    }
+                    $warehouseOrders = [
+                        'order' => $order,
+                        'outgoingStockPackageBundle' => $outgoingStockPackageBundle,
+                        'orderRevenue'=> $orderRevenue,
+                    ];
+                    $packages[] = $warehouseOrders;
+                }
+
+                return view('pages.warehouses.singleWarehouse', compact('authUser', 'user_role', 'warehouse', 'orders', 'outgoingStocks', 'currency', 'total_revenue', 'warehouseOrders', 'packages'));
+
             }
+    
         } 
         
         return view('pages.warehouses.singleWarehouse', compact('authUser', 'user_role', 'warehouse', 'orders', 'outgoingStocks'));

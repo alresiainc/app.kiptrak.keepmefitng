@@ -13,6 +13,10 @@ class OutgoingStock extends Model
     use HasFactory, SoftDeletes;
 
     protected $guarded = []; 
+
+    protected $casts = [
+        'package_bundle' => 'array',
+    ];
     
     protected static function boot()
     {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Helpers\Helper;
 
 use App\Models\Product;
 use App\Models\WareHouse;
@@ -25,6 +26,9 @@ use App\Models\Order;
 
 class ReportController extends Controller
 {
+    public function __construct() {
+        $this->helper = new Helper(); 
+    }
 
     public function profitLossReport()
     {
@@ -93,10 +97,11 @@ class ReportController extends Controller
             }
         }
         //total-sales remitted
-        $sales_paid = 0;
-        $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
-        $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
-        $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+        // $sales_paid = 0;
+        // $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+        // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+        // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+        $sales_paid = $this->helper->totalSalesRevenue();
 
         $profit_val = $sales_paid - $total_expenses;
         
@@ -173,10 +178,12 @@ class ReportController extends Controller
             }
 
             //total-sales remitted
-            $sales_paid = 0;
+            //$sales_paid = 0;
             $delivered_and_remitted_orders = Order::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+
+            $sales_paid = $this->helper->orderSalesRevenue($delivered_and_remitted_orders);
             
             $profit_val = $sales_paid - $total_expenses;
 
@@ -254,10 +261,11 @@ class ReportController extends Controller
             }
 
             //total-sales remitted
-            $sales_paid = 0;
+            //$sales_paid = 0;
             $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('product_id', $product_ids)->whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('product_id', $product_ids)->whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            $sales_paid = $this->helper->orderSalesRevenue($delivered_and_remitted_orders);
             
             $profit_val = $sales_paid - $total_expenses;
 
@@ -349,10 +357,12 @@ class ReportController extends Controller
             }
 
             //total-sales remitted
-            $sales_paid = 0;
+            //$sales_paid = 0;
             $delivered_and_remitted_orders = Order::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('product_id', $product_ids)->whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('product_id', $product_ids)->whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+
+            $sales_paid = $this->helper->orderSalesRevenue($delivered_and_remitted_orders);
             
             $profit_val = $sales_paid - $total_expenses;
 
@@ -439,11 +449,12 @@ class ReportController extends Controller
         $warehouse_selected = '';
 
         //revenue
-        $sales_paid = 0;
+        //$sales_paid = 0;
         $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
-        $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+        // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
 
-        $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+        // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+        $sales_paid = $this->helper->orderSalesRevenue($delivered_and_remitted_orders);
         $sales_paid = $this->shorten($sales_paid); //total revenue
 
         //expenses
@@ -483,11 +494,12 @@ class ReportController extends Controller
             $end_date = "";
             
             //revenue
-            $sales_paid = 0;
+            //$sales_paid = 0;
             $delivered_and_remitted_orders = Order::where('staff_assigned_id', $staff_id)->where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
 
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            $sales_paid = $this->helper->orderSalesRevenue($delivered_and_remitted_orders);
             $sales_paid = $this->shorten($sales_paid); //total revenue
 
             $expenses = Expense::where('staff_id', $staff_id)->sum('amount');
@@ -542,10 +554,11 @@ class ReportController extends Controller
             $end_date = date('Y-m-d',$end_date);
             
             //revenue
-            $sales_paid = 0;
+            //$sales_paid = 0;
             $delivered_and_remitted_orders = Order::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            $sales_paid = $this->helper->orderSalesRevenue($delivered_and_remitted_orders);
             $sales_paid = $this->shorten($sales_paid); //total revenue
 
             $expenses = Expense::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->sum('amount');
@@ -604,11 +617,12 @@ class ReportController extends Controller
             $end_date = date('Y-m-d',$end_date);
             
             //revenue
-            $sales_paid = 0;
+            //$sales_paid = 0;
             $delivered_and_remitted_orders = Order::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->where('staff_assigned_id', $staff_id)->where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
 
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            $sales_paid = $this->helper->orderSalesRevenue($delivered_and_remitted_orders);
             $sales_paid = $this->shorten($sales_paid); //total revenue
 
             $expenses = Expense::where('staff_id', $staff_id)->sum('amount');
@@ -701,7 +715,6 @@ class ReportController extends Controller
             $products = Product::whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->get();
         }
         
-
         if (!empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
             $start_date = strtotime($data['start_date']);
             $end_date = strtotime($data['end_date']);
@@ -716,6 +729,7 @@ class ReportController extends Controller
 
             $products = Product::where('warehouse_id',$data['warehouse_id'])->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->get();
         }
+
         if (!empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
             $start_date = strtotime($data['start_date']);
             $end_date = strtotime($data['end_date']);
@@ -751,7 +765,8 @@ class ReportController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
+        $categories = Category::all();
         $warehouses = WareHouse::all();
         $start_date = '';
         $end_date = '';
@@ -759,22 +774,62 @@ class ReportController extends Controller
 
         // $yearly_best_selling_qty = Sale::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->whereDate('created_at', '>=' , date("Y").'-01-01')
         // ->whereDate('created_at', '<=' , date("Y").'-12-31')->groupBy('product_id')->orderBy('sold_qty', 'desc')->take(5)->get();
-        $yearly_best_selling_qty = Sale::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->groupBy('product_id')->orderBy('sold_qty', 'desc')->get();
+        //$yearly_best_selling_qty = Sale::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->groupBy('product_id')->orderBy('sold_qty', 'desc')->get();
+        $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+        // $accepted_outgoing_stocks = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+        // ->select(DB::raw('product_id, sum(amount_accrued) as sold_amount, sum(quantity_removed) as sold_qty'))->groupBy('product_id')
+        // ->orderBy('sold_amount', 'desc')->get();
+
+        // Step 1: array containing the "package_bundle" data
+        $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->pluck('package_bundle'); //[[{}], [{}], [{}]] multidimensional
+        $packageBundleArray = $accepted_outgoing_stock;
+
+        // Initialize an empty array to store the grouped and summarized results
+        $groupedSummarizedArray = [];
+
+        // Step 2: Group the items by "product_id"
+        foreach ($packageBundleArray as $innerArray) {
+            foreach ($innerArray as $item) {
+                // Only consider items with 'customer_acceptance_status' being 'accepted'
+                if ($item['customer_acceptance_status'] === 'accepted') {
+                    $product_id = $item['product_id'];
+                    if (!isset($groupedSummarizedArray[$product_id])) {
+                        $groupedSummarizedArray[$product_id] = [
+                            'product_id' => $product_id,
+                            'sold_amount' => 0,
+                            'sold_qty' => 0,
+                        ];
+                    }
+
+                    // Step 3: Calculate the sum of "amount_accrued" and "quantity_removed" for each group
+                    $groupedSummarizedArray[$product_id]['sold_amount'] += $item['amount_accrued'];
+                    $groupedSummarizedArray[$product_id]['sold_qty'] += $item['quantity_removed'];
+                }
+            }
+        }
+
+        // Step 4: Sort the groups based on the sum of "amount_accrued" in descending order
+        usort($groupedSummarizedArray, function ($a, $b) {
+            return $b['sold_amount'] - $a['sold_amount'];
+        });
+
+        //return $groupedSummarizedArray;
         
         $sellingProductsBulk = [];
-        foreach ($yearly_best_selling_qty as $key => $sale) {
-            $product = Product::find($sale->product_id);
+        foreach ($groupedSummarizedArray as $key => $stock) {
+            $product = Product::find($stock['product_id']);
             $sellingProducts['product_name'] = $product->name;
-            $sellingProducts['sold_amount'] = $this->soldAmount($product->id);
-            $sellingProducts['sold_qty'] = $sale->sold_qty;
+            $sellingProducts['product_category'] = $product->category ? $product->category->name : null;
+            $sellingProducts['sold_amount'] = $stock['sold_amount'];
+            $sellingProducts['sold_qty'] = $stock['sold_qty'];
             $sellingProducts['stock_available'] = $product->stock_available();
 
             $sellingProductsBulk[] = $sellingProducts;
         }
 
-        //return $bestSellingProductsBulk;
+        //return $sellingProductsBulk;
 
-        return view('pages.reports.saleReport', \compact('authUser', 'user_role', 'warehouses', 'start_date', 'end_date', 'warehouse_selected', 'sellingProductsBulk'));
+        return view('pages.reports.saleReport', \compact('authUser', 'user_role', 'warehouses', 'start_date', 'end_date', 'warehouse_selected', 'sellingProductsBulk', 'categories'));
     }
 
     
@@ -788,26 +843,68 @@ class ReportController extends Controller
         $start_date = '';
         $end_date = '';
         $warehouse_selected = '';
+        //$delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+        $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted');
 
+        //warehouse only
         if (!empty($data['warehouse_id']) && empty($data['start_date']) && empty($data['end_date'])) {
 
             $warehouse_selected = WareHouse::find($data['warehouse_id']);
 
-            $yearly_best_selling_qty = Sale::where('warehouse_id', $data['warehouse_id'])->select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))
-            ->groupBy('product_id')->orderBy('sold_qty', 'desc')->get();
+            // $yearly_best_selling_qty = Sale::where('warehouse_id', $data['warehouse_id'])->select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))
+            // ->groupBy('product_id')->orderBy('sold_qty', 'desc')->get();
+            $delivered_and_remitted_orders = $delivered_and_remitted_orders->where('warehouse_id', $data['warehouse_id'])->pluck('id');
+            // $accepted_outgoing_stocks = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->select(DB::raw('product_id, sum(amount_accrued) as sold_amount, sum(quantity_removed) as sold_qty'))
+            // ->groupBy('product_id')->orderBy('sold_amount', 'desc')->get();
+
+            // Step 1: array containing the "package_bundle" data
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->pluck('package_bundle'); //[[{}], [{}], [{}]] multidimensional
+            $packageBundleArray = $accepted_outgoing_stock;
+
+            // Initialize an empty array to store the grouped and summarized results
+            $groupedSummarizedArray = [];
+
+            // Step 2: Group the items by "product_id"
+            foreach ($packageBundleArray as $innerArray) {
+                foreach ($innerArray as $item) {
+                    // Only consider items with 'customer_acceptance_status' being 'accepted'
+                    if ($item['customer_acceptance_status'] === 'accepted') {
+                        $product_id = $item['product_id'];
+                        if (!isset($groupedSummarizedArray[$product_id])) {
+                            $groupedSummarizedArray[$product_id] = [
+                                'product_id' => $product_id,
+                                'sold_amount' => 0,
+                                'sold_qty' => 0,
+                            ];
+                        }
+
+                        // Step 3: Calculate the sum of "amount_accrued" and "quantity_removed" for each group
+                        $groupedSummarizedArray[$product_id]['sold_amount'] += $item['amount_accrued'];
+                        $groupedSummarizedArray[$product_id]['sold_qty'] += $item['quantity_removed'];
+                    }
+                }
+            }
+
+            // Step 4: Sort the groups based on the sum of "amount_accrued" in descending order
+            usort($groupedSummarizedArray, function ($a, $b) {
+                return $b['sold_amount'] - $a['sold_amount'];
+            });
             
             $sellingProductsBulk = [];
-            foreach ($yearly_best_selling_qty as $key => $sale) {
-                $product = Product::find($sale->product_id);
+            foreach ($groupedSummarizedArray as $key => $stock) {
+                $product = Product::find($stock->product_id);
                 $sellingProducts['product_name'] = $product->name;
-                $sellingProducts['sold_amount'] = $this->soldAmount($product->id);
-                $sellingProducts['sold_qty'] = $sale->sold_qty;
+                $sellingProducts['product_category'] = $product->category ? $product->category->name : null;
+                $sellingProducts['sold_amount'] = $stock->sold_amount;
+                $sellingProducts['sold_qty'] = $stock->sold_qty;
                 $sellingProducts['stock_available'] = $product->stock_available();
 
                 $sellingProductsBulk[] = $sellingProducts;
             }
         }
 
+        //start & end-dates only
         if (empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
             $start_date = strtotime($data['start_date']);
             $end_date = strtotime($data['end_date']);
@@ -819,20 +916,59 @@ class ReportController extends Controller
             $start_date = date('Y-m-d',$start_date);
             $end_date = date('Y-m-d',$end_date);
 
-            $yearly_best_selling_qty = Sale::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->groupBy('product_id')->orderBy('sold_qty', 'desc')->get();
+            //$yearly_best_selling_qty = Sale::select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->groupBy('product_id')->orderBy('sold_qty', 'desc')->get();
+            $delivered_and_remitted_orders = $delivered_and_remitted_orders->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->pluck('id');
+            // $accepted_outgoing_stocks = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->select(DB::raw('product_id, sum(amount_accrued) as sold_amount, sum(quantity_removed) as sold_qty'))
+            // ->groupBy('product_id')->orderBy('sold_amount', 'desc')->get();
+
+            // Step 1: array containing the "package_bundle" data
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->pluck('package_bundle'); //[[{}], [{}], [{}]] multidimensional
+            $packageBundleArray = $accepted_outgoing_stock;
+
+            // Initialize an empty array to store the grouped and summarized results
+            $groupedSummarizedArray = [];
+
+            // Step 2: Group the items by "product_id"
+            foreach ($packageBundleArray as $innerArray) {
+                foreach ($innerArray as $item) {
+                    // Only consider items with 'customer_acceptance_status' being 'accepted'
+                    if ($item['customer_acceptance_status'] === 'accepted') {
+                        $product_id = $item['product_id'];
+                        if (!isset($groupedSummarizedArray[$product_id])) {
+                            $groupedSummarizedArray[$product_id] = [
+                                'product_id' => $product_id,
+                                'sold_amount' => 0,
+                                'sold_qty' => 0,
+                            ];
+                        }
+
+                        // Step 3: Calculate the sum of "amount_accrued" and "quantity_removed" for each group
+                        $groupedSummarizedArray[$product_id]['sold_amount'] += $item['amount_accrued'];
+                        $groupedSummarizedArray[$product_id]['sold_qty'] += $item['quantity_removed'];
+                    }
+                }
+            }
+
+            // Step 4: Sort the groups based on the sum of "amount_accrued" in descending order
+            usort($groupedSummarizedArray, function ($a, $b) {
+                return $b['sold_amount'] - $a['sold_amount'];
+            });
             
             $sellingProductsBulk = [];
-            foreach ($yearly_best_selling_qty as $key => $sale) {
-                $product = Product::find($sale->product_id);
+            foreach ($groupedSummarizedArray as $key => $stock) {
+                $product = Product::find($stock->product_id);
                 $sellingProducts['product_name'] = $product->name;
-                $sellingProducts['sold_amount'] = $this->soldAmount($product->id);
-                $sellingProducts['sold_qty'] = $sale->sold_qty;
+                $sellingProducts['product_category'] = $product->category ? $product->category->name : null;
+                $sellingProducts['sold_amount'] = $stock->sold_amount;
+                $sellingProducts['sold_qty'] = $stock->sold_qty;
                 $sellingProducts['stock_available'] = $product->stock_available();
 
                 $sellingProductsBulk[] = $sellingProducts;
             }
         }
 
+        //all options
         if (!empty($data['warehouse_id']) && !empty($data['start_date']) && !empty($data['end_date'])) {
             $start_date = strtotime($data['start_date']);
             $end_date = strtotime($data['end_date']);
@@ -845,14 +981,53 @@ class ReportController extends Controller
             $start_date = date('Y-m-d',$start_date);
             $end_date = date('Y-m-d',$end_date);
             
-            $yearly_best_selling_qty = Sale::where('warehouse_id',$data['warehouse_id'])->select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->groupBy('product_id')->orderBy('sold_qty', 'desc')->get();
-            
+            //$yearly_best_selling_qty = Sale::where('warehouse_id',$data['warehouse_id'])->select(DB::raw('product_id, sum(product_qty_sold) as sold_qty'))->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->groupBy('product_id')->orderBy('sold_qty', 'desc')->get();
+            $delivered_and_remitted_orders = $delivered_and_remitted_orders->where('warehouse_id', $data['warehouse_id'])
+            ->whereBetween(DB::raw('DATE(created_at)'), [$start_date, $end_date])->pluck('id');
+            // $accepted_outgoing_stocks = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->select(DB::raw('product_id, sum(amount_accrued) as sold_amount, sum(quantity_removed) as sold_qty'))
+            // ->groupBy('product_id')->orderBy('sold_amount', 'desc')->get();
+
+            // Step 1: array containing the "package_bundle" data
+            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->pluck('package_bundle'); //[[{}], [{}], [{}]] multidimensional
+            $packageBundleArray = $accepted_outgoing_stock;
+
+            // Initialize an empty array to store the grouped and summarized results
+            $groupedSummarizedArray = [];
+
+            // Step 2: Group the items by "product_id"
+            foreach ($packageBundleArray as $innerArray) {
+                foreach ($innerArray as $item) {
+                    // Only consider items with 'customer_acceptance_status' being 'accepted'
+                    if ($item['customer_acceptance_status'] === 'accepted') {
+                        $product_id = $item['product_id'];
+                        if (!isset($groupedSummarizedArray[$product_id])) {
+                            $groupedSummarizedArray[$product_id] = [
+                                'product_id' => $product_id,
+                                'sold_amount' => 0,
+                                'sold_qty' => 0,
+                            ];
+                        }
+
+                        // Step 3: Calculate the sum of "amount_accrued" and "quantity_removed" for each group
+                        $groupedSummarizedArray[$product_id]['sold_amount'] += $item['amount_accrued'];
+                        $groupedSummarizedArray[$product_id]['sold_qty'] += $item['quantity_removed'];
+                    }
+                }
+            }
+
+            // Step 4: Sort the groups based on the sum of "amount_accrued" in descending order
+            usort($groupedSummarizedArray, function ($a, $b) {
+                return $b['sold_amount'] - $a['sold_amount'];
+            });
+
             $sellingProductsBulk = [];
-            foreach ($yearly_best_selling_qty as $key => $sale) {
-                $product = Product::find($sale->product_id);
+            foreach ($groupedSummarizedArray as $key => $stock) {
+                $product = Product::find($stock->product_id);
                 $sellingProducts['product_name'] = $product->name;
-                $sellingProducts['sold_amount'] = $this->soldAmount($product->id);
-                $sellingProducts['sold_qty'] = $sale->sold_qty;
+                $sellingProducts['product_category'] = $product->category ? $product->category->name : null;
+                $sellingProducts['sold_amount'] = $stock->sold_amount;
+                $sellingProducts['sold_qty'] = $stock->sold_qty;
                 $sellingProducts['stock_available'] = $product->stock_available();
 
                 $sellingProductsBulk[] = $sellingProducts;

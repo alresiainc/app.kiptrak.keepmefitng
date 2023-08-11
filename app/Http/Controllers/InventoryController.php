@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Helpers\Helper;
 
 use App\Models\Product;
 use App\Models\Sale;
@@ -23,6 +24,9 @@ use App\Models\ProductTransfer;
 
 class InventoryController extends Controller
 {
+    public function __construct() {
+        $this->helper = new Helper(); 
+    }
     
     public function inventoryDashboard($warehouse_unique_key="")
     {
@@ -46,11 +50,6 @@ class InventoryController extends Controller
     
             $purchases_amount_paid = $this->shorten($purchases_sum);
             //$sales_paid = $this->shorten(Sale::sum('amount_paid'));
-
-            $sales_paid = 0;
-            $delivered_and_remitted_orders = $selected_warehouse->orders()->where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
         
             $total_products = Product::whereIn('id', $warehouse_product_ids)->whereNull('combo_product_ids')->get();
             
@@ -68,6 +67,7 @@ class InventoryController extends Controller
             //$sale_revenue = $this->shorten(Sale::sum('amount_paid'));
     
             //$sales_sum = Sale::sum('amount_paid');
+            $sales_paid = $this->helper->totalSalesRevenueByWarehouse($selected_warehouse->id);
             $sales_sum = $sales_paid;
             $purchase_sum = Purchase::sum('amount_paid');
             $expense_sum = Expense::sum('amount');
@@ -98,25 +98,60 @@ class InventoryController extends Controller
 
             //warehouse orders
             $orders = $selected_warehouse->orders()->whereNotNull('customer_id')->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
-            if (count($orders) > 0) {
-                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'));
+            // if (count($orders) > 0) {
+            //     $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'));
         
-                if (count($outgoingStocks->get()) > 0) {
-                    $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
-                    foreach ($orders as $key => $order) {
-                        $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
-                        if (count($outgoingStock->get()) > 0) {
-                            $warehouseOrders['warehouseOrder'] = 
-                            [
-                                'order'=>$order,
-                                'outgoingStock'=>$outgoingStock->get(),
-                                'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                            ];
-                            $packages[] = $warehouseOrders;
+            //     if (count($outgoingStocks->get()) > 0) {
+            //         $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
+            //         foreach ($orders as $key => $order) {
+            //             $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
+            //             if (count($outgoingStock->get()) > 0) {
+            //                 $warehouseOrders['warehouseOrder'] = 
+            //                 [
+            //                     'order'=>$order,
+            //                     'outgoingStock'=>$outgoingStock->get(),
+            //                     'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+            //                 ];
+            //                 $packages[] = $warehouseOrders;
+            //             }
+            //         }
+            //     }
+            // }
+            //////////////////////////////
+            if (count($orders) > 0) {
+
+                //grab accepted OutgoingStocks from these orders
+                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+    
+                // Flatten the multidimensional array into a single array
+                $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+    
+                if (count($outgoingStocks) > 0) {
+                    foreach ($flattenedArray as $key => $package) {
+                        if ($package['customer_acceptance_status'] == 'accepted') {
+                            $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                         }
                     }
+    
+                    foreach ($orders as $key => $order) {
+                        $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                        foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                            //append new key('product') to 'outgoingStockPackageBundle' array
+                            $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                        }
+                        $warehouseOrders['warehouseOrder'] = [
+                            'order' => $order,
+                            'outgoingStock' => $outgoingStockPackageBundle,
+                            'orderRevenue'=> $orderRevenue,
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+    
                 }
-            }
+        
+            } 
+            //////////////////////////
             
             //warehouse product transfers
             $transfers = ProductTransfer::where('from_warehouse_id', $selected_warehouse->id)->orWhere('to_warehouse_id', $selected_warehouse->id)->get();
@@ -146,10 +181,6 @@ class InventoryController extends Controller
     
             $purchases_amount_paid = $this->shorten($purchases_sum);
             //$sales_paid = $this->shorten(Sale::sum('amount_paid'));
-            $sales_paid = 0;
-            $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted');
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
     
             $total_products = Product::whereNull('combo_product_ids')->get();
             
@@ -165,6 +196,7 @@ class InventoryController extends Controller
             //$sale_revenue = $this->shorten(Sale::sum('amount_paid'));
     
             //$sales_sum = Sale::sum('amount_paid');
+            $sales_paid = $this->helper->totalSalesRevenue();
             $sales_sum = $sales_paid;
             $purchase_sum = Purchase::sum('amount_paid');
             $expense_sum = Expense::sum('amount');
@@ -183,6 +215,7 @@ class InventoryController extends Controller
 
             $purchase_sum = $this->shorten($purchase_sum);
             $sales_sum = $this->shorten($sales_sum);
+
             $sales_paid = $this->shorten($sales_paid);
     
     
@@ -192,26 +225,63 @@ class InventoryController extends Controller
             
             $categories = Category::all();
 
+            ////////////////////////////
+            
             $orders = Order::whereNotNull('customer_id')->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
-            if (count($orders) > 0) {
-                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'));
+            // if (count($orders) > 0) {
+            //     $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'));
         
-                if (count($outgoingStocks->get()) > 0) {
-                    $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
-                    foreach ($orders as $key => $order) {
-                        $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
-                        if (count($outgoingStock->get()) > 0) {
-                            $warehouseOrders['warehouseOrder'] = 
-                            [
-                                'order'=>$order,
-                                'outgoingStock'=>$outgoingStock->get(),
-                                'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                            ];
-                            $packages[] = $warehouseOrders;
+            //     if (count($outgoingStocks->get()) > 0) {
+            //         $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
+            //         foreach ($orders as $key => $order) {
+            //             $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
+            //             if (count($outgoingStock->get()) > 0) {
+            //                 $warehouseOrders['warehouseOrder'] = 
+            //                 [
+            //                     'order'=>$order,
+            //                     'outgoingStock'=>$outgoingStock->get(),
+            //                     'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+            //                 ];
+            //                 $packages[] = $warehouseOrders;
+            //             }
+            //         }
+            //     }
+            // }
+            //////////////////////////
+            if (count($orders) > 0) {
+
+                //grab accepted OutgoingStocks from these orders
+                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+    
+                // Flatten the multidimensional array into a single array
+                $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+    
+                if (count($outgoingStocks) > 0) {
+                    foreach ($flattenedArray as $key => $package) {
+                        if ($package['customer_acceptance_status'] == 'accepted') {
+                            $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                         }
                     }
+    
+                    foreach ($orders as $key => $order) {
+                        $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                        foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                            //append new key('product') to 'outgoingStockPackageBundle' array
+                            $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                        }
+                        $warehouseOrders['warehouseOrder'] = [
+                            'order' => $order,
+                            'outgoingStock' => $outgoingStockPackageBundle,
+                            'orderRevenue'=> $orderRevenue,
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+    
                 }
-            }
+        
+            } 
+            //////////////////////////
             //warehouse product transfers
             $transfers = ProductTransfer::all();
             $incomgoing_product_transfers = 0; $outgoing_product_transfers = 0;
@@ -248,11 +318,12 @@ class InventoryController extends Controller
             $purchases_amount_paid = $this->shorten($purchases_sum);
             //$sales_paid = $this->shorten(Sale::sum('amount_paid'));
 
-            $sales_paid = 0;
-            $delivered_and_remitted_orders = $selected_warehouse->orders()->where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
-            ->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()]);
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $sales_paid = 0;
+            // $delivered_and_remitted_orders = $selected_warehouse->orders()->where('status', 'delivered_and_remitted')->pluck('id');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()]);
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            $sales_paid = $this->helper->totalSalesRevenueByDurationWarehouse($dt->copy()->startOfDay(), $dt->copy()->endOfDay(), $selected_warehouse->id);
         
             $total_products = Product::whereNull('combo_product_ids')->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->whereIn('id', $warehouse_product_ids)->get();
             
@@ -300,26 +371,62 @@ class InventoryController extends Controller
             $categories = Category::all();
 
             //warehouse orders
-            $orders = $selected_warehouse->orders()->whereNotNull('customer_id')->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
-            if (count($orders) > 0) {
-                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()]);
+            $orders = $selected_warehouse->orders()->whereNotNull('customer_id')->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->get(); 
+            $outgoingStocks = ''; $total_revenue = 0; $packages = [];
+            // if (count($orders) > 0) {
+            //     $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()]);
         
-                if (count($outgoingStocks->get()) > 0) {
-                    $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
-                    foreach ($orders as $key => $order) {
-                        $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
-                        if (count($outgoingStock->get()) > 0) {
-                            $warehouseOrders['warehouseOrder'] = 
-                            [
-                                'order'=>$order,
-                                'outgoingStock'=>$outgoingStock->get(),
-                                'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                            ];
-                            $packages[] = $warehouseOrders;
+            //     if (count($outgoingStocks->get()) > 0) {
+            //         $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
+            //         foreach ($orders as $key => $order) {
+            //             $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
+            //             if (count($outgoingStock->get()) > 0) {
+            //                 $warehouseOrders['warehouseOrder'] = 
+            //                 [
+            //                     'order'=>$order,
+            //                     'outgoingStock'=>$outgoingStock->get(),
+            //                     'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+            //                 ];
+            //                 $packages[] = $warehouseOrders;
+            //             }
+            //         }
+            //     }
+            // }
+            //////////////////////////
+            if (count($orders) > 0) {
+
+                //grab accepted OutgoingStocks from these orders
+                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+    
+                // Flatten the multidimensional array into a single array
+                $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+    
+                if (count($outgoingStocks) > 0) {
+                    foreach ($flattenedArray as $key => $package) {
+                        if ($package['customer_acceptance_status'] == 'accepted') {
+                            $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                         }
                     }
+    
+                    foreach ($orders as $key => $order) {
+                        $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                        foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                            //append new key('product') to 'outgoingStockPackageBundle' array
+                            $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                        }
+                        $warehouseOrders['warehouseOrder'] = [
+                            'order' => $order,
+                            'outgoingStock' => $outgoingStockPackageBundle,
+                            'orderRevenue'=> $orderRevenue,
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+    
                 }
-            }
+        
+            } 
+            //////////////////////////
             
             //warehouse product transfers
             $transfers = ProductTransfer::where('from_warehouse_id', $selected_warehouse->id)->orWhere('to_warehouse_id', $selected_warehouse->id)
@@ -354,11 +461,15 @@ class InventoryController extends Controller
             $purchases_amount_paid = $this->shorten($purchases_sum);
             //$sales_paid = $this->shorten(Sale::sum('amount_paid'));
 
-            $sales_paid = 0;
-            $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
-            ->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()]);
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $sales_paid = 0;
+            // $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()]);
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+
+            ///////////////////////////////////////////////
+            $sales_paid = $this->helper->totalSalesRevenueByDuration($dt->copy()->startOfDay(), $dt->copy()->endOfDay());
+            //////////////////////////////////////
         
             $total_products = Product::whereNull('combo_product_ids')->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->get();
             
@@ -406,25 +517,61 @@ class InventoryController extends Controller
 
             //warehouse orders
             $orders = Order::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
-            if (count($orders) > 0) {
-                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()]);
+            // if (count($orders) > 0) {
+            //     $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()]);
         
-                if (count($outgoingStocks->get()) > 0) {
-                    $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
-                    foreach ($orders as $key => $order) {
-                        $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
-                        if (count($outgoingStock->get()) > 0) {
-                            $warehouseOrders['warehouseOrder'] = 
-                            [
-                                'order'=>$order,
-                                'outgoingStock'=>$outgoingStock->get(),
-                                'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                            ];
-                            $packages[] = $warehouseOrders;
+            //     if (count($outgoingStocks->get()) > 0) {
+            //         $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
+            //         foreach ($orders as $key => $order) {
+            //             $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
+            //             if (count($outgoingStock->get()) > 0) {
+            //                 $warehouseOrders['warehouseOrder'] = 
+            //                 [
+            //                     'order'=>$order,
+            //                     'outgoingStock'=>$outgoingStock->get(),
+            //                     'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+            //                 ];
+            //                 $packages[] = $warehouseOrders;
+            //             }
+            //         }
+            //     }
+            // }
+
+            //////////////////////////
+            if (count($orders) > 0) {
+
+                //grab accepted OutgoingStocks from these orders
+                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+    
+                // Flatten the multidimensional array into a single array
+                $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+    
+                if (count($outgoingStocks) > 0) {
+                    foreach ($flattenedArray as $key => $package) {
+                        if ($package['customer_acceptance_status'] == 'accepted') {
+                            $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                         }
                     }
+    
+                    foreach ($orders as $key => $order) {
+                        $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                        foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                            //append new key('product') to 'outgoingStockPackageBundle' array
+                            $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                        }
+                        $warehouseOrders['warehouseOrder'] = [
+                            'order' => $order,
+                            'outgoingStock' => $outgoingStockPackageBundle,
+                            'orderRevenue'=> $orderRevenue,
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+    
                 }
-            }
+        
+            } 
+            //////////////////////////
             
             //warehouse product transfers
             $transfers = ProductTransfer::whereBetween('created_at', [$dt->copy()->startOfDay(), $dt->copy()->endOfDay()])->get();
@@ -461,11 +608,15 @@ class InventoryController extends Controller
             $purchases_amount_paid = $this->shorten($purchases_sum);
             //$sales_paid = $this->shorten(Sale::sum('amount_paid'));
 
-            $sales_paid = 0;
-            $delivered_and_remitted_orders = $selected_warehouse->orders()->where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
-            ->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()]);
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $sales_paid = 0;
+            // $delivered_and_remitted_orders = $selected_warehouse->orders()->where('status', 'delivered_and_remitted')->pluck('id');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()]);
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+
+            ////////////////////////
+            $sales_paid = $this->helper->totalSalesRevenueByDurationWarehouse($dt->copy()->startOfWeek(), $dt->copy()->endOfWeek(), $selected_warehouse->id);
+            ////////////////
         
             $total_products = Product::whereNull('combo_product_ids')->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->whereIn('id', $warehouse_product_ids)->get();
             
@@ -513,26 +664,63 @@ class InventoryController extends Controller
             $categories = Category::all();
 
             //warehouse orders
-            $orders = $selected_warehouse->orders()->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
-            if (count($orders) > 0) {
-                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()]);
+            $orders = $selected_warehouse->orders()->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->get(); 
+            $outgoingStocks = ''; $total_revenue = 0; $packages = [];
+            // if (count($orders) > 0) {
+            //     $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()]);
         
-                if (count($outgoingStocks->get()) > 0) {
-                    $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
-                    foreach ($orders as $key => $order) {
-                        $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
-                        if (count($outgoingStock->get()) > 0) {
-                            $warehouseOrders['warehouseOrder'] = 
-                            [
-                                'order'=>$order,
-                                'outgoingStock'=>$outgoingStock->get(),
-                                'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                            ];
-                            $packages[] = $warehouseOrders;
+            //     if (count($outgoingStocks->get()) > 0) {
+            //         $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
+            //         foreach ($orders as $key => $order) {
+            //             $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
+            //             if (count($outgoingStock->get()) > 0) {
+            //                 $warehouseOrders['warehouseOrder'] = 
+            //                 [
+            //                     'order'=>$order,
+            //                     'outgoingStock'=>$outgoingStock->get(),
+            //                     'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+            //                 ];
+            //                 $packages[] = $warehouseOrders;
+            //             }
+            //         }
+            //     }
+            // }
+
+            //////////////////////////
+            if (count($orders) > 0) {
+
+                //grab accepted OutgoingStocks from these orders
+                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+    
+                // Flatten the multidimensional array into a single array
+                $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+    
+                if (count($outgoingStocks) > 0) {
+                    foreach ($flattenedArray as $key => $package) {
+                        if ($package['customer_acceptance_status'] == 'accepted') {
+                            $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                         }
                     }
+    
+                    foreach ($orders as $key => $order) {
+                        $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                        foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                            //append new key('product') to 'outgoingStockPackageBundle' array
+                            $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                        }
+                        $warehouseOrders['warehouseOrder'] = [
+                            'order' => $order,
+                            'outgoingStock' => $outgoingStockPackageBundle,
+                            'orderRevenue'=> $orderRevenue,
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+    
                 }
-            }
+        
+            } 
+            //////////////////////////
             
             //warehouse product transfers
             $transfers = ProductTransfer::where('from_warehouse_id', $selected_warehouse->id)->orWhere('to_warehouse_id', $selected_warehouse->id)
@@ -567,11 +755,15 @@ class InventoryController extends Controller
             $purchases_amount_paid = $this->shorten($purchases_sum);
             //$sales_paid = $this->shorten(Sale::sum('amount_paid'));
 
-            $sales_paid = 0;
-            $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
-            ->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()]);
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $sales_paid = 0;
+            // $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()]);
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+
+            ///////////////////////////////////////////////
+            $sales_paid = $this->helper->totalSalesRevenueByDuration($dt->copy()->startOfWeek(), $dt->copy()->endOfWeek());
+            //////////////////////////////////////
         
             $total_products = Product::whereNull('combo_product_ids')->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->get();
             
@@ -617,27 +809,63 @@ class InventoryController extends Controller
             
             $categories = Category::all();
 
-            //warehouse orders
-            $orders = Order::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
-            if (count($orders) > 0) {
-                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()]);
+            //duration orders
+            $orders = Order::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->get();
+            $outgoingStocks = ''; $total_revenue = 0; $packages = [];
+            // if (count($orders) > 0) {
+            //     $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()]);
         
-                if (count($outgoingStocks->get()) > 0) {
-                    $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
-                    foreach ($orders as $key => $order) {
-                        $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
-                        if (count($outgoingStock->get()) > 0) {
-                            $warehouseOrders['warehouseOrder'] = 
-                            [
-                                'order'=>$order,
-                                'outgoingStock'=>$outgoingStock->get(),
-                                'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                            ];
-                            $packages[] = $warehouseOrders;
+            //     if (count($outgoingStocks->get()) > 0) {
+            //         $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
+            //         foreach ($orders as $key => $order) {
+            //             $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
+            //             if (count($outgoingStock->get()) > 0) {
+            //                 $warehouseOrders['warehouseOrder'] = 
+            //                 [
+            //                     'order'=>$order,
+            //                     'outgoingStock'=>$outgoingStock->get(),
+            //                     'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+            //                 ];
+            //                 $packages[] = $warehouseOrders;
+            //             }
+            //         }
+            //     }
+            // }
+            //////////////////////////
+            if (count($orders) > 0) {
+
+                //grab accepted OutgoingStocks from these orders
+                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+    
+                // Flatten the multidimensional array into a single array
+                $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+    
+                if (count($outgoingStocks) > 0) {
+                    foreach ($flattenedArray as $key => $package) {
+                        if ($package['customer_acceptance_status'] == 'accepted') {
+                            $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                         }
                     }
+    
+                    foreach ($orders as $key => $order) {
+                        $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                        foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                            //append new key('product') to 'outgoingStockPackageBundle' array
+                            $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                        }
+                        $warehouseOrders['warehouseOrder'] = [
+                            'order' => $order,
+                            'outgoingStock' => $outgoingStockPackageBundle,
+                            'orderRevenue'=> $orderRevenue,
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+    
                 }
-            }
+        
+            } 
+            //////////////////////////
             
             //warehouse product transfers
             $transfers = ProductTransfer::whereBetween('created_at', [$dt->copy()->startOfWeek(), $dt->copy()->endOfWeek()])->get();
@@ -674,11 +902,15 @@ class InventoryController extends Controller
             $purchases_amount_paid = $this->shorten($purchases_sum);
             //$sales_paid = $this->shorten(Sale::sum('amount_paid'));
 
-            $sales_paid = 0;
-            $delivered_and_remitted_orders = $selected_warehouse->orders()->where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
-            ->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()]);
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $sales_paid = 0;
+            // $delivered_and_remitted_orders = $selected_warehouse->orders()->where('status', 'delivered_and_remitted')->pluck('id');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()]);
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            
+            ////////////////////////
+            $sales_paid = $this->helper->totalSalesRevenueByDurationWarehouse($dt->copy()->startOfMonth(), $dt->copy()->endOfMonth(), $selected_warehouse->id);
+            ///////////////////////
         
             $total_products = Product::whereNull('combo_product_ids')->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->whereIn('id', $warehouse_product_ids)->get();
             
@@ -726,26 +958,63 @@ class InventoryController extends Controller
             $categories = Category::all();
 
             //warehouse orders
-            $orders = $selected_warehouse->orders()->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
-            if (count($orders) > 0) {
-                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()]);
+            $orders = $selected_warehouse->orders()->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->get(); 
+            $outgoingStocks = ''; $total_revenue = 0; $packages = [];
+            // if (count($orders) > 0) {
+            //     $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()]);
         
-                if (count($outgoingStocks->get()) > 0) {
-                    $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
-                    foreach ($orders as $key => $order) {
-                        $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
-                        if (count($outgoingStock->get()) > 0) {
-                            $warehouseOrders['warehouseOrder'] = 
-                            [
-                                'order'=>$order,
-                                'outgoingStock'=>$outgoingStock->get(),
-                                'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                            ];
-                            $packages[] = $warehouseOrders;
+            //     if (count($outgoingStocks->get()) > 0) {
+            //         $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
+            //         foreach ($orders as $key => $order) {
+            //             $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
+            //             if (count($outgoingStock->get()) > 0) {
+            //                 $warehouseOrders['warehouseOrder'] = 
+            //                 [
+            //                     'order'=>$order,
+            //                     'outgoingStock'=>$outgoingStock->get(),
+            //                     'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+            //                 ];
+            //                 $packages[] = $warehouseOrders;
+            //             }
+            //         }
+            //     }
+            // }
+
+            //////////////////////////
+            if (count($orders) > 0) {
+
+                //grab accepted OutgoingStocks from these orders
+                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+
+                // Flatten the multidimensional array into a single array
+                $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+
+                if (count($outgoingStocks) > 0) {
+                    foreach ($flattenedArray as $key => $package) {
+                        if ($package['customer_acceptance_status'] == 'accepted') {
+                            $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                         }
                     }
+
+                    foreach ($orders as $key => $order) {
+                        $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                        foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                            //append new key('product') to 'outgoingStockPackageBundle' array
+                            $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                        }
+                        $warehouseOrders['warehouseOrder'] = [
+                            'order' => $order,
+                            'outgoingStock' => $outgoingStockPackageBundle,
+                            'orderRevenue'=> $orderRevenue,
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+
                 }
-            }
+
+            } 
+            //////////////////////////
             
             //warehouse product transfers
             $transfers = ProductTransfer::where('from_warehouse_id', $selected_warehouse->id)->orWhere('to_warehouse_id', $selected_warehouse->id)
@@ -780,11 +1049,15 @@ class InventoryController extends Controller
             $purchases_amount_paid = $this->shorten($purchases_sum);
             //$sales_paid = $this->shorten(Sale::sum('amount_paid'));
 
-            $sales_paid = 0;
-            $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
-            ->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()]);
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $sales_paid = 0;
+            // $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()]);
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+
+            ///////////////////////
+            $sales_paid = $this->helper->totalSalesRevenueByDuration($dt->copy()->startOfMonth(), $dt->copy()->endOfMonth());
+            ///////////////////////
         
             $total_products = Product::whereNull('combo_product_ids')->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->get();
             
@@ -832,25 +1105,61 @@ class InventoryController extends Controller
 
             //warehouse orders
             $orders = Order::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
-            if (count($orders) > 0) {
-                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()]);
+            // if (count($orders) > 0) {
+            //     $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()]);
         
-                if (count($outgoingStocks->get()) > 0) {
-                    $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
-                    foreach ($orders as $key => $order) {
-                        $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
-                        if (count($outgoingStock->get()) > 0) {
-                            $warehouseOrders['warehouseOrder'] = 
-                            [
-                                'order'=>$order,
-                                'outgoingStock'=>$outgoingStock->get(),
-                                'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                            ];
-                            $packages[] = $warehouseOrders;
+            //     if (count($outgoingStocks->get()) > 0) {
+            //         $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
+            //         foreach ($orders as $key => $order) {
+            //             $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
+            //             if (count($outgoingStock->get()) > 0) {
+            //                 $warehouseOrders['warehouseOrder'] = 
+            //                 [
+            //                     'order'=>$order,
+            //                     'outgoingStock'=>$outgoingStock->get(),
+            //                     'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+            //                 ];
+            //                 $packages[] = $warehouseOrders;
+            //             }
+            //         }
+            //     }
+            // }
+
+            //////////////////////////
+            if (count($orders) > 0) {
+
+                //grab accepted OutgoingStocks from these orders
+                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+
+                // Flatten the multidimensional array into a single array
+                $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+
+                if (count($outgoingStocks) > 0) {
+                    foreach ($flattenedArray as $key => $package) {
+                        if ($package['customer_acceptance_status'] == 'accepted') {
+                            $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                         }
                     }
+
+                    foreach ($orders as $key => $order) {
+                        $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                        foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                            //append new key('product') to 'outgoingStockPackageBundle' array
+                            $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                        }
+                        $warehouseOrders['warehouseOrder'] = [
+                            'order' => $order,
+                            'outgoingStock' => $outgoingStockPackageBundle,
+                            'orderRevenue'=> $orderRevenue,
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+
                 }
-            }
+
+            } 
+            //////////////////////////
             
             //warehouse product transfers
             $transfers = ProductTransfer::whereBetween('created_at', [$dt->copy()->startOfMonth(), $dt->copy()->endOfMonth()])->get();
@@ -887,11 +1196,15 @@ class InventoryController extends Controller
             $purchases_amount_paid = $this->shorten($purchases_sum);
             //$sales_paid = $this->shorten(Sale::sum('amount_paid'));
 
-            $sales_paid = 0;
-            $delivered_and_remitted_orders = $selected_warehouse->orders()->where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
-            ->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()]);
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $sales_paid = 0;
+            // $delivered_and_remitted_orders = $selected_warehouse->orders()->where('status', 'delivered_and_remitted')->pluck('id');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()]);
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+
+            ////////////////////////
+            $sales_paid = $this->helper->totalSalesRevenueByDurationWarehouse($dt->copy()->startOfYear(), $dt->copy()->endOfYear(), $selected_warehouse->id);
+            ///////////////////////
         
             $total_products = Product::whereNull('combo_product_ids')->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->whereIn('id', $warehouse_product_ids)->get();
             
@@ -939,26 +1252,63 @@ class InventoryController extends Controller
             $categories = Category::all();
 
             //warehouse orders
-            $orders = $selected_warehouse->orders()->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
-            if (count($orders) > 0) {
-                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()]);
+            $orders = $selected_warehouse->orders()->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->get(); 
+            $outgoingStocks = ''; $total_revenue = 0; $packages = [];
+            // if (count($orders) > 0) {
+            //     $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()]);
         
-                if (count($outgoingStocks->get()) > 0) {
-                    $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
-                    foreach ($orders as $key => $order) {
-                        $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
-                        if (count($outgoingStock->get()) > 0) {
-                            $warehouseOrders['warehouseOrder'] = 
-                            [
-                                'order'=>$order,
-                                'outgoingStock'=>$outgoingStock->get(),
-                                'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                            ];
-                            $packages[] = $warehouseOrders;
+            //     if (count($outgoingStocks->get()) > 0) {
+            //         $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
+            //         foreach ($orders as $key => $order) {
+            //             $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
+            //             if (count($outgoingStock->get()) > 0) {
+            //                 $warehouseOrders['warehouseOrder'] = 
+            //                 [
+            //                     'order'=>$order,
+            //                     'outgoingStock'=>$outgoingStock->get(),
+            //                     'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+            //                 ];
+            //                 $packages[] = $warehouseOrders;
+            //             }
+            //         }
+            //     }
+            // }
+
+            //////////////////////////
+            if (count($orders) > 0) {
+
+                //grab accepted OutgoingStocks from these orders
+                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+
+                // Flatten the multidimensional array into a single array
+                $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+
+                if (count($outgoingStocks) > 0) {
+                    foreach ($flattenedArray as $key => $package) {
+                        if ($package['customer_acceptance_status'] == 'accepted') {
+                            $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                         }
                     }
+
+                    foreach ($orders as $key => $order) {
+                        $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                        foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                            //append new key('product') to 'outgoingStockPackageBundle' array
+                            $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                        }
+                        $warehouseOrders['warehouseOrder'] = [
+                            'order' => $order,
+                            'outgoingStock' => $outgoingStockPackageBundle,
+                            'orderRevenue'=> $orderRevenue,
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+
                 }
-            }
+
+            } 
+            //////////////////////////
             
             //warehouse product transfers
             $transfers = ProductTransfer::where('from_warehouse_id', $selected_warehouse->id)->orWhere('to_warehouse_id', $selected_warehouse->id)
@@ -993,11 +1343,15 @@ class InventoryController extends Controller
             $purchases_amount_paid = $this->shorten($purchases_sum);
             //$sales_paid = $this->shorten(Sale::sum('amount_paid'));
 
-            $sales_paid = 0;
-            $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
-            $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
-            ->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()]);
-            $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+            // $sales_paid = 0;
+            // $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->pluck('id');
+            // $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->where('customer_acceptance_status', 'accepted')
+            // ->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()]);
+            // $sales_paid += $accepted_outgoing_stock->sum('amount_accrued');
+
+            ///////////////////////
+            $sales_paid = $this->helper->totalSalesRevenueByDuration($dt->copy()->startOfYear(), $dt->copy()->endOfYear());
+            ///////////////////////
         
             $total_products = Product::whereNull('combo_product_ids')->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->get();
             
@@ -1045,25 +1399,61 @@ class InventoryController extends Controller
 
             //warehouse orders
             $orders = Order::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->get(); $outgoingStocks = ''; $total_revenue = 0; $packages = [];
-            if (count($orders) > 0) {
-                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()]);
+            // if (count($orders) > 0) {
+            //     $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()]);
         
-                if (count($outgoingStocks->get()) > 0) {
-                    $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
-                    foreach ($orders as $key => $order) {
-                        $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
-                        if (count($outgoingStock->get()) > 0) {
-                            $warehouseOrders['warehouseOrder'] = 
-                            [
-                                'order'=>$order,
-                                'outgoingStock'=>$outgoingStock->get(),
-                                'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
-                            ];
-                            $packages[] = $warehouseOrders;
+            //     if (count($outgoingStocks->get()) > 0) {
+            //         $packages = []; $warehouseOrders = []; $total_revenue += $outgoingStocks->sum('amount_accrued');
+            //         foreach ($orders as $key => $order) {
+            //             $outgoingStock = $order->outgoingStocks()->orderBy('id', 'DESC');
+            //             if (count($outgoingStock->get()) > 0) {
+            //                 $warehouseOrders['warehouseOrder'] = 
+            //                 [
+            //                     'order'=>$order,
+            //                     'outgoingStock'=>$outgoingStock->get(),
+            //                     'orderRevenue'=>$outgoingStock->sum('amount_accrued'),
+            //                 ];
+            //                 $packages[] = $warehouseOrders;
+            //             }
+            //         }
+            //     }
+            // }
+
+            //////////////////////////
+            if (count($orders) > 0) {
+
+                //grab accepted OutgoingStocks from these orders
+                $outgoingStocks = OutgoingStock::whereIn('order_id', $orders->pluck('id'))->get(); //[[{}], [{}], [{}]]
+
+                // Flatten the multidimensional array into a single array
+                $flattenedArray = array_merge(...$outgoingStocks->pluck('package_bundle')); //[{}, {}]
+
+                if (count($outgoingStocks) > 0) {
+                    foreach ($flattenedArray as $key => $package) {
+                        if ($package['customer_acceptance_status'] == 'accepted') {
+                            $total_revenue += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0; //sum
                         }
                     }
+
+                    foreach ($orders as $key => $order) {
+                        $orderRevenue = $order->outgoingStock->package_bundle[0]['amount_accrued'];
+                        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                        foreach ($outgoingStockPackageBundle as &$stock_bundle) {
+                            //append new key('product') to 'outgoingStockPackageBundle' array
+                            $stock_bundle["product"] = Product::find($stock_bundle['product_id']);
+                        }
+                        $warehouseOrders['warehouseOrder'] = [
+                            'order' => $order,
+                            'outgoingStock' => $outgoingStockPackageBundle,
+                            'orderRevenue'=> $orderRevenue,
+                        ];
+                        $packages[] = $warehouseOrders;
+                    }
+
                 }
-            }
+
+            } 
+            //////////////////////////
             
             //warehouse product transfers
             $transfers = ProductTransfer::whereBetween('created_at', [$dt->copy()->startOfYear(), $dt->copy()->endOfYear()])->get();
@@ -1154,8 +1544,7 @@ class InventoryController extends Controller
                     if ($product->stock_available() > 10) {
                         $products[] = $product;
                     }
-                }
-                
+                } 
             }
            // return var_dump($in_stock_products);
         }

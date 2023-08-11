@@ -1,3 +1,8 @@
+@php
+    use App\Helpers\Helper;
+    $helper = new Helper();
+    // dd($helper->stock_available('3'));
+@endphp
 @extends('layouts.design')
 @section('title')Inventory @endsection
 
@@ -194,7 +199,7 @@
       <!-- Total Revenue Card -->
 
       @if ($selected_warehouse !== '')
-          <!-- Incoming Product Transfers Card -->
+      <!-- Incoming Product Transfers Card -->
       <div class="col-lg-3 col-md-6" style="cursor: pointer;">
         <div class="card bg-3">
           
@@ -653,28 +658,28 @@
               </div>
               
               @foreach ($package['warehouseOrder']['outgoingStock'] as $outgoingStock)
-              @if (isset($outgoingStock->product))
-              <div class="row g-3 m-1 border {{ $outgoingStock->customer_acceptance_status == 'accepted' ? 'border-success' : 'border-danger' }} rounded">
+              @if (isset($outgoingStock['product']))
+              <div class="row g-3 m-1 border {{ $outgoingStock['customer_acceptance_status'] == 'accepted' ? 'border-success' : 'd-none' }} rounded">
                 
                 <div class="col-lg-6">
                     <label class="fw-bolder">Product Name</label>
-                    <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock->product->name }}</div>
+                    <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock['product']->name }}</div>
                 </div>
 
                 <div class="col-lg-1">
                     <label class="fw-bolder">Qty Ordered</label>
-                    <div class="text-dark d-none" style="font-size: 14px;">{{ $outgoingStock->quantity_removed.' @'. $outgoingStock->product->price }}</div>
-                    <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock->quantity_removed }}</div>
+                    <div class="text-dark d-none" style="font-size: 14px;">{{ $outgoingStock['quantity_removed'].' @'. $outgoingStock['product']->price }}</div>
+                    <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock['quantity_removed'] }}</div>
                 </div>
                 
                 <div class="col-lg-3">
                     <label class="fw-bolder">Revenue</label>
-                    <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock->amount_accrued }}</div>
+                    <div class="text-dark" style="font-size: 14px;">{{ $outgoingStock['amount_accrued'] }}</div>
                 </div>
 
                 <div class="col-lg-2">
                   <label class="fw-bolder">Customer Action</label>
-                  <div class="{{ $outgoingStock->customer_acceptance_status == 'accepted' ? 'text-success' : 'text-danger' }}" style="font-size: 14px;">{{ $outgoingStock->customer_acceptance_status }}</div>
+                  <div class="{{ $outgoingStock['customer_acceptance_status'] == 'accepted' ? 'text-success' : 'text-danger' }}" style="font-size: 14px;">{{ $outgoingStock['customer_acceptance_status'] }}</div>
                 </div>
             
               </div> 
@@ -892,8 +897,8 @@
                         <td>{{ $product->name }}<input type="hidden" data-categoryname="{{ $product->category->name }}" class="categoryname" value="{{ $product->category->name }}"></td>
                         
                         <td>{{ $selected_warehouse->productQtyInWarehouse($product->id) }}</td>
-                        <td>{{ $selected_warehouse->productQtySoldInWarehouse($product->id) }}</td>
-                        <td>{{ $selected_warehouse->productQtyInWarehouse($product->id) - $selected_warehouse->productQtySoldInWarehouse($product->id) }}</td>
+                        <td>{{ $selected_warehouse->productQtyInWarehouse($product->id) - $selected_warehouse->stock_available_by_warehouse($product->id) }}</td>
+                        <td>{{ $selected_warehouse->stock_available_by_warehouse($product->id) }}</td>
                         <td>{{ $product->updated_at->format('Y-m-d') }}</td>
                       </tr>
                           
@@ -962,7 +967,6 @@
                   @if ($recently_products->count() > 0)
                       
                       @foreach ($recently_products as $product)
-                          
                           <tr>
                             <td>{{ $loop->iteration }}</td>
                             <th scope="row">
@@ -978,8 +982,8 @@
                             
                             
                             <td>{{ $product->purchases->sum('product_qty_purchased') }}</td>
-                            <td>{{ $product->purchases->sum('product_qty_purchased') - $product->stock_available() }}</td>
-                            <td>{{ $product->stock_available() }}</td>
+                            <td>{{ $product->purchases->sum('product_qty_purchased') - $helper->stock_available($product->id) }}</td>
+                            <td>{{ $helper->stock_available($product->id) }}</td>
                             <td>{{ $product->updated_at->format('Y-m-d') }}</td>
                           </tr>
                           

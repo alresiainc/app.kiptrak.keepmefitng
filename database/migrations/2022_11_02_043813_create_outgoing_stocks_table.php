@@ -28,6 +28,8 @@ return new class extends Migration
             $table->string('reason_returned')->nullable(); //administrative, will be added by staff later
 
             $table->string('isCombo')->nullable();
+            $table->json('package_bundle')->nullable(); //[{},{}]
+
 
             $table->string('created_by');
             $table->string('status'); //'true','false'

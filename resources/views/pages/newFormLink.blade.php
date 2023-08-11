@@ -516,6 +516,8 @@
                                 <ul class="row g-3">
                                     <div class="text-center"><p class="fw-bold mb-0 text-success">Products you ordered</p> <hr></div>
                                     @foreach ($mainProducts_outgoingStocks as $main_outgoingStock)
+                                    @if ((!empty($main_outgoingStock->customer_acceptance_status)) && ($main_outgoingStock->customer_acceptance_status == 'accepted') && 
+                                    ($main_outgoingStock->reason_removed == 'as_order_firstphase'))
                                     <li class="col-lg-4 col-md-6"> 
                                         <div class="itemside mb-3"> 
                                             <div class="aside"> 
@@ -526,11 +528,15 @@
                                                 <strong>N{{ $main_outgoingStock->amount_accrued }} ({{ $main_outgoingStock->quantity_removed }} items)</strong> 
                                             </div> 
                                         </div> 
-                                    </li>
+                                    </li>  
+                                    @endif
+                                    
                                     @endforeach
                                     
                                     <!---for orderbump or upsell--->
-                                    @if ($orderbumpProduct_revenue !== 0)
+                                    @if (($orderbumpProduct_revenue !== 0) && (!empty($orderbump_outgoingStock->customer_acceptance_status)) && 
+                                    ($orderbump_outgoingStock->customer_acceptance_status == 'accepted') && ($orderbump_outgoingStock->reason_removed == 'as_orderbump'))
+                                    
                                     <li class="col-lg-4 col-md-6"> 
                                         <div class="itemside mb-3"> 
                                             <div class="aside"> 
@@ -1101,8 +1107,6 @@
             }
             
         });
-
-        
     </script>
 
     <!---validate number only in phone-number field-->

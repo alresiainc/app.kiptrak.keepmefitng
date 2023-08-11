@@ -130,36 +130,86 @@ class ThankYouSettingController extends Controller
                  $customer =  $order->customer; $orderId = $order->orderId($order);
  
                  $mainProduct_revenue = 0;  //price * qty
-                 $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
-                 'customer_acceptance_status'=>'accepted'])->get();
+                 $qty_main_product = 0;
+                //  $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
+                //  'customer_acceptance_status'=>'accepted'])->get();
  
-                 if ( count($mainProducts_outgoingStocks) > 0 ) {
-                     foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-                        if(isset($main_outgoingStock->product)) {
-                            $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                //  if ( count($mainProducts_outgoingStocks) > 0 ) {
+                //      foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
+                //         if(isset($main_outgoingStock->product)) {
+                //             $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                //         }
+                //      }
+                //  }
+
+                 $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                foreach ($outgoingStockPackageBundle as &$main_outgoingStock) {
+                    if ( ($main_outgoingStock['reason_removed'] == 'as_order_firstphase') && ($main_outgoingStock['customer_acceptance_status'] == 'accepted') ) {
+                        $product = Product::where('id', $main_outgoingStock['product_id'])->first();
+                        if (isset($product)) {
+                            //array_push($mainProducts_outgoingStocks, array('product' => $product)); 
+                            $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                            $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
+                            $qty_main_product += $main_outgoingStock['quantity_removed'];
                         }
-                     }
-                 }
+                    }
+                }
+                $mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
+                //////////////////////////////////////////////////////////////
  
                  //orderbump
                  $orderbumpProduct_revenue = 0; //price * qty
                  $orderbump_outgoingStock = '';
-                 if (isset($formHolder->orderbump_id)) {
-                     $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
-                     if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
-                         $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
-                     }
-                 }
+                 $qty_orderbump = 0;
+                //  if (isset($formHolder->orderbump_id)) {
+                //      $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
+                //      if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+                //          $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+                //      }
+                //  }
+
+                 $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                
+                if (isset($formHolder->orderbump_id)) {
+                    foreach ($outgoingStockPackageBundle as &$orderbump_stock) {
+                        if ( ($orderbump_stock['reason_removed'] == 'as_orderbump') && ($orderbump_stock['customer_acceptance_status'] == 'accepted') ) {
+                            $product = Product::where('id', $orderbump_stock['product_id'])->first();
+                            if (isset($product)) {
+                                $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                                $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
+                                $qty_orderbump += $orderbump_stock['quantity_removed'];
+                            }
+                        }
+                    }
+                }
+                $orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : '';
  
                  //upsell
                  $upsellProduct_revenue = 0; //price * qty
                  $upsell_outgoingStock = '';
-                 if (isset($formHolder->upsell_id)) {
-                     $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
-                     if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
-                         $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
-                     }
-                 }
+                 $$qty_upsell = 0;
+                //  if (isset($formHolder->upsell_id)) {
+                //      $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
+                //      if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+                //          $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+                //      }
+                //  }
+
+                 $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                
+                if (isset($formHolder->upsell_id)) {
+                    foreach ($outgoingStockPackageBundle as &$upsell_stock) {
+                        if ( ($upsell_stock['reason_removed'] == 'as_upsell') && ($upsell_stock['customer_acceptance_status'] == 'accepted') ) {
+                            $product = Product::where('id', $upsell_stock['product_id'])->first();
+                            if (isset($product)) {
+                                $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                                $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
+                                $qty_upsell += $upsell_stock['quantity_removed'];
+                            }
+                        }
+                    }
+                }
+                $upsell_outgoingStock = $upsellProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : '';
                  
                  //order total amt
                  $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
@@ -171,9 +221,9 @@ class ThankYouSettingController extends Controller
                  }
                  
                  //package or product qty. sum = 0, if it doesnt exist
-                 $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
-                 $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
-                 $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
+                //  $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
+                //  $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
+                //  $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
                  $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
              }
              
@@ -206,8 +256,34 @@ class ThankYouSettingController extends Controller
                 \abort(404);
             }
             if (isset($order->customer)) {
-                $order->outgoingStocks()->where(['customer_acceptance_status'=>NULL])
-                ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
+                // $order->outgoingStocks()->where(['customer_acceptance_status'=>NULL])
+                // ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
+
+                $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                $package_bundle_1 = [];
+                //loop to get $package_bundle_1 array, if customer is null
+                foreach ($outgoingStockPackageBundle as &$main_outgoingStock) {
+                    if ( $main_outgoingStock['customer_acceptance_status'] == null ) {
+
+                        $package_bundles = [
+                            'customer_acceptance_status'=>'rejected',
+                            'reason_removed'=>'as_order_firstphase',
+                            'quantity_returned'=>1,
+                            'reason_returned'=>'declined',
+                        ];
+                        $package_bundle_1[] = $package_bundles;
+                    }
+                }
+
+                //loop to get new copy of $outgoingStockPackageBundle array
+                foreach ($outgoingStockPackageBundle as $key => &$value) {
+                    // Update values with similar keys
+                    if (isset($package_bundle_1[$key])) {
+                        $value = array_merge($value, $package_bundle_1[$key]);
+                    }
+                }
+                //pudate db column with new copy of $outgoingStockPackageBundle
+                $order->outgoingStock()->update(['package_bundle' => $outgoingStockPackageBundle]);
 
                 $formHolder = $order->formHolder;
 
@@ -219,37 +295,88 @@ class ThankYouSettingController extends Controller
                 //get customer
                 $customer =  $order->customer; $orderId = $order->orderId($order);
 
+                //mainProduct_revenue
                 $mainProduct_revenue = 0;  //price * qty
-                $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
-                'customer_acceptance_status'=>'accepted'])->get();
+                $qty_main_product = 0;
+                // $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
+                // 'customer_acceptance_status'=>'accepted'])->get();
 
-                if ( count($mainProducts_outgoingStocks) > 0 ) {
-                    foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-                        if(isset($main_outgoingStock->product)) {
-                            $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                // if ( count($mainProducts_outgoingStocks) > 0 ) {
+                //     foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
+                //         if(isset($main_outgoingStock->product)) {
+                //             $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+                //         }
+                //     }
+                // }
+
+                $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                foreach ($outgoingStockPackageBundle as &$main_outgoingStock) {
+                    if ( ($main_outgoingStock['reason_removed'] == 'as_order_firstphase') && ($main_outgoingStock['customer_acceptance_status'] == 'accepted') ) {
+                        $product = Product::where('id', $main_outgoingStock['product_id'])->first();
+                        if (isset($product)) {
+                            //array_push($mainProducts_outgoingStocks, array('product' => $product)); 
+                            $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                            $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
+                            $qty_main_product += $main_outgoingStock['quantity_removed'];
                         }
                     }
                 }
+                $mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
+                //////////////////////////////////////////////////////////////
 
                 //orderbump
                 $orderbumpProduct_revenue = 0; //price * qty
                 $orderbump_outgoingStock = '';
+                $qty_orderbump = 0;
+                // if (isset($formHolder->orderbump_id)) {
+                //     $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
+                //     if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+                //         $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+                //     }
+                // }
+
+                $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                
                 if (isset($formHolder->orderbump_id)) {
-                    $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
-                    if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
-                        $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+                    foreach ($outgoingStockPackageBundle as &$orderbump_stock) {
+                        if ( ($orderbump_stock['reason_removed'] == 'as_orderbump') && ($orderbump_stock['customer_acceptance_status'] == 'accepted') ) {
+                            $product = Product::where('id', $orderbump_stock['product_id'])->first();
+                            if (isset($product)) {
+                                $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                                $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
+                                $qty_orderbump += $orderbump_stock['quantity_removed'];
+                            }
+                        }
                     }
                 }
+                $orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : '';
 
                 //upsell
                 $upsellProduct_revenue = 0; //price * qty
                 $upsell_outgoingStock = '';
+                $qty_upsell = 0;
+                // if (isset($formHolder->upsell_id)) {
+                //     $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
+                //     if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+                //         $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+                //     }
+                // }
+
+                $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+                
                 if (isset($formHolder->upsell_id)) {
-                    $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
-                    if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
-                        $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+                    foreach ($outgoingStockPackageBundle as &$upsell_stock) {
+                        if ( ($upsell_stock['reason_removed'] == 'as_upsell') && ($upsell_stock['customer_acceptance_status'] == 'accepted') ) {
+                            $product = Product::where('id', $upsell_stock['product_id'])->first();
+                            if (isset($product)) {
+                                $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                                $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
+                                $qty_upsell += $upsell_stock['quantity_removed'];
+                            }
+                        }
                     }
                 }
+                $upsell_outgoingStock = $upsellProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : '';
                 
                 //order total amt
                 $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
@@ -261,9 +388,9 @@ class ThankYouSettingController extends Controller
                 }
                 
                 //package or product qty. sum = 0, if it doesnt exist
-                $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
-                $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
-                $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
+                // $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
+                // $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
+                // $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
                 $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
             }
             

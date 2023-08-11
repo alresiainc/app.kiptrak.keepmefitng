@@ -23,11 +23,11 @@
 <main id="main" class="main">
 
   <div class="pagetitle">
-    <h1>Sales Report</h1>
+    <h1>Product Sales Report</h1>
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/">Home</a></li>
-        <li class="breadcrumb-item active">Sales Report</li>
+        <li class="breadcrumb-item active">Product Sales Report</li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -99,11 +99,26 @@
           </div>
           <hr>
           
+          <div class="row mb-3">
+            <div class="col-lg-6 col-md-6">
+              <label for="filter-categoryname">Category</label>
+              <select id="filter-categoryname" type="select" class="custom-select border form-control filter">
+                <option value="">Nothing Selected</option>
+                @if (count($categories))
+                    @foreach ($categories as $category)
+                    <option value="{{ $category->name }}">{{ $category->name }}</option>
+                    @endforeach
+                @endif
+              </select>
+            </div>
+          </div>
+
           <div class="table table-responsive">
-            <table id="products-table" class="table custom-table" style="width:100%">
+            <table id="products-table" class="table custom-table table-striped" style="width:100%">
                 <thead>
                     <tr>
                         <th>Product Name</th>
+                        <th>Category</th>
                         <th>Sold Amount</th>
                         <th>Sold Qty</th>
                         <th>In Stock</th>
@@ -116,6 +131,9 @@
                       
                           <tr>
                               <td>{{ $product['product_name'] }}</td>
+                              <td>{{ $product['product_category'] }}
+                                <input type="hidden" class="product_categoryname" value="{!! $product['product_category'] !!}">
+                              </td>
                               <td>{{ $product['sold_amount'] }}</td>
                               <td>{{ $product['sold_qty'] }}</td>
                               <td>{{ $product['stock_available'] }}</td>
@@ -158,4 +176,45 @@
   </div>
 </div>
 
+@endsection
+
+@section('extra_js')
+<!--category-filter-transfers-->
+<script>
+    
+  //////////
+  $('#filter-categoryname').change(function() {
+      product_filter_function();
+  });
+
+  $('#products-table tbody tr').show();
+
+  function product_filter_function() {
+      $('#products-table tbody tr').hide();
+      var categorynameValue = $('#filter-categoryname').val();
+
+      //traversing each row one by one
+      $('#products-table tr').each(function() {
+          var categorynameFlag = 0;
+          
+          if (categorynameValue == 0) {
+              categorynameFlag = 1;
+          } else {
+              // Check if any hidden input in the row has a value matching the selected value
+              $(this).find('input.product_categoryname').each(function() {
+                  if ($(this).val() == categorynameValue) {
+                      categorynameFlag = 1;
+                      return false; // Exit the loop if a match is found
+                  }
+              });
+          }
+
+          //show if flag is true
+          if (categorynameFlag) {
+              $(this).show();
+          }
+      });
+  }
+
+</script>
 @endsection
