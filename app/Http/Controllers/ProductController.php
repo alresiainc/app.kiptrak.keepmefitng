@@ -15,6 +15,7 @@ use App\Models\Purchase;
 use App\Models\Sale;
 use App\Models\WareHouse;
 use App\Models\ProductWarehouse;
+use App\Models\GeneralSetting;
 
 
 class ProductController extends Controller
@@ -175,7 +176,9 @@ class ProductController extends Controller
             abort(404);
         }
         
-        $currency_symbol = substr($product->country_id, strrpos($product->country_id, '-') + 1);
+        //$currency_symbol = substr($product->country_id, strrpos($product->country_id, '-') + 1);
+        $generalSetting = GeneralSetting::where('id', '>', 0)->first();
+        $currency_symbol = $generalSetting->country->symbol;
         $features = unserialize($product->features) == [null] ? '' : unserialize($product->features);
 
         //stock_available

@@ -53,18 +53,18 @@ class FormHolder extends Model
     }
 
     public function entries() {
-        $formHolders = $this->formHolders;
+        $orders = $this->formOrders;
         $entries_count = 0;
-        foreach ($formHolders as $key => $formHolder) {
-            if (isset($formHolder->order->customer_id)) {
+        foreach ($orders as $key => $order) {
+            if (isset($order->customer_id)) {
                 $entries_count += 1;
             }
         }
 
         //if parent form has entry
-        if (isset($this->order->customer_id)) {
-            $entries_count += 1;
-        }
+        // if (isset($this->order->customer_id)) {
+        //     $entries_count += 1;
+        // }
         return $entries_count;
     }
 

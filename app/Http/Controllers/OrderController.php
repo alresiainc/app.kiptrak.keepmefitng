@@ -80,8 +80,9 @@ class OrderController extends Controller
                 $formHolder = FormHolder::where('unique_key', $status);
                 if($formHolder->exists()) {
                     $formHolder = $formHolder->first();
-                    $formHolders = $formHolder->formHolders;
-                    $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orderBy('id', 'DESC')->get();
+                    //$formHolders = $formHolder->formHolders;
+                    $formOrders = $formHolder->formOrders;
+                    $orders = Order::whereIn('orders.id', $formOrders->pluck('id'))->where('customer_id', '!=', null)->orderBy('id', 'DESC')->get();
                     $entries = true;
                 }
             }
@@ -158,8 +159,9 @@ class OrderController extends Controller
                 $formHolder = FormHolder::where('unique_key', $status);
                 if($formHolder->exists()) {
                     $formHolder = $formHolder->first();
-                    $formHolders = $formHolder->formHolders;
-                    $orders = Order::whereIn('orders.id', $formHolders->pluck('order_id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->orderBy('id', 'DESC')->get();
+                    //$formHolders = $formHolder->formHolders;
+                    $formOrders = $formHolder->formOrders;
+                    $orders = Order::whereIn('orders.id', $formOrders->pluck('id'))->where('customer_id', '!=', null)->orWhere('id', $formHolder->order_id)->orderBy('id', 'DESC')->get();
                     $entries = true;
                 }
             }

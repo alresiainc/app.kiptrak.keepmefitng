@@ -885,7 +885,7 @@
                             setView('thankyou-section')
                         } else {
                             $('.current_order_id').val('');
-                            //window.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
+                            //mutate browser url & redirect
                             window.parent.location.href = "/view-thankyou-templates/"+thankyou_unique_key+"/"+current_order_id
                         }
  

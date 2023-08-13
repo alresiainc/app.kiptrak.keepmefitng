@@ -40,7 +40,8 @@
                   </div>
                   <div class="d-grid ms-lg-3">
                     <div class="display-6">{{ $product->name }}</div>
-                    <h5>{{ $currency_symbol }}{{ $product->price }}</h5>
+                    <h5>Unit Purchase Price: <span class="badge badge-primary text-white fw-bold">{{ $currency_symbol }}{{ $product->purchase_price }}</span>
+                       | Unit Sale Price: <span class="badge badge-success text-white fw-bold">{{ $currency_symbol }}{{ $product->sale_price }}</span></h5> 
 
                     @if ($stock_available > 0)
                       <div class="row">

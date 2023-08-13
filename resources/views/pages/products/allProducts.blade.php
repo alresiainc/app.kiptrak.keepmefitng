@@ -86,7 +86,7 @@
                       {{-- <th>Colour</th>
                       <th>Size</th> --}}
                       <th>Quantity</th>
-                      <th>Price</th>
+                      <th>Unit Purchase Price</th>
                       <th>Date Added</th>
                       <th>Action</th>
                   </tr>

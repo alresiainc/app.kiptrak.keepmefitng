@@ -33,7 +33,7 @@ class ProductSeeder extends Seeder
         //$product->warehouse_id = '1';
         $product->created_by = '1';
         $product->status = 'true';
-        $product->image = '1.jpg';
+        $product->image = 'default.jpg';
         $product->save();
 
         //productwarehouse
@@ -67,7 +67,7 @@ class ProductSeeder extends Seeder
         //$product->warehouse_id = '1';
         $product->created_by = '1';
         $product->status = 'true';
-        $product->image = '2.jpg';
+        $product->image = 'default.jpg';
         $product->save();
 
         //productwarehouse
@@ -108,7 +108,7 @@ class ProductSeeder extends Seeder
         //$product->warehouse_id = 1;
         $product->created_by = 1;
         $product->status = 'true';
-        $product->image = '3.jpg';
+        $product->image = 'default.jpg';
         $product->save();
 
         //productwarehouse
@@ -137,7 +137,7 @@ class ProductSeeder extends Seeder
         //$product->warehouse_id = '1';
         $product->created_by = '1';
         $product->status = 'true';
-        $product->image = '4.jpg';
+        $product->image = 'default.jpg';
         $product->save();
 
         //productwarehouse
@@ -164,7 +164,7 @@ class ProductSeeder extends Seeder
         //$product->warehouse_id = '1';
         $product->created_by = '1';
         $product->status = 'true';
-        $product->image = '5.jpg';
+        $product->image = 'default.jpg';
         $product->save();
 
         //productwarehouse
