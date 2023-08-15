@@ -70,7 +70,8 @@ class AuthController extends Controller
                     $activityLog->status = 'true';
                     $activityLog->save();
                     
-                    return redirect()->route('todayRecord');
+                    //return redirect()->route('todayRecord');
+                    return redirect()->intended('/today'); 
                 } else {
 
                     $activityLog = new ActivityLog();

@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use App\Models\Order;
 use App\Models\OutgoingStock;
 use App\Models\Product;
@@ -159,6 +161,44 @@ class Helper
         return $sales_paid;
     }
 
+    public function yearlySalesReportChart($delivered_and_remitted_orders) {
+        // Initialize an array to store the monthly sale amounts
+        $yearly_sale_amount = [];
+
+        // Loop through each month of the year
+        for ($i = 1; $i <= 12; $i++) {
+            // Query the database to retrieve the relevant data
+            $monthly_sale_amount = DB::table('outgoing_stocks')
+                ->whereYear('created_at', (string) Carbon::now()->year)
+                ->whereMonth('created_at', $i)
+                ->whereIn('order_id', $delivered_and_remitted_orders)
+                ->get(); // Retrieve the rows for the specific month
+
+            // Initialize variables to store the sum for the month
+            $monthly_sum_amount = 0;
+
+            // Iterate through the retrieved rows for the month
+            foreach ($monthly_sale_amount as $row) {
+                // Access the package_bundle JSON data
+                $package_bundle = json_decode($row->package_bundle, true);
+                //$package_bundle = $row->package_bundle;
+
+                // Check if the item has 'customer_acceptance_status' as 'accepted'
+                foreach ($package_bundle as $item) {
+                    if ($item['customer_acceptance_status'] == 'accepted') {
+                        $monthly_sum_amount += (int) $item['amount_accrued'];
+                    }
+                }
+            }
+
+            // Add the monthly sum to the yearly_sale_amount array
+            $yearly_sale_amount[] = number_format($monthly_sum_amount, 2, '.', '');
+        }
+        
+        return $yearly_sale_amount;
+    }
+
+    //unused
     public function stock_available2($product_id)
     {
         //product stock available

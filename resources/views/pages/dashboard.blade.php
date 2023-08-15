@@ -20,7 +20,8 @@
     </nav>
   </div>
   <!-- End Page Title -->
-  <iframe src="http://127.0.0.1:9000/form-embedded/amvts2pPKm7sg7rvqedsqCFUrXwwk0" width="100%" height="1024px" style="border:0"></iframe>
+
+   <!-- Iframe form template -->
 
   <!-- Alert -->
   <div id="liveAlertPlaceholder d-none"></div>
