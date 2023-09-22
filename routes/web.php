@@ -226,6 +226,7 @@ Route::post('/create-employee', [EmployeeController::class, 'addStaffPost'])->na
 Route::get('/view-employee/{unique_key}', [EmployeeController::class, 'singleStaff'])->name('singleStaff');
 Route::get('/edit-employee/{unique_key}', [EmployeeController::class, 'editStaff'])->name('editStaff');
 Route::post('/edit-employee/{unique_key}', [EmployeeController::class, 'editStaffPost'])->name('editStaffPost');
+Route::get('/delete-employee/{unique_key}', [EmployeeController::class, 'deleteStaff'])->name('deleteStaff');
 
 //agent
 Route::get('/agents', [AuthController::class, 'allAgent'])->name('allAgent');

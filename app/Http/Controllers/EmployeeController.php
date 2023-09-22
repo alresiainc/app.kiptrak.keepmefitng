@@ -226,6 +226,19 @@ class EmployeeController extends Controller
         
         return back()->with('success', 'Staff Updated Successfully');
     }
+
+    public function deleteStaff ($unique_key) 
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        $staff = User::where('unique_key', $unique_key)->first();
+        if(!isset($staff)){
+            abort(404);
+        }
+
+        $staff->delete();
+        return back()->with('success', 'Staff Deleted Successfully');
+    }
 //-----------------AGENTS-----------------------------------------------
     
 public function allAgent()

@@ -51,7 +51,14 @@
       {{-- <iframe src="http://127.0.0.1:9000/form-embedded/h2aZRdBYqWuEDbJF1hl9Nh2QKrNEmE" width="100%" height="700" style="border:0"></iframe> --}}
       {{-- <iframe src="http://127.0.0.1:9000/thankYou-embedded/13vWgn4djty4YmuWN8BeMheNmlvKC5/1" width="100%" height="700" style="border:0"></iframe> --}}
       
+      
       <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+
+        <iframe
+    allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write; autoplay" 
+    src="https://meet.pindogo.com/" 
+    style="height: 100%; width: 100%; border: 0px;" 
+></iframe>
         <div class="container">
           <div class="row justify-content-center">
             <div class="col-lg-4 col-md-6 mx-auto">
@@ -62,6 +69,8 @@
                   <span class="d-none d-lg-block project-name"></span>
                 </a>
               </div><!-- End Logo -->
+
+              
 
               <div class="card mb-3">
 
