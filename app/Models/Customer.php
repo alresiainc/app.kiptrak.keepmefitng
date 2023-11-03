@@ -44,6 +44,11 @@ class Customer extends Model
         return $this->hasMany(Order::class, 'customer_id');  
     }
 
+    public function deliveredOrders()
+    {
+        return $this->hasMany(Order::class)->where('status', 'delivered_and_remitted');
+    }
+
     public function sales()
     {
         return $this->hasMany(Sale::class, 'customer_id');  

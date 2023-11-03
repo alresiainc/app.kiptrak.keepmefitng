@@ -1405,11 +1405,14 @@ class FormBuilderController extends Controller
 
         //updating thankyou templ with current form
         $thankyou = ThankYou::find($data['thankyou_template_id']);
-        $embedded_url = url('/').'/thankYou-embedded/'.$thankyou->unique_key.'/'.$order->id;
-        $thankyou->url = 'view-thankyou-templates/'.$thankyou->unique_key.'/'.$order->id;
+        //$embedded_url = url('/').'/thankYou-embedded/'.$thankyou->unique_key.'/'.$order->id;
+        $embedded_url = url('/').'/thankYou-embedded/'.$thankyou->unique_key;
+        //$thankyou->url = 'view-thankyou-templates/'.$thankyou->unique_key.'/'.$order->id;
+        $thankyou->url = 'view-thankyou-templates/'.$thankyou->unique_key;
         $thankyou->embedded_tag = '<embed type="text/html" src="'.$embedded_url.'"  width="100%" height="700">';
         $thankyou->iframe_tag = '<iframe src="'.$embedded_url.'" width="100%" height="700" style="border:0"></iframe>';
         $thankyou->template_external_url = $data['template_external_url'];
+        $thankyou->current_order_id = $order->id;
         $thankyou->save();
     
         //update formHolder

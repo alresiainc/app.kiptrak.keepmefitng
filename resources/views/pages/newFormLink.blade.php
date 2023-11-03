@@ -88,7 +88,7 @@
     <body class="">
 
     <!-- will be shown in singlelink-->
-    <header id="header" class="header fixed-top d-flex align-items-center">
+    <header id="header" class="header fixed-top d-flex align-items-center d-none">
         <div class="d-flex align-items-center justify-content-between">
           <a href="javascript:void(0);" class="logo d-flex align-items-center">
             <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="width: 30%; !important">
@@ -129,7 +129,11 @@
 
                     <article class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Contact info</h5>
+                            <div class="card-title text-center">
+                                <h5>Kindly fill the form below to place your order</h5>
+                                <h5>Please don't fill the form twice</h5>
+                                <h5>Please make sure that you have your money ready before you place order</h5>
+                            </div>
                             {{-- <form action="{{ route('newFormLinkPost', $unique_key) }}" method="POST">@csrf --}}
                             <form action="">@csrf
                                 

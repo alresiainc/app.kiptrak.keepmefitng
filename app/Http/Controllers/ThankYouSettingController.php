@@ -96,6 +96,7 @@ class ThankYouSettingController extends Controller
      * @return \Illuminate\Http\Response
      */
 
+     //shown from frontend
      public function showThankYouTemplate($unique_key, $current_order_id="")
      {
          // $authUser = auth()->user();
@@ -106,6 +107,7 @@ class ThankYouSettingController extends Controller
              abort(404);
          }
          $thankYou = $thankYouTemplate->first();
+         $current_order_id = isset($thankYou->current_order_id) ? $thankYou->current_order_id : "";
  
          $customer = ''; // to check against when the thankyou pg will be rendered
          
@@ -233,7 +235,9 @@ class ThankYouSettingController extends Controller
          return view('pages.settings.thankYou.singleThankYou', \compact('thankYou', 'order', 'orderId', 'customer',
          'qty_total', 'order_total_amount', 'grand_total', 'mainProducts_outgoingStocks',
          'orderbumpProduct_revenue', 'orderbump_outgoingStock', 'upsellProduct_revenue', 'upsell_outgoingStock'));
-     } 
+     }
+
+     //returns redirect-away to template_external_url
     public function singleThankYouTemplate($unique_key, $current_order_id="")
     {
         // $authUser = auth()->user();
@@ -245,7 +249,14 @@ class ThankYouSettingController extends Controller
         }
         $thankYou = $thankYouTemplate->first();
 
+        //update $thankYou tbl
+        if ($current_order_id !== "") {
+            $thankYou->current_order_id = $current_order_id;
+            $thankYou->save();
+        }
+        
         $template_name = $thankYou->template_name;
+        $current_order_id = isset($thankYou->current_order_id) ? $thankYou->current_order_id : "";
         
         $customer = ''; // to check against when the thankyou pg will be rendered
         
@@ -491,7 +502,7 @@ class ThankYouSettingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function thankYouEmbedded($unique_key, $current_order_id="")
+    public function thankYouEmbedded($unique_key)
     {
         // $authUser = auth()->user();
         // $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
@@ -501,6 +512,7 @@ class ThankYouSettingController extends Controller
             abort(404);
         }
         $thankYou = $thankYouTemplate->first();
+        $current_order_id = isset($thankYou->current_order_id) ? $thankYou->current_order_id : "";
 
         $customer = ''; // to check against when the thankyou pg will be rendered
         

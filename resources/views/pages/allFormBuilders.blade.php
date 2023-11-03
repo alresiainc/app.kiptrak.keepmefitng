@@ -115,7 +115,7 @@
                   <th scope="col">OrderBump</th>
                   <th scope="col">UpSell</th>
                   <th scope="col">Thank-You Page</th>
-                  <th scope="col">Customer</th>
+                  <th scope="col" class="d-none">Customer</th>
                   
                   <th scope="col">Actions</th>
                 </tr>
@@ -274,7 +274,7 @@
                           <i class="bi bi-plus"></i> Add</span></td>
                       @endif
 
-                      <td><span>{{ isset($formHolder->order->customer_id) ? $formHolder->order->customer->firstname .' '.$formHolder->order->customer->lastname : 'No response' }} </span></td>
+                      <td class="d-none"><span>{{ isset($formHolder->order->customer_id) ? $formHolder->order->customer->firstname .' '.$formHolder->order->customer->lastname : 'No response' }} </span></td>
                       
                       <td>
                         {{-- <input type="hidden" id="foo" value="https://github.com/zenorocha/clipboard.js.git"> --}}

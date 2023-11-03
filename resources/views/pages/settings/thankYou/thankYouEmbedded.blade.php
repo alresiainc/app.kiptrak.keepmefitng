@@ -56,7 +56,7 @@
         
     </head>
 
-<body class="">
+<body class="min-vh-100">
 
 <!-- will be shown in singlelink-->
 <nav class="navbar bg-light d-none">
@@ -73,10 +73,10 @@
     </div>
 </nav>
 
-<header id="header" class="header fixed-top d-flex align-items-center">
+<header id="header" class="header fixed-top d-flex align-items-center d-none">
     <div class="d-flex align-items-center justify-content-between">
       <a href="javascript:void(0);" class="logo d-flex align-items-center">
-        <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="width: 30%; !important">
+        <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" style="width: 30%; !important" class="d-none">
         <span class="d-none d-lg-block project-namek"></span>
       </a>
     </div>

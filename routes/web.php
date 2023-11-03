@@ -13,6 +13,7 @@ use App\Models\Customer;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,21 @@ use Illuminate\Support\Facades\Http;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+// Route::get('/artisan', function () {
+//     //php artisan make:migration add_group_access_to_groups_table --table=groups
+//     Artisan::call('make:migration', [
+//         'name' => 'add_current_order_id_to_thank_yous_table',
+//         '--table' => 'thank_yous',
+//     ]);
+    
+//     return 'Migration role created successfully1!';
+// });
+
+// Route::get('migrate', function () {
+//     Artisan::call('migrate');
+//     dd("Success2");
+// });
 
 Route::get('run', function () {
 
@@ -589,8 +605,6 @@ Route::get('/staff-dashboard-monthly', [StaffDashboardController::class, 'staffM
 Route::get('/staff-dashboard-lastmonth', [StaffDashboardController::class, 'staffLastMonthRecord'])->name('staffLastMonthRecord'); //staffLastMonthRecord
 
 //Route::get('/nLargest', [TaskController::class, 'nLargest'])->name('nLargest'); //kLargest
-
-
 
 });
 
