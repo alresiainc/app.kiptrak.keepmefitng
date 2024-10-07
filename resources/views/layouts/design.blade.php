@@ -11,8 +11,8 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <title>@yield('title') :: Kiptrak CRM</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+  <meta content="KIPTRAK CRM" name="description">
+  <meta content="kiptrak, crm, inventory" name="keywords">
 
   <!-- Favicons -->
   <link href="{{asset('/assets/img/favicon.png')}}" rel="icon">

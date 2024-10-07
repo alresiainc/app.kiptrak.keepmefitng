@@ -40,5 +40,5 @@ class Permission extends Model
     //$perm->permissions, for sub_permissions
     public function permissions() {
         return $this->hasMany(Permission::class, 'parent_id', 'id'); //mapping permissions to its 'parent_id'
-       }
+    }
 }

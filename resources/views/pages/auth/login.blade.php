@@ -6,8 +6,8 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
   <title>Login :: CRM</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+  <meta content="this is the description" name="description">
+  <meta content="this is the keyword" name="keywords">
 
   <!-- Favicons -->
   <link href="assets/img/favicon.png" rel="icon">
@@ -48,7 +48,7 @@
   <main>
     <div class="container">
 
-      {{-- <iframe src="http://127.0.0.1:9001/thankYou-embedded/J9zNXyxdwf9JgeF1qXgUNud7bEUl69" width="100%" height="1024px" style="border:0"></iframe> --}}
+      {{-- <iframe src="http://127.0.0.1:9001/thankYou-embedded/OpfsFcHuwugjz9DAjUhzPHdfV0Kndw" width="100%" height="700" style="border:0"></iframe> --}}
       
       
       <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">

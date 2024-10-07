@@ -2872,7 +2872,7 @@ class FormBuilderController extends Controller
         ];
 
         try {
-            Notification::route('mail', [$admin->official_notification_email])->notify(new NewOrder($invoiceData));
+            Notification::route('mail', [$admin->official_notification_email, $customer->email])->notify(new NewOrder($invoiceData));
         } catch (Exception $exception) {
             // return back()->withError($exception->getMessage())->withInput();
             return back();
