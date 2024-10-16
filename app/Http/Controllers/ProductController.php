@@ -24,7 +24,7 @@ class ProductController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         // $pro = Product::find('1');
         // return unserialize($pro->features) == [null] ? 'noting' : 'yes';
         // $currencies = array(
@@ -52,7 +52,7 @@ class ProductController extends Controller
         $categories = Category::all();
         $warehouses = WareHouse::all();
         $agents = User::where('type', 'agent')->get();
-        
+
         return view('pages.products.addProduct', compact('authUser', 'user_role', 'countries', 'units', 'categories', 'warehouses', 'agents'));
     }
 
@@ -60,7 +60,7 @@ class ProductController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $request->validate([
             'name' => 'required|string',
             'quantity' => 'required|numeric',
@@ -75,7 +75,7 @@ class ProductController extends Controller
             //'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
             'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg,webp',
         ]);
-        
+
         $data = $request->all();
         $product = new Product();
         $product->name = $data['name'];
@@ -94,15 +94,15 @@ class ProductController extends Controller
         // }else{
         //     $product->code = $data['code'];
         // }
-        
+
         $product->features = !empty($data['features']) ? serialize($data['features']) : null;
-    
+
         // $product->warehouse_id =  !empty($data['warehouse_id']) ? $data['warehouse_id'] : null;
         $product->created_by = $authUser->id;
         $product->status = 'true';
-        
+
         //image
-        $imageName = time().'.'.$request->image->extension();
+        $imageName = time() . '.' . $request->image->extension();
         //store products in folder
         $request->image->storeAs('products', $imageName, 'public');
         $product->image = $imageName;
@@ -118,7 +118,7 @@ class ProductController extends Controller
             $product_warehouse->warehouse_type = $warehouse->type;
             $product_warehouse->save();
         }
-        
+
         //incomingstocks, qty updated here
         $incomingStock = new IncomingStock();
         $incomingStock->product_id = $product->id;
@@ -127,12 +127,12 @@ class ProductController extends Controller
         $incomingStock->created_by = $authUser->id;
         $incomingStock->status = 'true';
         $incomingStock->save();
-        
+
         //Purchase
         $purchase = new Purchase();
-        $purchase_code = 'kpa-' . date("Ymd") . '-'. date("his");
+        $purchase_code = 'kpa-' . date("Ymd") . '-' . date("his");
         $purchase->purchase_code = $purchase_code;
-        
+
         $purchase->product_id = $product->id;
         $purchase->product_qty_purchased = $data['quantity'];
         $purchase->incoming_stock_id = $incomingStock->id;
@@ -148,10 +148,9 @@ class ProductController extends Controller
         $purchase->status = 'received';
         $purchase->save();
 
-        $product->update(['purchase_id'=>$purchase->id]);
+        $product->update(['purchase_id' => $purchase->id]);
 
         return back()->with('success', 'Product Created Successfully');
-
     }
 
     //allProducts
@@ -159,9 +158,9 @@ class ProductController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
-        $products = Product::whereNull('combo_product_ids')->orderBy('id','DESC')->get();
-        
+
+        $products = Product::whereNull('combo_product_ids')->orderBy('id', 'DESC')->get();
+
         return view('pages.products.allProducts', compact('authUser', 'user_role', 'products'));
     }
 
@@ -170,12 +169,12 @@ class ProductController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $product = Product::where('unique_key', $unique_key)->first();
-        if(!isset($product)){
+        if (!isset($product)) {
             abort(404);
         }
-        
+
         //$currency_symbol = substr($product->country_id, strrpos($product->country_id, '-') + 1);
         $generalSetting = GeneralSetting::where('id', '>', 0)->first();
         $currency_symbol = $generalSetting->country->symbol;
@@ -185,7 +184,7 @@ class ProductController extends Controller
         $stock_available = $product->stock_available();
 
         $warehouses = $product->warehouses;
-        
+
         return view('pages.products.singleProduct', compact('authUser', 'user_role', 'product', 'currency_symbol', 'features', 'stock_available', 'warehouses'));
     }
 
@@ -194,14 +193,14 @@ class ProductController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $product = Product::where('unique_key', $unique_key)->first();
-        if(!isset($product)){
+        if (!isset($product)) {
             abort(404);
         }
 
         $product_in_warehouse = ProductWarehouse::where('product_id', $product->id);
-        
+
         $currency_nationality = $product->country->name;
         $currency_symbol = $product->country->symbol;
 
@@ -216,17 +215,29 @@ class ProductController extends Controller
 
         $agents = User::where('type', 'agent')->get();
 
-        return view('pages.products.editProduct', compact('authUser', 'user_role', 'product', 'product_in_warehouse', 'currency_symbol', 'features',
-        'countries', 'currency_nationality', 'stock_available', 'categories', 'warehouses', 'agents'));
+        return view('pages.products.editProduct', compact(
+            'authUser',
+            'user_role',
+            'product',
+            'product_in_warehouse',
+            'currency_symbol',
+            'features',
+            'countries',
+            'currency_nationality',
+            'stock_available',
+            'categories',
+            'warehouses',
+            'agents'
+        ));
     }
 
     public function editProductPost(Request $request, $unique_key)
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $product = Product::where('unique_key', $unique_key)->first();
-        if(!isset($product)){
+        if (!isset($product)) {
             abort(404);
         }
 
@@ -244,8 +255,8 @@ class ProductController extends Controller
             //'image' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
             'image' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp',
         ]);
-    
-       $data = $request->all();
+
+        $data = $request->all();
 
         $product->name = $data['name'];
         // $product->quantity = $data['quantity'];
@@ -258,31 +269,30 @@ class ProductController extends Controller
         // $product->code = !empty($data['code']) ? $data['code'] : null;
 
         $product->features = !empty($data['features']) ? serialize($data['features']) : null;
-    
+
         // $product->warehouse_id =  !empty($data['warehouse_id']) ? $data['warehouse_id'] : null;
         $product->created_by = $authUser->id;
         $product->status = 'true';
-        
+
         //image
         if ($request->image) {
             $oldImage = $product->image; //1.jpg
-            if(Storage::disk('public')->exists('products/'.$oldImage)){
-                Storage::disk('public')->delete('products/'.$oldImage);
+            if (Storage::disk('uploads')->exists('products/' . $oldImage)) {
+                Storage::disk('uploads')->delete('products/' . $oldImage);
                 /*
                     Delete Multiple files this way
                     Storage::delete(['upload/test.png', 'upload/test2.png']);
                 */
             }
-            $imageName = time().'.'.$request->image->extension();
+            $imageName = time() . '.' . $request->image->extension();
             //store products in folder
-            $request->image->storeAs('products', $imageName, 'public');
+            $request->image->storeAs('products', $imageName, 'uploads');
             $product->image = $imageName;
         }
-        
+
         $product->save();
 
-        if(!empty($data['quantity']) && $data['quantity'] != 0)
-        {
+        if (!empty($data['quantity']) && $data['quantity'] != 0) {
             //incomingStock
             if ($data['quantity'] > 0) {
                 //incomingstocks
@@ -296,9 +306,9 @@ class ProductController extends Controller
 
                 //Purchase
                 $purchase = new Purchase();
-                $purchase_code = 'kpa-' . date("Ymd") . '-'. date("his");
+                $purchase_code = 'kpa-' . date("Ymd") . '-' . date("his");
                 $purchase->purchase_code = $purchase_code;
-                
+
                 $purchase->product_id = $product->id;
                 $purchase->product_qty_purchased = $data['quantity'];
                 $purchase->incoming_stock_id = $incomingStock->id;
@@ -314,12 +324,12 @@ class ProductController extends Controller
                 $purchase->status = 'received';
                 $purchase->save();
 
-                $product->update(['purchase_id'=>$purchase->id]);
+                $product->update(['purchase_id' => $purchase->id]);
 
                 $productWarehouse = ProductWarehouse::where('product_id', $product->id)->first();
-                if(isset($productWarehouse)){
+                if (isset($productWarehouse)) {
                     $qty = $productWarehouse->product_qty + $data['quantity'];
-                    $productWarehouse->update(['product_qty'=>$qty]);
+                    $productWarehouse->update(['product_qty' => $qty]);
                 }
             }
 
@@ -328,7 +338,7 @@ class ProductController extends Controller
 
                 //reduce purchase
                 $purchases = Purchase::where('product_id', $product->id);
-                $line_items = $purchases->orderBy('id','DESC')->get(['id', 'product_qty_purchased', 'incoming_stock_id']);
+                $line_items = $purchases->orderBy('id', 'DESC')->get(['id', 'product_qty_purchased', 'incoming_stock_id']);
 
                 //$quantity_removed = abs($data['quantity']);
                 $quantity_removed = abs($data['quantity']);
@@ -338,7 +348,7 @@ class ProductController extends Controller
                 $result = [];
 
                 //loop array until it stops at a particular pt
-                foreach ($line_items as $key=>$row) {
+                foreach ($line_items as $key => $row) {
                     $result[$key] = $row;
                     $bucket_sum += $row->product_qty_purchased;
                     if ($bucket_sum >= $quantity_removed) {
@@ -352,9 +362,9 @@ class ProductController extends Controller
                 //extract id columns
                 $purchase_column_ids = array_column($result, 'id');
                 $incoming_stock_column_ids = array_column($result, 'incoming_stock_id');
-                
+
                 if ($bucket_sum == $quantity_removed) {
-                
+
                     //purchase side
                     Purchase::whereIn('id', $purchase_column_ids)->update([
                         'product_qty_purchased' => 0,
@@ -366,16 +376,15 @@ class ProductController extends Controller
                     IncomingStock::whereIn('id', $incoming_stock_column_ids)->update([
                         'quantity_added' => 0,
                     ]);
-                    
                 } else {
-                    
+
                     //purchase side
-                    $result_except_last = array_slice($purchase_column_ids, 0, count($purchase_column_ids)-1, true); //array except last-item
+                    $result_except_last = array_slice($purchase_column_ids, 0, count($purchase_column_ids) - 1, true); //array except last-item
                     $result_only_last = collect(end($purchase_column_ids))[0]; //array only last-item
-                    
+
                     $purchases_result_except_last = Purchase::whereIn('id', $result_except_last);
                     $sum1 = $purchases_result_except_last->sum('product_qty_purchased');
-                    
+
                     $purchases_only_last = Purchase::where('id', $result_only_last)->first();
 
                     //some calcs
@@ -398,9 +407,9 @@ class ProductController extends Controller
                     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                     //incomingStock side
-                    $incomingStock_except_last = array_slice($incoming_stock_column_ids, 0, count($incoming_stock_column_ids)-1, true); //array except last-item
+                    $incomingStock_except_last = array_slice($incoming_stock_column_ids, 0, count($incoming_stock_column_ids) - 1, true); //array except last-item
                     $incomingStock_only_last = collect(end($incoming_stock_column_ids))[0]; //array only last-item
-                    
+
                     $incomingStocks_result_except_last = IncomingStock::whereIn('id', $incomingStock_except_last);
 
 
@@ -420,11 +429,10 @@ class ProductController extends Controller
                 }
 
                 $productWarehouse = ProductWarehouse::where('product_id', $product->id)->first();
-                if(isset($productWarehouse)){
+                if (isset($productWarehouse)) {
                     $qty = $productWarehouse->product_qty - $quantity_removed;
-                    $productWarehouse->update(['product_qty'=>$qty]);
+                    $productWarehouse->update(['product_qty' => $qty]);
                 }
- 
             }
         }
 
@@ -440,14 +448,12 @@ class ProductController extends Controller
                 $product_warehouse->warehouse_type = $warehouse->type;
                 $product_warehouse->save();
             }
-            
         }
-        
-        return back()->with('success', 'Product Updated Successfully');
 
+        return back()->with('success', 'Product Updated Successfully');
     }
 
-    
+
 
     /**
      * Remove the specified resource from storage.
@@ -459,7 +465,7 @@ class ProductController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         //
     }
 
@@ -467,23 +473,23 @@ class ProductController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
-        $product = Product::where(['unique_key'=>$unique_key]);
-        if(!$product->exists()){
+
+        $product = Product::where(['unique_key' => $unique_key]);
+        if (!$product->exists()) {
             abort(404);
         }
 
         $product = $product->first();
         $oldImage = $product->image;
-        if(Storage::disk('public')->exists('products/'.$oldImage)){
-            Storage::disk('public')->delete('products/'.$oldImage);
+        if (Storage::disk('public')->exists('products/' . $oldImage)) {
+            Storage::disk('public')->delete('products/' . $oldImage);
         }
 
         $product->purchases()->delete();
         $product->sales()->delete();
         $product->incomingStocks()->delete();
         $product->outgoingStocks()->delete();
-        ProductWarehouse::where('product_id',$product->id)->delete();
+        ProductWarehouse::where('product_id', $product->id)->delete();
 
         $product->delete();
 
