@@ -2,6 +2,9 @@
 @section('title')
     Form Builder
 @endsection
+{{-- @php
+    $form = !isset($form) ? (object) [] : $form;
+@endphp --}}
 
 @section('extra_css')
     <style>
@@ -225,9 +228,9 @@
 
 
         /* .text-field-content {
-                                                                                                                                                                                                                                                                                                                                                                                    pointer-events: auto;
-                                                                                                                                                                                                                                                                                                                                                                                    user-select: text;
-                                                                                                                                                                                                                                                                                                                                                                                } */
+                                                                                                                                                                                                                                                                                                                                                                                                        pointer-events: auto;
+                                                                                                                                                                                                                                                                                                                                                                                                        user-select: text;
+                                                                                                                                                                                                                                                                                                                                                                                                    } */
 
         .text-field-content,
         .form-submit-btn {
@@ -563,13 +566,6 @@
 @endsection
 
 @section('content')
-    {{-- @php
-        $form_data_array = json_decode(
-            '[{"type":"image","config":{"width":"100px","height":"100px","textAlign":"center","src":"https://via.placeholder.com/300","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"text","config":{"mode":"simple","color":"rgb(69, 69, 69)","fontWeight":"400","fontFamily":"\"Open Sans\", sans-serif","fontSize":"16px","fontStyle":"normal","textAlign":"center","textTransform":"none","textDecoration":"none solid rgb(69, 69, 69)","content":"Editable Text Worked","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"form","config":{"label":"First Name","size":"md","type":"text","placeholder":"Enter value","defaultValue":"","required":false,"options":[],"name":"first_name","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"form","config":{"label":"Last Name","size":"md","type":"text","placeholder":"Enter value","defaultValue":"","required":false,"options":[],"name":"last_name","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"form","config":{"label":"Phone Number","size":"md","type":"number","placeholder":"","defaultValue":"","required":false,"options":[],"name":"phone_number","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"form","config":{"label":"Whatsapp Phone Number","size":"md","type":"number","placeholder":"","defaultValue":"","required":false,"options":[],"name":"whatsapp_phone_number","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"form","config":{"label":"Email","size":"md","type":"email","placeholder":"","defaultValue":"","required":false,"options":[],"name":"email","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"form","config":{"label":"State","size":"md","type":"text","placeholder":"Enter value","defaultValue":"","required":false,"options":[],"name":"label","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"form","config":{"label":"City","size":"md","type":"text","placeholder":"Enter value","defaultValue":"","required":false,"options":[],"name":"city","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"form","config":{"label":"Address","size":"md","type":"textarea","placeholder":"","defaultValue":"","required":false,"options":[],"name":"address","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"seperator","config":{"width":"534.984px","height":"1px","marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}},{"type":"product","config":{"package_choice":"534.984px","label":"Product Placeholder","selected_package":[1,2],"marginBottom":"0px","marginTop":"0px","marginLeft":"0px","marginRight":"0px"}}]',
-            true,
-        );
-
-    @endphp --}}
 
     <main id="main" class="main">
 
@@ -620,7 +616,7 @@
                     method="POST">
                     @csrf
                     <input type="hidden" name="form_data_json" id="form_data_json"
-                        value="{{ old('form_data_json', json_encode($form?->form_data ?? [])) }}">
+                        value="{{ old('form_data_json', json_encode(isset($form) ? $form?->form_data : [])) }}">
 
                     <h5 title="Unique Form Code" class="text-center mb-3">Form Code:
                         {{ $form_code }}</h5>
@@ -630,7 +626,8 @@
                             <div class="">
                                 <input type="text" name="name"
                                     class="form-control @error('name') is-invalid @enderror" id=""
-                                    placeholder="Enter Form Name" value="{{ old('name', $form?->name ?? '') }}" required>
+                                    placeholder="Enter Form Name"
+                                    value="{{ old('name', isset($form) ? $form?->name : '') }}" required>
                                 @error('name')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -707,12 +704,12 @@
                                         <!-- Dropped elements will appear here -->
                                     </div>
                                     <div class="my-3 form-submit-btn-container"
-                                        style="text-align: {{ strtolower(old('form_button_alignment', $form?->form_button_alignment ?? 'center')) }};">
+                                        style="text-align: {{ strtolower(old('form_button_alignment', isset($form) ? $form->form_button_alignment : 'center')) }};">
                                         <button type="button" data-bs-toggle="tooltip" data-bs-placement="auto"
                                             data-bs-title="Click to edit form button"
-                                            class="{{ old('form_button_type', $form?->form_button_type ?? 'Rounded') == 'Rounded' ? 'rounded-pill' : '' }} w-50 p-2 form-submit-btn text-field-content"
-                                            style="background-color: {{ old('form_button_bg', $form?->form_button_bg ?? '#04512d') }}; color: {{ old('form_button_color', $form?->form_button_color ?? '#ffffff') }}; border:0; cursor: text;"
-                                            contenteditable="true">{{ old('form_button_text', $form?->form_button_text ?? 'Submit Order') }}</button>
+                                            class="{{ old('form_button_type', isset($form) ? $form->form_button_type : 'Rounded') == 'Rounded' ? 'rounded-pill' : '' }} w-50 p-2 form-submit-btn text-field-content"
+                                            style="background-color: {{ old('form_button_bg', isset($form) ? $form->form_button_bg : '#04512d') }}; color: {{ old('form_button_color', isset($form) ? $form->form_button_color : '#ffffff') }}; border:0; cursor: text;"
+                                            contenteditable="true">{{ old('form_button_text', isset($form) ? $form->form_button_text : 'Submit Order') }}</button>
                                     </div>
                                 </div>
 
