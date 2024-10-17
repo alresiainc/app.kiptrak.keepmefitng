@@ -64,14 +64,14 @@
         }
 
         .canvas-container {
-            background-color: {{ old('form_bg_color', $form?->form_bg_color ?? '#ffffff') }};
-            background-image: url({{ old('form_bg_url', $form?->form_bg_url ?? '') }});
+            background-color: {{ old('form_bg_color', isset($form) ? $form?->form_bg_color : '#ffffff') }};
+            background-image: url({{ old('form_bg_url', isset($form) ? $form?->form_bg_url : '') }});
             background-size: cover;
             background-repeat: no-repeat;
         }
 
         .canvas-container *:not(.element-wrapper):not(.element-wrapper *) {
-            color: {{ old('form_bg_text_color', $form?->form_bg_text_color ?? '') }};
+            color: {{ old('form_bg_text_color', isset($form) ? $form?->form_bg_text_color : '') }};
 
         }
 
@@ -225,9 +225,9 @@
 
 
         /* .text-field-content {
-                                                                                                                                                                                                                                                                                                                                                                                pointer-events: auto;
-                                                                                                                                                                                                                                                                                                                                                                                user-select: text;
-                                                                                                                                                                                                                                                                                                                                                                            } */
+                                                                                                                                                                                                                                                                                                                                                                                    pointer-events: auto;
+                                                                                                                                                                                                                                                                                                                                                                                    user-select: text;
+                                                                                                                                                                                                                                                                                                                                                                                } */
 
         .text-field-content,
         .form-submit-btn {
