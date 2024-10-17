@@ -13,51 +13,59 @@ class WordPressPluginController extends Controller
 {
     public function serveUpdate(Request $request, $plugin)
     {
-        // Secure the endpoint with an API key
-        $apiKey = $request->query('api_key');
-        if ($apiKey !== config('wordpress.plugin_api_key')) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
 
-        // Define the path to the folder containing the plugin update files
-        $folderPath = storage_path('app/wordpress-plugins/' . $plugin);
+        Log::info('Received request for plugin update', ['plugin' => $plugin]);
 
-        // Check if the folder exists
-        if (!File::exists($folderPath)) {
-            return response()->json(['message' => 'Plugin not found'], 404);
-        }
-
-        // Generate a unique temporary filename for the zip file
-        $zipFileName = storage_path('app/wordpress-plugins/' . $plugin . '_' . uniqid() . '.zip');
-
-        // Create a new zip archive
-        $zip = new ZipArchive;
-
-        if ($zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            // Get all files and directories from the folder
-            $files = File::allFiles($folderPath);
-
-            foreach ($files as $file) {
-                // Get the relative path of the file
-                $relativePath = $file->getRelativePathname();
-
-                // Skip the JSON file to avoid including it in the zip archive
-                if ($file->getFilename() === 'update.json') {
-                    continue;
-                }
-
-                // Add each file to the zip archive
-                $zip->addFile($file->getRealPath(), $relativePath);
+        try {
+            // Secure the endpoint with an API key
+            $apiKey = $request->query('api_key');
+            if ($apiKey !== config('wordpress.plugin_api_key')) {
+                return response()->json(['message' => 'Unauthorized'], 401);
             }
 
-            // Close the zip archive
-            $zip->close();
-        } else {
-            return response()->json(['message' => 'Could not create zip file'], 500);
-        }
+            // Define the path to the folder containing the plugin update files
+            $folderPath = storage_path('app/wordpress-plugins/' . $plugin);
 
-        // Serve the zip file for download and delete it after the response is sent
-        return Response::download($zipFileName)->deleteFileAfterSend(true);
+            // Check if the folder exists
+            if (!File::exists($folderPath)) {
+                return response()->json(['message' => 'Plugin not found'], 404);
+            }
+
+            // Generate a unique temporary filename for the zip file
+            $zipFileName = storage_path('app/wordpress-plugins/' . $plugin . '_' . uniqid() . '.zip');
+
+            // Create a new zip archive
+            $zip = new ZipArchive;
+
+            if ($zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+                // Get all files and directories from the folder
+                $files = File::allFiles($folderPath);
+
+                foreach ($files as $file) {
+                    // Get the relative path of the file
+                    $relativePath = $file->getRelativePathname();
+
+                    // Skip the JSON file to avoid including it in the zip archive
+                    if ($file->getFilename() === 'update.json') {
+                        continue;
+                    }
+
+                    // Add each file to the zip archive
+                    $zip->addFile($file->getRealPath(), $relativePath);
+                }
+
+                // Close the zip archive
+                $zip->close();
+            } else {
+                return response()->json(['message' => 'Could not create zip file'], 500);
+            }
+
+            // Serve the zip file for download and delete it after the response is sent
+            return Response::download($zipFileName)->deleteFileAfterSend(true);
+        } catch (Exception $e) {
+            Log::error('Error serving update for plugin: ' . $plugin . ' - ' . $e->getMessage());
+            return response()->json(['message' => 'Error serving update for plugin'], 500);
+        }
     }
 
 

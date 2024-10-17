@@ -52,10 +52,10 @@ Route::get('/wordpress/plugin-update/{plugin}/check', [WordPressPluginController
 //     return 'Migration role created successfully1!';
 // });
 
-// Route::get('migrate', function () {
-//     Artisan::call('migrate');
-//     dd("Success2");
-// });
+Route::get('migrate', function () {
+    Artisan::call('migrate');
+    dd("Success2");
+});
 
 Route::get('run', function () {
 
