@@ -15,4 +15,9 @@ yarn-error.log
 /.idea
 /.vscode
 
+# Do not ignore these directories and files
+!.gitignore
+!public/
+!storage/
+!storage/app/
 !storage/app/wordpress-plugins/
