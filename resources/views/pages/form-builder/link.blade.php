@@ -87,524 +87,558 @@
             color: #04512d !important;
         }
     </style>
+    <style>
+        .canvas-container {
+            overflow: hidden;
+            overflow-y: scroll;
+            max-height: calc(100vh - 250px);
+            position: relative;
+            margin-bottom: 30px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0px 0 30px rgba(1, 41, 112, 0.1);
+            padding: 0;
+            background-color: #ffffff;
+            border-radius: 8px;
+            /* padding-top: 26px; */
+        }
+
+        .canvas-container {
+            background-color: {{ $formSettings['form_bg_color'] ?? '#ffffff' }};
+            background-image: url({{ $formSettings['form_bg_url'] ?? '' }});
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .canvas-container *:not(.element-wrapper):not(.element-wrapper *) {
+            color: {{ $formSettings['form_bg_text_color'] ?? '' }};
+
+        }
+
+        .form-builder-sample-popover {
+            max-width: 100%;
+            width: 650px;
+        }
+
+        .form-builder-sample-popover .popover-body img,
+        .form-builder-sample-popover .popover-body video {
+            max-width: 100%;
+            width: 100%
+                /* Ensure the image fits within the popover */
+        }
+
+        .full-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            max-height: 100vh;
+        }
+
+        .trigger-fullscreen {
+            position: absolute;
+            top: 0;
+            right: 0;
+            border-left: 1px solid #dde1e5;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-top-right-radius: 10px;
+        }
+
+        .form-tab .tab-content {
+            overflow: hidden;
+            overflow-y: scroll;
+            max-height: calc(100vh - 250px);
+            position: relative;
+            margin-bottom: 30px;
+            border-top: 0;
+            border-radius: 0 5px 5px !important;
+            box-shadow: 0px 20px 20px 0px rgba(1, 41, 112, 0.1);
+            padding: 0;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 494px;
+            border-left: 1px solid #dee2e6;
+            border-right: 1px solid #dee2e6;
+        }
+
+        .form-tab .nav-tabs .nav-item.show .nav-link,
+        .form-tab .nav-tabs .nav-link.active {
+            background-color: #ffffff;
+        }
+
+        .form-tab .nav-link {
+            color: #000000;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .builder {
+            display: flex;
+            height: 100vh;
+        }
+
+        .properties {
+            padding: 10px;
+            border-right: 1px solid #ddd;
+            overflow: hidden;
+            overflow-y: scroll;
+            max-height: calc(100vh - 250px);
+        }
+
+        .canvas {
+            flex: 1;
+            background: #ffffff;
+
+            border-left: 1px solid #ddd;
+            min-height: 500px;
+            position: relative;
+
+            background: transparent;
+            font-weight: normal;
+            color: #454545;
+            margin: 0px 30px;
+        }
+
+        .element-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #ffffff;
+        }
+
+        .draggable-container {
+            border-top: 1px solid #cfd3d9;
+            border-bottom: 1px solid #cfd3d9;
+        }
+
+        .draggable {
+            padding: 5px 20px;
+            border: 0;
+            border-right: 1px solid #cfd3d9;
+            background-color: #ffffff;
+            cursor: move;
+        }
+
+        .draggable:last-child {
+            border-right: 0;
+        }
+
+        .draggable:hover {
+            background-color: #f8f9fa;
+            /* Optional: change background on hover */
+        }
+
+        .drop-container {
+            min-height: 300px;
+            background-color: inherit;
+            border: 2px dashed #ccc;
+            margin: 30px 0;
+            padding-bottom: 30px;
+        }
+
+        /* Placeholder Styles */
+        .sortable-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            opacity: 0.3;
+            height: 300px;
+        }
+
+        .properties-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            opacity: 0.3;
+            height: 300px;
+        }
 
 
-</head>
-
-<style>
-    .canvas-container {
-        overflow: hidden;
-        overflow-y: scroll;
-        max-height: calc(100vh - 250px);
-        position: relative;
-        margin-bottom: 30px;
-        border: none;
-        border-radius: 5px;
-        box-shadow: 0px 0 30px rgba(1, 41, 112, 0.1);
-        padding: 0;
-        background-color: #ffffff;
-        border-radius: 8px;
-        /* padding-top: 26px; */
-    }
-
-    .canvas-container {
-        background-color: {{ $formSettings['form_bg_color'] ?? '#ffffff' }};
-        background-image: url({{ $formSettings['form_bg_url'] ?? '' }});
-        background-size: cover;
-        background-repeat: no-repeat;
-    }
-
-    .canvas-container *:not(.element-wrapper):not(.element-wrapper *) {
-        color: {{ $formSettings['form_bg_text_color'] ?? '' }};
-
-    }
-
-    .form-builder-sample-popover {
-        max-width: 100%;
-        width: 650px;
-    }
-
-    .form-builder-sample-popover .popover-body img,
-    .form-builder-sample-popover .popover-body video {
-        max-width: 100%;
-        width: 100%
-            /* Ensure the image fits within the popover */
-    }
-
-    .full-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 9999;
-        max-height: 100vh;
-    }
-
-    .trigger-fullscreen {
-        position: absolute;
-        top: 0;
-        right: 0;
-        border-left: 1px solid #dde1e5;
-        padding: 8px 16px;
-        cursor: pointer;
-        border-top-right-radius: 10px;
-    }
-
-    .form-tab .tab-content {
-        overflow: hidden;
-        overflow-y: scroll;
-        max-height: calc(100vh - 250px);
-        position: relative;
-        margin-bottom: 30px;
-        border-top: 0;
-        border-radius: 0 5px 5px !important;
-        box-shadow: 0px 20px 20px 0px rgba(1, 41, 112, 0.1);
-        padding: 0;
-        background-color: #ffffff;
-        border-radius: 8px;
-        padding: 15px;
-        min-height: 494px;
-        border-left: 1px solid #dee2e6;
-        border-right: 1px solid #dee2e6;
-    }
-
-    .form-tab .nav-tabs .nav-item.show .nav-link,
-    .form-tab .nav-tabs .nav-link.active {
-        background-color: #ffffff;
-    }
-
-    .form-tab .nav-link {
-        color: #000000;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-
-    .nav-tabs {
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .builder {
-        display: flex;
-        height: 100vh;
-    }
-
-    .properties {
-        padding: 10px;
-        border-right: 1px solid #ddd;
-        overflow: hidden;
-        overflow-y: scroll;
-        max-height: calc(100vh - 250px);
-    }
-
-    .canvas {
-        flex: 1;
-        background: #ffffff;
-
-        border-left: 1px solid #ddd;
-        min-height: 500px;
-        position: relative;
-
-        background: transparent;
-        font-weight: normal;
-        color: #454545;
-        margin: 0px 30px;
-    }
-
-    .element-wrapper {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-        background: #ffffff;
-    }
-
-    .draggable-container {
-        border-top: 1px solid #cfd3d9;
-        border-bottom: 1px solid #cfd3d9;
-    }
-
-    .draggable {
-        padding: 5px 20px;
-        border: 0;
-        border-right: 1px solid #cfd3d9;
-        background-color: #ffffff;
-        cursor: move;
-    }
-
-    .draggable:last-child {
-        border-right: 0;
-    }
-
-    .draggable:hover {
-        background-color: #f8f9fa;
-        /* Optional: change background on hover */
-    }
-
-    .drop-container {
-        min-height: 300px;
-        background-color: inherit;
-        border: 2px dashed #ccc;
-        margin: 30px 0;
-        padding-bottom: 30px;
-    }
-
-    /* Placeholder Styles */
-    .sortable-placeholder {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        opacity: 0.3;
-        height: 300px;
-    }
-
-    .properties-placeholder {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        opacity: 0.3;
-        height: 300px;
-    }
-
-
-    /* .text-field-content {
+        /* .text-field-content {
                                                                                                                                                                                                                                                                                                         pointer-events: auto;
                                                                                                                                                                                                                                                                                                         user-select: text;
                                                                                                                                                                                                                                                                                                     } */
 
-    .text-field-content,
-    .form-submit-btn {
-        pointer-events: auto;
-        cursor: text;
-        user-select: text;
-    }
+        .text-field-content,
+        .form-submit-btn {
+            pointer-events: auto;
+            cursor: text;
+            user-select: text;
+        }
 
-    .text-field-content:focus-visible {
-        outline: none;
-        border: 0
-    }
+        .text-field-content:focus-visible {
+            outline: none;
+            border: 0
+        }
 
-    .canvas-element {
-        padding: 8px;
-        align-items: center;
-        position: relative;
-    }
+        .canvas-element {
+            padding: 8px;
+            align-items: center;
+            position: relative;
+        }
 
-    .canvas-element .item-move i {
-        cursor: move;
-    }
+        .canvas-element .item-move i {
+            cursor: move;
+        }
 
-    .canvas-element .item-remove i {
-        cursor: pointer;
-    }
+        .canvas-element .item-remove i {
+            cursor: pointer;
+        }
 
-    .canvas-element .item-remove {
-        display: none;
-        position: absolute;
-        right: -15px;
-        top: calc(50% - 12px);
-        background-color: red;
-        border-top-right-radius: 5px;
-        border-bottom-right-radius: 5px;
-        color: #fff;
-        justify-content: center;
-        align-items: center;
-        padding: 4px 2px;
-        font-size: 11px;
-        font-weight: 600;
+        .canvas-element .item-remove {
+            display: none;
+            position: absolute;
+            right: -15px;
+            top: calc(50% - 12px);
+            background-color: red;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            color: #fff;
+            justify-content: center;
+            align-items: center;
+            padding: 4px 2px;
+            font-size: 11px;
+            font-weight: 600;
 
-    }
+        }
 
-    .canvas-element .item-move {
-        display: none;
-        position: absolute;
-        left: -15px;
-        top: calc(50% - 12px);
-        background-color: #ccc;
-        border-top-left-radius: 5px;
-        border-bottom-left-radius: 5px;
-        /* color: #fff; */
-        justify-content: center;
-        align-items: center;
-        padding: 4px 2px;
-        font-size: 11px;
-        font-weight: 600;
-    }
+        .canvas-element .item-move {
+            display: none;
+            position: absolute;
+            left: -15px;
+            top: calc(50% - 12px);
+            background-color: #ccc;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            /* color: #fff; */
+            justify-content: center;
+            align-items: center;
+            padding: 4px 2px;
+            font-size: 11px;
+            font-weight: 600;
+        }
 
-    .canvas-element:hover {
-        border: 1px dashed #ccc;
-        border-radius: 3px;
-    }
+        .canvas-element:hover {
+            border: 1px dashed #ccc;
+            border-radius: 3px;
+        }
 
-    .canvas-element:hover .item-move,
-    .canvas-element:hover .item-remove {
-        display: flex;
-    }
+        .canvas-element:hover .item-move,
+        .canvas-element:hover .item-remove {
+            display: flex;
+        }
 
-    .canvas-element-seperator {
-        border-top: 1px solid #333;
-        margin: 10px 0;
-        width: 100%;
-        height: 1px;
-    }
+        .canvas-element-seperator {
+            border-top: 1px solid #333;
+            margin: 10px 0;
+            width: 100%;
+            height: 1px;
+        }
 
-    .canvas-element-submit {
-        padding: 10px 20px;
-        background-color: #04512d;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
+        .canvas-element-submit {
+            padding: 10px 20px;
+            background-color: #04512d;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
 
-    .accordion-item {
-        border: 0;
-    }
+        .accordion-item {
+            border: 0;
+        }
 
-    .accordion-body {
-        padding: 0;
-    }
+        .accordion-body {
+            padding: 0;
+        }
 
-    .accordion-item .tab-item-header {
-        font-size: 14px !important;
-        text-transform: capitalize;
-        font-weight: 600;
-        color: #000000;
-        margin-top: 5px;
-        margin-bottom: 5px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 2px solid #dee2e6;
-        padding: 5px 0;
-    }
+        .accordion-item .tab-item-header {
+            font-size: 14px !important;
+            text-transform: capitalize;
+            font-weight: 600;
+            color: #000000;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #dee2e6;
+            padding: 5px 0;
+        }
 
-    .accordion-item .tab-item-header i {
-        transform: rotate(45deg);
-    }
+        .accordion-item .tab-item-header i {
+            transform: rotate(45deg);
+        }
 
-    .accordion-item .tab-item-header.collapsed i {
-        transform: rotate(0deg);
-    }
+        .accordion-item .tab-item-header.collapsed i {
+            transform: rotate(0deg);
+        }
 
-    .form-tab label {
-        font-size: 12px !important;
-        text-transform: capitalize;
-        font-weight: 400;
-        color: #000000;
-        margin-top: 5px;
-        margin-bottom: 5px;
-    }
-
-
-    .form-tab h6 {
-        font-size: 14px !important;
-        text-transform: uppercase;
-        margin-top: 10px;
-        color: #000000;
-        font-weight: 600;
-        border-bottom: 1px solid #a0aec9;
-    }
-
-    .form-tab .input-group span {
-        background: #f6f6f6;
-        font-size: 15px;
-        padding: 4px;
-        border: 1px solid #dedede;
-    }
-
-    /* General Styling */
-    .product-item {
-        border: 1px solid #ddd;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        background-color: #ffffff;
-    }
-
-    .product-item:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        background-color: #f9f9f9;
-    }
-
-    /* Image Styling */
-    .product-item .product-img-container {
-        display: flex;
-        /* flex: 1 1 150px; */
-        width: 100px;
-        height: 100px;
-        overflow: hidden;
-    }
-
-    .product-item .product-img {
-        object-fit: cover;
-        max-width: 100%;
-        max-height: 100%;
-        border-radius: 8px;
-    }
-
-    /* Product Info Styling */
-    .product-item .product-info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
-        flex: 1 1;
-    }
-
-    .product-item .product-title {
-        font-size: 15px;
-        color: #333;
-    }
-
-    /* Select Box */
-    .product-item .select_product_qty {
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 5px 10px;
-        font-size: 0.9rem;
-        margin-top: 5px;
-        max-width: 180px;
-        transition: border-color 0.2s;
-    }
-
-    .product-item .select_product_qty:focus {
-        border-color: #04512d;
-        outline: none;
-    }
-
-    /* Input Radio Styling */
-    .product-item .product-package {
-        margin-top: 8px;
-        accent-color: #04512d;
-    }
-
-    /* Container Styling */
-    .product-item .color-options,
-    .size-options {
-        gap: 10px;
-    }
-
-    /* Hidden Radio Inputs */
-    .product-item .color-radio,
-    .product-item .size-radio {
-        display: none;
-    }
-
-    /* Color Circle */
-    .product-item .color-circle {
-        border-radius: 50%;
-        border: 2px solid transparent;
-        cursor: pointer;
-        transition: border-color 0.3s;
-        font-weight: 600;
-    }
+        .form-tab label {
+            font-size: 12px !important;
+            text-transform: capitalize;
+            font-weight: 400;
+            color: #000000;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
 
 
+        .form-tab h6 {
+            font-size: 14px !important;
+            text-transform: uppercase;
+            margin-top: 10px;
+            color: #000000;
+            font-weight: 600;
+            border-bottom: 1px solid #a0aec9;
+        }
 
-    /* Checked State for Color Circles */
-    .color-radio:checked+.color-circle {
-        width: 18px;
-        height: 18px;
-    }
+        .form-tab .input-group span {
+            background: #f6f6f6;
+            font-size: 15px;
+            padding: 4px;
+            border: 1px solid #dedede;
+        }
 
-    .no-product i {
-        font-size: 42px;
-        border: 1px solid #dee1e6;
-        padding: 6px 20px;
-    }
+        /* General Styling */
+        .product-item {
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background-color: #ffffff;
+        }
 
-    .no-product {
-        font-size: 16px;
-        opacity: 0.4;
-        font-weight: 900;
-        display: flex;
-        align-items: center;
-        gap: 11px;
-        border: 1px solid #dee1e6;
-        padding: 7px;
-    }
+        .product-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9;
+        }
 
-    /* Size Box */
-    .product-item .size-box {
-        display: flex;
-        border: 1px solid;
-        align-items: center;
-        justify-content: center;
-        padding: 2px 10px;
-        font-weight: 600 !important;
-        font-size: 10px !important;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: border-color 0.3s, background-color 0.3s;
-        border-color: #a1aec9;
-        background-color: #ffffff;
-    }
+        /* Image Styling */
+        .product-item .product-img-container {
+            display: flex;
+            /* flex: 1 1 150px; */
+            width: 100px;
+            height: 100px;
+            overflow: hidden;
+        }
 
-    .product-item .size-box:hover {
-        border-color: #aaa;
-    }
+        .product-item .product-img {
+            object-fit: cover;
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+        }
 
-    /* Checked State for Size Boxes */
-    .size-radio:checked+.size-box {
-        border-color: #04512d;
-        background-color: #04512d;
-        color: white;
-    }
+        /* Product Info Styling */
+        .product-item .product-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+            flex: 1 1;
+        }
 
-    .product_field {
-        border: 2px solid #d2d2d2;
-        position: relative;
-        transition: all 0.3s ease;
-    }
+        .product-item .product-title {
+            font-size: 15px;
+            color: #333;
+        }
 
-    .product_field::after {
-        content: "✓ Selected ";
-        position: absolute;
-        top: -12px;
-        right: 12px;
-        border-radius: 15px;
-        padding: 2px 15px;
-        color: white;
-        background-color: #04512d;
-        font-size: 12px;
-        font-weight: 600;
-        display: none
-    }
+        /* Select Box */
+        .product-item .select_product_qty {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            max-width: 180px;
+            transition: border-color 0.2s;
+        }
 
-    /* Checked State for Size Boxes */
-    .product-checker {
-        display: none;
-    }
+        .product-item .select_product_qty:focus {
+            border-color: #04512d;
+            outline: none;
+        }
 
-    .product-checker:checked+.product_field {
-        border-color: #04512d;
-    }
+        /* Input Radio Styling */
+        .product-item .product-package {
+            margin-top: 8px;
+            accent-color: #04512d;
+        }
 
-    .product-checker:checked+.product_field::after {
-        display: block;
-    }
+        /* Container Styling */
+        .product-item .color-options,
+        .size-options {
+            gap: 10px;
+        }
 
+        /* Hidden Radio Inputs */
+        .product-item .color-radio,
+        .product-item .size-radio {
+            display: none;
+        }
 
-    .product-qty input,
-    .product-qty button {
-        width: 25px !important;
-        height: 25px !important;
-        padding: 2px !important;
-        font-size: 15px;
-        font-weight: 400;
-        flex: none !important;
-    }
+        /* Color Circle */
+        .product-item .color-circle {
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            font-weight: 600;
+        }
 
 
 
-    .product-checker:checked+.product_field .product-qty button {
-        background-color: #04512d !important;
-        color: white;
-        border-color: #04512d;
-    }
-</style>
+        /* Checked State for Color Circles */
+        .color-radio:checked+.color-circle {
+            width: 18px;
+            height: 18px;
+        }
+
+        .no-product i {
+            font-size: 42px;
+            border: 1px solid #dee1e6;
+            padding: 6px 20px;
+        }
+
+        .no-product {
+            font-size: 16px;
+            opacity: 0.4;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            border: 1px solid #dee1e6;
+            padding: 7px;
+        }
+
+        /* Size Box */
+        .product-item .size-box {
+            display: flex;
+            border: 1px solid;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 10px;
+            font-weight: 600 !important;
+            font-size: 10px !important;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: border-color 0.3s, background-color 0.3s;
+            border-color: #a1aec9;
+            background-color: #ffffff;
+        }
+
+        .product-item .size-box:hover {
+            border-color: #aaa;
+        }
+
+        /* Checked State for Size Boxes */
+        .size-radio:checked+.size-box {
+            border-color: #04512d;
+            background-color: #04512d;
+            color: white;
+        }
+
+        .product_field {
+            border: 2px solid #d2d2d2;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .product_field::after {
+            content: "✓ Selected ";
+            position: absolute;
+            top: -12px;
+            right: 12px;
+            border-radius: 15px;
+            padding: 2px 15px;
+            color: white;
+            background-color: #04512d;
+            font-size: 12px;
+            font-weight: 600;
+            display: none
+        }
+
+        /* Checked State for Size Boxes */
+        .product-checker {
+            display: none;
+        }
+
+        .product-checker:checked+.product_field {
+            border-color: #04512d;
+        }
+
+        .product-checker:checked+.product_field::after {
+            display: block;
+        }
+
+
+        .product-qty input,
+        .product-qty button {
+            width: 25px !important;
+            height: 25px !important;
+            padding: 2px !important;
+            font-size: 15px;
+            font-weight: 400;
+            flex: none !important;
+        }
+
+
+
+        .product-checker:checked+.product_field .product-qty button {
+            background-color: #04512d !important;
+            color: white;
+            border-color: #04512d;
+        }
+    </style>
+
+    <style>
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loader {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
 
 <body class="">
+
+    <div id="loader-overlay" style="display: none;">
+        <div class="loader text-center">
+            <div class="spinner-border text-primary" role="status" id="spinner-icon" style="margin-bottom: 15px;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p id="funny-message">Hang tight, magic is happening...</p>
+            <p>Progress: <span id="progress-percentage">0%</span></p>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                    style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- will be shown in singlelink-->
     <header id="header" class="header fixed-top d-flex align-items-center d-none">
@@ -631,7 +665,16 @@
             </div>
         @endif
 
+        <input type="hidden" name="redirect_url" class="redirect_url" value="{{ $redirect_url ?? '' }}">
+        <input type="hidden" name="formholder_unique_key" class="formholder_unique_key"
+            value="{{ $formHolder->unique_key }}">
+        <input type="hidden" name="thankyou_unique_key" class="thankyou_unique_key"
+            value="{{ isset($formHolder->thankyou_id) ? $formHolder->thankyou->unique_key : '' }}">
+
+
+
         <!-- Monitoring diferent stages in the form -->
+
         <input type="hidden" name="main_stage" class="main_stage" value="">
         <input type="hidden" name="orderbump_stage" class="orderbump_stage" value="">
         <input type="hidden" name="upsell_stage" class="upsell_stage" value="">
@@ -641,14 +684,13 @@
         <!-- Monitoring diferent stages in the form -->
 
         <!-- CHECKOUT VIEW Main + orderbump + upsell -->
-        @if ($stage == '')
-
+        @if (!isset($stage))
             <div class="row view" id="main-section" style="display: block;">
                 <div class="col-md-12">
 
                     <article class="card">
                         <div class="card-body">
-                            <form action="">@csrf
+                            <form action="" id="form">@csrf
 
                                 <div class="row">
 
@@ -657,23 +699,21 @@
                                             $form = $data['config'];
                                             $config_type = $data['type'];
                                         @endphp
-                                        @if ($config_type == 'seperator')
-                                        @endif
+
                                         <div class="{{ $form['column_width'] ?? 'col-sm-12' }} mb-3"
                                             style="margin-top: {{ $form['marginTop'] ?? '0' }};
                                                 margin-bottom: {{ $form['marginBottom'] ?? '0' }};
                                                 margin-left: {{ $form['marginLeft'] ?? '0' }};
                                                 margin-right: {{ $form['marginRight'] ?? '0' }};
-                                                text-align: {{ $form['textAlign'] ?? 'inherit' }};"
-                                        >
+                                                text-align: {{ $form['textAlign'] ?? 'inherit' }};">
                                             @if ($config_type == 'form' && !in_array($form['type'], ['select', 'textarea', 'radio', 'checkbox']))
                                                 <div class="contact-parent">
                                                     <label class="form-label">{{ $form['label'] }}</label>
 
-                                                    <input type="{{ $form['type'] }}" data-name="{{ $form['name'] }}"
-                                                        name="{{ $form['name'] }}"
+                                                    <input type="{{ $form['type'] }}"
+                                                        data-name="{{ $form['name'] }}" name="{{ $form['name'] }}"
                                                         value="{{ old($form['name'], $form['default_value'] ?? '') }}"
-                                                        class="contact-input form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror"
+                                                        class="form-field contact-input form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror"
                                                         placeholder="{{ $form['placeholder'] }}"
                                                         @if ($form['required']) required @endif>
 
@@ -695,11 +735,12 @@
                                                         @if (isset($form['options']) && count($form['options']) > 0)
                                                             @foreach ($form['options'] as $option)
                                                                 <div class="form-check">
-                                                                    <input class="form-check-input"
+                                                                    <input class="form-check-input form-field"
                                                                         type="{{ $form['type'] }}"
                                                                         @if ($form['type'] == 'checkbox') name="{{ $form['name'] }}[]"
                                                                         @else
                                                                         name="{{ $form['name'] }}" @endif
+                                                                        @if ($form['required']) required @endif
                                                                         id="{{ $form['name'] }}_{{ $loop->index }}"
                                                                         value="{{ $option }}">
                                                                     <label class="form-check-label"
@@ -721,7 +762,7 @@
                                                     <select data-name="{{ $form['name'] }}"
                                                         name="{{ $form['name'] }}"
                                                         value="{{ old($form['name'], $form['default_value'] ?? '') }}"
-                                                        class="contact-input custom-select form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror"
+                                                        class="form-field contact-input custom-select form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror"
                                                         placeholder="{{ $form['placeholder'] }}"
                                                         @if ($form['required']) required @endif>
                                                         @if (isset($form['options']) && count($form['options']) > 0)
@@ -741,7 +782,7 @@
                                                 <div class="form-group w-100">
                                                     <label class="form-label">{{ $form['label'] }}</label>
                                                     <textarea data-name="{{ $form['name'] }}" name="{{ $form['name'] }}"
-                                                        class="contact-input custom-select form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror"
+                                                        class="form-field contact-input custom-select form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror"
                                                         placeholder="{{ $form['placeholder'] }}" @if ($form['required']) required @endif>{{ old($form['name'], $form['default_value'] ?? '') }}</textarea>
                                                 </div>
                                             @endif
@@ -803,12 +844,13 @@
                                                         @php
                                                             $is_combo = $item['combo_product_ids'] ? true : false;
                                                         @endphp
-                                                        <div class="{{ $form['column_width'] ?? 'col-sm-12' }}">
+                                                        <div
+                                                            class="{{ $form['column_width'] ?? 'col-sm-12' }} product_package_item">
                                                             <input
                                                                 type="{{ $form['package_choice'] == 'package_single' ? 'radio' : 'checkbox' }}"
-                                                                name="product_packagesss[]"
+                                                                name="product_packages[]"
                                                                 id="package{{ $key }}"
-                                                                class="me-3 product-packages product-checker"
+                                                                class="me-3 product-package product-checker"
                                                                 value="{{ $item['id'] }}-{{ $item['price'] }}" />
                                                             <label for="package{{ $key }}"
                                                                 class="product_field form-label me-3 product-item p-3 rounded shadow-sm w-100"
@@ -849,7 +891,7 @@
                                                                                         <i class="bi bi-dash"></i>
                                                                                     </button>
                                                                                     <input
-                                                                                        class="form-control border text-center select_product_qtys"
+                                                                                        class="form-control border text-center select_product_qty"
                                                                                         placeholder="" value="1"
                                                                                         min="1"
                                                                                         name="select_product_qty[{{ $item['id'] }}]"
@@ -921,17 +963,10 @@
                                         @endif
                                     @endforeach
 
-
-
-
-
-
-
-
                                     <div class="my-3 form-submit-btn-container"
                                         style="text-align: {{ strtolower($settingsData['form_button_alignment'] ?? 'center') }};">
                                         <button type="button"
-                                            class="{{ $settingsData['form_button_type'] == 'Rounded' ? 'rounded-pill' : '' }} w-50 p-2 form-submit-btn text-field-content"
+                                            class="{{ $settingsData['form_button_type'] == 'Rounded' ? 'rounded-pill' : '' }} w-50 p-2 form-submit-btn main_package_submit_btn"
                                             style="background-color: {{ $settingsData['form_button_bg'] ?? '#04512d' }}; color: {{ $settingsData['form_button_color'] ?? '#ffffff' }}; border:0; : text;">{{ $settingsData['form_button_text'] ?? 'Submit Order' }}</button>
                                     </div>
 
@@ -944,7 +979,6 @@
                 </div>
 
             </div>
-
         @endif
 
         <!---orderbump view--->
@@ -1422,6 +1456,7 @@
     <!-- upsell->Template Main JS File -->
     <script src="{{ asset('/customerform/assets/js/main.js?v=42') }}"></script>
     <script src="{{ asset('/customerform/assets/js/navigation.js?v=4') }}"></script>
+    <script src="{{ asset('assets/js/jquery.validate.min.js') }}"></script>
 
     <!-- submit main form -->
     <script>
@@ -1567,6 +1602,8 @@
                 //cart-abandon-delivery-address
             })
 
+
+
             //cart-abandon-package
             var packages = [];
             $(".product-package").click(function() {
@@ -1574,14 +1611,10 @@
                 var unique_key = $(".formholder_unique_key").val();
                 var product_package = $(this).val();
                 var package_field_type = $(this).attr('type');
-
-                var selected_qty = $(this).closest(".product_package_label").find("select[name='select_product_qty']")
-                    .val(); //notused
-                //console.log(selected_qty)
+                var selected_qty = $(this).closest(".product_package_item").find(".select_product_qty")
+                    .val();
                 product_package = $(this).val(); //1-1000-10
 
-
-                //var product_package = $(".product-package").val();
 
                 if (package_field_type == 'radio') {
                     if (packages.length > 0) {
@@ -1589,172 +1622,284 @@
                     }
                     packages.push(product_package) //store in array
                     //check for duplicates
-                    var packages_copy = unique(packages)
-                    //console.log(packages_copy)
+                    var packages_copy = unique(packages);
                 } else {
-                    packages.push(product_package) //store in array
-                    //check for duplicates
-                    var packages_copy = unique(packages)
-                    //console.log(packages_copy)
-                }
-
-                var last_Val = $('input.contact-input:last').val();
-                var last_inputName = $('input.contact-input:last').attr('data-name');
-
-                if (last_Val == '' || last_Val == null) {
-                    var msg = last_inputName + ' ' + 'must be filled';
-                    alert(msg)
-                } else {
-                    var inputVal = last_Val + '|' + last_inputName;
-                    $.ajax({
-                        type: 'get',
-                        url: '/cart-abandon-package',
-                        data: {
-                            unique_key: unique_key,
-                            cartAbandoned_id: cartAbandoned_id,
-                            product_package: packages_copy,
-                            inputVal: inputVal
-                        },
-                        success: function(resp) {
-                            //console.log(resp)
-
-                        },
-                        error: function() {
-                            alert("Error");
+                    packages = [];
+                    $('.product-container .product-package').each(function() {
+                        var type = $(this).attr('type');
+                        var value = $(this).val();
+                        if ($(this).is(':checked')) {
+                            packages.push(value) //store in array
                         }
-                    });
+                    })
+                    //check for duplicates
+                    var packages_copy = unique(packages);
                 }
+
+
+
+                // var last_Val = $('input.contact-input:last').val();
+                // var last_inputName = $('input.contact-input:last').attr('data-name');
+
+                // if (last_Val == '' || last_Val == null) {
+                //     var msg = last_inputName + ' ' + 'must be filled';
+                //     alert(msg)
+                // } else {
+                //     var inputVal = last_Val + '|' + last_inputName;
+                //     $.ajax({
+                //         type: 'get',
+                //         url: '/cart-abandon-package',
+                //         data: {
+                //             unique_key: unique_key,
+                //             cartAbandoned_id: cartAbandoned_id,
+                //             product_package: packages_copy,
+                //             inputVal: inputVal
+                //         },
+                //         success: function(resp) {
+                //             //console.log(resp)
+
+                //         },
+                //         error: function() {
+                //             alert("Error");
+                //         }
+                //     });
+                // }
 
             })
 
+            // Get all fields' values based on their type in the form
+            function getFormValues() {
+                const values = {};
+
+                // Get all input, select, and textarea elements within the form
+                $("#form").find(".form-field").each(function() {
+                    const type = $(this).attr("type");
+                    const name = $(this).attr("name");
+                    let value;
+
+                    // Handle different types of fields
+                    switch (type) {
+                        case "checkbox":
+                            // Get the checked value if it's a checkbox
+                            value = $(this).is(":checked") ? $(this).val() : null;
+                            break;
+                        case "radio":
+                            // Get the selected radio button value by its name
+                            if ($(this).is(":checked")) {
+                                value = $(this).val();
+                            }
+                            break;
+                        case "file":
+                            // Get file input value (file names)
+                            value = $(this).prop("files");
+                            break;
+                        default:
+                            // Get the value for text, email, password, and other input types
+                            value = $(this).val();
+                    }
+
+                    // For radio buttons, we only store the value once (for the checked one)
+                    if (type === "radio") {
+                        if (!(name in values) && value) {
+                            values[name] = value;
+                        }
+                    } else if (name) {
+                        values[name] = value;
+                    }
+                });
+
+                return values;
+            }
+
+
+
+
             //main package
+
+            $("#form").validate({
+                errorClass: "form-error",
+                ignore: "", // Ensure that dynamically added fields are not ignored
+                errorPlacement: function(error, element) {
+                    // Only place error messages for elements with .form-field class
+                    if (element.hasClass("form-field")) {
+                        error.insertAfter(element);
+                    }
+                },
+                highlight: function(element) {
+                    // Highlight only elements with .form-field class
+                    if ($(element).hasClass("form-field")) {
+                        $(element).addClass('is-invalid'); // Bootstrap's error class
+                    }
+                },
+                unhighlight: function(element) {
+                    // Remove highlight only for elements with .form-field class
+                    if ($(element).hasClass("form-field")) {
+                        $(element).removeClass('is-invalid'); // Remove Bootstrap's error class
+                    }
+                },
+                rules: {
+                    // This applies validation rules only to elements with the .form-field class
+                    'form-field': {
+                        required: true // Add more validation rules if needed
+                    }
+                }
+            });
+
+
+
+            const messages = [
+                "Hold on, the hamsters are spinning the wheels...",
+                "Just a moment, fueling up the rocket...",
+                "Good things take time... almost there!",
+                "Checking internet cables... all clear!",
+                "Loading... did you know bananas are berries?",
+                "Hang tight, we’re catching a shooting star!",
+                "Unicorns are processing your request. 🦄",
+                "Grabbing coffee for the servers... ☕"
+            ];
+
+            function getRandomMessage() {
+                return messages[Math.floor(Math.random() * messages.length)];
+            }
+
+            // Function to start the loader
+            function startLoader() {
+                $("#loader-overlay").fadeIn();
+                const estimatedTime = Math.floor(Math.random() * (15 - 5 + 1)) + 5; // Random time between 5 and 15 seconds
+
+                const incrementTime = estimatedTime / 100; // Time to increment per percentage
+                let progress = 0;
+                const maxProgress = Math.floor(Math.random() * (99 - 90 + 1)) + 90;
+
+                const interval = setInterval(() => {
+                    if (progress < maxProgress) {
+                        progress++;
+                        updateProgressBar(progress);
+                    } else {
+                        clearInterval(interval); // Stop the interval at 97%
+                    }
+                }, incrementTime * 1000);
+
+                // Update messages every few seconds
+                const messageInterval = setInterval(() => {
+                    $("#funny-message").text(getRandomMessage());
+                }, 3000);
+
+                // Stop the message interval when the loader is hidden
+                $("#loader-overlay").on('hide', function() {
+                    clearInterval(messageInterval);
+                });
+
+                return interval; // Return interval so it can be cleared later
+            }
+
+            // Function to update the progress bar
+            function updateProgressBar(percentage) {
+                $("#progress-percentage").text(percentage + '%');
+                $(".progress-bar").css('width', percentage + '%').attr('aria-valuenow', percentage);
+            }
+
+            // Function to finish loading (sets progress to 100%)
+            function finishLoader() {
+                updateProgressBar(100);
+                setTimeout(() => {
+                    $("#loader-overlay").fadeOut();
+                }, 500);
+            }
+
             $('.main_package_submit_btn').click(function(e) {
                 e.preventDefault();
 
-                var unique_key = $(".formholder_unique_key").val();
+                const submitButton = $(this)
 
-                var firstname = $(".first-name").val();
-                var lastname = $(".last-name").val();
-                var phone_number = $(".phone-number").val();
-                var whatsapp_phone_number = $(".whatsapp-phone-number").val();
-                var active_email = $(".active-email").val();
-                var state = $(".state").val();
-                var city = $(".city").val();
-                var address = $(".address").val();
-                var delivery_duration = $(".delivery_duration").val();
-                var product_package = $(".product-package").val();
-
-                if (firstname == "" || firstname == null) {
-                    alert("First name must be filled");
-                    return false;
-                }
-                if (lastname == "" || lastname == null) {
-                    alert("Last name must be filled");
-                    return false;
-                }
-                if (phone_number == "" || phone_number == null) {
-                    alert("Phone number must be filled");
-                    return false;
-                }
-                if (whatsapp_phone_number == "" || whatsapp_phone_number == null) {
-                    alert("Phone number must be filled");
-                    return false;
-                }
-                // if (active_email == "" || active_email == null) {
-                //     alert("Email address must be filled");
-                //     return false;
-                // }
-                if (state == "" || state == null) {
-                    alert("Your State must be filled");
-                    return false;
-                }
-                if (city == "" || city == null) {
-                    alert("City or Town must be filled");
-                    return false;
-                }
-                if (address == "" || address == null) {
-                    alert("Your Address must be selected");
-                    return false;
-                }
-                if (product_package == "" || product_package == null) {
-                    alert("Your Product Package must be filled");
-                    return false;
-                }
 
                 var unique_key = $(".formholder_unique_key").val();
                 var cartAbandoned_id = $('.cartAbandoned_id').val();
                 var product_packages = $('input[name^="product_packages[]"]').map(function() {
                     if ($(this).is(':checked')) {
-                        var selected_qty = $(this).closest(".product_package_label").find(
-                            "select[name='select_product_qty']").val();
-                        //console.log(selected_qty)
-                        return $(this).val() + '-' + selected_qty; //1-1000-2
+                        var selected_qty = $(this).closest(".product_package_item").find(".select_product_qty")
+                            .val();
+                        return $(this).val() + '-' + selected_qty;
                     }
                 }).get();
 
-                var has_orderbump = $(".has_orderbump").val();
-                var has_upsell = $(".has_upsell").val();
+                const isValid = $("#form").validate().form();
 
-                $(this).text('Please wait...')
-                $(this).prop('disabled', true);
+                if (isValid) {
+                    const formValues = getFormValues();
+                    var has_orderbump = $(".has_orderbump").val();
+                    var has_upsell = $(".has_upsell").val();
 
-                //ajax start
-                $.ajax({
-                    type: 'get',
-                    url: '/ajax-save-new-form-link',
-                    data: {
+                    submitButton.text('Please wait...');
+                    submitButton.prop('disabled', true);
+
+                    const data = {
                         unique_key: unique_key,
                         cartAbandoned_id: cartAbandoned_id,
-                        firstname: firstname,
-                        lastname: lastname,
-                        phone_number: phone_number,
-                        whatsapp_phone_number: whatsapp_phone_number,
-                        active_email: active_email,
-                        state: state,
-                        city: city,
-                        address: address,
-                        delivery_duration: delivery_duration,
                         product_packages: product_packages,
-                    },
-                    success: function(resp) {
-                        //console.log(resp)
-                        $(".main_stage").val('done')
-                        localStorage.setItem('main_stage', 'done');
-                        $('.current_order_id').val(resp.data.order_id);
-                        if (resp.data.has_orderbump) {
-                            setView('orderbump-section')
+                        form_fields: formValues
+                    };
 
-                        } else if (resp.data.has_upsell) {
-                            setView('upsell-section')
+                    // Show the loader and start simulating the progress
+                    const interval = startLoader();
 
-                        } else {
-                            var current_order_id = $('.current_order_id').val();
-                            var thankyou_unique_key = $(".thankyou_unique_key").val();
-
-                            if (thankyou_unique_key == '') {
-                                window.parent.location.href = "/new-form-link/" + unique_key + "/" +
-                                    current_order_id + "/thankYou";
-                                $('.current_order_id').val('');
-                                setView('thankyou-section')
+                    $.ajax({
+                        type: 'get',
+                        url: '/ajax-save-new-form-link',
+                        data: data,
+                        success: function(resp) {
+                            clearInterval(interval); // Stop the interval when request is done
+                            finishLoader(); // Fill the bar to 100%
+                            $(".main_stage").val('done');
+                            localStorage.setItem('main_stage', 'done');
+                            $('.current_order_id').val(resp.data.order_id);
+                            if (resp.data.has_orderbump) {
+                                setView('orderbump-section');
+                            } else if (resp.data.has_upsell) {
+                                setView('upsell-section');
                             } else {
-                                $('.current_order_id').val('');
-                                //mutate browser url & redirect
-                                window.parent.location.href = "/view-thankyou-templates/" +
-                                    thankyou_unique_key + "/" + current_order_id
+                                var current_order_id = $('.current_order_id').val();
+                                var thankyou_unique_key = $(".thankyou_unique_key").val();
+                                var redirect_url = $('.redirect_url').val();
+
+                                if (redirect_url != '') {
+                                    window.parent.location.href = redirect_url;
+                                } else {
+                                    if (thankyou_unique_key == '') {
+                                        window.parent.location.href = "/new-form-link/" + unique_key + "/" +
+                                            current_order_id + "/thankYou";
+                                        $('.current_order_id').val('');
+                                        setView('thankyou-section');
+                                    } else {
+                                        $('.current_order_id').val('');
+                                        window.parent.location.href = "/view-thankyou-templates/" +
+                                            thankyou_unique_key + "/" + current_order_id;
+                                    }
+                                }
                             }
+                        },
+                        error: function(e) {
+                            console.log(e);
 
-
+                            submitButton.text(
+                                "{{ $settingsData['form_button_text'] ?? 'Submit Order' }}");
+                            submitButton.prop('disabled', false);
+                            clearInterval(interval); // Stop the interval when error occurs
+                            alert("Error");
+                            $("#loader-overlay").fadeOut();
                         }
+                    });
 
-                    },
-                    error: function() {
-                        alert("Error");
-                    }
-                });
+                } else {
+                    console.log("Form is invalid. Please fix the errors.");
+                }
+            });
 
-                //ajax end
 
-            })
+
+
+
+
 
             //orderbump_stage
             $('.orderbump_submit_btn').click(function(e) {
@@ -1786,16 +1931,21 @@
                             } else {
                                 var current_order_id = $('.current_order_id').val();
                                 var thankyou_unique_key = $(".thankyou_unique_key").val();
+                                var redirect_url = $('.redirect_url').val();
 
-                                if (thankyou_unique_key == '') {
-                                    window.parent.location.href = "/new-form-link/" + unique_key + "/" +
-                                        current_order_id + "/thankYou";
-                                    $('.current_order_id').val('');
-                                    setView('thankyou-section')
+                                if (redirect_url != '') {
+                                    window.parent.location.href = redirect_url;
                                 } else {
-                                    $('.current_order_id').val('');
-                                    window.parent.location.href = "/view-thankyou-templates/" +
-                                        thankyou_unique_key + "/" + current_order_id
+                                    if (thankyou_unique_key == '') {
+                                        window.parent.location.href = "/new-form-link/" + unique_key + "/" +
+                                            current_order_id + "/thankYou";
+                                        $('.current_order_id').val('');
+                                        setView('thankyou-section')
+                                    } else {
+                                        $('.current_order_id').val('');
+                                        window.parent.location.href = "/view-thankyou-templates/" +
+                                            thankyou_unique_key + "/" + current_order_id
+                                    }
                                 }
 
                             }
@@ -1840,16 +1990,21 @@
 
                             var current_order_id = $('.current_order_id').val();
                             var thankyou_unique_key = $(".thankyou_unique_key").val();
+                            var redirect_url = $('.redirect_url').val();
 
-                            if (thankyou_unique_key == '') {
-                                window.parent.location.href = "/new-form-link/" + unique_key + "/" +
-                                    current_order_id + "/thankYou";
-                                $('.current_order_id').val('');
-                                setView('thankyou-section')
+                            if (redirect_url != '') {
+                                window.parent.location.href = redirect_url;
                             } else {
-                                $('.current_order_id').val('');
-                                window.parent.location.href = "/view-thankyou-templates/" +
-                                    thankyou_unique_key + "/" + current_order_id
+                                if (thankyou_unique_key == '') {
+                                    window.parent.location.href = "/new-form-link/" + unique_key + "/" +
+                                        current_order_id + "/thankYou";
+                                    $('.current_order_id').val('');
+                                    setView('thankyou-section')
+                                } else {
+                                    $('.current_order_id').val('');
+                                    window.parent.location.href = "/view-thankyou-templates/" +
+                                        thankyou_unique_key + "/" + current_order_id
+                                }
                             }
 
 
@@ -1897,16 +2052,22 @@
 
                                     var current_order_id = $('.current_order_id').val();
                                     var thankyou_unique_key = $(".thankyou_unique_key").val();
+                                    var redirect_url = $('.redirect_url').val();
 
-                                    if (thankyou_unique_key == '') {
-                                        window.parent.location.href = "/new-form-link/" + unique_key + "/" +
-                                            current_order_id + "/thankYou";
-                                        $('.current_order_id').val('');
-                                        setView('thankyou-section')
+                                    if (redirect_url != '') {
+                                        window.parent.location.href = redirect_url;
                                     } else {
-                                        $('.current_order_id').val('');
-                                        window.parent.location.href = "/view-thankyou-templates/" +
-                                            thankyou_unique_key + "/" + current_order_id
+                                        if (thankyou_unique_key == '') {
+                                            window.parent.location.href = "/new-form-link/" + unique_key +
+                                                "/" +
+                                                current_order_id + "/thankYou";
+                                            $('.current_order_id').val('');
+                                            setView('thankyou-section')
+                                        } else {
+                                            $('.current_order_id').val('');
+                                            window.parent.location.href = "/view-thankyou-templates/" +
+                                                thankyou_unique_key + "/" + current_order_id
+                                        }
                                     }
                                 }
 
@@ -1951,18 +2112,24 @@
                                 // $(".current_order_id").val('');
                                 // setView('thankyou-section')
 
+
                                 var current_order_id = $('.current_order_id').val();
                                 var thankyou_unique_key = $(".thankyou_unique_key").val();
+                                var redirect_url = $('.redirect_url').val();
 
-                                if (thankyou_unique_key == '') {
-                                    window.parent.location.href = "/new-form-link/" + unique_key + "/" +
-                                        current_order_id + "/thankYou";
-                                    $('.current_order_id').val('');
-                                    setView('thankyou-section')
+                                if (redirect_url != '') {
+                                    window.parent.location.href = redirect_url;
                                 } else {
-                                    $('.current_order_id').val('');
-                                    window.parent.location.href = "/view-thankyou-templates/" +
-                                        thankyou_unique_key + "/" + current_order_id
+                                    if (thankyou_unique_key == '') {
+                                        window.parent.location.href = "/new-form-link/" + unique_key + "/" +
+                                            current_order_id + "/thankYou";
+                                        $('.current_order_id').val('');
+                                        setView('thankyou-section')
+                                    } else {
+                                        $('.current_order_id').val('');
+                                        window.parent.location.href = "/view-thankyou-templates/" +
+                                            thankyou_unique_key + "/" + current_order_id
+                                    }
                                 }
 
                             },

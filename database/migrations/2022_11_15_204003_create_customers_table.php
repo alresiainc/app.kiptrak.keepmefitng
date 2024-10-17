@@ -35,7 +35,7 @@ return new class extends Migration
             $table->longText('delivery_duration')->nullable();
 
             $table->longText('profile_picture')->nullable();
-            
+
             $table->string('created_by');
             $table->string('status')->nullable();
             $table->softDeletes();

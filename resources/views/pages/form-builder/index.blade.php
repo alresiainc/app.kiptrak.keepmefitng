@@ -287,12 +287,8 @@
                                                             <br>
 
                                                             <div class="d-flex mt-1">
-                                                                <a class="btn btn-info btn-sm me-2"
-                                                                    onclick="embedFormModal('{{ url('/') . '/' . $formHolder->url }}')"
-                                                                    data-bs-toggle="tooltip" data-bs-placement="left"
-                                                                    data-bs-title="Copy Embedded Code">
-                                                                    <i class="bi bi-plus"></i> <span>Embed</span></a>
-                                                                {{-- <a class="btn btn-info btn-sm me-2 clipboard-btn"
+
+                                                                <a class="btn btn-info btn-sm me-2 clipboard-btn"
                                                                     data-bs-toggle="tooltip" data-bs-placement="top"
                                                                     data-bs-title="Copy Url Link"
                                                                     data-clipboard-text="{{ url('/') . '/' . $formHolder->thankyou->url }}">
@@ -304,7 +300,7 @@
                                                                     data-bs-title="Copy Embedded Code"
                                                                     data-clipboard-text="{{ $formHolder->thankyou->iframe_tag }}">
                                                                     <i class="bi bi-archive"></i>
-                                                                </a> --}}
+                                                                </a>
 
                                                                 <a href="{{ route('showThankYouTemplate', $formHolder->thankyou->unique_key) }}"
                                                                     class="btn btn-primary btn-sm me-2"
@@ -329,29 +325,16 @@
                                                     </td>
 
                                                     <td>
-                                                        {{-- <input type="hidden" id="foo" value="https://github.com/zenorocha/clipboard.js.git"> --}}
                                                         <div class="d-flex">
                                                             <a class="btn btn-info btn-sm me-2"
                                                                 onclick="embedFormModal('{{ url('/') . '/' . $formHolder->url }}')"
                                                                 data-bs-toggle="tooltip" data-bs-placement="left"
                                                                 data-bs-title="Copy Embedded Code">
                                                                 <i class="bi bi-clipboard"></i> <span>Embed</span></a>
-                                                            {{-- <a class="btn btn-info btn-sm me-2 clipboard-btn"
-                                                                data-bs-toggle="tooltip" data-bs-placement="top"
-                                                                data-bs-title="Copy Url Link"
-                                                                data-clipboard-text="{{ url('/') . '/' . $formHolder->url }}">
-                                                                <i class="bi bi-clipboard"></i>
-                                                            </a>
 
-                                                            <a class="btn btn-secondary btn-sm me-2 clipboard-btn"
-                                                                data-bs-toggle="tooltip" data-bs-placement="top"
-                                                                data-bs-title="Copy Embedded Code"
-                                                                data-clipboard-text="{{ $formHolder->iframe_tag }}">
-                                                                <i class="bi bi-archive"></i>
-                                                            </a> --}}
 
-                                                            <a href="{{ route('newFormLink', $formHolder->unique_key) }}"
-                                                                class="btn btn-primary btn-sm me-2"
+                                                            <a href="{{ route('form.get', ['key' => $formHolder->unique_key]) }}"
+                                                                class="btn btn-primary btn-sm me-2" target="_blank"
                                                                 data-bs-toggle="tooltip" data-bs-placement="top"
                                                                 data-bs-title="View"><i class="bi bi-eye"></i></a>
                                                             <a href="{{ route('editForm', $formHolder->unique_key) }}"
@@ -1139,12 +1122,12 @@
 
             $('#embedFormModal').find('#formEmbedUrl').val(formUrl);
 
-           // Extract the unique key from the URL
-    const urlParts = formUrl.split('/');
-    const uniqueKey = urlParts[urlParts.length - 1]; // Get the last segment of the URL
+            // Extract the unique key from the URL
+            const urlParts = formUrl.split('/');
+            const uniqueKey = urlParts[urlParts.length - 1]; // Get the last segment of the URL
 
-    // WP short code
-    shortCode = `[kiptrak type="form" key="${uniqueKey}"]`;
+            // WP short code
+            shortCode = `[kiptrak type="form" key="${uniqueKey}"]`;
             $('#embedFormModal').find('#formWPShortcode').val(shortCode);
 
             // iFrame code

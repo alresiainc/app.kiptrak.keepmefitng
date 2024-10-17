@@ -755,7 +755,8 @@ class FormBuilderController extends Controller
             'order_total_amount',
             'grand_total',
             'stage',
-            'cartAbandoned_id'
+            'cartAbandoned_id',
+            'redirect_url'
         ));
     }
 
@@ -3415,10 +3416,9 @@ class FormBuilderController extends Controller
     //after clicking first main btn, ajax
     public function saveNewFormFromCustomer(Request $request)
     {
-        // $authUser = auth()->user();
-        // $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-
         $data = $request->all();
+        //create a code to delay the code for 15 sec
+        sleep(20);
 
         //delete cartabandoned
 
@@ -3441,23 +3441,7 @@ class FormBuilderController extends Controller
             $newOrder->save();
 
             //making a copy from the former outgoingStocks, in the case of dealing with an edited or duplicated form
-            // $outgoingStocks = $order->outgoingStocks;
 
-            // foreach($outgoingStocks as $i => $outgoingStock)
-            // {
-            //     //make copy of rows, and create new records
-            //     if(isset($outgoingStock->product)) {
-            //         $outgoingStocks[$i]->order_id = $newOrder->id;
-            //         $outgoingStocks[$i]->quantity_returned = 0;
-            //         $outgoingStocks[$i]->quantity_removed = 1;
-            //         $outgoingStocks[$i]->amount_accrued = $outgoingStock->product->sale_price;
-            //         $outgoingStocks[$i]->isCombo = isset($outgoingStock->product->combo_product_ids) ? 'true' : null;
-
-            //         $x[$i] = (new OutgoingStock())->create($outgoingStock->only(['product_id', 'order_id', 'quantity_removed', 'amount_accrued',
-            //         'reason_removed', 'quantity_returned', 'created_by', 'status']));
-            //     }
-            // }
-            // return $x;
 
             //////////////////////////////////////////////////////////
             //making a copy from the former outgoingStock, in the case of dealing with an edited or duplicated form
@@ -3488,10 +3472,6 @@ class FormBuilderController extends Controller
             $newOutgoingStock->status = $order->outgoingStock->status;
             $newOutgoingStock->package_bundle = $package_bundle_1;
             $newOutgoingStock->save();
-
-            ///////////////////////////////////////////////////////////////
-
-            //update package in OutgoingStock
 
             #remove later
             $outgoingStock = OutgoingStock::where('order_id', $newOrder->id)->first();
@@ -3527,79 +3507,22 @@ class FormBuilderController extends Controller
 
             #remove later
             $outgoingStock->update(['package_bundle' => $outgoingStockPackageBundle]);
-            #remove later
 
-            /////////start old code/////////////////////////////////////////
-            // $order = $order;
-            // $package_bundle_1 = [];
-            // //updated package in outgoingstock, created above
-            // foreach ($data['product_packages'] as $key => $product_id) {
-            //     $data['product_id'] = $product_id;
-            //     if (!empty($product_id)) {
-
-            //         $idPriceQty = explode('-', $product_id);
-            //         $productId = $idPriceQty[0];
-            //         $saleUnitPrice = $idPriceQty[1];
-            //         $qtyRemoved = $idPriceQty[2];
-
-            //         //accepted updated
-            //         $amount_accrued = $qtyRemoved * $saleUnitPrice;
-            //         // OutgoingStock::where(['product_id'=>$productId, 'order_id'=>$newOrder->id, 'reason_removed'=>'as_order_firstphase'])
-            //         // ->update(['quantity_removed'=>$qtyRemoved, 'amount_accrued'=>$amount_accrued, 'customer_acceptance_status'=>'accepted']);
-
-            //         // Create a new package array for each product ID
-            //         $package_bundles = [
-            //             'product_id'=>$productId,
-            //             'quantity_removed'=>$qtyRemoved,
-            //             'amount_accrued'=>$amount_accrued,
-            //             'customer_acceptance_status'=>'accepted',
-            //         ];
-            //         $package_bundle_1[] = $package_bundles;
-
-            //         //rejected or declined updated
-            //         // $rejected_products = OutgoingStock::where('product_id', '!=', $productId)->where('order_id', $newOrder->id)
-            //         // ->where('reason_removed','as_order_firstphase')->get();
-            //         // foreach ($rejected_products as $key => $rejected) {
-            //         //     $rejected->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>$rejected->quantity_removed]);
-            //         // }
-
-            //     } 
-            // }
-
-            // //now update each row package_bundle
-            // $outgoingStockPackageBundle = OutgoingStock::where('order_id', $newOrder->id)->first()->package_bundle;
-
-            // foreach ($outgoingStockPackageBundle as &$package_bundle) {
-            //     // Find the corresponding package_bundle in $package_bundle_1 based on product_id
-            //     $matching_package = collect($package_bundle_1)->firstWhere('product_id', $package_bundle['product_id']);
-
-            //     // If a matching package is found, update the row in $outgoingStockPackageBundle
-            //     if ($matching_package && $package_bundle['reason_removed']=='as_order_firstphase') {
-            //         // Merge the matching keys and values from $matching_package into $package_bundle
-            //         $package_bundle = array_merge($package_bundle, array_intersect_key($matching_package, $package_bundle));
-            //     }
-            // }
-
-            // // Now $outgoingStockPackageBundle has the updated data
-            // //return $outgoingStockPackageBundle;
-
-            // //update outgoingStock
-            // OutgoingStock::where(['order_id'=>$newOrder->id])->update(['package_bundle' => $outgoingStockPackageBundle]);
-            //////////end old code///////////////////////////////////////
 
             $customer = new Customer();
             $customer->order_id = $newOrder->id;
             $customer->form_holder_id = $formHolder->id;
-            $customer->firstname = $data['firstname'];
-            $customer->lastname = $data['lastname'];
-            $customer->phone_number = $data['phone_number'];
-            $customer->whatsapp_phone_number = $data['whatsapp_phone_number'];
-            $customer->email = $data['active_email'];
-            $customer->city = $data['city'];
-            $customer->state = $data['state'];
-            $customer->delivery_address = $data['address'];
-            $customer->delivery_duration = $data['delivery_duration'];
+            $customer->firstname = $data['firstname'] ?? '';
+            $customer->lastname = $data['lastname'] ?? '';
+            $customer->phone_number = $data['phone_number'] ?? '';
+            $customer->whatsapp_phone_number = $data['whatsapp_phone_number'] ?? '';
+            $customer->email = $data['active_email'] ?? '';
+            $customer->city = $data['city'] ?? '';
+            $customer->state = $data['state'] ?? '';
+            $customer->delivery_address = $data['address'] ?? '';
+            $customer->delivery_duration = $data['delivery_duration'] ?? '';
             $customer->created_by = 1;
+            $customer->data = $data['form_fields'] ?? [];
             $customer->status = 'true';
             $customer->save();
 
@@ -3667,16 +3590,17 @@ class FormBuilderController extends Controller
             $customer = new Customer();
             $customer->order_id = $order->id;
             $customer->form_holder_id = $formHolder->id;
-            $customer->firstname = $data['firstname'];
-            $customer->lastname = $data['lastname'];
-            $customer->phone_number = $data['phone_number'];
-            $customer->whatsapp_phone_number = $data['whatsapp_phone_number'];
-            $customer->email = $data['active_email'];
-            $customer->city = $data['city'];
-            $customer->state = $data['state'];
-            $customer->delivery_address = $data['address'];
-            $customer->delivery_duration = $data['delivery_duration'];
+            $customer->firstname = $data['firstname'] ?? '';
+            $customer->lastname = $data['lastname'] ?? '';
+            $customer->phone_number = $data['phone_number'] ?? '';
+            $customer->whatsapp_phone_number = $data['whatsapp_phone_number'] ?? '';
+            $customer->email = $data['active_email'] ?? '';
+            $customer->city = $data['city'] ?? '';
+            $customer->state = $data['state'] ?? '';
+            $customer->delivery_address = $data['address'] ?? '';
+            $customer->delivery_duration = $data['delivery_duration'] ?? '';
             $customer->created_by = 1;
+            $customer->data = $data['form_fields'] ?? [];
             $customer->status = 'true';
             $customer->save();
 
@@ -3684,7 +3608,9 @@ class FormBuilderController extends Controller
             //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
             $order->customer_id = $customer->id;
             $order->status = 'new';
-            $order->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
+            if ($customer->delivery_duration) {
+                $order->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
+            }
             $order->save();
 
             $has_orderbump = isset($formHolder->orderbump_id) ? true : false;

@@ -10,26 +10,26 @@ use App\Models\Product;
 
 class Helper
 {
-    public function orderSalesRevenue($delivered_and_remitted_orders) 
+    public function orderSalesRevenue($delivered_and_remitted_orders)
     {
         $sales_paid = 0;
-        
+
         $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->pluck('package_bundle'); //[[{}], [{}], [{}]] multidimensional
 
-         // Flatten the multidimensional array into a single array
-         $flattenedArray = array_merge(...$accepted_outgoing_stock); //[{}, {}]
+        // Flatten the multidimensional array into a single array
+        $flattenedArray = array_merge(...$accepted_outgoing_stock); //[{}, {}]
 
-         if (count($accepted_outgoing_stock) > 0) {
-             // foreach ($accepted_outgoing_stock as $packages) {
-                 foreach ($flattenedArray as $package) {
-                     if ($package['customer_acceptance_status'] == 'accepted') {
-                         $sales_paid += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0;
-                     }
-                 }
-             // }
-         }
- 
-         return $sales_paid;
+        if (count($accepted_outgoing_stock) > 0) {
+            // foreach ($accepted_outgoing_stock as $packages) {
+            foreach ($flattenedArray as $package) {
+                if ($package['customer_acceptance_status'] == 'accepted') {
+                    $sales_paid += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0;
+                }
+            }
+            // }
+        }
+
+        return $sales_paid;
     }
 
     public function totalSalesRevenue()
@@ -46,11 +46,11 @@ class Helper
 
         if (count($accepted_outgoing_stock) > 0) {
             // foreach ($accepted_outgoing_stock as $packages) {
-                foreach ($flattenedArray as $package) {
-                    if ($package['customer_acceptance_status'] == 'accepted') {
-                        $sales_paid += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0;
-                    }
+            foreach ($flattenedArray as $package) {
+                if ($package['customer_acceptance_status'] == 'accepted') {
+                    $sales_paid += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0;
                 }
+            }
             // }
         }
 
@@ -71,15 +71,14 @@ class Helper
         // return count($accepted_outgoing_stock);
         if (count($accepted_outgoing_stock) > 0) {
             // foreach ($accepted_outgoing_stock as $packages) {
-                foreach ($flattenedArray as $package) {
-                    if ($package['customer_acceptance_status'] == 'accepted') {
-                        $sales_count += isset($package['quantity_removed']) ? (int) $package['quantity_removed'] : 0;
-                    }
+            foreach ($flattenedArray as $package) {
+                if ($package['customer_acceptance_status'] == 'accepted') {
+                    $sales_count += isset($package['quantity_removed']) ? (int) $package['quantity_removed'] : 0;
                 }
+            }
             // }
         }
         return $sales_count;
-        
     }
 
     //warehouse revenue
@@ -97,11 +96,11 @@ class Helper
 
         if (count($accepted_outgoing_stock) > 0) {
             // foreach ($accepted_outgoing_stock as $packages) {
-                foreach ($flattenedArray as $package) {
-                    if ($package['customer_acceptance_status'] == 'accepted') {
-                        $sales_paid += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0;
-                    }
+            foreach ($flattenedArray as $package) {
+                if ($package['customer_acceptance_status'] == 'accepted') {
+                    $sales_paid += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0;
                 }
+            }
             // }
         }
 
@@ -123,11 +122,11 @@ class Helper
 
         if (count($accepted_outgoing_stock) > 0) {
             // foreach ($accepted_outgoing_stock as $packages) {
-                foreach ($flattenedArray as $package) {
-                    if ($package['customer_acceptance_status'] == 'accepted') {
-                        $sales_paid += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0;
-                    }
+            foreach ($flattenedArray as $package) {
+                if ($package['customer_acceptance_status'] == 'accepted') {
+                    $sales_paid += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0;
                 }
+            }
             // }
         }
 
@@ -138,9 +137,9 @@ class Helper
     public function totalSalesRevenueByDurationWarehouse($duration_start = "", $duration_end = "", $warehouse_id = "")
     {
         $sales_paid = 0;
-        
+
         $delivered_and_remitted_orders = Order::where('status', 'delivered_and_remitted')->where('warehouse_id', $warehouse_id)
-        ->whereBetween('created_at', [$duration_start, $duration_end])->pluck('id');
+            ->whereBetween('created_at', [$duration_start, $duration_end])->pluck('id');
         $accepted_outgoing_stock = OutgoingStock::whereIn('order_id', $delivered_and_remitted_orders)->pluck('package_bundle'); //[[{}], [{}], [{}]] multidimensional
 
         //return $productIds = array_column($accepted_outgoing_stock->toArray(), 'product_id');
@@ -150,18 +149,19 @@ class Helper
 
         if (count($accepted_outgoing_stock) > 0) {
             // foreach ($accepted_outgoing_stock as $packages) {
-                foreach ($flattenedArray as $package) {
-                    if ($package['customer_acceptance_status'] == 'accepted') {
-                        $sales_paid += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0;
-                    }
+            foreach ($flattenedArray as $package) {
+                if ($package['customer_acceptance_status'] == 'accepted') {
+                    $sales_paid += isset($package['amount_accrued']) ? (int) $package['amount_accrued'] : 0;
                 }
+            }
             // }
         }
 
         return $sales_paid;
     }
 
-    public function yearlySalesReportChart($delivered_and_remitted_orders) {
+    public function yearlySalesReportChart($delivered_and_remitted_orders)
+    {
         // Initialize an array to store the monthly sale amounts
         $yearly_sale_amount = [];
 
@@ -194,7 +194,7 @@ class Helper
             // Add the monthly sum to the yearly_sale_amount array
             $yearly_sale_amount[] = number_format($monthly_sum_amount, 2, '.', '');
         }
-        
+
         return $yearly_sale_amount;
     }
 
@@ -215,14 +215,13 @@ class Helper
 
         // Now, use array_column to get the product_id values
         $productIds = array_column($flattenedArray, 'product_id'); //["1","2","3","4","5","6","7"]
-        
+
         // Check if the $product_id is contained in the extracted array
         if (!in_array($product_id, $productIds)) {
             // Product with the given $product_id does not exist in the array
             $stock_available = $sum_incomingStocks;
-    
         } else {
-            
+
             // Product with the given $product_id exists in the array
             //$sum_outgoingStocks = $this->outgoingStocks->sum->outgoingStockTotal();
 
@@ -233,16 +232,16 @@ class Helper
             $comboOutgoingStocksArray = [];
             $comboOutgoingStocks = '';
             if (count($accepted_outgoing_stock) > 0) {
-                
+
                 foreach ($flattenedArray as $key => $package) {
-                    if ( (!isset($package['isCombo'])) && ($package['isCombo'] !== 'true') ) {
-                        
-                        if ( ($package['customer_acceptance_status'] == 'accepted') && ($package['product_id'] == $product_id) ) {
+                    if ((!isset($package['isCombo'])) && ($package['isCombo'] !== 'true')) {
+
+                        if (($package['customer_acceptance_status'] == 'accepted') && ($package['product_id'] == $product_id)) {
                             $quantity_removed += isset($package['quantity_removed']) ? (int) $package['quantity_removed'] : 0; //sum
                             $quantity_returned += isset($package['quantity_returned']) ? (int) $package['quantity_returned'] : 0; //sum
                         }
                     }
-                    if ( (isset($package['isCombo'])) && ($package['isCombo'] == 'true') ) {
+                    if ((isset($package['isCombo'])) && ($package['isCombo'] == 'true')) {
                         $comboOutgoingStocksArray[] = $package;
                     }
                     // if ( ($package['customer_acceptance_status'] == 'accepted') && ($package['product_id'] == $this->id) && (isset($package['isCombo'])) && ($package['isCombo'] == 'true') ) {
@@ -252,7 +251,7 @@ class Helper
                     //     return 'dwn';
                     // }
                 }
-                $comboOutgoingStocks = count($comboOutgoingStocksArray) > 0 ? array_merge(...$comboOutgoingStocksArray) : '' ;
+                $comboOutgoingStocks = count($comboOutgoingStocksArray) > 0 ? array_merge(...$comboOutgoingStocksArray) : '';
             }
             //return count($accepted_outgoing_stock);
 
@@ -264,34 +263,33 @@ class Helper
 
             //incase of combo
             // $comboOutgoingStocks = OutgoingStock::whereIn('order_id', $delivered_order_ids)->where('isCombo','true')->get();
-            
+
             ///previous code
             // if (count($comboOutgoingStocks) > 0) {
             //     $comboOutgoingStocksProducts = $comboOutgoingStocks->pluck('product_id'); //['4'] combo product id. we need to get out the pro
             //     $comboProducts = Product::whereIn('id', $comboOutgoingStocksProducts)->get(); //combo products
-            
+
             //     foreach ($comboProducts as $key => $product) {
             //         $sum_outgoingStocks += count(collect($product->comboProducts())->where('id', $this->id)) > 0 ? 
             //         collect($product->comboProducts())->where('id', $this->id)->first()->quantity_combined : 0;
             //     } 
             // }
-            
+
             if ($comboOutgoingStocks !== '') {
                 //$comboOutgoingStocksProducts = $comboOutgoingStocks->pluck('product_id'); //['4'] combo product id. we need to get out the pro
                 $comboOutgoingStocksProducts = array_column($comboOutgoingStocksArray, 'product_id');
                 $comboProducts = Product::whereIn('id', $comboOutgoingStocksProducts)->get(); //combo products
-            
+
                 foreach ($comboProducts as $key => $product) {
-                     
-                   $sum_outgoingStocks += count(collect($product->comboProducts())->where('id', $product_id)) > 0 ? 
-                    collect($product->comboProducts())->where('id', $product_id)->first()->quantity_combined : 0;
-                    
-                } 
+
+                    $sum_outgoingStocks += count(collect($product->comboProducts())->where('id', $product_id)) > 0 ?
+                        collect($product->comboProducts())->where('id', $product_id)->first()->quantity_combined : 0;
+                }
             }
-            
+
             //incase of combo
-            
-            
+
+
             $stock_available = $sum_incomingStocks - $sum_outgoingStocks;
         }
         return $sum_outgoingStocks;
@@ -315,7 +313,7 @@ class Helper
 
         // Now, use array_column to get the product_id values
         $productIds = array_column($flattenedArray, 'product_id'); //["1","2","3","4","5","6","7"]
-        
+
         // Product with the given $product_id exists in the array
         $quantity_removed = 0;
         $quantity_returned = 0;
@@ -323,26 +321,24 @@ class Helper
         $comboOutgoingStocksArray = [];
         $comboOutgoingStocks = '';
         if (count($accepted_outgoing_stock) > 0) {
-            
+
             foreach ($flattenedArray as $key => $package) {
-                if ( (!isset($package['isCombo'])) && ($package['isCombo'] !== 'true') ) {
-                    
-                    if ( ($package['customer_acceptance_status'] == 'accepted') && ($package['product_id'] == $product_id) ) {
+                if ((!isset($package['isCombo'])) && ($package['isCombo'] !== 'true')) {
+
+                    if (($package['customer_acceptance_status'] == 'accepted') && ($package['product_id'] == $product_id)) {
                         $quantity_removed += isset($package['quantity_removed']) ? (int) $package['quantity_removed'] : 0; //sum
                         $quantity_returned += isset($package['quantity_returned']) ? (int) $package['quantity_returned'] : 0; //sum
                     }
                 }
-                if ( (isset($package['isCombo'])) && ($package['isCombo'] == 'true') ) {
-                    if ( $package['customer_acceptance_status'] == 'accepted' ) {
+                if ((isset($package['isCombo'])) && ($package['isCombo'] == 'true')) {
+                    if ($package['customer_acceptance_status'] == 'accepted') {
                         $comboOutgoingStocksArray[] = $package;
                     }
-                    
                 }
-                
             }
-            $comboOutgoingStocks = count($comboOutgoingStocksArray) > 0 ? array_merge(...$comboOutgoingStocksArray) : '' ;
+            $comboOutgoingStocks = count($comboOutgoingStocksArray) > 0 ? array_merge(...$comboOutgoingStocksArray) : '';
         }
-        
+
         $sum_outgoingStocks = count($delivered_order_ids) > 0 ? $quantity_removed - $quantity_returned : 0;
         ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -350,17 +346,94 @@ class Helper
         if ($comboOutgoingStocks !== '') {
             $comboOutgoingStocksProducts = array_column($comboOutgoingStocksArray, 'product_id');
             $comboProducts = Product::whereIn('id', $comboOutgoingStocksProducts)->get(); //combo products
-        
+
             foreach ($comboProducts as $key => $product) {
-                    
-                $sum_outgoingStocks += count(collect($product->comboProducts())->where('id', $product_id)) > 0 ? 
-                collect($product->comboProducts())->where('id', $product_id)->first()->quantity_combined : 0;
-                
-            } 
+
+                $sum_outgoingStocks += count(collect($product->comboProducts())->where('id', $product_id)) > 0 ?
+                    collect($product->comboProducts())->where('id', $product_id)->first()->quantity_combined : 0;
+            }
         }
-        
+
         $stock_available = $sum_incomingStocks - $sum_outgoingStocks;
-    
+
         return $stock_available;
+    }
+
+
+    /**
+     * Match form fields with required fields intelligently.
+     *
+     * @param string|array $requiredFields - The required field(s) from the model. Can be a string or an array.
+     * @param array $formFields - The dynamic form fields.
+     * @return array - An associative array of matched fields.
+     */
+    public function matchFormFields($requiredFields, array $formFields): array
+    {
+        // Ensure $requiredFields is an array, even if it's a single string.
+        $requiredFields = is_array($requiredFields) ? $requiredFields : [$requiredFields];
+
+        $matchedFields = [];
+
+        foreach ($requiredFields as $requiredField) {
+            // Normalize the required field name (e.g., convert to lowercase and remove special characters)
+            $normalizedRequiredField = $this->normalizeFieldName($requiredField);
+
+            // Attempt to find a direct match first
+            $directMatch = array_filter($formFields, function ($field) use ($normalizedRequiredField) {
+                return $this->normalizeFieldName($field) === $normalizedRequiredField;
+            });
+
+            if (!empty($directMatch)) {
+                $matchedFields[$requiredField] = reset($directMatch);
+                continue;
+            }
+
+            // Try to find a partial match (e.g., contains both 'first' and 'name')
+            $partialMatch = array_filter($formFields, function ($field) use ($normalizedRequiredField) {
+                $normalizedFormField = $this->normalizeFieldName($field);
+                return strpos($normalizedFormField, '-') !== false &&
+                    strpos($normalizedFormField, '-') !== false;
+            });
+
+            if (!empty($partialMatch)) {
+                $matchedFields[$requiredField] = reset($partialMatch);
+                continue;
+            }
+
+            // As a last resort, find the closest match using Levenshtein distance
+            $closestMatch = null;
+            $shortestDistance = null;
+
+            foreach ($formFields as $field) {
+                $normalizedFormField = $this->normalizeFieldName($field);
+                $levenshteinDistance = levenshtein($normalizedRequiredField, $normalizedFormField);
+
+                if (is_null($shortestDistance) || $levenshteinDistance < $shortestDistance) {
+                    $closestMatch = $field;
+                    $shortestDistance = $levenshteinDistance;
+                }
+            }
+
+            // Accept the closest match if it's within a reasonable threshold
+            if ($closestMatch && $shortestDistance <= 3) { // 3 can be adjusted as needed
+                $matchedFields[$requiredField] = $closestMatch;
+            } else {
+                // If no match is found, return null
+                $matchedFields[$requiredField] = null;
+            }
+        }
+
+        return $matchedFields;
+    }
+
+    /**
+     * Normalize a field name for easier comparison.
+     *
+     * @param string $fieldName
+     * @return string
+     */
+    public function normalizeFieldName(string $fieldName): string
+    {
+        return strtolower(preg_replace('/[^a-z0-9]/', '', $fieldName));
     }
 }
