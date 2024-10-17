@@ -24,7 +24,7 @@ class WordPressPluginController extends Controller
             }
 
             // Define the path to the folder containing the plugin update files
-            $folderPath = storage_path('app/wordpress-plugins/' . $plugin);
+            $folderPath = public_path('wordpress-plugins/' . $plugin);
 
             // Check if the folder exists
             if (!File::exists($folderPath)) {
@@ -32,7 +32,7 @@ class WordPressPluginController extends Controller
             }
 
             // Generate a unique temporary filename for the zip file
-            $zipFileName = storage_path('app/wordpress-plugins/' . $plugin . '_' . uniqid() . '.zip');
+            $zipFileName = public_path('wordpress-plugins/' . $plugin . '_' . uniqid() . '.zip');
 
             // Create a new zip archive
             $zip = new ZipArchive;
@@ -81,7 +81,7 @@ class WordPressPluginController extends Controller
             }
 
             // Define the path to the folder containing the plugin update files
-            $folderPath = storage_path('app/wordpress-plugins/' . $plugin);
+            $folderPath = public_path('app/wordpress-plugins/' . $plugin);
 
             // Check if the folder exists
             if (!File::exists($folderPath)) {
