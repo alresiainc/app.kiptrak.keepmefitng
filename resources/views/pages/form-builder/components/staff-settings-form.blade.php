@@ -3,7 +3,7 @@
         <div class="col-md-12 mt-1 wrapper">
             <label for="" class="form-label">Select Staffs</label>
 
-            @forelse (old('staff_assigned_ids', $form?->staff_assigned_ids ?? []) as $staff_assigned_ids)
+            @forelse (old('staff_assigned_ids', isset($form) ? $form?->staff_assigned_ids :[]) as $staff_assigned_ids)
                 <div class="d-flex align-items-center product-container mb-2 w-100 element">
 
                     <select name="staff_assigned_ids[]" id="" data-live-search="true"

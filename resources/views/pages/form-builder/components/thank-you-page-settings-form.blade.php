@@ -8,7 +8,7 @@
 
             @foreach ($thankYouTemplates as $template)
                 <option value="{{ $template->id }}"
-                    {{ old('thankyou_template_id', $form?->thankyou_id ?? '') == $template->id ? 'selected' : '' }}>
+                    {{ old('thankyou_template_id', isset($form) ? $form?->thankyou_id : '') == $template->id ? 'selected' : '' }}>
                     {{ $template->template_name }}</option>
             @endforeach
 
@@ -27,7 +27,7 @@
     <label for="template_external_url" class="form-label">External Url (Redirection)</label>
     <input type="text" name="template_external_url" id="template_external_url" class="form-control form-control-sm"
         placeholder="https://..."
-        value="{{ old('template_external_url', $form?->thankYou?->template_external_url ?? '') }}">
+        value="{{ old('template_external_url', isset($form) ? $form?->thankYou?->template_external_url : '') }}">
 
     @error('template_external_url')
         <span class="invalid-feedback mb-3" role="alert">

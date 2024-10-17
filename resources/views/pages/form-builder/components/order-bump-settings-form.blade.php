@@ -17,7 +17,7 @@
     <div class="mt-3">
         <label for="editOrderbump_heading" class="form-label">Heading | Optional</label>
         <input type="text" name="orderbump_heading" id="editOrderbump_heading" class="form-control form-control-sm"
-            value="{{ old('orderbump_heading', $form?->orderbump?->orderbump_heading ?? '') }}">
+            value="{{ old('orderbump_heading', isset($form) ? $form?->orderbump?->orderbump_heading : '') }}">
     </div>
 
     <div class="mt-3">
@@ -25,7 +25,7 @@
             <div class="col-md-12 mt-1 wrapper">
                 <label for="" class="form-label">Sub Headings | Optional</label>
 
-                @forelse (old('orderbump_subheading', $form?->orderbump?->orderbump_subheading ?? []) as $orderbump_subheading)
+                @forelse (old('orderbump_subheading', isset($form) ? $form?->orderbump?->orderbump_subheading :[]) as $orderbump_subheading)
                     <div class="d-flex align-items-center product-container mb-2 w-100 element">
                         <input type="text" name="orderbump_subheading[]" class="form-control form-control-sm"
                             placeholder="" value="{{ $orderbump_subheading }}">
@@ -56,7 +56,7 @@
             @if (isset($products) && count($products) > 0)
                 @foreach ($products as $product)
                     <option value="{{ $product->id }}"
-                        {{ old('orderbump_product', $form?->orderbump?->orderbump_product ?? '') == $product->id ? 'selected' : '' }}>
+                        {{ old('orderbump_product', isset($form) ? $form?->orderbump?->orderbump_product : '') == $product->id ? 'selected' : '' }}>
                         {{ $product->name }} @<span class="product_sale_price">{{ $product->sale_price }}</span>
                     </option>
                 @endforeach
@@ -73,6 +73,6 @@
     <div class="mt-3">
         <label for="" class="form-label">Discount Amount</label>
         <input type="text" name="orderbump_discount" class="form-control form-control-sm"
-            value="{{ old('orderbump_discount', $form?->orderbump?->orderbump_discount ?? '') }}">
+            value="{{ old('orderbump_discount', isset($form) ? $form?->orderbump?->orderbump_discount : '') }}">
     </div>
 </div>
