@@ -1388,7 +1388,7 @@
 
     </main>
 
-    <!-- <hr> will be shown in singlelink-->
+    {{-- <!-- <hr> will be shown in singlelink-->
     <footer class="container-fluid position-relative bg-dark py-5 text-white bottom-0"
         style="position: relative; bottom: 0;">
         <div class="container">
@@ -1399,7 +1399,7 @@
                 </div>
             </div>
         </div>
-    </footer>
+    </footer> --}}
 
     <!-- Vendor JS Files -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>

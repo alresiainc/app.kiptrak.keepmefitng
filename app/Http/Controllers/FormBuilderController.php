@@ -302,6 +302,7 @@ class FormBuilderController extends Controller
         $formPackage = [];
 
 
+        $selected_package = [];
         foreach ($formData ?? [] as $item) {
             if (isset($item['type'])) {
                 // Check for product type
@@ -342,6 +343,7 @@ class FormBuilderController extends Controller
         // }
 
         //products package
+        $products = [];
         foreach ($packages as $key => $package) {
             $product = Product::where('id', $package)->first();
             // dd($product);
@@ -492,6 +494,270 @@ class FormBuilderController extends Controller
             'cartAbandoned_id'
         ));
     }
+    public function get_form(Request $request)
+    {
+
+
+        $id = !empty($request->id) ? $request->id : null;
+        $unique_key = !empty($request->unique_key) ? $request->unique_key : null;
+        $key = !empty($request->key) ? $request->key : null;
+        $current_order_id = !empty($request->order_id) ? $request->order_id : null;
+        $stage = !empty($request->stage) ? $request->stage : null;
+        $redirect_url = !empty($request->redirect_url) ? $request->redirect_url : null;
+
+        // dd($current_order_id);
+        // Check which value is provided and build the query accordingly
+        $formHolderQuery = FormHolder::query();
+
+        if (!empty($id)) {
+            $formHolderQuery->where('id', $id);
+        } elseif (!empty($key)) {
+            $formHolderQuery->where(function ($query) use ($key) {
+                $query->where('slug', $key)
+                    ->orWhere('unique_key', $key);
+            });
+        }
+
+        // Get the first result that matches any of the conditions
+        $formHolder = $formHolderQuery->first();
+
+
+
+
+        if (!isset($formHolder)) {
+            // Respond differently based on request type
+            if ($request->expectsJson() || $request->wantsJson() || $request->errors_in_json == 'yes') {
+                return response()->json(['message' => 'Form not found'], 404);
+            }
+            abort(404, 'Form not found');
+        }
+
+        if ($current_order_id) {
+            $order = Order::where('id', $current_order_id)->first();
+            if (!isset($order)) {
+                // Respond differently based on request type
+                if ($request->expectsJson() || $request->wantsJson() || $request->errors_in_json == 'yes') {
+                    return response()->json(['message' => 'Order with ID: ' . $current_order_id . ' not found'], 404);
+                }
+                abort(404, 'Order with ID: ' . $current_order_id . ' not found');
+            }
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+            $package_bundle_1 = [];
+
+            // Loop through the $outgoingStockPackageBundle array with access to keys
+            foreach ($outgoingStockPackageBundle as $key => $value) {
+                if (empty($value['customer_acceptance_status'])) {
+                    // Merge the data from $package_bundle_1 into the $outgoingStockPackageBundle
+                    $outgoingStockPackageBundle[$key]['customer_acceptance_status'] = 'rejected';
+                    $outgoingStockPackageBundle[$key]['reason_removed'] = 'as_order_firstphase';
+                    $outgoingStockPackageBundle[$key]['quantity_returned'] = 1;
+                    $outgoingStockPackageBundle[$key]['reason_returned'] = 'declined';
+                }
+            }
+
+            //pudate db column with new copy of $outgoingStockPackageBundle
+            $order->outgoingStock()->update(['package_bundle' => $outgoingStockPackageBundle]);
+        } else {
+            $order = $formHolder->order;
+        }
+
+        $authUser = User::find(1);
+
+        if (!isset($order)) {
+            if ($request->expectsJson() || $request->wantsJson() || $request->errors_in_json == 'yes') {
+                return response()->json(['message' => 'Order not available in the form not found'], 404);
+            }
+            abort(404, 'Order not available in the form not found');
+        }
+
+        $customer_ip_address = \Request::ip();
+        $existingCart = CartAbandon::where(['order_id' => $order->id, 'form_holder_id' => $formHolder->id, 'customer_ip_address' => $customer_ip_address])->first();
+        if (isset($existingCart)) {
+            $cartAbandoned_id = $existingCart->id;
+        } else {
+            //create new cart-abandoned, for this process
+            $cartAbandoned = new CartAbandon();
+            $cartAbandoned->order_id = $order->id;
+            $cartAbandoned->form_holder_id = $formHolder->id;
+            $cartAbandoned->customer_delivery_duration = 1;
+            $cartAbandoned->customer_ip_address = $customer_ip_address;
+            $cartAbandoned->save();
+            $cartAbandoned_id = $cartAbandoned->id;
+        }
+
+        $formName = $formHolder->name;
+        $formData = \unserialize($formHolder->form_data);
+        $settingsData = \unserialize($formHolder->setting_data);
+        $formPackage = [];
+
+
+        $selected_package = [];
+        foreach ($formData ?? [] as $item) {
+            if (isset($item['type'])) {
+                // Check for product type
+                if ($item['type'] === 'product' && !empty($item['config']['selected_package'])) {
+                    $hasProduct = true;
+                    $item_package = $item['config']['selected_package'];
+
+                    $selected_package[]  = $item_package;
+                }
+            }
+        }
+
+        $packages = Arr::flatten($selected_package);
+        $formPackage = [];
+
+
+
+
+        //products package
+        $products = [];
+        foreach ($packages as $key => $package) {
+            $product = Product::where('id', $package)->first();
+            // dd($product);
+            $formPackage['id'] = $package; //product_id
+            $formPackage['name'] = $product->name;
+            $formPackage['combo_product_ids'] = isset($product->combo_product_ids) ? true : false;
+            $formPackage['short_description'] = $product->short_description;
+            $formPackage['price'] = $product->sale_price;
+            $formPackage['currency_symbol'] = $product->country?->symbol;
+            $formPackage['currency'] = $product->country?->currency;
+            $formPackage['stock_available'] = $product->stock_available();
+            $formPackage['image_url'] = url('/uploads/products/' . $product->image);
+
+            $formPackage['available_colors'] = !empty($product->color) && is_array($product->color) ? $product->color : (!empty($product->color) ? [$product->color] : []);
+            $formPackage['available_sizes'] = !empty($product->size) && is_array($product->size) ? $product->size : (!empty($product->size) ? [$product->size] : []);
+
+            $products[] = $formPackage;
+        }
+        //name, labels, type, in dat order
+
+        //for thankyou part
+        // $order = $formHolder->order;
+        $mainProduct_revenue = 0;  //price * qty
+        $qty_main_product = 0;
+
+        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+        foreach ($outgoingStockPackageBundle as $key => &$main_outgoingStock) {
+
+            if (($main_outgoingStock['reason_removed'] == 'as_order_firstphase') && ($main_outgoingStock['customer_acceptance_status'] == 'accepted')) {
+                $product = Product::where('id', $main_outgoingStock['product_id'])->first();
+                if (isset($product)) {
+                    //array_push($mainProducts_outgoingStocks, array('product' => $product)); 
+                    $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                    $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
+                    $qty_main_product += $main_outgoingStock['quantity_removed'];
+                }
+            } else {
+                // Remove the element from the array if the condition is not met
+                unset($outgoingStockPackageBundle[$key]);
+            }
+        }
+
+
+        //convert to array to array-of-object
+        $mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
+
+        //orderbump
+        $orderbumpProduct_revenue = 0; //price * qty
+        $orderbump_outgoingStock = '';
+        $qty_orderbump = 0;
+
+
+        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+
+        if (isset($formHolder->orderbump_id)) {
+            foreach ($outgoingStockPackageBundle as $key => &$orderbump_stock) {
+                if (($orderbump_stock['reason_removed'] == 'as_orderbump') && ($orderbump_stock['customer_acceptance_status'] == 'accepted')) {
+                    $product = Product::where('id', $orderbump_stock['product_id'])->first();
+                    if (isset($product)) {
+                        $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                        $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
+                        $qty_orderbump += $orderbump_stock['quantity_removed'];
+                    }
+                } else {
+                    // Remove the element from the array if the condition is not met
+                    unset($outgoingStockPackageBundle[$key]);
+                }
+            }
+        }
+
+        $orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockPackageBundle)))) : '';
+
+        //upsell
+        $upsellProduct_revenue = 0; //price * qty
+        $upsell_outgoingStock = '';
+        $qty_upsell = 0;
+
+
+        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+
+        if (isset($formHolder->upsell_id)) {
+            foreach ($outgoingStockPackageBundle as $key => &$upsell_stock) {
+                if (($upsell_stock['reason_removed'] == 'as_upsell') && ($upsell_stock['customer_acceptance_status'] == 'accepted')) {
+                    $product = Product::where('id', $upsell_stock['product_id'])->first();
+                    if (isset($product)) {
+                        $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                        $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
+                        $qty_upsell += $upsell_stock['quantity_removed'];
+                    }
+                } else {
+                    // Remove the element from the array if the condition is not met
+                    unset($outgoingStockPackageBundle[$key]);
+                }
+            }
+        }
+        $upsell_outgoingStock = $upsellProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockPackageBundle)))) : '';
+
+        //order total amt
+        $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
+        $grand_total = $order_total_amount; //might include discount later
+
+        $orderId = ''; //used in thankYou section
+        if (isset($order->id)) {
+            $orderId = $order->orderId($order);
+        }
+
+        $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
+
+
+
+        $customer = '';
+        $invoiceData = [];
+        if (isset($order->customer)) {
+            //customer
+            $customer =  $order->customer;
+
+            $receipients = Arr::collapse([[$authUser->email], [$customer->email]]);
+
+            // event(new TestEvent($invoiceData));
+            $this->invoiceData($formHolder, $customer, $order);
+        }
+        // dd($formData);
+
+        return view('pages.form-builder.link', compact(
+            'authUser',
+            'unique_key',
+            'formHolder',
+            'settingsData',
+            'formData',
+            'products',
+            'mainProducts_outgoingStocks',
+            'order',
+            'orderId',
+            'mainProduct_revenue',
+            'orderbump_outgoingStock',
+            'orderbumpProduct_revenue',
+            'upsell_outgoingStock',
+            'upsellProduct_revenue',
+            'customer',
+            'qty_total',
+            'order_total_amount',
+            'grand_total',
+            'stage',
+            'cartAbandoned_id'
+        ));
+    }
 
     //saving built form
     public function newFormBuilderPost(Request $request)
@@ -511,14 +777,14 @@ class FormBuilderController extends Controller
         $selected_package = [];
         // Expected form labels
         $expected_form = [
-            "First Name",
-            "Last Name",
-            "Phone Number",
-            "Whatsapp Phone Number",
-            "Email",
-            "State",
-            "City",
-            "Address"
+            // "First Name",
+            // "Last Name",
+            // "Phone Number",
+            // "Whatsapp Phone Number",
+            // "Email",
+            // "State",
+            // "City",
+            // "Address"
         ];
 
 
@@ -551,9 +817,9 @@ class FormBuilderController extends Controller
             return back()->with('field_error', 'At least one form field is required.')->withInput($request->all());
         }
         // Validate conditions
-        if (!$hasProduct) {
-            return back()->with('field_error', 'A product with at least one selected package is required.')->withInput($request->all());
-        }
+        // if (!$hasProduct) {
+        //     return back()->with('field_error', 'A product with at least one selected package is required.')->withInput($request->all());
+        // }
 
         // Check for expected form fields
         foreach ($expected_form as $form_name) {

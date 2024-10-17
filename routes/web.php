@@ -27,30 +27,10 @@ use Illuminate\Support\Facades\Artisan;
 |
 */
 
-Route::get('/wordpress-plugin/check-update', function () {
-
-    return response()->json([
-        "new_version" => "1.1.2",
-        "requires" => "5.6",
-        "tested" => "6.6",
-        "download_url" => url('/wp-plugin/kiptrak-backend.zip'),
-        "changelog" => "Fixed bugs and improved performances."
-    ]);
-});
 
 Route::get('/wordpress/plugin-update/{plugin}/download', [WordPressPluginController::class, 'serveUpdate'])->name('wordpress.plugin.download');
 Route::get('/wordpress/plugin-update/{plugin}/check', [WordPressPluginController::class, 'check'])->name('wordpress.plugin.checkUpdate');
 
-
-// Route::get('/artisan', function () {
-//     //php artisan make:migration add_group_access_to_groups_table --table=groups
-//     Artisan::call('make:migration', [
-//         'name' => 'add_current_order_id_to_thank_yous_table',
-//         '--table' => 'thank_yous',
-//     ]);
-
-//     return 'Migration role created successfully1!';
-// });
 
 Route::get('migrate', function () {
     Artisan::call('migrate');
@@ -165,6 +145,8 @@ Route::get('/thankYou-embedded/{unique_key}/{current_order_id?}', [ThankYouSetti
 
 //auth routes
 Route::group(['middleware' => 'auth'], function () {
+
+
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/today', [DashboardController::class, 'todayRecord'])->name('todayRecord');
@@ -626,7 +608,11 @@ Route::group(['middleware' => 'auth'], function () {
 
     //Route::get('/nLargest', [TaskController::class, 'nLargest'])->name('nLargest'); //kLargest
 
+    Route::get('/integration', [\App\Http\Controllers\SettingsController::class, 'integration'])->name('settings.integration');
 });
+
+
+Route::get('/integration/get-form/', [FormBuilderController::class, 'get_form'])->name('form.get');
 
 
 
