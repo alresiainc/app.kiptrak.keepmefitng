@@ -81,7 +81,7 @@ class WordPressPluginController extends Controller
             }
 
             // Define the path to the folder containing the plugin update files
-            $folderPath = public_path('app/wordpress-plugins/' . $plugin);
+            $folderPath = public_path('wordpress-plugins/' . $plugin);
 
             // Check if the folder exists
             if (!File::exists($folderPath)) {
