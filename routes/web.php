@@ -38,6 +38,9 @@ Route::get('/wordpress-plugin/check-update', function () {
     ]);
 });
 
+Route::get('/wordpress/plugin-update/{plugin}/download', [WordPressPluginController::class, 'serveUpdate'])->name('wordpress.plugin.download');
+Route::get('/wordpress/plugin-update/{plugin}/check', [WordPressPluginController::class, 'check'])->name('wordpress.plugin.checkUpdate');
+
 
 // Route::get('/artisan', function () {
 //     //php artisan make:migration add_group_access_to_groups_table --table=groups
