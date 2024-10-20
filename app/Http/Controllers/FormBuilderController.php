@@ -10,6 +10,7 @@ use DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TestMail;
 use App\Events\TestEvent;
+use App\Helpers\FormHelper;
 use App\Notifications\TestNofication;
 use App\Notifications\NewOrder;
 use Illuminate\Support\Facades\Notification;
@@ -29,9 +30,10 @@ use App\Models\Customer;
 use App\Models\CartAbandon;
 use App\Models\UpsellSetting;
 use App\Models\GeneralSetting;
+use App\Models\MessageTemplate;
 use App\Models\SoundNotification;
 use App\Models\ThankYou;
-
+use App\Notifications\OrderWhatsappNotification;
 
 class FormBuilderController extends Controller
 {
@@ -494,7 +496,7 @@ class FormBuilderController extends Controller
             'cartAbandoned_id'
         ));
     }
-    public function get_form(Request $request)
+    public function viewPublicForm(Request $request)
     {
 
 
@@ -532,6 +534,8 @@ class FormBuilderController extends Controller
             abort(404, 'Form not found');
         }
 
+
+
         if ($current_order_id) {
             $order = Order::where('id', $current_order_id)->first();
             if (!isset($order)) {
@@ -541,8 +545,12 @@ class FormBuilderController extends Controller
                 }
                 abort(404, 'Order with ID: ' . $current_order_id . ' not found');
             }
+
+
             $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
             $package_bundle_1 = [];
+
+            // dd($outgoingStockPackageBundle);
 
             // Loop through the $outgoingStockPackageBundle array with access to keys
             foreach ($outgoingStockPackageBundle as $key => $value) {
@@ -565,7 +573,7 @@ class FormBuilderController extends Controller
 
         if (!isset($order)) {
             if ($request->expectsJson() || $request->wantsJson() || $request->errors_in_json == 'yes') {
-                return response()->json(['message' => 'Order not available in the form not found'], 404);
+                return response()->json(['message' => 'Order not available in the form'], 404);
             }
             abort(404, 'Order not available in the form not found');
         }
@@ -638,6 +646,8 @@ class FormBuilderController extends Controller
         $qty_main_product = 0;
 
         $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+
+        // dd($outgoingStockPackageBundle);
         foreach ($outgoingStockPackageBundle as $key => &$main_outgoingStock) {
 
             if (($main_outgoingStock['reason_removed'] == 'as_order_firstphase') && ($main_outgoingStock['customer_acceptance_status'] == 'accepted')) {
@@ -654,10 +664,11 @@ class FormBuilderController extends Controller
             }
         }
 
-
+        // dd($outgoingStockPackageBundle);
         //convert to array to array-of-object
         $mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
 
+        // dd($mainProducts_outgoingStocks);
         //orderbump
         $orderbumpProduct_revenue = 0; //price * qty
         $orderbump_outgoingStock = '';
@@ -807,7 +818,7 @@ class FormBuilderController extends Controller
                     $hasForm = true;
                     // Collect form labels
                     if (isset($item['config']['label'])) {
-                        $form_names[] = $item['config']['name'];
+                        $form_names[] = strtolower(str_replace(" ", "_", $item['config']['label']));
                         $form_labels[] = $item['config']['label'];
                     }
                 }
@@ -923,7 +934,7 @@ class FormBuilderController extends Controller
             $staff_ids = $request->staff_assigned_ids;
             $formHolder->update(['staff_assigned_ids' => $staff_ids]);
             if ($request->auto_orders_distribution == 'on') {
-                $formHolder->update(['auto_orders_distribution' => true]);
+                $formHolder->update(['auto_orders_distribution' => true, 'staff_workload_threshold' => $request->staff_workload_threshold]);
             }
         }
 
@@ -1089,14 +1100,14 @@ class FormBuilderController extends Controller
         $selected_package = [];
         // Expected form labels
         $expected_form = [
-            "First Name",
-            "Last Name",
-            "Phone Number",
-            "Whatsapp Phone Number",
-            "Email",
-            "State",
-            "City",
-            "Address"
+            // "First Name",
+            // "Last Name",
+            // "Phone Number",
+            // "Whatsapp Phone Number",
+            // "Email",
+            // "State",
+            // "City",
+            // "Address"
         ];
 
 
@@ -1119,7 +1130,7 @@ class FormBuilderController extends Controller
                     $hasForm = true;
                     // Collect form labels
                     if (isset($item['config']['label'])) {
-                        $form_names[] = $item['config']['name'];
+                        $form_names[] = strtolower(str_replace(" ", "_", $item['config']['label']));
                         $form_labels[] = $item['config']['label'];
                     }
                 }
@@ -1130,9 +1141,9 @@ class FormBuilderController extends Controller
             return back()->with('field_error', 'At least one form field is required.')->withInput($request->all());
         }
         // Validate conditions
-        if (!$hasProduct) {
-            return back()->with('field_error', 'A product with at least one selected package is required.')->withInput($request->all());
-        }
+        // if (!$hasProduct) {
+        //     return back()->with('field_error', 'A product with at least one selected package is required.')->withInput($request->all());
+        // }
 
         // Check for expected form fields
         foreach ($expected_form as $form_name) {
@@ -1243,7 +1254,7 @@ class FormBuilderController extends Controller
             $staff_ids = $request->staff_assigned_ids;
             $formHolder->update(['staff_assigned_ids' => $staff_ids]);
             if ($request->auto_orders_distribution == 'on') {
-                $formHolder->update(['auto_orders_distribution' => true]);
+                $formHolder->update(['auto_orders_distribution' => true, 'staff_workload_threshold' => $request->staff_workload_threshold]);
             }
         }
 
@@ -1841,7 +1852,7 @@ class FormBuilderController extends Controller
                     $hasForm = true;
                     // Collect form labels
                     if (isset($item['config']['label'])) {
-                        $form_names[] = $item['config']['name'];
+                        $form_names[] = strtolower(str_replace(" ", "_", $item['config']['label']));
                         $form_labels[] = $item['config']['label'];
                     }
                 }
@@ -1965,7 +1976,7 @@ class FormBuilderController extends Controller
                 $staff_ids = $request->staff_assigned_ids;
                 $formHolder->update(['staff_assigned_ids' => $staff_ids]);
                 if ($request->auto_orders_distribution == 'on') {
-                    $formHolder->update(['auto_orders_distribution' => true]);
+                    $formHolder->update(['auto_orders_distribution' => true, 'staff_workload_threshold' => $request->staff_workload_threshold]);
                 }
             }
 
@@ -2102,6 +2113,7 @@ class FormBuilderController extends Controller
             $formHolder->staff_assigned_ids = isset($formHolder_former->staff_assigned_ids) ? $formHolder_former->staff_assigned_ids : null;
             $formHolder->staff_assigned_id = isset($formHolder_former->staff_assigned_id) ? $formHolder_former->staff_assigned_id : null;
             $formHolder->auto_orders_distribution = $formHolder_former->auto_orders_distribution;
+            $formHolder->staff_workload_threshold = $formHolder_former->staff_workload_threshold;
             $formHolder->order_id = $order->id;
 
             $formHolder->created_by = $authUser->id;
@@ -2175,7 +2187,7 @@ class FormBuilderController extends Controller
                 $staff_ids = $request->staff_assigned_ids;
                 $formHolder->update(['staff_assigned_ids' => $staff_ids]);
                 if ($request->auto_orders_distribution == 'on') {
-                    $formHolder->update(['auto_orders_distribution' => true]);
+                    $formHolder->update(['auto_orders_distribution' => true, 'staff_workload_threshold' => $request->staff_workload_threshold]);
                 }
             }
 
@@ -3416,16 +3428,18 @@ class FormBuilderController extends Controller
     //after clicking first main btn, ajax
     public function saveNewFormFromCustomer(Request $request)
     {
+
+        // dd($request->all());
         $data = $request->all();
         //create a code to delay the code for 15 sec
-        sleep(20);
+        // sleep(20);
 
         //delete cartabandoned
-
         $cartAbandon = CartAbandon::where('id', $data['cartAbandoned_id']);
         if ($cartAbandon->exists()) {
             $cartAbandon->delete();
         }
+
 
         $formHolder = FormHolder::where('unique_key', $data['unique_key'])->first();
         $order = $formHolder->order;
@@ -3446,7 +3460,7 @@ class FormBuilderController extends Controller
             //////////////////////////////////////////////////////////
             //making a copy from the former outgoingStock, in the case of dealing with an edited or duplicated form
             $outgoingStockPackageBundleFormer = $order->outgoingStock->package_bundle;
-
+            // dd($order->outgoingStock->package_bundle);
             $package_bundle_1 = [];
             foreach ($outgoingStockPackageBundleFormer as $i => $outgoingStock) {
                 $product = Product::find($outgoingStock['product_id']);
@@ -3475,34 +3489,98 @@ class FormBuilderController extends Controller
 
             #remove later
             $outgoingStock = OutgoingStock::where('order_id', $newOrder->id)->first();
-            $outgoingStockPackageBundle = $outgoingStock->package_bundle; //[{},{}]
-            foreach ($data['product_packages'] as $key => $product_id) {
-                if (!empty($product_id)) {
-                    $idPriceQty = explode('-', $product_id);
-                    $productId = $idPriceQty[0];
-                    $saleUnitPrice = $idPriceQty[1];
-                    $qtyRemoved = $idPriceQty[2];
 
-                    // Accepted updated
+            $outgoingStockPackageBundle = $outgoingStock->package_bundle; //[{},{}]
+
+
+
+
+            //Old code 
+            // foreach ($data['product_packages'] ?? [] as $key => $product_id) {
+            //     if (!empty($product_id)) {
+            //         $idPriceQty = explode('-', $product_id);
+            //         $productId = $idPriceQty[0];
+            //         $saleUnitPrice = $idPriceQty[1];
+            //         $qtyRemoved = $idPriceQty[2];
+
+            //         // Accepted updated
+            //         $amount_accrued = $qtyRemoved * $saleUnitPrice;
+
+            //         foreach ($outgoingStockPackageBundle as &$stock) {
+            //             $product = Product::find($stock['product_id']);
+
+            //             if ($stock['product_id'] == (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
+            //                 $stock['quantity_removed'] = $qtyRemoved;
+            //                 $stock['amount_accrued'] = $amount_accrued;
+            //                 $stock['customer_acceptance_status'] = 'accepted';
+            //             }
+            //             // Rejected or declined updated
+            //             if ($stock['product_id'] !== (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
+            //                 $stock['customer_acceptance_status'] = 'rejected';
+            //                 $stock['amount_accrued'] = $product->sale_price;
+            //                 $stock['quantity_returned'] = $stock['quantity_removed'];
+            //                 $stock['reason_returned'] = 'declined';
+            //             }
+            //         }
+            //     }
+            // }
+
+            //NEW CODES
+            foreach ($data['product_packages'] ?? [] as $key => $product_id) {
+                if (!empty($product_id)) {
+                    // Extract product details from the string
+                    $idPriceQty = explode('-', $product_id);
+                    $productId = $idPriceQty[0];     // Product ID
+                    $saleUnitPrice = $idPriceQty[1]; // Unit price
+                    $qtyRemoved = $idPriceQty[2];    // Quantity removed
+
+                    // Calculate the amount accrued
                     $amount_accrued = $qtyRemoved * $saleUnitPrice;
 
                     foreach ($outgoingStockPackageBundle as &$stock) {
+                        // Fetch the product information from the database
                         $product = Product::find($stock['product_id']);
+
+                        // Check if the product ID from $outgoingStockPackageBundle matches and reason_removed is 'as_order_firstphase'
                         if ($stock['product_id'] == (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
                             $stock['quantity_removed'] = $qtyRemoved;
                             $stock['amount_accrued'] = $amount_accrued;
                             $stock['customer_acceptance_status'] = 'accepted';
                         }
-                        // Rejected or declined updated
-                        if ($stock['product_id'] !== (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
-                            $stock['customer_acceptance_status'] = 'rejected';
-                            $stock['amount_accrued'] = $product->sale_price;
-                            $stock['quantity_returned'] = $stock['quantity_removed'];
-                            $stock['reason_returned'] = 'declined';
-                        }
                     }
                 }
             }
+
+            // Additional loop to set 'rejected' status if the product is not found in $data['product_packages']
+            foreach ($outgoingStockPackageBundle as &$stock) {
+                $productFound = false;
+                foreach ($data['product_packages'] ?? [] as $product_id) {
+                    if (!empty($product_id)) {
+                        $idPriceQty = explode('-', $product_id);
+                        $productId = $idPriceQty[0];
+
+                        // Check if the product ID matches
+                        if ($stock['product_id'] == (int) $productId) {
+                            $productFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                // If the product is not found in $data['product_packages'] and reason_removed is 'as_order_firstphase', mark as rejected
+                if (!$productFound && $stock['reason_removed'] == 'as_order_firstphase') {
+                    $product = Product::find($stock['product_id']); // Fetch the product details
+                    $stock['customer_acceptance_status'] = 'rejected';
+                    $stock['amount_accrued'] = $product->sale_price;
+                    $stock['quantity_returned'] = $stock['quantity_removed'];
+                    $stock['reason_returned'] = 'declined';
+                }
+            }
+
+
+
+
+            // dd($outgoingStockPackageBundle);
             #remove later
 
             #remove later
@@ -3531,18 +3609,36 @@ class FormBuilderController extends Controller
             $newOrder = Order::find($newOrder->id);
             $newOrder->customer_id = $customer->id;
             $newOrder->status = 'new';
-            $newOrder->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
+            // $newOrder->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
+            if ($customer->delivery_duration) {
+                $newOrder->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
+            }
+
+            $nextStaff = (new FormHelper())->getNextAvailableStaff($formHolder, true);
+            $newOrder->staff_assigned_id = $nextStaff?->id ?? null;
             $newOrder->save();
+
+            //Send Message to the assigned staff if any
+            $whatsapp_new_order_assigned = MessageTemplate::where('type', 'whatsapp_new_order_assigned')->first()?->message;
+            $nextStaff?->notify(new OrderWhatsappNotification($newOrder, $whatsapp_new_order_assigned));
+
 
             $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
             $has_upsell = isset($formHolder->upsell_id) ? true : false;
             $data['has_orderbump'] = $has_orderbump;
             $data['has_upsell'] = $has_upsell;
             $data['order_id'] = $newOrder->id;
+            $data['staff_assigned_id'] = $newOrder->staff_assigned_id;
+
+
 
             //call notify fxn
             if ($has_orderbump == false && $has_upsell == false) {
                 $this->invoiceData($formHolder, $customer, $newOrder);
+
+                //Send Message to the customer
+                $whatsapp_new_order_message = MessageTemplate::where('type', 'whatsapp_new_order_message')->first()?->message;
+                $customer->notify(new OrderWhatsappNotification($newOrder, $whatsapp_new_order_message));
             }
 
             return response()->json([
@@ -3556,29 +3652,56 @@ class FormBuilderController extends Controller
             #remove later
             $outgoingStock = OutgoingStock::where('order_id', $order->id)->first();
             $outgoingStockPackageBundle = $outgoingStock->package_bundle; //[{},{}]
-            foreach ($data['product_packages'] as $key => $product_id) {
-                if (!empty($product_id)) {
-                    $idPriceQty = explode('-', $product_id);
-                    $productId = $idPriceQty[0];
-                    $saleUnitPrice = $idPriceQty[1];
-                    $qtyRemoved = $idPriceQty[2];
 
-                    // Accepted updated
+            //NEW CODES
+            foreach ($data['product_packages'] ?? [] as $key => $product_id) {
+                if (!empty($product_id)) {
+                    // Extract product details from the string
+                    $idPriceQty = explode('-', $product_id);
+                    $productId = $idPriceQty[0];     // Product ID
+                    $saleUnitPrice = $idPriceQty[1]; // Unit price
+                    $qtyRemoved = $idPriceQty[2];    // Quantity removed
+
+                    // Calculate the amount accrued
                     $amount_accrued = $qtyRemoved * $saleUnitPrice;
 
                     foreach ($outgoingStockPackageBundle as &$stock) {
+                        // Fetch the product information from the database
+                        $product = Product::find($stock['product_id']);
+
+                        // Check if the product ID from $outgoingStockPackageBundle matches and reason_removed is 'as_order_firstphase'
                         if ($stock['product_id'] == (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
                             $stock['quantity_removed'] = $qtyRemoved;
                             $stock['amount_accrued'] = $amount_accrued;
                             $stock['customer_acceptance_status'] = 'accepted';
                         }
-                        // Rejected or declined updated
-                        if ($stock['product_id'] !== (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
-                            $stock['customer_acceptance_status'] = 'rejected';
-                            $stock['quantity_returned'] = $stock['quantity_removed'];
-                            $stock['reason_returned'] = 'declined';
+                    }
+                }
+            }
+
+            // Additional loop to set 'rejected' status if the product is not found in $data['product_packages']
+            foreach ($outgoingStockPackageBundle as &$stock) {
+                $productFound = false;
+                foreach ($data['product_packages'] ?? [] as $product_id) {
+                    if (!empty($product_id)) {
+                        $idPriceQty = explode('-', $product_id);
+                        $productId = $idPriceQty[0];
+
+                        // Check if the product ID matches
+                        if ($stock['product_id'] == (int) $productId) {
+                            $productFound = true;
+                            break;
                         }
                     }
+                }
+
+                // If the product is not found in $data['product_packages'] and reason_removed is 'as_order_firstphase', mark as rejected
+                if (!$productFound && $stock['reason_removed'] == 'as_order_firstphase') {
+                    $product = Product::find($stock['product_id']); // Fetch the product details
+                    $stock['customer_acceptance_status'] = 'rejected';
+                    $stock['amount_accrued'] = $product->sale_price;
+                    $stock['quantity_returned'] = $stock['quantity_removed'];
+                    $stock['reason_returned'] = 'declined';
                 }
             }
             #remove later
@@ -3611,19 +3734,32 @@ class FormBuilderController extends Controller
             if ($customer->delivery_duration) {
                 $order->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
             }
+            $nextStaff = (new FormHelper())->getNextAvailableStaff($formHolder, true);
+            $order->staff_assigned_id = $nextStaff?->id ?? null;
             $order->save();
+
+            //Send Message to the assigned staff if any
+            $whatsapp_new_order_assigned = MessageTemplate::where('type', 'whatsapp_new_order_assigned')->first()?->message;
+            $nextStaff?->notify(new OrderWhatsappNotification($order, $whatsapp_new_order_assigned));
+
 
             $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
             $has_upsell = isset($formHolder->upsell_id) ? true : false;
             $data['has_orderbump'] = $has_orderbump;
             $data['has_upsell'] = $has_upsell;
             $data['order_id'] = $order->id;
+            $data['staff_assigned_id'] = $order->staff_assigned_id;
+            $data['nextStaff'] = $nextStaff;
 
             $data['order'] = $order->outgoingStock->package_bundle;
 
             //call notify fxn
             if ($has_orderbump == false && $has_upsell == false) {
                 $this->invoiceData($formHolder, $customer, $order);
+
+                //Send Message to the customer
+                $whatsapp_new_order_message = MessageTemplate::where('type', 'whatsapp_new_order_message')->first()?->message;
+                $customer->notify(new OrderWhatsappNotification($order, $whatsapp_new_order_message));
             }
 
             return response()->json([
@@ -3692,7 +3828,11 @@ class FormBuilderController extends Controller
         //call notify fxn
         if ($has_upsell == false) {
             $this->invoiceData($formHolder, $customer, $order);
+            //Send Message to the customer
+            $whatsapp_new_order_message = MessageTemplate::where('type', 'whatsapp_new_order_message')->first()?->message;
+            $customer->notify(new OrderWhatsappNotification($order, $whatsapp_new_order_message));
         }
+
 
         return response()->json([
             'status' => true,
@@ -3752,6 +3892,9 @@ class FormBuilderController extends Controller
         //////////////////////////////////////////////////////////////////////////////
         $customer =  $order->customer;
         $this->invoiceData($formHolder, $customer, $order);
+        
+        $whatsapp_new_order_message = MessageTemplate::where('type', 'whatsapp_new_order_message')->first()?->message;
+        $customer->notify(new OrderWhatsappNotification($order, $whatsapp_new_order_message));
 
         //////////////////////////////////////////////////////////////////////////////
 

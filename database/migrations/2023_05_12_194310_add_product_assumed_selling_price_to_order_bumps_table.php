@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('order_bumps', function (Blueprint $table) {
-            $table->string('product_assumed_selling_price')->nullable()->after('product_actual_selling_price');
+            $table->dropColumn('product_assumed_selling_price');
         });
     }
 };

@@ -30,7 +30,7 @@
     <link href="{{ asset('/customerform/assets/vendor/quill/quill.bubble.css') }}" rel="stylesheet">
     <link href="{{ asset('/customerform/assets/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
     <link href="{{ asset('/customerform/assets/vendor/simple-datatables/style.css') }}" rel="stylesheet">
-
+    <link href="{{ asset('assets/vendor/toastr/toastr.min.css') }}" rel="stylesheet">
     <!-- Font awesome 5 -->
     <link rel="preload" href="{{ asset('/customerform/assets/vendor/font-awesome/webfonts/fa-solid-900.woff2') }}"
         as="font" type="font/woff" crossorigin>
@@ -458,7 +458,7 @@
             border-radius: 5px;
             padding: 5px 10px;
             font-size: 0.9rem;
-            margin-top: 5px;
+            /* margin-top: 5px; */
             max-width: 180px;
             transition: border-color 0.2s;
         }
@@ -499,8 +499,8 @@
 
         /* Checked State for Color Circles */
         .color-radio:checked+.color-circle {
-            width: 18px;
-            height: 18px;
+            /* width: 18px; */
+            /* height: 18px; */
         }
 
         .no-product i {
@@ -581,9 +581,18 @@
         }
 
 
-        .product-qty input,
+
         .product-qty button {
             width: 25px !important;
+            height: 25px !important;
+            padding: 2px !important;
+            font-size: 15px;
+            font-weight: 400;
+            flex: none !important;
+        }
+
+        .product-qty input {
+            width: 50px !important;
             height: 25px !important;
             padding: 2px !important;
             font-size: 15px;
@@ -620,6 +629,10 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
+
+        .progress-bar {
+            background-color: #04512d !important;
+        }
     </style>
 </head>
 
@@ -627,17 +640,18 @@
 
     <div id="loader-overlay" style="display: none;">
         <div class="loader text-center">
-            <div class="spinner-border text-primary" role="status" id="spinner-icon" style="margin-bottom: 15px;">
+            <div class="spinner-border " role="status" id="spinner-icon" style="margin-bottom: 15px; color:#04512d">
                 <span class="visually-hidden">Loading...</span>
             </div>
             <p id="funny-message">Hang tight, magic is happening...</p>
             <p>Progress: <span id="progress-percentage">0%</span></p>
             <div class="progress">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                    style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                </div>
+                    style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                    style="background-color: #04512d !important"></div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- will be shown in singlelink-->
@@ -684,6 +698,7 @@
         <!-- Monitoring diferent stages in the form -->
 
         <!-- CHECKOUT VIEW Main + orderbump + upsell -->
+        {{-- @dd($formData) --}}
         @if (!isset($stage))
             <div class="row view" id="main-section" style="display: block;">
                 <div class="col-md-12">
@@ -1417,7 +1432,7 @@
             </div>
         @endif
         <!--/ THANKYOU VIEW -->
-        <div id="pdf-content" style="display: none"></div>
+        <div id="pdf-content" style="display: none"> HeLLO</div>
         <div id="pdf-renderer"></div>
 
     </main>
@@ -1457,6 +1472,11 @@
     <script src="{{ asset('/customerform/assets/js/main.js?v=42') }}"></script>
     <script src="{{ asset('/customerform/assets/js/navigation.js?v=4') }}"></script>
     <script src="{{ asset('assets/js/jquery.validate.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/toastr/toastr.min.js') }}"></script>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+
 
     <!-- submit main form -->
     <script>
@@ -1501,8 +1521,37 @@
 
                 currentView = viewId;
             }
+
+            const next = () => {
+                var unique_key = $('.formholder_unique_key').val();
+                var current_order_id = $('.current_order_id').val();
+                var thankyou_unique_key = $(".thankyou_unique_key").val();
+                let redirect_url = $('.redirect_url').val();
+                if (redirect_url != '') {
+                    window.parent.location.href = redirect_url;
+                } else {
+
+                    if (thankyou_unique_key == '') {
+                        const data = {
+                            unique_key: unique_key,
+                            order_id: current_order_id,
+                            stage: "thankYou",
+                        }
+                        const params = $.param(data);
+                        redirect_url = `/link/form/get-view?${params}`;
+                        window.parent.location.href = redirect_url;
+                        $('.current_order_id').val('');
+                        setView('thankyou-section');
+                    } else {
+                        $('.current_order_id').val('');
+                        window.parent.location.href = "/view-thankyou-templates/" +
+                            thankyou_unique_key + "/" + current_order_id;
+                    }
+                }
+            }
+
             //initialise view
-            setView('main-section');
+            // setView('main-section');
             /** END SET VIEWS */
 
             //cart abandoned
@@ -1807,10 +1856,12 @@
                 }, 500);
             }
 
+
             $('.main_package_submit_btn').click(function(e) {
                 e.preventDefault();
 
                 const submitButton = $(this)
+                const buttonOldText = $(this).text()
 
 
                 var unique_key = $(".formholder_unique_key").val();
@@ -1840,8 +1891,20 @@
                         form_fields: formValues
                     };
 
+
                     // Show the loader and start simulating the progress
                     const interval = startLoader();
+
+
+                    // Create URL parameters
+                    const params = $.param(data); // Converts data object to URL query string
+                    const newUrl = `/ajax-save-new-form-link?${params}`; // Construct new URL
+
+                    console.log(data);
+
+                    // return;
+                    // Navigate to the new URL
+                    // window.location.href = newUrl; // Redirect to the new URL
 
                     $.ajax({
                         type: 'get',
@@ -1858,52 +1921,35 @@
                             } else if (resp.data.has_upsell) {
                                 setView('upsell-section');
                             } else {
-                                var current_order_id = $('.current_order_id').val();
-                                var thankyou_unique_key = $(".thankyou_unique_key").val();
-                                var redirect_url = $('.redirect_url').val();
-
-                                if (redirect_url != '') {
-                                    window.parent.location.href = redirect_url;
-                                } else {
-                                    if (thankyou_unique_key == '') {
-                                        window.parent.location.href = "/new-form-link/" + unique_key + "/" +
-                                            current_order_id + "/thankYou";
-                                        $('.current_order_id').val('');
-                                        setView('thankyou-section');
-                                    } else {
-                                        $('.current_order_id').val('');
-                                        window.parent.location.href = "/view-thankyou-templates/" +
-                                            thankyou_unique_key + "/" + current_order_id;
-                                    }
-                                }
+                                next();
                             }
                         },
                         error: function(e) {
                             console.log(e);
-
-                            submitButton.text(
-                                "{{ $settingsData['form_button_text'] ?? 'Submit Order' }}");
+                            toastr.error(
+                                'An error occurred while processing your request. Please try again later.'
+                            );
+                            submitButton.text(buttonOldText);
                             submitButton.prop('disabled', false);
                             clearInterval(interval); // Stop the interval when error occurs
-                            alert("Error");
                             $("#loader-overlay").fadeOut();
                         }
                     });
 
                 } else {
-                    console.log("Form is invalid. Please fix the errors.");
+                    toastr.error('You have an error in your form!');
                 }
             });
-
-
-
-
 
 
 
             //orderbump_stage
             $('.orderbump_submit_btn').click(function(e) {
                 e.preventDefault();
+                const submitButton = $(this)
+                const buttonOldText = $(this).text()
+
+
                 var unique_key = $(".formholder_unique_key").val();
 
                 var current_order_id = $(".current_order_id").val();
@@ -1911,8 +1957,12 @@
                 if ($('.orderbump_product_checkbox').val() != '') {
                     var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
 
-                    $(this).text('Please wait...');
-                    $(this).prop('disabled', true);
+                    submitButton.text('Please wait...');
+                    submitButton.prop('disabled', true);
+                    // Show the loader and start simulating the progress
+                    const interval = startLoader();
+
+
 
                     $.ajax({
                         type: 'get',
@@ -1924,53 +1974,55 @@
                         },
                         success: function(resp) {
                             //console.log(resp)
+                            clearInterval(interval); // Stop the interval when request is done
+                            finishLoader(); // Fill the bar to 100%
+
+
+
                             localStorage.setItem('orderbump_stage', 'done');
                             if (resp.data.has_upsell) {
                                 setView('upsell-section')
-
                             } else {
-                                var current_order_id = $('.current_order_id').val();
-                                var thankyou_unique_key = $(".thankyou_unique_key").val();
-                                var redirect_url = $('.redirect_url').val();
-
-                                if (redirect_url != '') {
-                                    window.parent.location.href = redirect_url;
-                                } else {
-                                    if (thankyou_unique_key == '') {
-                                        window.parent.location.href = "/new-form-link/" + unique_key + "/" +
-                                            current_order_id + "/thankYou";
-                                        $('.current_order_id').val('');
-                                        setView('thankyou-section')
-                                    } else {
-                                        $('.current_order_id').val('');
-                                        window.parent.location.href = "/view-thankyou-templates/" +
-                                            thankyou_unique_key + "/" + current_order_id
-                                    }
-                                }
+                                next();
 
                             }
 
                         },
-                        error: function() {
-                            alert("Error");
+                        error: function(e) {
+                            //Error
+                            console.log(e);
+                            toastr.error(
+                                'An error occurred while processing your request. Please try again later.'
+                            );
+                            submitButton.text(buttonOldText);
+                            submitButton.prop('disabled', false);
+                            clearInterval(interval); // Stop the interval when error occurs
+                            $("#loader-overlay").fadeOut();
                         }
                     });
 
                 } else {
-                    alert('Error: Something went wrong')
+                    toastr.error('Something went wrong')
                 }
             });
 
             //upsell_stage
             $('.upsell_submit_btn').click(function(e) {
                 e.preventDefault();
+
+                const submitButton = $(this)
+                const buttonOldText = $(this).text()
                 var unique_key = $(".formholder_unique_key").val();
                 var current_order_id = $(".current_order_id").val();
                 var upsell_product_checkbox = ''
                 if ($('.upsell_product_checkbox').val() != '') {
                     var upsell_product_checkbox = $('.upsell_product_checkbox').val();
-                    $(this).text('Please wait...');
-                    $(this).prop('disabled', true);
+                    submitButton.text('Please wait...');
+                    submitButton.prop('disabled', true);
+
+                    // Show the loader and start simulating the progress
+                    const interval = startLoader();
+
 
                     $.ajax({
                         type: 'get',
@@ -1982,55 +2034,47 @@
                         },
                         success: function(resp) {
                             //console.log(resp)
+                            clearInterval(interval); // Stop the interval when request is done
+                            finishLoader(); // Fill the bar to 100%
+
                             localStorage.setItem('upsell_stage', 'done');
-
-                            // window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
-                            // $('.current_order_id').val('');
-                            // setView('thankyou-section')
-
-                            var current_order_id = $('.current_order_id').val();
-                            var thankyou_unique_key = $(".thankyou_unique_key").val();
-                            var redirect_url = $('.redirect_url').val();
-
-                            if (redirect_url != '') {
-                                window.parent.location.href = redirect_url;
-                            } else {
-                                if (thankyou_unique_key == '') {
-                                    window.parent.location.href = "/new-form-link/" + unique_key + "/" +
-                                        current_order_id + "/thankYou";
-                                    $('.current_order_id').val('');
-                                    setView('thankyou-section')
-                                } else {
-                                    $('.current_order_id').val('');
-                                    window.parent.location.href = "/view-thankyou-templates/" +
-                                        thankyou_unique_key + "/" + current_order_id
-                                }
-                            }
+                            next();
 
 
                         },
-                        error: function() {
-                            alert("Error");
+                        error: function(e) {
+                            //Error
+                            console.log(e);
+                            toastr.error(
+                                'An error occurred while processing your request. Please try again later.'
+                            );
+                            submitButton.text(buttonOldText);
+                            submitButton.prop('disabled', false);
+                            clearInterval(interval); // Stop the interval when error occurs
+                            $("#loader-overlay").fadeOut();
                         }
                     });
 
                 } else {
-                    alert('Error: Something went wrong')
+                    toastr.error('Something went wrong')
                 }
             });
 
             //orderbump_refusal
             $('.orderbump_refusal').click(function() {
                 if ($(this).is(':checked')) {
+                    const submitButton = $(this)
+                    const buttonOldText = $(this).text()
 
                     var unique_key = $(".formholder_unique_key").val();
                     var current_order_id = $(".current_order_id").val();
                     var orderbump_product_checkbox = ''
                     if ($('.orderbump_product_checkbox').val() != '') {
                         var orderbump_product_checkbox = $('.orderbump_product_checkbox').val();
-                        $(this).text('Please wait...');
-                        $(this).prop('disabled', true);
-
+                        submitButton.text('Please wait...');
+                        submitButton.prop('disabled', true);
+                        // Show the loader and start simulating the progress
+                        const interval = startLoader();
                         $.ajax({
                             type: 'get',
                             url: '/ajax-save-new-form-link-orderbump-refusal',
@@ -2041,44 +2085,32 @@
                             },
                             success: function(resp) {
                                 //console.log(resp)
+                                clearInterval(interval); // Stop the interval when request is done
+                                finishLoader(); // Fill the bar to 100%
                                 localStorage.setItem('orderbump_stage', 'done');
                                 if (resp.data.has_upsell) {
                                     setView('upsell-section')
-
                                 } else {
-                                    // window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
-                                    // $(".current_order_id").val('');
-                                    // setView('thankyou-section')
-
-                                    var current_order_id = $('.current_order_id').val();
-                                    var thankyou_unique_key = $(".thankyou_unique_key").val();
-                                    var redirect_url = $('.redirect_url').val();
-
-                                    if (redirect_url != '') {
-                                        window.parent.location.href = redirect_url;
-                                    } else {
-                                        if (thankyou_unique_key == '') {
-                                            window.parent.location.href = "/new-form-link/" + unique_key +
-                                                "/" +
-                                                current_order_id + "/thankYou";
-                                            $('.current_order_id').val('');
-                                            setView('thankyou-section')
-                                        } else {
-                                            $('.current_order_id').val('');
-                                            window.parent.location.href = "/view-thankyou-templates/" +
-                                                thankyou_unique_key + "/" + current_order_id
-                                        }
-                                    }
+                                    next();
                                 }
 
                             },
-                            error: function() {
-                                alert("Error");
+                            error: function(e) {
+                                //Error
+                                console.log(e);
+                                toastr.error(
+                                    'An error occurred while processing your request. Please try again later.'
+                                );
+                                submitButton.text(buttonOldText);
+                                submitButton.prop('disabled', false);
+                                clearInterval(interval); // Stop the interval when error occurs
+                                $("#loader-overlay").fadeOut();
                             }
                         });
 
                     } else {
-                        alert('Error: Something went wrong')
+                        toastr.error(
+                            'Something went wrong')
                     }
 
                 }
@@ -2088,15 +2120,18 @@
             //upsell_refusal
             $('.upsell_refusal').click(function() {
                 if ($(this).is(':checked')) {
+                    const submitButton = $(this)
+                    const buttonOldText = $(this).text()
 
                     var unique_key = $(".formholder_unique_key").val();
                     var current_order_id = $(".current_order_id").val();
                     var upsell_product_checkbox = ''
                     if ($('.upsell_product_checkbox').val() != '') {
                         var upsell_product_checkbox = $('.upsell_product_checkbox').val();
-                        $(this).text('Please wait...');
-                        $(this).prop('disabled', true);
-
+                        submitButton.text('Please wait...');
+                        submitButton.prop('disabled', true);
+                        // Show the loader and start simulating the progress
+                        const interval = startLoader();
                         $.ajax({
                             type: 'get',
                             url: '/ajax-save-new-form-link-upsell-refusal',
@@ -2107,39 +2142,28 @@
                             },
                             success: function(resp) {
                                 //console.log(resp)
+                                clearInterval(interval); // Stop the interval when request is done
+                                finishLoader(); // Fill the bar to 100%
                                 localStorage.setItem('upsell_stage', 'done');
-                                // window.location.href = "/new-form-link/"+unique_key+"/"+current_order_id+"/thankYou"
-                                // $(".current_order_id").val('');
-                                // setView('thankyou-section')
-
-
-                                var current_order_id = $('.current_order_id').val();
-                                var thankyou_unique_key = $(".thankyou_unique_key").val();
-                                var redirect_url = $('.redirect_url').val();
-
-                                if (redirect_url != '') {
-                                    window.parent.location.href = redirect_url;
-                                } else {
-                                    if (thankyou_unique_key == '') {
-                                        window.parent.location.href = "/new-form-link/" + unique_key + "/" +
-                                            current_order_id + "/thankYou";
-                                        $('.current_order_id').val('');
-                                        setView('thankyou-section')
-                                    } else {
-                                        $('.current_order_id').val('');
-                                        window.parent.location.href = "/view-thankyou-templates/" +
-                                            thankyou_unique_key + "/" + current_order_id
-                                    }
-                                }
+                                next();
 
                             },
                             error: function() {
-                                alert("Error");
+                                //Error
+                                console.log(e);
+                                toastr.error(
+                                    'An error occurred while processing your request. Please try again later.'
+                                );
+                                submitButton.text(buttonOldText);
+                                submitButton.prop('disabled', false);
+                                clearInterval(interval); // Stop the interval when error occurs
+                                $("#loader-overlay").fadeOut();
                             }
                         });
 
                     } else {
-                        alert('Error: Something went wrong')
+                        toastr.error(
+                            'Something went wrong')
                     }
 
                 }
@@ -2183,13 +2207,47 @@
         };
 
         $('#generate-pdf').click(function() {
-            $('#pdf-content').show();
-            doc.fromHTML($('#pdf-content').html(), 15, 15, {
-                'width': 170,
-                'elementHandlers': specialElementHandlers
+            const button = $(this);
+            const oldValue = button.html();
+            button.html('<i class="fa fa-spinner fa-spin"></i> Generating PDF...');
+
+            const element = document.getElementById('thankyou-section');
+            const uniqueKey = $(".formholder_unique_key").val();
+
+            // Generate a timestamp for the filename
+            const timestamp = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0];
+            const filename = `invoice-${timestamp}.pdf`;
+
+            html2canvas(element, {
+                ignoreElements: (el) => {
+                    // Ignore the button when generating the canvas
+                    return el.id === 'generate-pdf';
+                }
+            }).then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 295; // A4 height in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save(filename);
+                button.html(oldValue);
+            }).catch((error) => {
+                console.error("Error generating PDF: ", error);
+                button.html(oldValue);
             });
-            doc.save('sample-file.pdf');
-            $('#pdf-content').hide();
         });
     </script>
 

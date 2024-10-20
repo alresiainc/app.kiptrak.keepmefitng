@@ -1,0 +1,138 @@
+[
+    {
+        "type": "image",
+        "config": {
+            "width": "250px",
+            "height": "108px",
+            "textAlign": "center",
+            "src": "http://kiptrak.test/assets/img/logo.png",
+            "column_width": "col-sm-12",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px"
+        }
+    },
+    {
+        "type": "text",
+        "config": {
+            "mode": "advanced",
+            "color": "rgb(69, 69, 69)",
+            "fontWeight": "400",
+            "fontFamily": "\"Open Sans\", sans-serif",
+            "fontSize": "16px",
+            "fontStyle": "normal",
+            "textAlign": "start",
+            "textTransform": "none",
+            "textDecoration": "none solid rgb(69, 69, 69)",
+            "content": "<p style=\"text-align: center;\"><span style=\"font-size: 24pt;\"><strong>Order Form Description</strong></span></p>\n<p style=\"text-align: center;\">This order form is designed to collect essential information from customers wishing to place an order for products. It includes various input fields that ensure the order details are captured accurately and comprehensively.</p>",
+            "column_width": "col-sm-12",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px"
+        }
+    },
+    {
+        "type": "form",
+        "config": {
+            "label": "Full Name",
+            "size": "md",
+            "type": "text",
+            "placeholder": "Enter value",
+            "defaultValue": "",
+            "required": true,
+            "options": [],
+            "name": "full_name",
+            "column_width": "col-sm-12",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px"
+        }
+    },
+    {
+        "type": "form",
+        "config": {
+            "label": "Email Address",
+            "size": "md",
+            "type": "text",
+            "placeholder": "Enter value",
+            "defaultValue": "",
+            "required": "true",
+            "name": "email_address",
+            "column_width": "col-sm-6",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px"
+        }
+    },
+    {
+        "type": "form",
+        "config": {
+            "label": "Phone Number",
+            "size": "md",
+            "type": "text",
+            "placeholder": "Enter value",
+            "defaultValue": "",
+            "required": "true",
+            "name": "phone_number",
+            "column_width": "col-sm-6",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px"
+        }
+    },
+    {
+        "type": "form",
+        "config": {
+            "label": "Address",
+            "size": "md",
+            "type": "textarea",
+            "placeholder": "",
+            "defaultValue": "",
+            "required": false,
+            "name": "address",
+            "column_width": "col-sm-12",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px"
+        }
+    },
+    {
+        "type": "form",
+        "config": {
+            "label": "Preferred Delivery Time",
+            "size": "md",
+            "type": "select",
+            "placeholder": "Enter value",
+            "defaultValue": "",
+            "required": "false",
+            "options": ["Within 24 hours", "within 48 hours"],
+            "name": "preferred_delivery_time",
+            "column_width": "col-sm-12",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px",
+            "content": "Preferred Delivery Time"
+        }
+    },
+    {
+        "type": "product",
+        "config": {
+            "package_choice": "package_multi",
+            "label": "Product",
+            "selected_package": [1, 2, 3],
+            "column_width": "col-sm-4",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px",
+            "name": "product"
+        }
+    }
+]

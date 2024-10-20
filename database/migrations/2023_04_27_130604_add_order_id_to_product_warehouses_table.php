@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('product_warehouses', function (Blueprint $table) {
-            $table->longText('order_id')->nullable()->after('warehouse_id');
+            $table->dropColumn('order_id');
         });
     }
 };

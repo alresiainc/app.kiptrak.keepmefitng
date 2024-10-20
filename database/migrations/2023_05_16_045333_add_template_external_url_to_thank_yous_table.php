@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('thank_yous', function (Blueprint $table) {
-            $table->string('template_external_url')->nullable()->after('iframe_tag');
+            $table->dropColumn('template_external_url');
         });
     }
 };

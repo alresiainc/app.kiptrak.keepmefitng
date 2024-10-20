@@ -31,40 +31,42 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function allOrders($status="")
+    public function allOrders($status = "")
     {
+        // dd($status);
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        $agents = User::where('type','agent')->orderBy('id', 'DESC')->get();
-        $staffs = User::where('type','staff')->orderBy('id', 'DESC')->get();
+        $agents = User::where('type', 'agent')->orderBy('id', 'DESC')->get();
+        $staffs = User::where('type', 'staff')->orderBy('id', 'DESC')->get();
 
         if ($authUser->isSuperAdmin || $user_role->permissions->contains('slug', 'view-all-orders')) {
-            
+
             $orders = Order::all();
-            if ($status=="") {
+            if ($status == "") {
                 $orders = Order::all();
             }
-            if ($status=="new") {
+            if ($status == "new") {
                 $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->get();
             }
-            if ($status=="new_from_alarm") {
-                DB::table('sound_notifications')->update(['status'=>'seen']);
+            if ($status == "new_from_alarm") {
+                DB::table('sound_notifications')->update(['status' => 'seen']);
                 $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->get();
             }
-            if ($status=="pending") {
+            if ($status == "pending") {
                 $orders = Order::where('status', 'pending')->orderBy('id', 'DESC')->get();
             }
-            if ($status=="cancelled") {
+            if ($status == "cancelled") {
                 $orders = Order::where('status', 'cancelled')->orderBy('id', 'DESC')->get();
             }
-            if ($status=="delivered_not_remitted") {
+            if ($status == "delivered_not_remitted") {
                 $orders = Order::where('status', 'delivered_not_remitted')->orderBy('id', 'DESC')->get();
             }
-            if ($status=="delivered_and_remitted") {
+            if ($status == "delivered_and_remitted") {
                 $orders = Order::where('status', 'delivered_and_remitted')->orderBy('id', 'DESC')->get();
             }
-            
-            $entries = false; $formHolder = '';
+
+            $entries = false;
+            $formHolder = '';
             // if ($status !== "") {
             //     $formHolder = FormHolder::where('unique_key', $status);
             //     if($formHolder->exists()) {
@@ -78,7 +80,7 @@ class OrderController extends Controller
 
             if ($status !== "") {
                 $formHolder = FormHolder::where('unique_key', $status);
-                if($formHolder->exists()) {
+                if ($formHolder->exists()) {
                     $formHolder = $formHolder->first();
                     //$formHolders = $formHolder->formHolders;
                     $formOrders = $formHolder->formOrders;
@@ -87,46 +89,48 @@ class OrderController extends Controller
                 }
             }
         } else {
-            
+
             $orders = Order::where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
-            if ($status=="") {
+            if ($status == "") {
                 $orders = Order::where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
-            if ($status=="new") {
+            if ($status == "new") {
                 $orders = Order::where('status', 'new')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
-            if ($status=="new_from_alarm") {
-                DB::table('sound_notifications')->update(['status'=>'seen']);
+            if ($status == "new_from_alarm") {
+                DB::table('sound_notifications')->update(['status' => 'seen']);
                 $orders = Order::where('status', 'new')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
-            if ($status=="pending") {
+            if ($status == "pending") {
                 $orders = Order::where('status', 'pending')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
-            if ($status=="cancelled") {
+            if ($status == "cancelled") {
                 $orders = Order::where('status', 'cancelled')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
-            if ($status=="delivered_not_remitted") {
+            if ($status == "delivered_not_remitted") {
                 $orders = Order::where('status', 'delivered_not_remitted')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
-            if ($status=="delivered_and_remitted") {
+            if ($status == "delivered_and_remitted") {
                 $orders = Order::where('status', 'delivered_and_remitted')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
             }
 
             //orders whose dates are greater-than today
-            if ($status=="total_follow_ups") {
-                $totalFollowUpOrders1 = []; $today = Carbon::now(); $expected_date;
+            if ($status == "total_follow_ups") {
+                $totalFollowUpOrders1 = [];
+                $today = Carbon::now();
+                $expected_date;
                 foreach ($authUser->assignedOrders as $order) {
                     $expected_date = Carbon::parse($order->expected_delivery_date);
                     $result = $expected_date->gt($today);
                     if ($result) {
                         $totalFollowUpOrders1[] = $order;
                     }
-                } 
+                }
                 $orders = collect($totalFollowUpOrders1);
             }
 
             //today only
-            if ($status=="today_follow_ups") {
+            if ($status == "today_follow_ups") {
                 $todayFollowUpOrders1 = [];
                 foreach ($authUser->assignedOrders as $order) {
                     $expected_date = Carbon::parse($order->expected_delivery_date);
@@ -137,10 +141,11 @@ class OrderController extends Controller
                 }
                 $orders = collect($todayFollowUpOrders1);
             }
-            
+
             //tomorrow only
-            if ($status=="tomorrow_follow_ups") {
-                $tomorrowFollowUpOrders1 = []; $tomorrow = Carbon::now()->addDays(1)->format('Y-m-d');
+            if ($status == "tomorrow_follow_ups") {
+                $tomorrowFollowUpOrders1 = [];
+                $tomorrow = Carbon::now()->addDays(1)->format('Y-m-d');
                 foreach ($authUser->assignedOrders as $order) {
                     $expected_date = Carbon::parse($order->expected_delivery_date)->format('Y-m-d');
                     if ($expected_date == $tomorrow) {
@@ -150,14 +155,15 @@ class OrderController extends Controller
                 $orders = collect($tomorrowFollowUpOrders1);
             }
 
-            if ($status=="other_orders") {
-                $orders = $authUser->assignedOrders()->where(['customer_id'=>null])->orderBy('id', 'DESC')->get();
+            if ($status == "other_orders") {
+                $orders = $authUser->assignedOrders()->where(['customer_id' => null])->orderBy('id', 'DESC')->get();
             }
-            
-            $entries = false; $formHolder = '';
+
+            $entries = false;
+            $formHolder = '';
             if ($status !== "") {
                 $formHolder = FormHolder::where('unique_key', $status);
-                if($formHolder->exists()) {
+                if ($formHolder->exists()) {
                     $formHolder = $formHolder->first();
                     //$formHolders = $formHolder->formHolders;
                     $formOrders = $formHolder->formOrders;
@@ -166,17 +172,17 @@ class OrderController extends Controller
                 }
             }
         }
-        
+
         return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents', 'staffs', 'status', 'entries', 'formHolder'));
     }
 
     public function updateOrderStatus($unique_key, $status)
     {
         $order = Order::where('unique_key', $unique_key);
-        if(!$order->exists()) {
+        if (!$order->exists()) {
             abort(404);
         }
-        $order->update(['status'=>$status]);
+        $order->update(['status' => $status]);
         return back()->with('success', 'Order Updated Successfully!');
     }
 
@@ -184,15 +190,15 @@ class OrderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $data = $request->all();
         $order_id = $data['order_id'];
         $order_delivery_date = $data['order_delivery_date'];
         $order_status = $data['order_status'];
         $order_note = $data['order_note'];
 
-        $order = Order::where('id',$order_id)->first();
-        
+        $order = Order::where('id', $order_id)->first();
+
         $order->status = !empty($order_status) ? $order_status : $order->status;
         $order->order_note = !empty($order_note) ? $order_note : null;
         $order->expected_delivery_date = !empty($order_delivery_date) ? $order_delivery_date : $order->expected_delivery_date;
@@ -208,25 +214,25 @@ class OrderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        $agents = User::where('type','agent')->orderBy('id', 'DESC')->get();
-        $staffs = User::where('type','staff')->orderBy('id', 'DESC')->get();
-        
+        $agents = User::where('type', 'agent')->orderBy('id', 'DESC')->get();
+        $staffs = User::where('type', 'staff')->orderBy('id', 'DESC')->get();
+
         $order = Order::where('unique_key', $unique_key);
-        if(!$order->exists()) {
+        if (!$order->exists()) {
             abort(404);
         }
         $order = $order->first();
         $status = $order->status;
 
-        $url = env('APP_URL').'/'.$order->url;
+        $url = env('APP_URL') . '/' . $order->url;
         $orderedProducts = unserialize($order->products);
         $products = [];
         $gross_revenue = 0;
         $currency = '';
         $packages = [];
-        
+
         //return $packages;
-        
+
         // $outgoingStocks = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted'])->orderBy('id', 'DESC')->get();
         // foreach ($outgoingStocks as $key => $product) {
         //     $products['product'] = $product->product;
@@ -241,9 +247,9 @@ class OrderController extends Controller
 
         //////////////////////
         $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
-        
+
         foreach ($outgoingStockPackageBundle as $key => &$stock) {
-            if ( $stock['customer_acceptance_status'] == 'accepted' ) {
+            if ($stock['customer_acceptance_status'] == 'accepted') {
                 $product = Product::where('id', $stock['product_id'])->first();
                 if (isset($product)) {
                     $stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
@@ -256,11 +262,11 @@ class OrderController extends Controller
         }
         //add extra cost, if exists
         $gross_revenue += isset($order->extra_cost_amount) ? (int) $order->extra_cost_amount : 0;
-        
+
         $outgoingStocks = $gross_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
         // return count((array) $outgoingStocks);
         //////////////////////
-        
+
         return view('pages.orders.singleOrder', compact('authUser', 'user_role', 'url', 'order', 'packages', 'gross_revenue', 'currency', 'status', 'agents', 'staffs', 'outgoingStocks'));
     }
 
@@ -269,9 +275,9 @@ class OrderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $order = Order::where('unique_key', $unique_key);
-        if(!$order->exists()) {
+        if (!$order->exists()) {
             abort(404);
         }
         $order = $order->first();
@@ -301,12 +307,14 @@ class OrderController extends Controller
         //     $packages[] = $productArr;
         // }
 
-        $packages = []; $gross_revenue = 0; $productArr = [];
+        $packages = [];
+        $gross_revenue = 0;
+        $productArr = [];
         //////////////////////
         $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
-        
+
         foreach ($outgoingStockPackageBundle as $key => &$stock) {
-            if ( $stock['reason_removed'] == 'as_order_firstphase' ) {
+            if ($stock['reason_removed'] == 'as_order_firstphase') {
                 $product = Product::where('id', $stock['product_id'])->first();
                 if (isset($product)) {
                     $stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
@@ -319,7 +327,7 @@ class OrderController extends Controller
         }
         //add extra cost, if exists
         $gross_revenue += isset($order->extra_cost_amount) ? (int) $order->extra_cost_amount : 0;
-        
+
         $mainProducts_outgoingStocks = $gross_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
         // return count((array) $outgoingStocks);
         //////////////////////
@@ -327,7 +335,7 @@ class OrderController extends Controller
         $outgoingStockOrderBumpPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
         $orderbumpProduct_revenue = 0;
         foreach ($outgoingStockOrderBumpPackageBundle as $key => &$stock) {
-            if ( $stock['reason_removed'] == 'as_orderbump' ) {
+            if ($stock['reason_removed'] == 'as_orderbump') {
                 $product = Product::where('id', $stock['product_id'])->first();
                 if (isset($product)) {
                     $stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
@@ -338,7 +346,7 @@ class OrderController extends Controller
                 unset($outgoingStockOrderBumpPackageBundle[$key]);
             }
         }
-        
+
         //since were expecting a single array
         $orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockOrderBumpPackageBundle)))) : '';
         ///////////////////////
@@ -347,7 +355,7 @@ class OrderController extends Controller
         $outgoingStockUpSellPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
         $upsellProduct_revenue = 0;
         foreach ($outgoingStockUpSellPackageBundle as $key => &$stock) {
-            if ( $stock['reason_removed'] == 'as_upsell' ) {
+            if ($stock['reason_removed'] == 'as_upsell') {
                 $product = Product::where('id', $stock['product_id'])->first();
                 if (isset($product)) {
                     $stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
@@ -358,12 +366,25 @@ class OrderController extends Controller
                 unset($outgoingStockUpSellPackageBundle[$key]);
             }
         }
-        
+
         //since were expecting a single array
         $upsell_outgoingStock = $upsellProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockUpSellPackageBundle)))) : '';
-        
-        return view('pages.orders.editOrder', compact('authUser', 'user_role', 'order', 'status', 'products', 'customers', 'warehouses', 'gross_revenue', 'currency', 'packages',
-        'orderbump_outgoingStock', 'upsell_outgoingStock', 'mainProducts_outgoingStocks'));
+
+        return view('pages.orders.editOrder', compact(
+            'authUser',
+            'user_role',
+            'order',
+            'status',
+            'products',
+            'customers',
+            'warehouses',
+            'gross_revenue',
+            'currency',
+            'packages',
+            'orderbump_outgoingStock',
+            'upsell_outgoingStock',
+            'mainProducts_outgoingStocks'
+        ));
     }
 
     //
@@ -371,9 +392,9 @@ class OrderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $order = Order::where('unique_key', $unique_key);
-        if(!$order->exists()) {
+        if (!$order->exists()) {
             abort(404);
         }
         $order = $order->first();
@@ -382,16 +403,16 @@ class OrderController extends Controller
 
         //check if product_id is selected morethan once
         $dup = [];
-        foreach($data['product_id'] as $key => $id){
-            if(!empty($id)){
-                if(!in_array($id, $dup)){
+        foreach ($data['product_id'] as $key => $id) {
+            if (!empty($id)) {
+                if (!in_array($id, $dup)) {
                     $dup[] = $id;
                 } else {
                     return back()->with('duplicate_error', 'Duplicate Product Detected. You can increase quantity accordingly');
                 }
             }
         }
-        
+
         //warehouse selected
         if (!empty($data['warehouse_id'])) {
             $warehouse = WareHouse::find($data['warehouse_id']);
@@ -404,17 +425,16 @@ class OrderController extends Controller
             if (!empty($data['upsell_product'])) {
                 array_push($order_product_ids, $data['upsell_product']);
             }
-            
+
             //check if warehouse contains all ordered products
             if (!empty(array_diff($order_product_ids, $warehouse_product_ids))) {
                 return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls <a href="/all-product-transfers" class="btn">transfer</a> product accordingly');
             }
 
-            if (ProductWarehouse::whereIn('product_id',$warehouse->products->pluck('id'))->where('warehouse_id',$data['warehouse_id'])->where('product_qty', '<', 10)->exists()) {
+            if (ProductWarehouse::whereIn('product_id', $warehouse->products->pluck('id'))->where('warehouse_id', $data['warehouse_id'])->where('product_qty', '<', 10)->exists()) {
                 return back()->with('warehouse_error', 'The selected warehouse does not contain some products in this order. Pls transfer product accordingly');
             }
-            
-        }       
+        }
 
         $order->products = serialize($data['product_id']);
         $order->customer_id = $data['customer'];
@@ -422,15 +442,17 @@ class OrderController extends Controller
         $order->order_note = !empty($data['note']) ? $data['note'] : null;
         $order->warehouse_id = !empty($data['warehouse_id']) ? $data['warehouse_id'] : null;
         $order->save();
-        
+
         // return $order->outgoingStock->package_bundle;
 
-        $grand_total = 0; $new_package_bundle = []; $outgone_existing = OutgoingStock::where('order_id', $order->id)->first();
+        $grand_total = 0;
+        $new_package_bundle = [];
+        $outgone_existing = OutgoingStock::where('order_id', $order->id)->first();
         foreach ($data['product_id'] as $key => $id) {
-            if(!empty($id)) {
+            if (!empty($id)) {
 
-               //$outgone_existing = OutgoingStock::where('order_id', $order->id)->where('product_id', $id)->where('reason_removed', 'as_order_firstphase');
-                
+                //$outgone_existing = OutgoingStock::where('order_id', $order->id)->where('product_id', $id)->where('reason_removed', 'as_order_firstphase');
+
                 // if ($outgone_existing->exists()) {
                 //     $outgone = $outgone_existing->first();
                 //we update or create incase the new set of products does not exist in existing stock
@@ -469,9 +491,9 @@ class OrderController extends Controller
                     'reason_removed' => 'as_order_firstphase',
                     'quantity_returned' => $data['customer_acceptance_status'][$key] == 'rejected' ? $data['product_qty'][$key] : 0,
                     'reason_returned' => $data['customer_acceptance_status'][$key] == 'rejected' ? 'declined' : null,
-                    'isCombo'=>isset($product->combo_product_ids) ? 'true' : null,
+                    'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
                 ];
-                $new_package_bundle[] = $package_bundles; 
+                $new_package_bundle[] = $package_bundles;
             }
         }
 
@@ -503,7 +525,7 @@ class OrderController extends Controller
         //accepted orderbump
         if (!empty($data['orderbump_product'])) {
             //OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_orderbump')->update(['product_id'=>$data['orderbump_product'], 'customer_acceptance_status'=>'accepted', 'quantity_returned'=>0]);
-            
+
             $product = Product::where('id', $data['orderbump_product'])->first();
             // Create a new package array for each product ID
             $package_bundles = [
@@ -516,14 +538,14 @@ class OrderController extends Controller
                 'reason_returned' => null,
                 'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
             ];
-            
+
             //push to new_package_bundle
             array_push($new_package_bundle, $package_bundles);
         }
         //return $new_package_bundle;
         //rejected orderbump
         if (empty($data['orderbump_product']) && !empty($data['hidden_orderbump_product'])) {
-            
+
             //OutgoingStock::where('order_id', $order->id)->where('reason_removed', 'as_orderbump')->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1]);
             $product = Product::where('id', $data['hidden_orderbump_product'])->first();
             // Create a new package array for each product ID
@@ -537,7 +559,7 @@ class OrderController extends Controller
                 'reason_returned' => 'declined',
                 'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
             ];
-            
+
             //push to new_package_bundle
             array_push($new_package_bundle, $package_bundles);
         }
@@ -556,7 +578,7 @@ class OrderController extends Controller
                 'reason_returned' => null,
                 'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
             ];
-            
+
             //push to new_package_bundle
             array_push($new_package_bundle, $package_bundles);
         }
@@ -575,12 +597,12 @@ class OrderController extends Controller
                 'reason_returned' => 'declined',
                 'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
             ];
-            
+
             //push to new_package_bundle
             array_push($new_package_bundle, $package_bundles);
         }
 
-        $order->outgoingStock()->update(['package_bundle'=>$new_package_bundle]);
+        $order->outgoingStock()->update(['package_bundle' => $new_package_bundle]);
 
         if (($data['order_status'] == 'delivered_and_remitted') && (!empty($data['warehouse_id']))) {
             //remove product-qty from warehouse
@@ -590,7 +612,7 @@ class OrderController extends Controller
                     $stock_available = $product->stock_available(); //90
                     //sum product_qty except current_warehouse
                     $sum_of_product_qty = ProductWarehouse::where('product_id', $id)->where('warehouse_id', '!=', $data['warehouse_id'])->sum('product_qty'); //20
-                    $productWarehouse = ProductWarehouse::where(['product_id'=>$id, 'warehouse_id'=>$data['warehouse_id']])->first();
+                    $productWarehouse = ProductWarehouse::where(['product_id' => $id, 'warehouse_id' => $data['warehouse_id']])->first();
                     $product_qty = $productWarehouse->product_qty; //75
                     $final_sum = $sum_of_product_qty + $product_qty; //20 + 75 = 95
                     //aim is to mk sure stock_available = final_sum, then we can update
@@ -599,25 +621,25 @@ class OrderController extends Controller
                         $qty_to_minus = $final_sum - $stock_available;
                         $product_qty = $productWarehouse->product_qty - $qty_to_minus; //70
                         $final_sum = $sum_of_product_qty + $product_qty; //90
-                        $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+                        $stock_available == $final_sum ? $productWarehouse->update(['product_qty' => $product_qty]) : '';
                     }
                     if ($final_sum < $stock_available) { //100 < 109 
                         //needs to add-to from the selected warehouse, 100 + x = 109
                         $qty_to_minus = $stock_available - $final_sum;
                         $product_qty = $productWarehouse->product_qty + $qty_to_minus; //80 + 9
                         $final_sum = $sum_of_product_qty + $product_qty; //20 + (80+9)
-                        $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+                        $stock_available == $final_sum ? $productWarehouse->update(['product_qty' => $product_qty]) : '';
                     }
                     if ($final_sum == $stock_available) {
                         //needs to add-to from the selected warehouse
                         $qty_to_minus = $stock_available - $final_sum;
                         $product_qty = $productWarehouse->product_qty - $data['product_qty'][$key];
                         $final_sum = $sum_of_product_qty + $product_qty;
-                        $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+                        $stock_available == $final_sum ? $productWarehouse->update(['product_qty' => $product_qty]) : '';
                     }
-                    
+
                     //$productWarehouse->update(['product_qty'=>$product_qty]);
-                } 
+                }
             }
             //accepted orderbump
             if (!empty($data['orderbump_product']) && isset($orderbump_outgoingStock)) {
@@ -625,10 +647,10 @@ class OrderController extends Controller
                 $stock_available = $product->stock_available();
                 //sum product_qty except current_warehouse
                 $sum_of_product_qty = ProductWarehouse::where('product_id', $data['orderbump_product'])->where('warehouse_id', '!=', $data['warehouse_id'])->sum('product_qty');
-                $productWarehouse = ProductWarehouse::where(['product_id'=>$data['orderbump_product'], 'warehouse_id'=>$data['warehouse_id']])->first();
+                $productWarehouse = ProductWarehouse::where(['product_id' => $data['orderbump_product'], 'warehouse_id' => $data['warehouse_id']])->first();
                 $product_qty = $productWarehouse->product_qty - 1;
                 $final_sum = $sum_of_product_qty + $product_qty;
-                $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+                $stock_available == $final_sum ? $productWarehouse->update(['product_qty' => $product_qty]) : '';
             }
             //rejected orderbump
             if (empty($data['orderbump_product']) && isset($orderbump_outgoingStock)) {
@@ -636,10 +658,10 @@ class OrderController extends Controller
                 $stock_available = $product->stock_available();
                 //sum product_qty except current_warehouse
                 $sum_of_product_qty = ProductWarehouse::where('product_id', $orderbump_outgoingStock->product_id)->where('warehouse_id', '!=', $data['warehouse_id'])->sum('product_qty');
-                $productWarehouse = ProductWarehouse::where(['product_id'=>$orderbump_outgoingStock->product_id, 'warehouse_id'=>$data['warehouse_id']])->first();
+                $productWarehouse = ProductWarehouse::where(['product_id' => $orderbump_outgoingStock->product_id, 'warehouse_id' => $data['warehouse_id']])->first();
                 $product_qty = $productWarehouse->product_qty + 1;
                 $final_sum = $sum_of_product_qty + $product_qty;
-                $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+                $stock_available == $final_sum ? $productWarehouse->update(['product_qty' => $product_qty]) : '';
             }
             //accepted upsell
             if (!empty($data['upsell_product']) && isset($upsell_outgoingStock)) {
@@ -647,10 +669,10 @@ class OrderController extends Controller
                 $stock_available = $product->stock_available();
                 //sum product_qty except current_warehouse
                 $sum_of_product_qty = ProductWarehouse::where('product_id', $data['upsell_product'])->where('warehouse_id', '!=', $data['warehouse_id'])->sum('product_qty');
-                $productWarehouse = ProductWarehouse::where(['product_id'=>$data['upsell_product'], 'warehouse_id'=>$data['warehouse_id']])->first();
+                $productWarehouse = ProductWarehouse::where(['product_id' => $data['upsell_product'], 'warehouse_id' => $data['warehouse_id']])->first();
                 $product_qty = $productWarehouse->product_qty - 1;
                 $final_sum = $sum_of_product_qty + $product_qty;
-                $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+                $stock_available == $final_sum ? $productWarehouse->update(['product_qty' => $product_qty]) : '';
             }
             //rejected upsell
             if (empty($data['upsell_product']) && isset($upsell_outgoingStock)) {
@@ -658,15 +680,14 @@ class OrderController extends Controller
                 $stock_available = $product->stock_available();
                 //sum product_qty except current_warehouse
                 $sum_of_product_qty = ProductWarehouse::where('product_id', $upsell_outgoingStock->product_id)->where('warehouse_id', '!=', $data['warehouse_id'])->sum('product_qty');
-                $productWarehouse = ProductWarehouse::where(['product_id'=>$upsell_outgoingStock->product_id, 'warehouse_id'=>$data['warehouse_id']])->first();
+                $productWarehouse = ProductWarehouse::where(['product_id' => $upsell_outgoingStock->product_id, 'warehouse_id' => $data['warehouse_id']])->first();
                 $product_qty = $productWarehouse->product_qty + 1;
                 $final_sum = $sum_of_product_qty + $product_qty;
-                $stock_available == $final_sum ? $productWarehouse->update(['product_qty'=>$product_qty]) : '';
+                $stock_available == $final_sum ? $productWarehouse->update(['product_qty' => $product_qty]) : '';
             }
         }
 
         return back()->with('success', 'Order Updated Successfully');
-
     }
 
     //deleteOrder
@@ -674,13 +695,13 @@ class OrderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $order = Order::where('unique_key', $unique_key)->first();
         if (!isset($order)) {
             abort(404);
         }
         $order->delete();
-        if(isset($order->customer_id) && isset($order->customer->id)) {
+        if (isset($order->customer_id) && isset($order->customer->id)) {
             $order->customer()->delete();
         }
         return back()->with('success', 'Order Deleted Successfullly');
@@ -693,21 +714,21 @@ class OrderController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
         $ids = $request->ids;
-        DB::table("orders")->whereIn('id',explode(",",$ids))->delete();
-        return response()->json(['success'=>"Selected Orders Deleted Successfully."]);
+        DB::table("orders")->whereIn('id', explode(",", $ids))->delete();
+        return response()->json(['success' => "Selected Orders Deleted Successfully."]);
     }
 
     public function assignAgentToOrder(Request $request)
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $data = $request->all();
         $order_id = $data['order_id'];
         $agent_id = $data['agent_id'];
 
         //upd order
-        Order::where('id',$order_id)->update(['agent_assigned_id'=>$agent_id]);
+        Order::where('id', $order_id)->update(['agent_assigned_id' => $agent_id]);
 
         return back()->with('success', 'Agent Assigned Successfully');
     }
@@ -716,13 +737,13 @@ class OrderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $data = $request->all();
         $order_id = $data['order_id'];
         $staff_id = $data['staff_id'];
 
         //upd order
-        Order::where('id',$order_id)->update(['staff_assigned_id'=>$staff_id]);
+        Order::where('id', $order_id)->update(['staff_assigned_id' => $staff_id]);
 
         return back()->with('success', 'Staff Assigned Successfully');
     }
@@ -735,19 +756,19 @@ class OrderController extends Controller
 
         //change extra_cost to null
         if (!empty($data['remove'])) {
-            Order::where('id', $order_id)->update(['extra_cost_amount'=>null, 'extra_cost_reason'=>null]);
+            Order::where('id', $order_id)->update(['extra_cost_amount' => null, 'extra_cost_reason' => null]);
             return back()->with('success', 'Extra Cost Removed Successfully');
         }
 
         $extra_cost_reason = !empty($data['extra_cost_reason']) ? $data['extra_cost_reason'] : null;
 
 
-        if(empty($data['extra_cost_amount']) || $data['extra_cost_amount'] < 1){
+        if (empty($data['extra_cost_amount']) || $data['extra_cost_amount'] < 1) {
             return back();
         }
 
         //upd order
-        Order::where('id',$order_id)->update(['extra_cost_amount'=>$extra_cost_amount, 'extra_cost_reason'=>$extra_cost_reason]);
+        Order::where('id', $order_id)->update(['extra_cost_amount' => $extra_cost_amount, 'extra_cost_reason' => $extra_cost_reason]);
 
         return back()->with('success', 'Extra Cost Added Successfully');
     }
@@ -758,12 +779,17 @@ class OrderController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
         //remove any reminant
-        CartAbandon::where([ 'customer_firstname'=>null, 'customer_lastname'=>null, 'customer_phone_number'=>null, 'customer_whatsapp_phone_number'=>null,
-        'customer_email'=>null ])->delete();
+        CartAbandon::where([
+            'customer_firstname' => null,
+            'customer_lastname' => null,
+            'customer_phone_number' => null,
+            'customer_whatsapp_phone_number' => null,
+            'customer_email' => null
+        ])->delete();
 
         $carts = CartAbandon::all();
-        
-        $agents = User::where('type','agent')->orderBy('id', 'DESC')->get();
+
+        $agents = User::where('type', 'agent')->orderBy('id', 'DESC')->get();
         return view('pages.orders.cartAbandon', compact('authUser', 'user_role', 'carts', 'agents'));
     }
 
@@ -771,7 +797,7 @@ class OrderController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $cart = CartAbandon::where('unique_key', $unique_key)->first();
         $package_info = $cart->package_info; //wat customer clicked
 
@@ -785,7 +811,7 @@ class OrderController extends Controller
         $products = [];
         $gross_revenue = 0;
         $currency = '';
-        
+
         //$outgoingStocks = OutgoingStock::where(['order_id'=>$order->id])->orderBy('id', 'DESC')->get();
         $outgoingStocks = $order->$outgoingStock->package_bundle;
         foreach ($outgoingStocks as $key => $stock) {
@@ -796,7 +822,7 @@ class OrderController extends Controller
 
             $packages[] = $products;
         }
-        
+
         return view('pages.orders.singleCartAbandon', compact('authUser', 'user_role', 'cart', 'package_info', 'order', 'packages', 'gross_revenue', 'currency'));
     }
 
@@ -816,7 +842,8 @@ class OrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function productById($id){
-        return $product = Product::where('id',$id)->first();
+    public function productById($id)
+    {
+        return $product = Product::where('id', $id)->first();
     }
 }

@@ -110,10 +110,18 @@ class FormHolder extends Model
         return $this->belongsTo(User::class, 'staff_assigned_id');
     }
 
-    public function staffs()
+    public function getStaffsAttribute()
     {
-        return $this->belongsToMany(User::class, 'users', 'id', 'id')
-            ->whereIn('id', $this->staff_assigned_ids ?? []);
+        // Decode the JSON and retrieve the IDs
+        $staffIds = $this->staff_assigned_ids;
+
+        // Check if the staffIds are set
+        if (empty($staffIds)) {
+            return collect(); // Return an empty collection if no IDs are present
+        }
+
+        // Use the User model to fetch users based on staff IDs
+        return User::whereIn('id', $staffIds)->get();
     }
 
     public function thankYou()

@@ -25,7 +25,7 @@
             <div class="col-md-12 mt-1 wrapper">
                 <label for="" class="form-label">Sub Headings | Optional</label>
 
-                @forelse (old('orderbump_subheading', isset($form) ? $form?->orderbump?->orderbump_subheading :[]) as $orderbump_subheading)
+                @forelse (old('orderbump_subheading', isset($form?->orderbump?->orderbump_subheading) ? $form?->orderbump?->orderbump_subheading :[]) as $orderbump_subheading)
                     <div class="d-flex align-items-center product-container mb-2 w-100 element">
                         <input type="text" name="orderbump_subheading[]" class="form-control form-control-sm"
                             placeholder="" value="{{ $orderbump_subheading }}">

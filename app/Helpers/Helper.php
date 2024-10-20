@@ -2,11 +2,12 @@
 
 namespace App\Helpers;
 
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Order;
-use App\Models\OutgoingStock;
 use App\Models\Product;
+use App\Models\OutgoingStock;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
 class Helper
 {
@@ -367,7 +368,7 @@ class Helper
      * @param array $formFields - The dynamic form fields.
      * @return array - An associative array of matched fields.
      */
-    public function matchFormFields($requiredFields, array $formFields): array
+    public function matchFormFieldsOLD($requiredFields, array $formFields): array
     {
         // Ensure $requiredFields is an array, even if it's a single string.
         $requiredFields = is_array($requiredFields) ? $requiredFields : [$requiredFields];
@@ -435,5 +436,84 @@ class Helper
     public function normalizeFieldName(string $fieldName): string
     {
         return strtolower(preg_replace('/[^a-z0-9]/', '', $fieldName));
+    }
+
+    public function resetSite()
+    {
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
+        Artisan::call('view:clear');
+        Artisan::call('route:clear');
+
+        //remember to change env to local, to avoid 'STDIN' constant error
+
+        Artisan::call('migrate:refresh', [
+            '--seed' => true
+        ]);
+
+        dd('Site reset successfully');
+    }
+
+    /**
+     * Match required fields to form fields with fuzzy matching.
+     *
+     * @param array $requiredFields - An associative array of required fields and their variations.
+     * @param array $formFields - An associative array of form fields submitted (key-value pairs).
+     * @return array - An associative array with matched fields and their corresponding values.
+     */
+    public function matchFields(array $requiredFields, array $formFields)
+    {
+        $matchedFields = [];
+
+        // Loop through each required field and its variations
+        foreach ($requiredFields as $mainField => $variations) {
+            // If the required field is just a string (no variations provided)
+            if (is_int($mainField)) {
+                $mainField = $variations; // Set the main field name
+                $variations = [$mainField]; // Use the main field as the only variation
+            } elseif (is_string($variations)) {
+                // If the value is a string, convert it to an array with just that string
+                $variations = [$variations];
+            }
+
+            $foundMatch = false;
+
+            // Exact match search for any variation in the form fields
+            foreach ($variations as $variation) {
+                if (array_key_exists($variation, $formFields)) {
+                    $matchedFields[$mainField] = $formFields[$variation];
+                    $foundMatch = true;
+                    break; // Stop once the first exact match is found
+                }
+            }
+
+            // If no exact match is found, try fuzzy matching
+            if (!$foundMatch) {
+                $bestMatch = null;
+                $highestSimilarity = 0;
+
+                foreach ($formFields as $formFieldKey => $formFieldValue) {
+                    foreach ($variations as $variation) {
+                        // Calculate the similarity between the variation and the form field key
+                        similar_text(strtolower($variation), strtolower($formFieldKey), $similarity);
+
+                        // If similarity is higher than the previous highest and above a certain threshold (e.g., 60%)
+                        if ($similarity > $highestSimilarity && $similarity > 60) {
+                            $highestSimilarity = $similarity;
+                            $bestMatch = $formFieldKey;
+                        }
+                    }
+                }
+
+                // If a fuzzy match is found, use it; otherwise, set it to null
+                if ($bestMatch) {
+                    $matchedFields[$mainField] = $formFields[$bestMatch];
+                } else {
+                    $matchedFields[$mainField] = null;
+                }
+            }
+        }
+
+        return $matchedFields;
     }
 }

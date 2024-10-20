@@ -26,7 +26,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('product_warehouses', function (Blueprint $table) {
-            $table->integer('transfer_from_warehouse')->nullable()->after('warehouse_type');
+            $table->dropColumn('transfer_from_warehouse');
+            
         });
     }
 };

@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('form_holders', function (Blueprint $table) {
-            $table->boolean('has_edited_duplicate')->default(false)->after('staff_assigned_id');
+            $table->dropColumn('has_edited_duplicate');
         });
     }
 };

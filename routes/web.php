@@ -6,12 +6,15 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TestMail;
 use App\Events\TestEvent;
+use App\Helpers\Helper;
 use App\Notifications\TestNofication;
 use App\Notifications\sendUserMessageNotification;
 use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use App\Models\Customer;
 use Carbon\Carbon;
+use App\Helpers\FieldMatcher;
+use App\Models\Notification as ModelsNotification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Artisan;
@@ -32,38 +35,54 @@ Route::get('/wordpress/plugin-update/{plugin}/download', [WordPressPluginControl
 Route::get('/wordpress/plugin-update/{plugin}/check', [WordPressPluginController::class, 'check'])->name('wordpress.plugin.checkUpdate');
 
 
-Route::get('migrate', function () {
-    Artisan::call('migrate');
-    dd("Success2");
-});
+Route::get('/test-fields', function () {
 
-Route::get('run', function () {
 
-    //Artisan::call('cache:clear');
-    //Artisan::call('make:migration add_extra_cost_amount_to_orders_table --table=orders');
-    //Artisan::call('make:migration add_extra_cost_reason_to_orders_table --table=orders');
-    //Artisan::call('migrate'); //remember to change env to local, to avoid 'STDIN' constant error
-
-    // Artisan::call('db:seed', [
-    // '--force' => true //to avoid 'STDIN' constant error, while in production
+    // ModelsNotification::create([
+    //     // 'user_id' => auth()->user()->id,
+    //     'message' => 'This is a test',
+    //     'types' => 'superadmin',
+    //     // 'roles' => 'admin',
     // ]);
 
-    dd("artisan success");
+    // Output the matched fields
+    dd(auth()->user()->notifications);
 });
+Route::get('migrate', function () {
+    Artisan::call('migrate');
+    return redirect('/login')->with('success', 'Migration completed successfully');
+    return view('page')->with('success', 'Migration completed successfully');
+});
+
+
+Route::get('/reset-site', function () {
+
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
+
+    //remember to change env to local, to avoid 'STDIN' constant error
+
+    Artisan::call('migrate:refresh', [
+        '--seed' => true
+    ]);
+
+    return redirect('/login')->with('success', 'Site reset successfully');
+
+    // return view('page')->with('message', 'Site reset successfully');
+})->name('reset-site');
 
 // Route::get('/', function () {
 //     return view('welcome');
 // });
 //symlink for sites that allow
-// Route::get('/storage-link', function(){
-//     $tagartFolder = storage_path('app/pulbic');
-//     $linkFolder = $_SERVER['DOCUMENT_ROOT'] .'/storage';
-//     symlink($tagartFolder,$linkFolder);
-// });
+Route::get('/storage-link', function () {
+    $targetFolder = storage_path('app/pulbic');
+    $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
+    symlink($targetFolder, $linkFolder);
+});
 
-// Route::get('/email', function () {
-//     Mail::to('test@email.com')->send(new TestMail());
-// }); 
 
 Route::get('/notify', function () {
 
@@ -612,7 +631,7 @@ Route::group(['middleware' => 'auth'], function () {
 });
 
 
-Route::get('/integration/get-form/', [FormBuilderController::class, 'get_form'])->name('form.get');
+Route::get('/link/form/get-view', [FormBuilderController::class, 'viewPublicForm'])->name('form.get');
 
 
 

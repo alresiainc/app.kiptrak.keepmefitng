@@ -47,8 +47,8 @@
             <i class="bi bi-plus"></i> Add more
         </button>
     </div>
-
 </div>
+
 <div class="mt-3">
     <div class="form-check">
         <input class="form-check-input req-item" id="input-required" type="checkbox" name="auto_orders_distribution"
@@ -60,5 +60,21 @@
     <div style="font-size: 12px;" class="text-muted">
         Distribute orders automatically among available staff members in a rotating manner. If unchecked, orders will
         wait for the first staff member to accept them
+    </div>
+</div>
+
+<!-- Add Staff Workload Threshold Field -->
+<div class="mt-3">
+    <label for="staff_workload_threshold" class="form-label">Staff Workload Threshold</label>
+    <input type="number" class="form-control form-control-sm" name="staff_workload_threshold"
+        id="staff_workload_threshold"
+        value="{{ old('staff_workload_threshold', isset($form) ? $form->staff_workload_threshold : '') }}"
+        placeholder="Enter workload threshold (e.g., 5)">
+    <div style="font-size: 12px;" class="text-muted mt-1">
+        Set the maximum number of pending orders a staff member can handle before they are skipped in automatic
+        distribution.
+        <br>
+        <strong>Note:</strong> Setting this value to <strong>0</strong> means staff will not be skipped, regardless of
+        their pending orders.
     </div>
 </div>

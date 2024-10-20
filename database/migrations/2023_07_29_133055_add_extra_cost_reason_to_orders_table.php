@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->longText('extra_cost_reason')->nullable()->after('extra_cost_amount');
+            $table->dropColumn(['extra_cost_reason']);
         });
     }
 };
