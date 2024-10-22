@@ -93,6 +93,11 @@ class FormHolder extends Model
         return $this->belongsTo(UpSell::class, 'upsell_id');
     }
 
+    public function downsell()
+    {
+        return $this->belongsTo(DownSell::class, 'downsell_id');
+    }
+
     //$cat->categories as subcat
     public function formHolders()
     {

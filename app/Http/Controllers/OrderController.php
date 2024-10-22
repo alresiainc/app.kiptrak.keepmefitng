@@ -2,27 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Validator;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
+use App\Models\User;
 use App\Models\Order;
-use App\Models\OrderLabel;
-use App\Models\OrderProduct;
-use App\Models\OrderBump;
+
 use App\Models\UpSell;
 use App\Models\Product;
-use App\Models\OutgoingStock;
-use App\Models\User;
-use App\Models\CartAbandon;
-use App\Models\FormHolder;
-use App\Models\SoundNotification;
 use App\Models\Customer;
+use App\Models\OrderBump;
 use App\Models\WareHouse;
-use App\Models\ProductWareHouse;
+use App\Models\FormHolder;
+use App\Models\OrderLabel;
+use App\Models\CartAbandon;
+use App\Models\OrderProduct;
+use Illuminate\Http\Request;
+use App\Models\OutgoingStock;
 use App\Models\GeneralSetting;
-
+use App\Models\MessageTemplate;
+use App\Models\ProductWareHouse;
+use App\Models\SoundNotification;
+use App\Notifications\OrderNotification;
+use Illuminate\Support\Facades\DB;
+use App\Notifications\OrderWhatsappNotification;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class OrderController extends Controller
 {
@@ -178,11 +182,29 @@ class OrderController extends Controller
 
     public function updateOrderStatus($unique_key, $status)
     {
-        $order = Order::where('unique_key', $unique_key);
-        if (!$order->exists()) {
+        $order = Order::where('unique_key', $unique_key)->first();
+        if (!$order) {
             abort(404);
         }
+
+        $channels = config('site.notification_channels') ?? [];
+
+        $messages = [];
+
+        foreach ($channels as $type) {
+            $message_type = MessageTemplate::where('type', $type . '_order_status_changed_to_' . $status)->first();
+            if ($message_type) {
+                $messages[$type]['title'] = $message_type->title;
+                $messages[$type]['message'] = $message_type->message;
+            }
+        }
+
+        Log::alert($messages);
+
+        $customer = $order->customer;
         $order->update(['status' => $status]);
+        $customer?->notify(new OrderNotification($order, $messages));
+
         return back()->with('success', 'Order Updated Successfully!');
     }
 

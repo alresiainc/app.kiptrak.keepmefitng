@@ -15,9 +15,12 @@ return new class extends Migration
     {
         Schema::create('message_templates', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->string('type');
-            $table->longText("message")->nullable();
+            $table->string('channel')->nullable();
             $table->string('subject')->nullable();
+            $table->longText("message")->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

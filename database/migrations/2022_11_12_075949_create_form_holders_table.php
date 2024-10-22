@@ -32,9 +32,10 @@ return new class extends Migration
             $table->longText('embedded_tag')->nullable();
             $table->longText('iframe_tag')->nullable();
             $table->longText('object_tag')->nullable();
-            
+
             $table->string('orderbump_id')->nullable();
             $table->string('upsell_id')->nullable();
+            $table->string('downsell_id')->nullable();
 
             $table->string('staff_assigned_id')->nullable();
 

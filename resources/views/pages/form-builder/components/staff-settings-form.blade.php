@@ -68,7 +68,7 @@
     <label for="staff_workload_threshold" class="form-label">Staff Workload Threshold</label>
     <input type="number" class="form-control form-control-sm" name="staff_workload_threshold"
         id="staff_workload_threshold"
-        value="{{ old('staff_workload_threshold', isset($form) ? $form->staff_workload_threshold : '') }}"
+        value="{{ old('staff_workload_threshold', isset($form) ? $form->staff_workload_threshold : 0) }}"
         placeholder="Enter workload threshold (e.g., 5)">
     <div style="font-size: 12px;" class="text-muted mt-1">
         Set the maximum number of pending orders a staff member can handle before they are skipped in automatic

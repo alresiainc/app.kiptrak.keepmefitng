@@ -105,17 +105,6 @@ class User extends Authenticatable
         return $this->hasMany(Order::class, 'staff_assigned_id');
     }
 
-    /**
-     * Route notifications for the WhatsApp channel.
-     *
-     * @return string
-     */
-    public function routeNotificationForWhatsapp()
-    {
-        // Return the WhatsApp number to be used
-        return $this->phone_1 ?? $this->phone_2;
-    }
-
     public function notifications()
     {
         return $this->hasMany(Notification::class)
@@ -236,5 +225,38 @@ class User extends Authenticatable
 
         // Notify the user
         $this->notify(new UserNotification($notification));
+    }
+
+
+    /**
+     * Route notifications for the SMS channel.
+     *
+     * @return string
+     */
+    public function routeNotificationForSMS()
+    {
+        // Return the number to be used
+        return $this->phone_1 ?? $this->phone_2;
+    }
+    /**
+     * Route notifications for the WhatsApp channel.
+     *
+     * @return string
+     */
+    public function routeNotificationForWhatsapp()
+    {
+        // Return the WhatsApp number to be used
+        return $this->phone_1 ?? $this->phone_2;
+    }
+
+    /**
+     * Route notifications for the Email channel.
+     *
+     * @return string
+     */
+    public function routeNotificationForEmail()
+    {
+        // Return the Emailr to be used
+        return $this->email;
     }
 }

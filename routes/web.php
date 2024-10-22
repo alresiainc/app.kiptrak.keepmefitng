@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Artisan;
 */
 
 
-Route::get('/wordpress/plugin-update/{plugin}/download', [WordPressPluginController::class, 'serveUpdate'])->name('wordpress.plugin.download');
+Route::get('/wordpress/plugin-update/{plugin}/download.zip', [WordPressPluginController::class, 'serveUpdate'])->name('wordpress.plugin.download');
 Route::get('/wordpress/plugin-update/{plugin}/check', [WordPressPluginController::class, 'check'])->name('wordpress.plugin.checkUpdate');
 
 
@@ -148,8 +148,10 @@ Route::post('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBui
 Route::get('/ajax-save-new-form-link', [FormBuilderController::class, 'saveNewFormFromCustomer'])->name('saveNewFormFromCustomer'); //ajax
 Route::get('/ajax-save-new-form-link-orderbump', [FormBuilderController::class, 'saveNewFormOrderBumpFromCustomer'])->name('saveNewFormOrderBumpFromCustomer'); //ajax
 Route::get('/ajax-save-new-form-link-upsell', [FormBuilderController::class, 'saveNewFormUpSellFromCustomer'])->name('saveNewFormUpSellFromCustomer'); //ajax
+Route::get('/ajax-save-new-form-link-downsell', [FormBuilderController::class, 'saveNewFormDownsellFromCustomer'])->name('saveNewFormDownsellFromCustomer'); //ajax
 Route::get('/ajax-save-new-form-link-orderbump-refusal', [FormBuilderController::class, 'saveNewFormOrderBumpRefusalFromCustomer'])->name('saveNewFormOrderBumpRefusalFromCustomer'); //ajax
 Route::get('/ajax-save-new-form-link-upsell-refusal', [FormBuilderController::class, 'saveNewFormUpSellRefusalFromCustomer'])->name('saveNewFormUpSellRefusalFromCustomer'); //ajax
+Route::get('/ajax-save-new-form-link-downsell-refusal', [FormBuilderController::class, 'saveNewFormDownsellRefusalFromCustomer'])->name('saveNewFormDownsellRefusalFromCustomer'); //ajax
 Route::get('/delete-form/{unique_key}', [FormBuilderController::class, 'deleteForm'])->name('deleteForm'); //deleteForm
 
 //cart abandoned
@@ -192,6 +194,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/complete-customer-order', [FormController::class, 'completeCustomerOrder'])->name('completeCustomerOrder'); //ajax
     Route::get('/product-orderbump-customer-order', [FormController::class, 'productOrderbumpCustomerOrder'])->name('productOrderbumpCustomerOrder'); //ajax
     Route::get('/product-upsell-customer-order', [FormController::class, 'productUpsellCustomerOrder'])->name('productUpsellCustomerOrder'); //ajax
+    Route::get('/product-downsell-customer-order', [FormController::class, 'productDownsellCustomerOrder'])->name('productDownsellCustomerOrder'); //ajax
     Route::get('/product-only-customer-order', [FormController::class, 'productOnlyCustomerOrder'])->name('productOnlyCustomerOrder'); //ajax
 
     //formbuilder drag n drop
@@ -215,20 +218,15 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/form-link/{unique_key}', [FormBuilderController::class, 'formLink'])->name('formLink'); //like singleform
     Route::post('/form-link/{unique_key}/{stage?}', [FormBuilderController::class, 'formLinkPost'])->name('formLinkPost');
     Route::post('/form-link-upsell/{unique_key}', [FormBuilderController::class, 'formLinkUpsellPost'])->name('formLinkUpsellPost');
-
-    // Route::get('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'newFormLink'])->name('newFormLink'); //like singleform for newFormBuilder 
-    // Route::post('/new-form-link/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'newFormLinkPost'])->name('newFormLinkPost'); //the post
-    // Route::get('/ajax-save-new-form-link', [FormBuilderController::class, 'saveNewFormFromCustomer'])->name('saveNewFormFromCustomer'); //ajax
-    // Route::get('/ajax-save-new-form-link-orderbump', [FormBuilderController::class, 'saveNewFormOrderBumpFromCustomer'])->name('saveNewFormOrderBumpFromCustomer'); //ajax
-    // Route::get('/ajax-save-new-form-link-upsell', [FormBuilderController::class, 'saveNewFormUpSellFromCustomer'])->name('saveNewFormUpSellFromCustomer'); //ajax
-    // Route::get('/ajax-save-new-form-link-orderbump-refusal', [FormBuilderController::class, 'saveNewFormOrderBumpRefusalFromCustomer'])->name('saveNewFormOrderBumpRefusalFromCustomer'); //ajax
-    // Route::get('/ajax-save-new-form-link-upsell-refusal', [FormBuilderController::class, 'saveNewFormUpSellRefusalFromCustomer'])->name('saveNewFormUpSellRefusalFromCustomer'); //ajax
+    Route::post('/form-link-downsell/{unique_key}', [FormBuilderController::class, 'formLinkDownsellPost'])->name('formLinkDownsellPost');
 
     Route::get('/forms-list', [FormBuilderController::class, 'allFormBuilders'])->name('allFormBuilders');
     Route::post('/add-orderbump', [FormBuilderController::class, 'addOrderbumpToForm'])->name('addOrderbumpToForm');
     Route::post('/edit-orderbump', [FormBuilderController::class, 'editOrderbumpToForm'])->name('editOrderbumpToForm');
     Route::post('/add-upsell', [FormBuilderController::class, 'addUpsellToForm'])->name('addUpsellToForm');
     Route::post('/edit-upsell', [FormBuilderController::class, 'editUpsellToForm'])->name('editUpsellToForm');
+    Route::post('/add-downsell', [FormBuilderController::class, 'addDownsellToForm'])->name('addDownsellToForm');
+    Route::post('/edit-downsell', [FormBuilderController::class, 'editDownsellToForm'])->name('editDownsellToForm');
     Route::post('/add-thankyou', [FormBuilderController::class, 'addThankYouTemplateToForm'])->name('addThankYouTemplateToForm');
     Route::post('/edit-thankyou', [FormBuilderController::class, 'editThankYouTemplateToForm'])->name('editThankYouTemplateToForm');
 
@@ -418,6 +416,15 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/edit-upsell-templates/{unique_key}', [UpsellSettingController::class, 'editUpsellTemplate'])->name('editUpsellTemplate');
     Route::post('/edit-upsell-templates/{unique_key}', [UpsellSettingController::class, 'editUpsellTemplatePost'])->name('editUpsellTemplatePost');
 
+
+    //allDownsellTemplates 
+    Route::get('/all-downsell-templates', [UpsellSettingController::class, 'allDownsellTemplates'])->name('allDownsellTemplates');
+    Route::get('/view-downsell-template/{unique_key}', [UpsellSettingController::class, 'singleDownsellTemplate'])->name('singleDownsellTemplate');
+    Route::get('/add-downsell-templates', [UpsellSettingController::class, 'addDownsellTemplate'])->name('addDownsellTemplate');
+    Route::post('/add-downsell-templates', [UpsellSettingController::class, 'addDownsellTemplatePost'])->name('addDownsellTemplatePost');
+    Route::get('/edit-downsell-templates/{unique_key}', [UpsellSettingController::class, 'editDownsellTemplate'])->name('editDownsellTemplate');
+    Route::post('/edit-downsell-templates/{unique_key}', [UpsellSettingController::class, 'editDownsellTemplatePost'])->name('editDownsellTemplatePost');
+
     //thankYouTemplates
     Route::get('/all-thankyou-templates', [ThankYouSettingController::class, 'thankYouTemplates'])->name('thankYouTemplates');
     Route::get('/add-thankyou-templates', [ThankYouSettingController::class, 'addThankYouTemplate'])->name('addThankYouTemplate');
@@ -493,6 +500,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/sent-whatsapp-messages/{source?}', [MessageController::class, 'sentWhatsappMessage'])->name('sentWhatsappMessage'); //sentWhatsappMessage
     Route::get('/sent-email-messages', [MessageController::class, 'sentEmailMessage'])->name('sentEmailMessage'); //sentEmailMessage
     Route::post('/sent-email-messages', [MessageController::class, 'sentEmailMessageUpdate'])->name('sentEmailMessageUpdate'); //sentEmailMessageUpdate
+
+    Route::get('/view-message-templates/{channel}', [MessageController::class, 'viewTemplates'])->name('viewMessageTemplates'); //viewTemplate
+    Route::post('/update-message-template/{template}', [MessageController::class, 'updateTemplate'])->name('updateMessageTemplate'); //updateTemplate
+    Route::get('/update-template-status/{template}/{status}', [MessageController::class, 'updateTemplateStatus'])->name('updateTemplateStatus'); //updateTemplate
 
     //whatsapp
     Route::post('/send-agent-whatsapp', [MessageController::class, 'sendAgentWhatsapp'])->name('sendAgentWhatsapp'); //sendAgentWhatsapp

@@ -109,6 +109,11 @@ class Order extends Model
         return (bool) OutgoingStock::where(['order_id' => $this->id, 'reason_removed' => 'as_upsell'])->count();
     }
 
+    public function hasDownsell()
+    {
+        return (bool) OutgoingStock::where(['order_id' => $this->id, 'reason_removed' => 'as_downsell'])->count();
+    }
+
     public function outgoingStock()
     {
         return $this->hasOne(OutgoingStock::class, 'order_id');

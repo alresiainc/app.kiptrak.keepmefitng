@@ -17,7 +17,7 @@
     <div class="mt-3">
         <label for="editOrderbump_heading" class="form-label">Heading | Optional</label>
         <input type="text" name="orderbump_heading" id="editOrderbump_heading" class="form-control form-control-sm"
-            value="{{ old('orderbump_heading', isset($form) ? $form?->orderbump?->orderbump_heading : '') }}">
+            value="{{ old('orderbump_heading', isset($form) ? $form?->orderbump?->orderbump_heading : 'Would You Like to Add this Package to your Order') }}">
     </div>
 
     <div class="mt-3">
@@ -50,13 +50,14 @@
 
     <div class="mt-3">
         <label for="orderbumpProductSelect" class="form-label">Select Product Package</label>
+
         <select id="orderbumpProductSelect" name="orderbump_product" data-live-search="true"
             class="form-control form-control-sm border @error('orderbump_product') is-invalid @enderror">
             <option value="">Nothing Selected</option>
             @if (isset($products) && count($products) > 0)
                 @foreach ($products as $product)
                     <option value="{{ $product->id }}"
-                        {{ old('orderbump_product', isset($form) ? $form?->orderbump?->orderbump_product : '') == $product->id ? 'selected' : '' }}>
+                        {{ old('orderbump_product', isset($form) ? $form?->orderbump?->product_id : '') == $product->id ? 'selected' : '' }}>
                         {{ $product->name }} @<span class="product_sale_price">{{ $product->sale_price }}</span>
                     </option>
                 @endforeach
@@ -68,6 +69,19 @@
                 <strong>{{ $message }}</strong>
             </span>
         @enderror
+    </div>
+
+    <div class="mt-3">
+        <label for="" class="form-label">Discount Type</label>
+        <select name="orderbump_discount_type" class="form-control form-control-sm">
+            <option value="">Nothing Selected</option>
+            <option value="fixed"
+                {{ old('orderbump_discount_type', isset($form?->orderbump) ? $form?->orderbump?->orderbump_discount_type : '') == 'fixed' ? 'selected' : '' }}>
+                Fixed</option>
+            <option value="percentage"
+                {{ old('orderbump_discount_type', isset($form?->orderbump) ? $form?->orderbump?->orderbump_discount_type : '') == 'percentage' ? 'selected' : '' }}>
+                Percentage</option>
+        </select>
     </div>
 
     <div class="mt-3">

@@ -17,12 +17,12 @@ use App\Notifications\sendUserMessageNotification;
 use Illuminate\Support\Facades\Notification;
 // use App\Traits\EbulkSmsTrait;
 use App\Models\EbulkSmsApi;
-
+use App\Models\MessageTemplate;
 
 class MessageController extends Controller
 {
     // use EbulkSmsTrait;
-    
+
     //ebulk sms
     /* EBULKSMS API DETAILS */
     private $json_url = "http://api.ebulksms.com:4433/sendsms.json";
@@ -39,7 +39,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $flash = 0;
         $message = substr($message, 0, 160); //Limit this message to one page.
         $Ebulksms = new EbulkSmsApi();
@@ -56,11 +56,11 @@ class MessageController extends Controller
         }
     }
 
-    public function sendVCode($phone, $vcode="")
+    public function sendVCode($phone, $vcode = "")
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $message = '<#> Test message';
         $this->sendSMS($phone, $message);
     }
@@ -69,7 +69,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         return view('pages.messages.sms.composeMessage', compact('authUser', 'user_role'));
     }
 
@@ -82,7 +82,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $request->validate([
             'topic' => 'required|string',
             'recipients' => 'required|string',
@@ -116,19 +116,18 @@ class MessageController extends Controller
                     'body' => $data['message'],
                     'dnd' => '2',
                 ]);
-        
-               $x = json_decode($response);
+
+                $x = json_decode($response);
                 if (isset($x->error)) {
                     //return $x->error->message;
                     return back()->with('success', 'SMS Saved Successfully, but not Delivered. Contact Service Providers');
                 } else {
                     return back()->with('success', 'SMS Saved & Delivered Successfully');
                 }
-                
             } catch (Exception $exception) {
                 return back()->with('success', 'SMS Saved successfully, but not delivered. Something Went Wrong');
             }
-    
+
             return back()->with('success', 'Message Sent Successfully');
         } else {
             $message = new Message();
@@ -141,10 +140,9 @@ class MessageController extends Controller
             $message->created_by = 1;
             $message->status = 'true';
             $message->save();
-    
+
             return back()->with('success', 'Message Saved As Draft Successfully');
         }
-            
     }
 
     /**
@@ -157,7 +155,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $messages = Message::where('type', 'sms')->get();
         return view('pages.messages.sms.sentMessage', compact('authUser', 'user_role', 'messages'));
     }
@@ -172,7 +170,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $users = User::where('isSuperAdmin', false)->get();
         return view('pages.messages.email.composeMessage', compact('authUser', 'user_role', 'users'));
     }
@@ -181,7 +179,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $request->validate([
             'topic' => 'required|string',
             'message' => 'required|string',
@@ -206,7 +204,7 @@ class MessageController extends Controller
             $message->save();
 
             Notification::send($recipients, new sendUserMessageNotification($message));
-    
+
             return back()->with('success', 'Message Sent Successfully');
         } else {
             $message = new Message();
@@ -219,7 +217,7 @@ class MessageController extends Controller
             $message->created_by = $authUser->id;
             $message->status = 'true';
             $message->save();
-    
+
             return back()->with('success', 'Message Saved As Draft Successfully');
         }
     }
@@ -229,7 +227,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $request->validate([
             'topic' => 'required|string',
             'message' => 'required|string',
@@ -239,7 +237,7 @@ class MessageController extends Controller
         $data = $request->all();
 
         //return $data['user_id']; //"2,3"
-        
+
         $user_ids = explode(',', $data['employee_id']); //["2","3"]
         $recipients = User::whereIn('id', $user_ids)->pluck('email');
 
@@ -253,11 +251,10 @@ class MessageController extends Controller
         $message->created_by = $authUser->id;
         $message->status = 'true';
         $message->save();
-        
+
         Notification::route('mail', $recipients)->notify(new sendUserMessageNotification($message));
 
         return back()->with('success', 'Message Sent Successfully');
-        
     }
 
     //from allAgents tbl
@@ -265,7 +262,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $request->validate([
             'topic' => 'required|string',
             'message' => 'required|string',
@@ -275,7 +272,7 @@ class MessageController extends Controller
         $data = $request->all();
 
         //return $data['user_id']; //"2,3"
-        
+
         $user_ids = explode(',', $data['agent_id']); //["2","3"]
         $recipients = User::whereIn('id', $user_ids)->pluck('email');
 
@@ -289,11 +286,10 @@ class MessageController extends Controller
         $message->created_by = $authUser->id;
         $message->status = 'true';
         $message->save();
-        
+
         Notification::route('mail', $recipients)->notify(new sendUserMessageNotification($message));
 
         return back()->with('success', 'Message Sent Successfully');
-        
     }
 
     //from allcustomers tbl
@@ -301,7 +297,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $request->validate([
             'topic' => 'required|string',
             'message' => 'required|string',
@@ -311,7 +307,7 @@ class MessageController extends Controller
         $data = $request->all();
 
         //return $data['user_id']; //"2,3"
-        
+
         $user_ids = explode(',', $data['user_id']); //["2","3"]
         $recipients = Customer::whereIn('id', $user_ids)->pluck('email');
 
@@ -335,27 +331,26 @@ class MessageController extends Controller
                     //append to former ids
                     $former_mail_message_ids = unserialize($order->email_message_ids); //["8"]
                     $string_format = implode(',', $former_mail_message_ids); //8,4
-                    $string_format_append = $string_format.','.$message->id; //8,4,7
+                    $string_format_append = $string_format . ',' . $message->id; //8,4,7
                     $array_format = explode(',', $string_format_append); //["8","4"]
 
-                    $order->update(['email_message_ids'=>serialize($array_format)]);
+                    $order->update(['email_message_ids' => serialize($array_format)]);
                 } else {
                     return '2';
                     $message_id = explode(',', $message->id);
-                    $order->update(['email_message_ids'=>serialize($message_id)]);
+                    $order->update(['email_message_ids' => serialize($message_id)]);
                 }
-            }   
+            }
         }
-        
+
         try {
             Notification::route('mail', $recipients)->notify(new sendUserMessageNotification($message));
         } catch (Exception $exception) {
             // return back()->withError($exception->getMessage())->withInput();
             return back()->with('info', 'Mail Server Issue. Message Saved in System. You can Re-send later');
         }
-        
+
         return back()->with('success', 'Message Sent Successfully');
-        
     }
 
     //from allAgents tbl
@@ -363,14 +358,14 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
 
         $data = $request->all();
 
         //return $data['user_id']; //"2,3"
-        
+
         $user_id = explode(',', $data['whatsapp_agent_id']); //["2","3"]
-        
+
         $message = new Message();
         $message->type = 'whatsapp';
         $message->topic = 'Whatsapp Message';
@@ -384,10 +379,9 @@ class MessageController extends Controller
 
         $recepient_phone_number = $data['recepient_phone_number'];
         $text_msg = $data['message'];
-        
-        $url = "https://wa.me/".$recepient_phone_number."?text=".$text_msg;
+
+        $url = "https://wa.me/" . $recepient_phone_number . "?text=" . $text_msg;
         return redirect()->away($url);
-        
     }
 
     //from allEmployees tbl
@@ -395,14 +389,14 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
 
         $data = $request->all();
 
         //return $data['user_id']; //"2,3"
-        
+
         $user_id = explode(',', $data['whatsapp_employee_id']); //["2","3"]
-        
+
         $message = new Message();
         $message->type = 'whatsapp';
         $message->topic = 'Whatsapp Message';
@@ -416,10 +410,9 @@ class MessageController extends Controller
 
         $recepient_phone_number = $data['recepient_phone_number'];
         $text_msg = $data['message'];
-        
-        $url = "https://wa.me/".$recepient_phone_number."?text=".$text_msg;
+
+        $url = "https://wa.me/" . $recepient_phone_number . "?text=" . $text_msg;
         return redirect()->away($url);
-        
     }
 
     //from allCustomer tbl, allOrders tbl as entries
@@ -427,13 +420,13 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $data = $request->all();
 
         //return $data['user_id']; //"2,3"
-        
+
         $user_id = explode(',', $data['whatsapp_customer_id']); //["2","3"]
-        
+
         $message = new Message();
         $message->type = 'whatsapp';
         $message->topic = 'Whatsapp Message';
@@ -454,9 +447,9 @@ class MessageController extends Controller
                 $former_whatsapp_message_ids = unserialize($order->whatsapp_message_ids); //["8"]
                 $string_format = implode(',', $former_whatsapp_message_ids); //8,4
 
-                $string_format_append = $string_format.','.$message->id;
+                $string_format_append = $string_format . ',' . $message->id;
                 $array_format = explode(',', $string_format_append); //["8","4"]
-                
+
                 $order->whatsapp_message_ids = \serialize($array_format);
                 $order->save();
             } else {
@@ -469,8 +462,8 @@ class MessageController extends Controller
 
         $recepient_phone_number = $data['recepient_phone_number'];
         $text_msg = $data['message'];
-        
-        $url = "https://wa.me/".$recepient_phone_number."?text=".$text_msg;
+
+        $url = "https://wa.me/" . $recepient_phone_number . "?text=" . $text_msg;
         return redirect()->away($url);
     }
 
@@ -478,7 +471,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $request->validate([
             'topic' => 'required|string',
             'message' => 'required|string',
@@ -492,12 +485,11 @@ class MessageController extends Controller
 
         $text_msg = $data['message'];
 
-        $url = "https://wa.me/".$recepient_phone_number."?text=".$text_msg;
+        $url = "https://wa.me/" . $recepient_phone_number . "?text=" . $text_msg;
         return redirect()->away($url);
-        
     }
 
-    public function sentWhatsappMessage($source="")
+    public function sentWhatsappMessage($source = "")
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
@@ -516,11 +508,40 @@ class MessageController extends Controller
         return view('pages.messages.whatsapp.whatsapp', compact('authUser', 'user_role', 'messages', 'order'));
     }
 
+    public function viewTemplates($channel)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $templates = MessageTemplate::where('channel', $channel)->get();
+
+        return view('pages.messages.templates', compact('authUser', 'user_role', 'templates', 'channel'));
+    }
+
+    public function updateTemplate(MessageTemplate $template, Request $request)
+    {
+
+        $template->update([
+            'subject' => $request->subject,
+            'message' => $request->template,
+        ]);
+
+        return redirect()->back()->with('success', 'Template updated successfully');
+    }
+
+    public function updateTemplateStatus(MessageTemplate $template, $status)
+    {
+        $template->update([
+            'is_active' => $status == 'activate' ? true : false,
+        ]);
+        return redirect()->back()->with('success', 'Template updated successfully');
+    }
+
     public function sentEmailMessage()
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $messages = Message::where('type', 'email')->get();
         return view('pages.messages.email.sentMessage', compact('authUser', 'user_role', 'messages'));
     }
@@ -529,7 +550,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $request->validate([
             'topic' => 'required|string',
             'message' => 'required|string',
@@ -544,34 +565,33 @@ class MessageController extends Controller
         } else {
             $recipients = Customer::whereIn('id', $user_ids)->pluck('email');
         }
-    
+
         $message->topic = $data['topic'];
         $message->message = $data['message'];
         $message->save();
-        
+
         Notification::route('mail', $recipients)->notify(new sendUserMessageNotification($message));
 
         return back()->with('success', 'Message Sent Successfully');
-        
     }
 
-    public function mailCustomersByCategory($selectedCategory, $recipients="")
+    public function mailCustomersByCategory($selectedCategory, $recipients = "")
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $category = Category::where('unique_key', $selectedCategory)->first();
-        $selectedCustomers = DB::table("customers")->whereIn('id',explode(",",$recipients))->get();
+        $selectedCustomers = DB::table("customers")->whereIn('id', explode(",", $recipients))->get();
         return view('pages.messages.email.mailCustomersByCategory', compact('authUser', 'user_role', 'category', 'selectedCustomers', 'recipients'));
     }
 
-    public function mailCustomersByCategoryPost(Request $request, $selectedCategory, $recipients="")
+    public function mailCustomersByCategoryPost(Request $request, $selectedCategory, $recipients = "")
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         $category = Category::where('unique_key', $selectedCategory)->first();
-        $customers = DB::table("customers")->whereIn('id',explode(",",$recipients));
+        $customers = DB::table("customers")->whereIn('id', explode(",", $recipients));
         $recipients_emails = $customers->pluck('email');
         //$recipients_ids = $customers->pluck('id');
 
@@ -608,7 +628,7 @@ class MessageController extends Controller
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        
+
         //
     }
 }

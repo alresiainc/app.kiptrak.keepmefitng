@@ -20,14 +20,15 @@
     <!-- Heading Input (Hidden) -->
     <div class="mt-3 d-none">
         <label for="editUpsell_heading" class="form-label">Heading</label>
-        <input type="text" name="upsell_heading" id="editUpsell_heading" class="form-control" value="">
+        <input type="text" name="upsell_heading" id="editUpsell_heading" class="form-control"
+            value="{{ old('editUpsell_heading', isset($form) && $form?->editUpsell_heading ? $form?->editUpsell_heading : '') }}">
     </div>
 
     <!-- Sub Heading Textarea (Hidden) -->
     <div class="mt-3 d-none">
         <label for="editUpsell_subheading" class="form-label">Sub Heading</label>
         <textarea name="upsell_subheading" id="editUpsell_subheading" cols="30" rows="5"
-            class="mytextarea form-control"></textarea>
+            class="mytextarea form-control">{{ old('upsell_subheading', isset($form) && $form?->upsell_subheading ? $form?->upsell_subheading : '') }}</textarea>
     </div>
 
     <!-- Template Selection -->
@@ -71,5 +72,25 @@
                 <strong>{{ $message }}</strong>
             </span>
         @enderror
+    </div>
+
+    <div class="mt-3 d-none">
+        <label for="" class="form-label">Discount Type</label>
+        <select name="upsell_discount_type" class="form-control border btn-dark">
+            <option value="">
+                Nothing Selected</option>
+            <option value="fixed"
+                {{ old('upsell_discount_type', isset($form) && $form?->upsell_discount_type ? $form?->upsell_discount_type : '') == 'fixed' ? 'selected' : '' }}>
+                Fixed</option>
+            <option value="percentage"
+                {{ old('upsell_discount_type', isset($form) && $form?->upsell_discount_type ? $form?->upsell_discount_type : '') == 'percentage' ? 'selected' : '' }}>
+                Percentage</option>
+        </select>
+    </div>
+
+    <div class="mt-3 d-none">
+        <label for="" class="form-label">Discount Amount</label>
+        <input type="text" name="upsell_discount" class="form-control"
+            value="{{ old('upsell_discount', isset($form) && $form?->upsell_discount ? $form?->upsell_discount : '') }}">
     </div>
 </div>

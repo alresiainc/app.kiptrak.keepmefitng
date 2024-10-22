@@ -28,12 +28,14 @@ use App\Models\OrderBump;
 use App\Models\UpSell;
 use App\Models\Customer;
 use App\Models\CartAbandon;
+use App\Models\Downsell;
 use App\Models\UpsellSetting;
 use App\Models\GeneralSetting;
 use App\Models\MessageTemplate;
 use App\Models\SoundNotification;
 use App\Models\ThankYou;
-use App\Notifications\OrderWhatsappNotification;
+use App\Notifications\OrderNotification;
+use Illuminate\Support\Facades\Log;
 
 class FormBuilderController extends Controller
 {
@@ -123,7 +125,8 @@ class FormBuilderController extends Controller
 
         //$products = Product::whereNull('combo_product_ids')->where('status', 'true')->orderBy('id','DESC')->get();
         $products = Product::where('status', 'true')->orderBy('id', 'DESC')->get();
-        $upsellTemplates = UpsellSetting::all();
+        $upsellTemplates = UpsellSetting::where('type', 'upsell')->get();
+        $downsellTemplates = UpsellSetting::where('type', 'downsell')->get();
         $staffs = User::where('type', 'staff')->get();
         $thankYouTemplates = ThankYou::all();
 
@@ -136,6 +139,7 @@ class FormBuilderController extends Controller
             'form_code',
             'formHolders',
             'upsellTemplates',
+            'downsellTemplates',
             'staffs',
             'thankYouTemplates'
         ));
@@ -223,7 +227,8 @@ class FormBuilderController extends Controller
 
         //$products = Product::whereNull('combo_product_ids')->where('status', 'true')->orderBy('id','DESC')->get();
         $products = Product::where('status', 'true')->orderBy('id', 'DESC')->get();
-        $upsellTemplates = UpsellSetting::all();
+        $upsellTemplates = UpsellSetting::where('type', 'upsell')->get();
+        $downsellTemplates = UpsellSetting::where('type', 'downsell')->get();
         $staffs = User::where('type', 'staff')->get();
         $thankYouTemplates = ThankYou::all();
 
@@ -237,6 +242,7 @@ class FormBuilderController extends Controller
             'package_select',
             'form_code',
             'upsellTemplates',
+            'downsellTemplates',
             'staffs',
             'form',
             'toUpdate',
@@ -978,6 +984,8 @@ class FormBuilderController extends Controller
                 $orderbump->product_actual_selling_price = $orderbump_product->sale_price;
                 $orderbump->product_assumed_selling_price = $orderbump_product->sale_price + 500;
                 // $outgoingStock->created_by = $authUser->id;
+                $orderbump->orderbump_discount = $request->orderbump_discount;
+                $orderbump->orderbump_discount_type = $request->orderbump_discount_type;
                 $orderbump->status = 'true';
                 $orderbump->save();
 
@@ -1016,8 +1024,8 @@ class FormBuilderController extends Controller
 
             //upsell
             $upsell = new UpSell();
-            $upsell->upsell_heading = !empty($request->upsell_heading) ? $request->upsell_heading : $templ->heading_text;
-            $upsell->upsell_subheading = !empty($request->upsell_subheading) ? $request->upsell_subheading : serialize($templ->subheading_text);
+            $upsell->upsell_heading = !empty($request->upsell_heading) ? $request->upsell_heading : ($templ->heading_text ?? '');
+            $upsell->upsell_subheading = !empty($request->upsell_subheading) ? $request->upsell_subheading : serialize($templ->subheading_text ?? '');
             $upsell->upsell_setting_id = $request->upsell_setting_id;
             $upsell->product_id = $request->upsell_product;
             $upsell->order_id = $formHolder->order->id;
@@ -1054,6 +1062,49 @@ class FormBuilderController extends Controller
             $formHolder->update(['upsell_id' => $upsell->id]);
         }
 
+        if ($request->switch_downsell == 'on') {
+            $downsellTemplate = UpsellSetting::where('id', $request->downsell_setting_id)->first();
+
+            //downsell
+            $downsell = new DownSell();
+            $downsell->downsell_heading = !empty($request->downsell_heading) ? $request->downsell_heading : ($downsellTemplate->heading_text ?? '');
+            $downsell->downsell_subheading = !empty($request->downsell_subheading) ? $request->downsell_subheading : serialize($downsellTemplate->subheading_text ?? '');
+            $downsell->downsell_setting_id = $request->downsell_setting_id;
+            $downsell->product_id = $request->downsell_product;
+            $downsell->order_id = $formHolder->order->id;
+            $downsell->product_expected_quantity_to_be_sold = 1;
+            $downsell->product_expected_amount = 0;
+            // $downsell->created_by = $authUser->id;
+            $downsell->status = 'true';
+            $downsell->save();
+
+            $product = Product::where('id', $request->downsell_product)->first();
+            // Create a new package array for each product ID
+            $package_bundles = [
+                'product_id' => $request->downsell_product,
+                'quantity_removed' => 1,
+                'amount_accrued' => $product->sale_price,
+                'customer_acceptance_status' => null,
+                'reason_removed' => 'as_downsell',
+                'quantity_returned' => 0,
+                'reason_returned' => null,
+                'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
+            ];
+            // $package_bundle[] = $package_bundles;
+            $orderPackageBundle = $formHolder->order->outgoingStock->package_bundle;
+            array_push($orderPackageBundle, $package_bundles);
+
+            //update existing OutgoingStock row
+            $outgoingStock = OutgoingStock::where('order_id', $formHolder->order->id)->first();
+            $outgoingStock->order_id = isset($formHolder->order_id) ? $formHolder->order->id : null;
+            $outgoingStock->package_bundle = $orderPackageBundle;
+            $outgoingStock->created_by = $authUser->id;
+            $outgoingStock->status = 'true';
+            $outgoingStock->save();
+            //update formHolder
+            $formHolder->update(['downsell_id' => $downsell->id]);
+        }
+
         return back()->with('success', 'Form Created Successfully');
     }
 
@@ -1072,12 +1123,13 @@ class FormBuilderController extends Controller
 
         //$products = Product::whereNull('combo_product_ids')->where('status', 'true')->orderBy('id','DESC')->get();
         $products = Product::where('status', 'true')->orderBy('id', 'DESC')->get();
-        $upsellTemplates = UpsellSetting::all();
+        $upsellTemplates = UpsellSetting::where('type', 'upsell')->get();
+        $downsellTemplates = UpsellSetting::where('type', 'downsell')->get();
         $staffs = User::where('type', 'staff')->get();
         $thankYouTemplates = ThankYou::all();
 
         // dd('ddd');
-        return view('pages.form-builder.index', compact('authUser', 'user_role', 'formHolders', 'products', 'upsellTemplates', 'staffs', 'thankYouTemplates'));
+        return view('pages.form-builder.index', compact('authUser', 'user_role', 'formHolders', 'products', 'upsellTemplates', 'downsellTemplates', 'staffs', 'thankYouTemplates'));
     }
 
     public function updateFormBuilderPost(Request $request, $unique_key)
@@ -1089,6 +1141,7 @@ class FormBuilderController extends Controller
         if (!isset($formHolder)) {
             abort(404);
         }
+
 
         // Initialize flags
         $hasProduct = false;
@@ -1193,23 +1246,6 @@ class FormBuilderController extends Controller
 
         $order = $formHolder->order;
 
-
-        if (!empty($request->switch_orderbump)) {
-            if ($request->switch_orderbump == 'off') {
-                $formHolder->orderbump_id = null;
-                OrderBump::where('id', $formHolder->orderbump_id)->delete();
-            }
-        }
-        if (!empty($request->switch_upsell)) {
-            if ($request->switch_upsell == 'off') {
-                $formHolder->upsell_id = null;
-                UpSell::where('id', $formHolder->upsell_id)->delete();
-            }
-        }
-
-        //for unsed forms
-
-
         $formHolder->form_data = \serialize($form_data_array);
         $formHolder->setting_data = \serialize($setting_data);
         $formHolder->status = 'true';
@@ -1238,6 +1274,8 @@ class FormBuilderController extends Controller
                 $package_bundle[] = $package_bundles;
             }
         }
+
+
 
         $outgoingStock = new OutgoingStock();
         $outgoingStock->order_id = $order->id;
@@ -1288,7 +1326,12 @@ class FormBuilderController extends Controller
                 }
 
                 //orderbump
-                $orderbump = new OrderBump();
+                if ($formHolder->orderbump_id) {
+                    $orderbump = OrderBump::find($formHolder->orderbump_id);
+                } else {
+                    $orderbump = new OrderBump();
+                }
+
                 $orderbump->orderbump_heading = !empty($request->orderbump_heading) ? $request->orderbump_heading : 'Would You Like to Add this Package to your Order';
                 $orderbump->orderbump_subheading = $orderbump_subheading;
                 $orderbump->product_id = $request->orderbump_product;
@@ -1298,6 +1341,8 @@ class FormBuilderController extends Controller
                 $orderbump->product_actual_selling_price = $orderbump_product->sale_price;
                 $orderbump->product_assumed_selling_price = $orderbump_product->sale_price + 500;
                 // $outgoingStock->created_by = $authUser->id;
+                $orderbump->orderbump_discount = $request->orderbump_discount;
+                $orderbump->orderbump_discount_type = $request->orderbump_discount_type;
                 $orderbump->status = 'true';
                 $orderbump->save();
 
@@ -1318,23 +1363,32 @@ class FormBuilderController extends Controller
                 //push to existing array
                 array_push($orderPackageBundle, $package_bundles);
 
+
                 //update existing OutgoingStock row
                 $outgoingStock = OutgoingStock::where('order_id', $formHolder->order->id)->first();
+
                 $outgoingStock->order_id = isset($formHolder->order_id) ? $formHolder->order->id : null;
                 $outgoingStock->package_bundle = $orderPackageBundle;
                 $outgoingStock->created_by = $authUser->id;
                 $outgoingStock->status = 'true';
                 $outgoingStock->save();
 
+
                 //update formHolder
                 $formHolder->update(['orderbump_id' => $orderbump->id]);
             }
+        } else {
+            OrderBump::where('id', $formHolder->orderbump_id)->delete();
         }
         if ($request->switch_upsell == 'on') {
             $templ = UpsellSetting::where('id', $request->upsell_setting_id)->first();
 
             //upsell
-            $upsell = new UpSell();
+            if ($formHolder->upsell_id) {
+                $upsell = UpSell::find($formHolder->upsell_id);
+            } else {
+                $upsell = new UpSell();
+            }
             $upsell->upsell_heading = !empty($request->upsell_heading) ? $request->upsell_heading : $templ->heading_text;
             $upsell->upsell_subheading = !empty($request->upsell_subheading) ? $request->upsell_subheading : serialize($templ->subheading_text);
             $upsell->upsell_setting_id = $request->upsell_setting_id;
@@ -1359,7 +1413,8 @@ class FormBuilderController extends Controller
                 'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
             ];
             // $package_bundle[] = $package_bundles;
-            $orderPackageBundle = $formHolder->order->outgoingStock->package_bundle;
+            $getStockForUpsell = OutgoingStock::where('order_id', $formHolder->order->id)->first();
+            $orderPackageBundle = $getStockForUpsell->package_bundle;
             array_push($orderPackageBundle, $package_bundles);
 
             //update existing OutgoingStock row
@@ -1371,29 +1426,89 @@ class FormBuilderController extends Controller
             $outgoingStock->save();
             //update formHolder
             $formHolder->update(['upsell_id' => $upsell->id]);
+        } else {
+            UpSell::where('id', $formHolder->upsell_id)->delete();
         }
+        if ($request->switch_downsell == 'on') {
+            $downsellTemplate = UpsellSetting::where('id', $request->downsell_setting_id)->first();
+
+            //downsell
+            if ($formHolder->downsell_id) {
+                $downsell = DownSell::find($formHolder->downsell_id);
+            } else {
+                $downsell = new DownSell();
+            }
+            $downsell->downsell_heading = !empty($request->downsell_heading) ? $request->downsell_heading : $downsellTemplate->heading_text;
+            $downsell->downsell_subheading = !empty($request->downsell_subheading) ? $request->downsell_subheading : serialize($downsellTemplate->subheading_text);
+            $downsell->downsell_setting_id = $request->downsell_setting_id;
+            $downsell->product_id = $request->downsell_product;
+            $downsell->order_id = $formHolder->order->id;
+            $downsell->product_expected_quantity_to_be_sold = 1;
+            $downsell->product_expected_amount = 0;
+            // $downsell->created_by = $authUser->id;
+            $downsell->status = 'true';
+            $downsell->save();
+
+            $product = Product::where('id', $request->downsell_product)->first();
+            // Create a new package array for each product ID
+            $package_bundles = [
+                'product_id' => $request->downsell_product,
+                'quantity_removed' => 1,
+                'amount_accrued' => $product->sale_price,
+                'customer_acceptance_status' => null,
+                'reason_removed' => 'as_downsell',
+                'quantity_returned' => 0,
+                'reason_returned' => null,
+                'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
+            ];
+            // $package_bundle[] = $package_bundles;
+            $getStockForDownsell = OutgoingStock::where('order_id', $formHolder->order->id)->first();
+            $orderPackageBundle = $getStockForDownsell->package_bundle;
+            // $orderPackageBundle = $formHolder->order->outgoingStock->package_bundle;
+            array_push($orderPackageBundle, $package_bundles);
+
+            //update existing OutgoingStock row
+            $outgoingStock = OutgoingStock::where('order_id', $formHolder->order->id)->first();
+            $outgoingStock->order_id = isset($formHolder->order_id) ? $formHolder->order->id : null;
+            $outgoingStock->package_bundle = $orderPackageBundle;
+            $outgoingStock->created_by = $authUser->id;
+            $outgoingStock->status = 'true';
+            $outgoingStock->save();
+            //update formHolder
+            $formHolder->update(['downsell_id' => $downsell->id]);
+        } else {
+            Downsell::where('id', $formHolder->downsell_id)->delete();
+        }
+
+        // dd(OutgoingStock::where('order_id', $formHolder->order->id)->first()->package_bundle);
 
         return back()->with('success', 'Form Updated Successfully');
     }
 
     public function assignStaffToForm(Request $request)
     {
+        // dd($request->all());
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
-        $data = $request->all();
-        $form_id = $data['form_id'];
-        $staff_id = $data['staff_id'];
+        $formHolder = FormHolder::where('id', $request->form_id)->first();
 
-        $formHolder = FormHolder::where('id', $form_id)->first();
-
-        //check if form has entries
-        if (count($formHolder->customers) > 0) {
-            $orders = Order::where('form_holder_id', $formHolder->id)->update(['staff_assigned_id' => $staff_id]);
+        if ($request->staff_assigned_ids && is_array($request->staff_assigned_ids)) {
+            $staff_ids = $request->staff_assigned_ids;
+            $formHolder->update(['staff_assigned_ids' => $staff_ids]);
+            if ($request->auto_orders_distribution == 'on') {
+                $formHolder->update(['auto_orders_distribution' => true, 'staff_workload_threshold' => $request->staff_workload_threshold]);
+            }
         }
 
+
+        //check if form has entries
+        // if (count($formHolder->customers) > 0) {
+        //     $orders = Order::where('form_holder_id', $formHolder->id)->update(['staff_assigned_id' => $staff_id]);
+        // }
+
         //upd form
-        $formHolder->update(['staff_assigned_id' => $staff_id]);
+        // $formHolder->update(['staff_assigned_id' => $staff_id]);
 
 
         return back()->with('success', 'Staff Assigned Successfully');
@@ -3429,6 +3544,8 @@ class FormBuilderController extends Controller
     public function saveNewFormFromCustomer(Request $request)
     {
 
+        $channels = config('site.notification_channels');
+
         // dd($request->all());
         $data = $request->all();
         //create a code to delay the code for 15 sec
@@ -3491,40 +3608,7 @@ class FormBuilderController extends Controller
             $outgoingStock = OutgoingStock::where('order_id', $newOrder->id)->first();
 
             $outgoingStockPackageBundle = $outgoingStock->package_bundle; //[{},{}]
-
-
-
-
-            //Old code 
-            // foreach ($data['product_packages'] ?? [] as $key => $product_id) {
-            //     if (!empty($product_id)) {
-            //         $idPriceQty = explode('-', $product_id);
-            //         $productId = $idPriceQty[0];
-            //         $saleUnitPrice = $idPriceQty[1];
-            //         $qtyRemoved = $idPriceQty[2];
-
-            //         // Accepted updated
-            //         $amount_accrued = $qtyRemoved * $saleUnitPrice;
-
-            //         foreach ($outgoingStockPackageBundle as &$stock) {
-            //             $product = Product::find($stock['product_id']);
-
-            //             if ($stock['product_id'] == (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
-            //                 $stock['quantity_removed'] = $qtyRemoved;
-            //                 $stock['amount_accrued'] = $amount_accrued;
-            //                 $stock['customer_acceptance_status'] = 'accepted';
-            //             }
-            //             // Rejected or declined updated
-            //             if ($stock['product_id'] !== (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
-            //                 $stock['customer_acceptance_status'] = 'rejected';
-            //                 $stock['amount_accrued'] = $product->sale_price;
-            //                 $stock['quantity_returned'] = $stock['quantity_removed'];
-            //                 $stock['reason_returned'] = 'declined';
-            //             }
-            //         }
-            //     }
-            // }
-
+            // dd($outgoingStockPackageBundle);
             //NEW CODES
             foreach ($data['product_packages'] ?? [] as $key => $product_id) {
                 if (!empty($product_id)) {
@@ -3577,12 +3661,6 @@ class FormBuilderController extends Controller
                 }
             }
 
-
-
-
-            // dd($outgoingStockPackageBundle);
-            #remove later
-
             #remove later
             $outgoingStock->update(['package_bundle' => $outgoingStockPackageBundle]);
 
@@ -3619,8 +3697,15 @@ class FormBuilderController extends Controller
             $newOrder->save();
 
             //Send Message to the assigned staff if any
-            $whatsapp_new_order_assigned = MessageTemplate::where('type', 'whatsapp_new_order_assigned')->first()?->message;
-            $nextStaff?->notify(new OrderWhatsappNotification($newOrder, $whatsapp_new_order_assigned));
+            $assigned_staff_messages = [];
+            foreach ($channels as $type) {
+                $message_type = MessageTemplate::where('type', $type . '_new_order_assigned')->first();
+                if ($message_type && $message_type->is_active) {
+                    $assigned_staff_messages[$type]['title'] = $message_type->subject;
+                    $assigned_staff_messages[$type]['message'] = $message_type->message;
+                }
+            }
+            $nextStaff?->notify(new OrderNotification($newOrder, $assigned_staff_messages));
 
 
             $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
@@ -3629,17 +3714,38 @@ class FormBuilderController extends Controller
             $data['has_upsell'] = $has_upsell;
             $data['order_id'] = $newOrder->id;
             $data['staff_assigned_id'] = $newOrder->staff_assigned_id;
+            $data['nextStaff'] = $nextStaff;
 
 
 
             //call notify fxn
             if ($has_orderbump == false && $has_upsell == false) {
                 $this->invoiceData($formHolder, $customer, $newOrder);
-
                 //Send Message to the customer
-                $whatsapp_new_order_message = MessageTemplate::where('type', 'whatsapp_new_order_message')->first()?->message;
-                $customer->notify(new OrderWhatsappNotification($newOrder, $whatsapp_new_order_message));
+                $customer_messages = [];
+                foreach ($channels as $type) {
+                    if ($nextStaff) {
+                        $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_staff')->first();
+                        if ($message_type && $message_type->is_active) {
+                            $customer_messages[$type]['title'] = $message_type->subject;
+                            $customer_messages[$type]['message'] = $message_type->message;
+                        }
+                    } else {
+                        $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_no_staff')->first();
+                        if ($message_type && $message_type->is_active) {
+                            $customer_messages[$type]['title'] = $message_type->subject;
+                            $customer_messages[$type]['message'] = $message_type->message;
+                        }
+                    }
+                }
+                $customer?->notify(new OrderNotification($newOrder, $customer_messages));
             }
+
+            Log::alert('New order');
+            Log::alert([
+                'status' => true,
+                'data' => $data,
+            ]);
 
             return response()->json([
                 'status' => true,
@@ -3734,14 +3840,22 @@ class FormBuilderController extends Controller
             if ($customer->delivery_duration) {
                 $order->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
             }
+
+
             $nextStaff = (new FormHelper())->getNextAvailableStaff($formHolder, true);
             $order->staff_assigned_id = $nextStaff?->id ?? null;
             $order->save();
 
             //Send Message to the assigned staff if any
-            $whatsapp_new_order_assigned = MessageTemplate::where('type', 'whatsapp_new_order_assigned')->first()?->message;
-            $nextStaff?->notify(new OrderWhatsappNotification($order, $whatsapp_new_order_assigned));
-
+            $assigned_staff_messages = [];
+            foreach ($channels as $type) {
+                $message_type = MessageTemplate::where('type', $type . '_new_order_assigned')->first();
+                if ($message_type && $message_type->is_active) {
+                    $assigned_staff_messages[$type]['title'] = $message_type->subject;
+                    $assigned_staff_messages[$type]['message'] = $message_type->message;
+                }
+            }
+            $nextStaff?->notify(new OrderNotification($order, $assigned_staff_messages));
 
             $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
             $has_upsell = isset($formHolder->upsell_id) ? true : false;
@@ -3757,11 +3871,33 @@ class FormBuilderController extends Controller
             if ($has_orderbump == false && $has_upsell == false) {
                 $this->invoiceData($formHolder, $customer, $order);
 
-                //Send Message to the customer
-                $whatsapp_new_order_message = MessageTemplate::where('type', 'whatsapp_new_order_message')->first()?->message;
-                $customer->notify(new OrderWhatsappNotification($order, $whatsapp_new_order_message));
+
+
+                //Send Message to the assigned staff if any
+                $customer_messages = [];
+                foreach ($channels as $type) {
+                    if ($nextStaff) {
+                        $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_staff')->first();
+                        if ($message_type && $message_type->is_active) {
+                            $customer_messages[$type]['title'] = $message_type->subject;
+                            $customer_messages[$type]['message'] = $message_type->message;
+                        }
+                    } else {
+                        $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_no_staff')->first();
+                        if ($message_type && $message_type->is_active) {
+                            $customer_messages[$type]['title'] = $message_type->subject;
+                            $customer_messages[$type]['message'] = $message_type->message;
+                        }
+                    }
+                }
+                $customer?->notify(new OrderNotification($order, $customer_messages));
             }
 
+            Log::alert('New order');
+            Log::alert([
+                'status' => true,
+                'data' => $data,
+            ]);
             return response()->json([
                 'status' => true,
                 'data' => $data,
@@ -3774,6 +3910,7 @@ class FormBuilderController extends Controller
     {
         // $authUser = auth()->user();
         // $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
 
         $data = $request->all();
 
@@ -3801,16 +3938,19 @@ class FormBuilderController extends Controller
             //now update each row package_bundle
             $outgoingStockPackageBundle = $order->outgoingStock->package_bundle;
 
+            // dd($outgoingStockPackageBundle);
             foreach ($outgoingStockPackageBundle as &$package_bundle) {
                 // Find the corresponding package_bundle in $package_bundle_1 based on product_id
                 $matching_package = collect($package_bundle_1)->firstWhere('product_id', $package_bundle['product_id']);
-
+                // dd($package_bundle_1);
                 // If a matching package is found, update the row in $outgoingStockPackageBundle
                 if ($matching_package && $package_bundle['reason_removed'] == 'as_orderbump') {
                     // Merge the matching keys and values from $matching_package into $package_bundle
                     $package_bundle = array_merge($package_bundle, array_intersect_key($matching_package, $package_bundle));
                 }
             }
+
+            // dd($outgoingStockPackageBundle);
             //update outgoingStock
             OutgoingStock::where(['order_id' => $order->id])->update(['package_bundle' => $outgoingStockPackageBundle, 'order_id' => $order->id]);
         }
@@ -3829,8 +3969,25 @@ class FormBuilderController extends Controller
         if ($has_upsell == false) {
             $this->invoiceData($formHolder, $customer, $order);
             //Send Message to the customer
-            $whatsapp_new_order_message = MessageTemplate::where('type', 'whatsapp_new_order_message')->first()?->message;
-            $customer->notify(new OrderWhatsappNotification($order, $whatsapp_new_order_message));
+
+            $channels = config('site.notification_channels');
+            $customer_messages = [];
+            foreach ($channels as $type) {
+                if ($order->staff) {
+                    $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_staff')->first();
+                    if ($message_type && $message_type->is_active) {
+                        $customer_messages[$type]['title'] = $message_type->subject;
+                        $customer_messages[$type]['message'] = $message_type->message;
+                    }
+                } else {
+                    $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_no_staff')->first();
+                    if ($message_type && $message_type->is_active) {
+                        $customer_messages[$type]['title'] = $message_type->subject;
+                        $customer_messages[$type]['message'] = $message_type->message;
+                    }
+                }
+            }
+            $customer?->notify(new OrderNotification($order, $customer_messages));
         }
 
 
@@ -3872,6 +4029,8 @@ class FormBuilderController extends Controller
             //now update each row package_bundle
             $outgoingStockPackageBundle = $order->outgoingStock->package_bundle;
 
+            // dd($outgoingStockPackageBundle);
+
             foreach ($outgoingStockPackageBundle as &$package_bundle) {
                 // Find the corresponding package_bundle in $package_bundle_1 based on product_id
                 $matching_package = collect($package_bundle_1)->firstWhere('product_id', $package_bundle['product_id']);
@@ -3882,19 +4041,44 @@ class FormBuilderController extends Controller
                     $package_bundle = array_merge($package_bundle, array_intersect_key($matching_package, $package_bundle));
                 }
             }
+
+
             //update outgoingStock
-            OutgoingStock::where(['order_id' => $order->id])->update(['package_bundle' => $outgoingStockPackageBundle, 'order_id' => $order->id]);
+            OutgoingStock::where(['order_id' => $order->id])->update(['package_bundle' => $outgoingStockPackageBundle]);
         }
+
+        // dd(OutgoingStock::where(['order_id' => $order->id])->first()->package_bundle);
 
         //update order with same orderbump as formholder
         $order->update(['upsell_id' => $formHolder->upsell_id]);
+        Log::alert("Update outgoingStock");
+        Log::alert($order->outgoingStock);
 
         //////////////////////////////////////////////////////////////////////////////
         $customer =  $order->customer;
         $this->invoiceData($formHolder, $customer, $order);
-        
-        $whatsapp_new_order_message = MessageTemplate::where('type', 'whatsapp_new_order_message')->first()?->message;
-        $customer->notify(new OrderWhatsappNotification($order, $whatsapp_new_order_message));
+
+
+
+        $channels = config('site.notification_channels');
+        $customer_messages = [];
+        foreach ($channels as $type) {
+            if ($order->staff) {
+                $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_staff')->first();
+                if ($message_type && $message_type->is_active) {
+                    $customer_messages[$type]['title'] = $message_type->subject;
+                    $customer_messages[$type]['message'] = $message_type->message;
+                }
+            } else {
+                $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_no_staff')->first();
+                if ($message_type && $message_type->is_active) {
+                    $customer_messages[$type]['title'] = $message_type->subject;
+                    $customer_messages[$type]['message'] = $message_type->message;
+                }
+            }
+        }
+
+        $customer?->notify(new OrderNotification($order, $customer_messages));
 
         //////////////////////////////////////////////////////////////////////////////
 

@@ -23,7 +23,7 @@ class EmployeeController extends Controller
         $roles = Role::all();
         return view('pages.hrm.employee.allEmployee', compact('authUser', 'user_role', 'staffs', 'roles'));
     }
-    
+
     //add any user, like registration
     public function addStaff()
     {
@@ -61,7 +61,7 @@ class EmployeeController extends Controller
         $data = $request->all();
 
         $user = new User();
-        $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
         $user->firstname = $data['firstname'];
         $user->lastname = $data['lastname'];
         $user->email = $data['email'];
@@ -72,6 +72,7 @@ class EmployeeController extends Controller
         $user->city = !empty($data['city']) ? $data['city'] : null;
         $user->state = $data['state'];
         $user->country_id = $data['country'];
+        $user->adkombo_whatsapp_session_name = $data['adkombo_whatsapp_session_name'];
         $user->address = !empty($data['address']) ? $data['address'] : null;
         $user->current_salary = !empty($data['current_salary']) ? $data['current_salary'] : null;
 
@@ -80,7 +81,7 @@ class EmployeeController extends Controller
 
         if ($request->profile_picture) {
             //image
-            $imageName = time().'.'.$request->profile_picture->extension();
+            $imageName = time() . '.' . $request->profile_picture->extension();
             //store products in folder
             $request->profile_picture->storeAs('staff', $imageName, 'public');
             $user->profile_picture = $imageName;
@@ -103,10 +104,8 @@ class EmployeeController extends Controller
             // }
             return back()->with('success', 'Staff Created and Assigned Role Successfully');
         }
-        
-        return back()->with('success', 'Staff Created Successfully');
 
-        
+        return back()->with('success', 'Staff Created Successfully');
     }
 
     public function singleStaff($unique_key)
@@ -114,7 +113,7 @@ class EmployeeController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $staff = User::where('unique_key', $unique_key)->first();
-        if(!isset($staff)){
+        if (!isset($staff)) {
             abort(404);
         }
         return view('pages.hrm.employee.singleEmployee', compact('authUser', 'user_role', 'staff'));
@@ -125,10 +124,10 @@ class EmployeeController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $staff = User::where('unique_key', $unique_key)->first();
-        if(!isset($staff)){
+        if (!isset($staff)) {
             abort(404);
         }
-        
+
         $countries = Country::all();
         $name = explode(' ', $staff->name);
         $firstname = $name[0];
@@ -144,7 +143,7 @@ class EmployeeController extends Controller
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $user = User::where('unique_key', $unique_key)->first();
-        if(!isset($user)){
+        if (!isset($user)) {
             abort(404);
         }
         $request->validate([
@@ -161,7 +160,7 @@ class EmployeeController extends Controller
 
         $data = $request->all();
 
-        $user->name = $data['firstname'].' '.$data['lastname'];
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
         $user->firstname = $data['firstname'];
         $user->lastname = $data['lastname'];
         $user->email = $data['email'];
@@ -171,6 +170,7 @@ class EmployeeController extends Controller
         $user->city = !empty($data['city']) ? $data['city'] : null;
         $user->state = $data['state'];
         $user->country_id = $data['country'];
+        $user->adkombo_whatsapp_session_name = $data['adkombo_whatsapp_session_name'];
         $user->address = !empty($data['address']) ? $data['address'] : null;
         $user->current_salary = !empty($data['current_salary']) ? $data['current_salary'] : null;
 
@@ -180,14 +180,14 @@ class EmployeeController extends Controller
         //profile_picture
         if ($request->profile_picture) {
             $oldImage = $user->profile_picture; //1.jpg
-            if(Storage::disk('public')->exists('staff/'.$oldImage)){
-                Storage::disk('public')->delete('staff/'.$oldImage);
+            if (Storage::disk('public')->exists('staff/' . $oldImage)) {
+                Storage::disk('public')->delete('staff/' . $oldImage);
                 /*
                     Delete Multiple files this way
                     Storage::delete(['upload/test.png', 'upload/test2.png']);
                 */
             }
-            $imageName = time().'.'.$request->profile_picture->extension();
+            $imageName = time() . '.' . $request->profile_picture->extension();
             //store products in folder
             $request->profile_picture->storeAs('staff', $imageName, 'public');
             $user->profile_picture = $imageName;
@@ -196,7 +196,7 @@ class EmployeeController extends Controller
         $user->save();
 
         //update role to user
-        if(!empty($data['role_id'])){
+        if (!empty($data['role_id'])) {
 
             $role = Role::find($data['role_id']);
             $permissions = $role->permissions;
@@ -207,351 +207,346 @@ class EmployeeController extends Controller
                 $userRole->role_id = $data['role_id'];
                 $userRole->save();
                 return back()->with('success', 'Staff Updated and Assigned Successfully');
-            } 
+            }
 
             $former_role_id = $user->role($user->id)->role->id;
             $former_role_obj = Role::find($former_role_id);
             $former_permissions = $former_role_obj->permissions;
 
             //update user new role
-            DB::table('user_roles')->where(['user_id'=>$user->id, 'role_id'=>$former_role_id])->update(['role_id'=>$role->id]);
-            
+            DB::table('user_roles')->where(['user_id' => $user->id, 'role_id' => $former_role_id])->update(['role_id' => $role->id]);
+
             //update user new permissions
             // if(count($permissions) > 0){
             //     $user->permissions()->attach($permissions);
             // }
-            
+
             return back()->with('success', 'Staff Updated and Assigned Successfully');
         }
-        
+
         return back()->with('success', 'Staff Updated Successfully');
     }
 
-    public function deleteStaff ($unique_key) 
+    public function deleteStaff($unique_key)
     {
         $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
         $staff = User::where('unique_key', $unique_key)->first();
-        if(!isset($staff)){
+        if (!isset($staff)) {
             abort(404);
         }
 
         $staff->delete();
         return back()->with('success', 'Staff Deleted Successfully');
     }
-//-----------------AGENTS-----------------------------------------------
-    
-public function allAgent()
-{
-    $authUser = auth()->user();
+    //-----------------AGENTS-----------------------------------------------
+
+    public function allAgent()
+    {
+        $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $agents = User::where('type', 'agent')->get();
-    return view('pages.agents.allAgent', compact('authUser', 'user_role', 'agents'));
-}
-
-//add any user, like registration
-public function addAgent()
-{
-    $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $countries = Country::all();
-    return view('pages.agents.addAgent', compact('authUser', 'user_role', 'countries'));
-}
-
-/**
- * Show the form for creating a new resource.
- *
- * @return \Illuminate\Http\Response
- */
-public function addAgentPost(Request $request)
-{
-    $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $request->validate([
-        'firstname' => 'required|string',
-        'lastname' => 'required|string',
-        'email' => 'required|email|unique:users',
-        'password' => 'required|string',
-        'phone_1' => 'required|unique:users',
-        'phone_2' => 'nullable|unique:users',
-        'country' => 'required|string',
-        'city' => 'required|string',
-        'state' => 'required|string',
-        'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
-    ]);
-
-    $data = $request->all();
-
-    $user = new User();
-    $user->name = $data['firstname'].' '.$data['lastname'];
-    $user->firstname = $data['firstname'];
-    $user->lastname = $data['lastname'];
-    $user->email = $data['email'];
-    $user->password = Hash::make($data['password']);
-    $user->type = 'agent';  //customer, staff, agent, superadmin
-    $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
-    $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
-    $user->city = !empty($data['city']) ? $data['city'] : null;
-    $user->state = $data['state'];
-    $user->country_id = $data['country'];
-    $user->address = !empty($data['address']) ? $data['address'] : null;
-
-    $user->created_by = $authUser->id;
-    $user->status = 'true';
-
-    if ($request->profile_picture) {
-        //image
-        $imageName = time().'.'.$request->profile_picture->extension();
-        //store products in folder
-        $request->profile_picture->storeAs('agent', $imageName, 'public');
-        $user->profile_picture = $imageName;
+        $agents = User::where('type', 'agent')->get();
+        return view('pages.agents.allAgent', compact('authUser', 'user_role', 'agents'));
     }
 
-    $user->save();
-    
-    return back()->with('success', 'Agent Created Successfully');
-
-    
-}
-
-public function singleAgent($unique_key)
-{
-    $authUser = auth()->user();
+    //add any user, like registration
+    public function addAgent()
+    {
+        $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $agent = User::where('unique_key', $unique_key)->first();
-    if(!isset($agent)){
-        abort(404);
+        $countries = Country::all();
+        return view('pages.agents.addAgent', compact('authUser', 'user_role', 'countries'));
     }
-    return view('pages.agents.singleAgent', compact('authUser', 'user_role', 'agent'));
-}
 
-public function editAgent($unique_key)
-{
-    $authUser = auth()->user();
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function addAgentPost(Request $request)
+    {
+        $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $agent = User::where('unique_key', $unique_key)->first();
-    if(!isset($agent)){
-        abort(404);
+        $request->validate([
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string',
+            'phone_1' => 'required|unique:users',
+            'phone_2' => 'nullable|unique:users',
+            'country' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+        ]);
+
+        $data = $request->all();
+
+        $user = new User();
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
+        $user->firstname = $data['firstname'];
+        $user->lastname = $data['lastname'];
+        $user->email = $data['email'];
+        $user->password = Hash::make($data['password']);
+        $user->type = 'agent';  //customer, staff, agent, superadmin
+        $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
+        $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
+        $user->city = !empty($data['city']) ? $data['city'] : null;
+        $user->state = $data['state'];
+        $user->country_id = $data['country'];
+        $user->address = !empty($data['address']) ? $data['address'] : null;
+
+        $user->created_by = $authUser->id;
+        $user->status = 'true';
+
+        if ($request->profile_picture) {
+            //image
+            $imageName = time() . '.' . $request->profile_picture->extension();
+            //store products in folder
+            $request->profile_picture->storeAs('agent', $imageName, 'public');
+            $user->profile_picture = $imageName;
+        }
+
+        $user->save();
+
+        return back()->with('success', 'Agent Created Successfully');
     }
-    
-    $countries = Country::all();
-    $name = explode(' ', $agent->name);
-    $firstname = $name[0];
-    $lastname = $name[1];
 
-    return view('pages.agents.editAgent', compact('authUser', 'user_role', 'agent', 'countries', 'firstname', 'lastname'));
-}
-
-public function editAgentPost(Request $request, $unique_key)
-{
-    $authUser = auth()->user();
+    public function singleAgent($unique_key)
+    {
+        $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $user = User::where('unique_key', $unique_key)->first();
-    if(!isset($user)){
-        abort(404);
+        $agent = User::where('unique_key', $unique_key)->first();
+        if (!isset($agent)) {
+            abort(404);
+        }
+        return view('pages.agents.singleAgent', compact('authUser', 'user_role', 'agent'));
     }
-    $request->validate([
-        'firstname' => 'required|string',
-        'lastname' => 'required|string',
-        'email' => 'required|email',
-        'phone_1' => 'required',
-        'phone_2' => 'nullable',
-        'country' => 'required|string',
-        'city' => 'required|string',
-        'state' => 'required|string',
-        'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
-    ]);
 
-    $data = $request->all();
+    public function editAgent($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        $agent = User::where('unique_key', $unique_key)->first();
+        if (!isset($agent)) {
+            abort(404);
+        }
 
-    $user->name = $data['firstname'].' '.$data['lastname'];
-    $user->firstname = $data['firstname'];
-    $user->lastname = $data['lastname'];
-    $user->email = $data['email'];
-    $user->type = 'agent';  //customer, staff, agent, superadmin
-    $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
-    $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
-    $user->city = !empty($data['city']) ? $data['city'] : null;
-    $user->state = $data['state'];
-    $user->country_id = $data['country'];
-    $user->address = !empty($data['address']) ? $data['address'] : null;
-    $user->status = 'true';
+        $countries = Country::all();
+        $name = explode(' ', $agent->name);
+        $firstname = $name[0];
+        $lastname = $name[1];
 
-    //profile_picture
-    if ($request->profile_picture) {
-        $oldImage = $user->profile_picture; //1.jpg
-        if(Storage::disk('public')->exists('agent/'.$oldImage)){
-            Storage::disk('public')->delete('agent/'.$oldImage);
-            /*
+        return view('pages.agents.editAgent', compact('authUser', 'user_role', 'agent', 'countries', 'firstname', 'lastname'));
+    }
+
+    public function editAgentPost(Request $request, $unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        $user = User::where('unique_key', $unique_key)->first();
+        if (!isset($user)) {
+            abort(404);
+        }
+        $request->validate([
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email',
+            'phone_1' => 'required',
+            'phone_2' => 'nullable',
+            'country' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+        ]);
+
+        $data = $request->all();
+
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
+        $user->firstname = $data['firstname'];
+        $user->lastname = $data['lastname'];
+        $user->email = $data['email'];
+        $user->type = 'agent';  //customer, staff, agent, superadmin
+        $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
+        $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
+        $user->city = !empty($data['city']) ? $data['city'] : null;
+        $user->state = $data['state'];
+        $user->country_id = $data['country'];
+        $user->address = !empty($data['address']) ? $data['address'] : null;
+        $user->status = 'true';
+
+        //profile_picture
+        if ($request->profile_picture) {
+            $oldImage = $user->profile_picture; //1.jpg
+            if (Storage::disk('public')->exists('agent/' . $oldImage)) {
+                Storage::disk('public')->delete('agent/' . $oldImage);
+                /*
                 Delete Multiple files this way
                 Storage::delete(['upload/test.png', 'upload/test2.png']);
             */
+            }
+            $imageName = time() . '.' . $request->profile_picture->extension();
+            //store products in folder
+            $request->profile_picture->storeAs('agent', $imageName, 'public');
+            $user->profile_picture = $imageName;
         }
-        $imageName = time().'.'.$request->profile_picture->extension();
-        //store products in folder
-        $request->profile_picture->storeAs('agent', $imageName, 'public');
-        $user->profile_picture = $imageName;
+
+        $user->save();
+
+        return back()->with('success', 'Agent Updated Successfully');
     }
 
-    $user->save();
-    
-    return back()->with('success', 'Agent Updated Successfully');
-}
+    //-----------------CUSTOMERS-----------------------------------------------
 
-//-----------------CUSTOMERS-----------------------------------------------
-    
-public function allCustomer()
-{
-    $authUser = auth()->user();
+    public function allCustomer()
+    {
+        $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $customers = User::where('type', 'customer')->get();
-    return view('pages.customers.allCustomer', compact('authUser', 'user_role', 'customers'));
-}
-
-public function addCustomer()
-{
-    $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $countries = Country::all();
-    return view('pages.customers.addCustomer', compact('authUser', 'user_role', 'countries'));
-}
-
-/**
- * Show the form for creating a new resource.
- *
- * @return \Illuminate\Http\Response
- */
-public function addCustomerPost(Request $request)
-{
-    $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $request->validate([
-        'firstname' => 'required|string',
-        'lastname' => 'required|string',
-        'email' => 'required|email|unique:users',
-        'password' => 'required|string',
-        'phone_1' => 'required|unique:users',
-        'phone_2' => 'nullable|unique:users',
-        'country' => 'required|string',
-        'city' => 'required|string',
-        'state' => 'required|string',
-        'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
-    ]);
-
-    $data = $request->all();
-
-    $user = new User();
-    $user->name = $data['firstname'].' '.$data['lastname'];
-    $user->email = $data['email'];
-    $user->password = Hash::make($data['password']);
-    $user->type = 'customer';  //customer, staff, agent, superadmin
-    $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
-    $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
-    $user->city = !empty($data['city']) ? $data['city'] : null;
-    $user->state = $data['state'];
-    $user->country_id = $data['country'];
-    $user->address = !empty($data['address']) ? $data['address'] : null;
-
-    $user->created_by = $authUser->id;
-    $user->status = 'true';
-
-    if ($request->profile_picture) {
-        //image
-        $imageName = time().'.'.$request->profile_picture->extension();
-        //store products in folder
-        $request->profile_picture->storeAs('customer', $imageName, 'public');
-        $user->profile_picture = $imageName;
+        $customers = User::where('type', 'customer')->get();
+        return view('pages.customers.allCustomer', compact('authUser', 'user_role', 'customers'));
     }
 
-    $user->save();
-    
-    return back()->with('success', 'Customer Created Successfully');
-
-    
-}
-
-public function singleCustomer($unique_key)
-{
-    $authUser = auth()->user();
+    public function addCustomer()
+    {
+        $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $customer = User::where('unique_key', $unique_key)->first();
-    if(!isset($customer)){
-        abort(404);
+        $countries = Country::all();
+        return view('pages.customers.addCustomer', compact('authUser', 'user_role', 'countries'));
     }
-    return view('pages.customers.singleCustomer', compact('authUser', 'user_role', 'customer'));
-}
 
-public function editCustomer($unique_key)
-{
-    $authUser = auth()->user();
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function addCustomerPost(Request $request)
+    {
+        $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $customer = User::where('unique_key', $unique_key)->first();
-    if(!isset($customer)){
-        abort(404);
+        $request->validate([
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string',
+            'phone_1' => 'required|unique:users',
+            'phone_2' => 'nullable|unique:users',
+            'country' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+        ]);
+
+        $data = $request->all();
+
+        $user = new User();
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
+        $user->email = $data['email'];
+        $user->password = Hash::make($data['password']);
+        $user->type = 'customer';  //customer, staff, agent, superadmin
+        $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
+        $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
+        $user->city = !empty($data['city']) ? $data['city'] : null;
+        $user->state = $data['state'];
+        $user->country_id = $data['country'];
+        $user->address = !empty($data['address']) ? $data['address'] : null;
+
+        $user->created_by = $authUser->id;
+        $user->status = 'true';
+
+        if ($request->profile_picture) {
+            //image
+            $imageName = time() . '.' . $request->profile_picture->extension();
+            //store products in folder
+            $request->profile_picture->storeAs('customer', $imageName, 'public');
+            $user->profile_picture = $imageName;
+        }
+
+        $user->save();
+
+        return back()->with('success', 'Customer Created Successfully');
     }
-    
-    $countries = Country::all();
-    $name = explode(' ', $customer->name);
-    $firstname = $name[0];
-    $lastname = $name[1];
 
-    return view('pages.customers.editCustomer', compact('authUser', 'user_role', 'customer', 'countries', 'firstname', 'lastname'));
-}
-
-public function editCustomerPost(Request $request, $unique_key)
-{
-    $authUser = auth()->user();
+    public function singleCustomer($unique_key)
+    {
+        $authUser = auth()->user();
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-    $user = User::where('unique_key', $unique_key)->first();
-    if(!isset($user)){
-        abort(404);
+        $customer = User::where('unique_key', $unique_key)->first();
+        if (!isset($customer)) {
+            abort(404);
+        }
+        return view('pages.customers.singleCustomer', compact('authUser', 'user_role', 'customer'));
     }
-    $request->validate([
-        'firstname' => 'required|string',
-        'lastname' => 'required|string',
-        'email' => 'required|email',
-        'phone_1' => 'required',
-        'phone_2' => 'nullable',
-        'country' => 'required|string',
-        'city' => 'required|string',
-        'state' => 'required|string',
-        'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
-    ]);
 
-    $data = $request->all();
+    public function editCustomer($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        $customer = User::where('unique_key', $unique_key)->first();
+        if (!isset($customer)) {
+            abort(404);
+        }
 
-    $user->name = $data['firstname'].' '.$data['lastname'];
-    $user->email = $data['email'];
-    $user->type = 'customer';  //customer, staff, agent, superadmin
-    $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
-    $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
-    $user->city = !empty($data['city']) ? $data['city'] : null;
-    $user->state = $data['state'];
-    $user->country_id = $data['country'];
-    $user->address = !empty($data['address']) ? $data['address'] : null;
+        $countries = Country::all();
+        $name = explode(' ', $customer->name);
+        $firstname = $name[0];
+        $lastname = $name[1];
 
-    $user->created_by = $authUser->id;
-    $user->status = 'true';
+        return view('pages.customers.editCustomer', compact('authUser', 'user_role', 'customer', 'countries', 'firstname', 'lastname'));
+    }
 
-    //profile_picture
-    if ($request->profile_picture) {
-        $oldImage = $user->profile_picture; //1.jpg
-        if(Storage::disk('public')->exists('customer/'.$oldImage)){
-            Storage::disk('public')->delete('customer/'.$oldImage);
-            /*
+    public function editCustomerPost(Request $request, $unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+        $user = User::where('unique_key', $unique_key)->first();
+        if (!isset($user)) {
+            abort(404);
+        }
+        $request->validate([
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email',
+            'phone_1' => 'required',
+            'phone_2' => 'nullable',
+            'country' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required|string',
+            'profile_picture' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg,webp|max:2048',
+        ]);
+
+        $data = $request->all();
+
+        $user->name = $data['firstname'] . ' ' . $data['lastname'];
+        $user->email = $data['email'];
+        $user->type = 'customer';  //customer, staff, agent, superadmin
+        $user->phone_1 = !empty($data['phone_1']) ? $data['phone_1'] : null;
+        $user->phone_2 = !empty($data['phone_2']) ? $data['phone_2'] : null;
+        $user->city = !empty($data['city']) ? $data['city'] : null;
+        $user->state = $data['state'];
+        $user->country_id = $data['country'];
+        $user->address = !empty($data['address']) ? $data['address'] : null;
+
+        $user->created_by = $authUser->id;
+        $user->status = 'true';
+
+        //profile_picture
+        if ($request->profile_picture) {
+            $oldImage = $user->profile_picture; //1.jpg
+            if (Storage::disk('public')->exists('customer/' . $oldImage)) {
+                Storage::disk('public')->delete('customer/' . $oldImage);
+                /*
                 Delete Multiple files this way
                 Storage::delete(['upload/test.png', 'upload/test2.png']);
             */
+            }
+            $imageName = time() . '.' . $request->profile_picture->extension();
+            //store products in folder
+            $request->profile_picture->storeAs('customer', $imageName, 'public');
+            $user->profile_picture = $imageName;
         }
-        $imageName = time().'.'.$request->profile_picture->extension();
-        //store products in folder
-        $request->profile_picture->storeAs('customer', $imageName, 'public');
-        $user->profile_picture = $imageName;
+
+        $user->save();
+
+        return back()->with('success', 'Customer Updated Successfully');
     }
-
-    $user->save();
-    
-    return back()->with('success', 'Customer Updated Successfully');
-}
-
 }

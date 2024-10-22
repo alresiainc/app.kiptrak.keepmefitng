@@ -12,7 +12,7 @@ class NotificationService
     public function __construct()
     {
         $this->apiUrl = env('WHATSAPP_API_URL', 'https://ad.adkombo.com/api/whatsapp/send');
-        $this->apiKey = env('WHATSAPP_API_KEY', 'e1961a42-abd3-4f32-80f8-54d24d86a6c5');
+        $this->apiKey = config('site.adkombo_api_key', 'e1961a42-abd3-4f32-80f8-54d24d86a6c5');
     }
 
     /**
@@ -32,7 +32,7 @@ class NotificationService
 
         Log::alert('Post Data: ', $postData);
 
-        return;
+        // return;
 
         // Initialize cURL
         $curl = curl_init();
@@ -68,7 +68,16 @@ class NotificationService
         $decodedResponse = json_decode($response, true);
         curl_close($curl);
 
-        // dd($decodedResponse);
+        Log::alert("whatsApp");
+        Log::alert($decodedResponse);
         return $decodedResponse;
+    }
+
+    public function sendSMSMessage(array $contacts)
+    {
+
+
+        Log::alert("SMS");
+        return;
     }
 }

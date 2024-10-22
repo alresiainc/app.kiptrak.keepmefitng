@@ -2,10 +2,9 @@
 //$url = url()->current();
 $routeName = \Route::currentRouteName();
 if (!isset($authUser)) {
-        $authUser = Auth::user();
-    }
+    $authUser = Auth::user();
+}
 //dd($routeName);
-
 ?>
 <aside id="sidebar" class="sidebar">
 
@@ -875,6 +874,10 @@ if (!isset($authUser)) {
                     <li>
                         <a href="{{ route('allUpsellTemplates') }}"><i style="font-size: 100%!important;"
                                 class="bi bi-plus"></i><span>Upsell Templates</span></a>
+                    </li>
+                    <li>
+                        <a href="{{ route('allDownsellTemplates') }}"><i style="font-size: 100%!important;"
+                                class="bi bi-plus"></i><span>Downsell Templates</span></a>
                     </li>
                     <li>
                         <a href="{{ route('thankYouTemplates') }}"><i style="font-size: 100%!important;"

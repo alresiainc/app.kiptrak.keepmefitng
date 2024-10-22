@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class MessageTemplate extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'subject',
+        'message',
+        'is_active'
+    ];
 }

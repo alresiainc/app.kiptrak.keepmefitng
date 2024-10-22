@@ -130,10 +130,17 @@ class Customer extends Model
         return $this->hasMany(Sale::class, 'customer_id');
     }
 
-    /**
-     * Automatically fill fields based on the available data.
-     */
 
+    /**
+     * Route notifications for the SMS channel.
+     *
+     * @return string
+     */
+    public function routeNotificationForSMS()
+    {
+        // Return the WhatsApp number to be used
+        return $this->phone_number ?? $this->whatsapp_phone_number;
+    }
     /**
      * Route notifications for the WhatsApp channel.
      *
@@ -143,5 +150,16 @@ class Customer extends Model
     {
         // Return the WhatsApp number to be used
         return $this->whatsapp_phone_number ?? $this->phone_number;
+    }
+
+    /**
+     * Route notifications for the Email channel.
+     *
+     * @return string
+     */
+    public function routeNotificationForEmail()
+    {
+        // Return the WhatsApp number to be used
+        return $this->email;
     }
 }

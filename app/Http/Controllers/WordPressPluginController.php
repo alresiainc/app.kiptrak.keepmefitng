@@ -154,11 +154,11 @@ class WordPressPluginController extends Controller
     {
         try {
             // Secure the endpoint with an API key
-            $apiKey = $request->query('api_key');
-            if ($apiKey !== config('wordpress.plugin_api_key')) {
-                Log::info('Serving update for plugin: ' . $plugin);
-                return response()->json(['message' => 'Unauthorized'], 401);
-            }
+            // $apiKey = $request->query('api_key');
+            // if ($apiKey !== config('wordpress.plugin_api_key')) {
+            //     Log::info('Serving update for plugin: ' . $plugin);
+            //     return response()->json(['message' => 'Unauthorized'], 401);
+            // }
 
             // Define the path to the folder containing the plugin update files
             $folderPath = public_path('wordpress-plugins/' . $plugin);

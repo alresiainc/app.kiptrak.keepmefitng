@@ -2,12 +2,23 @@
 
 namespace App\Channels;
 
+use App\Helpers\PhoneHelper;
+use App\Models\Message;
+use App\Models\User;
 use Illuminate\Notifications\Notification;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Log;
 
 class WhatsAppChannel
 {
+    protected $notificationService;
+
+    // Use Dependency Injection for NotificationService
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * Send the given notification.
      *
@@ -17,24 +28,34 @@ class WhatsAppChannel
      */
     public function send($notifiable, Notification $notification)
     {
+        // Check if the notification has the toWhatsApp method
+        if (!method_exists($notification, 'toWhatsApp')) {
+            Log::error('Notification is missing toWhatsApp.');
+            return; // Return early to avoid unnecessary processing
+        }
+
         // Retrieve the WhatsApp message and recipient from the notification
-        $messageData = $notification->toWhatsapp($notifiable);
-
-        if (!$messageData) {
-            // Log missing message data
-            Log::warning('No message data returned from the notification.');
+        $whatsappData = $notification->toWhatsApp($notifiable);
+        if (empty($whatsappData)) {
+            Log::info('No WhatsApp message to send.');
             return;
         }
 
-        // Ensure that 'message' and 'to' are set in messageData
-        if (empty($messageData['message']) || empty($messageData['to'])) {
-            Log::warning('Missing required fields in message data.', ['data' => $messageData]);
+
+
+        // Ensure that 'message' and 'to' are set in whatsappData
+        if (empty($whatsappData['message']) || empty($whatsappData['recipients'])) {
+            Log::warning('Missing required fields in message data.', ['data' => $whatsappData]);
             return;
         }
+
+        $recipients = unserialize($whatsappData['recipients']);
 
         // Normalize 'to' to handle both single and multiple phone numbers
-        $phones = is_array($messageData['to']) ? $messageData['to'] : [$messageData['to']];
+        $phones = is_array($recipients) ? $recipients : [$recipients];
         $dataToSend = [];
+
+        $staff = User::find($whatsappData['created_by']);
 
         foreach ($phones as $phone) {
             // Filter out any invalid phone numbers (empty or improperly formatted)
@@ -43,25 +64,38 @@ class WhatsAppChannel
                 continue;
             }
 
+            // Format the phone number
+            $formattedPhoneNumber = PhoneHelper::formatToInternational($phone, '+234'); // Nigeria's country code
+            $message = $whatsappData['message'] ?? '';
+            $title = $whatsappData['topic'] ?? 'Order Notification';
+            $body = '*' . $title . '*' . "\n" . $message;
             // Create a new message data object for each phone number
-            $individualMessageData = [
-                'number' => $phone,
-                'message' => $messageData['message'],
-                'session_name' => $messageData['session_name'],
-                // Include any other fields from messageData if necessary
+            $individualWhatsappData = [
+                'number' => $formattedPhoneNumber,
+                'message' => $body,
             ];
 
-            $dataToSend[] = $individualMessageData;
+            if ($staff) {
+                $session_name = $staff->adkombo_whatsapp_session_name ?? config('site.default_adkombo_whatsapp_session_name', '');
+                if ($session_name) {
+                    $individualWhatsappData['session_name'] = $session_name;
+                }
+            }
+
+            $dataToSend[] = $individualWhatsappData;
         }
 
         // If no valid data entries exist after filtering, log it and return
         if (empty($dataToSend)) {
-            Log::warning('No valid message entries to send after filtering.', ['messageData' => $messageData]);
+            Log::warning('No valid message entries to send after filtering.', ['whatsappData' => $whatsappData]);
             return;
         }
 
+
+
         // Use your NotificationService to send the message
-        $notificationService = new NotificationService();
-        $notificationService->sendWhatsAppMessage($dataToSend);
+        $this->notificationService->sendWhatsAppMessage($dataToSend);
+
+        Message::where('id', $whatsappData['id'])->update(['status' => 'sent', 'message_status' => 'sent']);
     }
 }

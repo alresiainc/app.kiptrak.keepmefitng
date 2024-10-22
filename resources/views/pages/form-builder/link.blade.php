@@ -1029,11 +1029,42 @@
                                                             alt="{{ $formHolder->orderbump->product->name }}">
                                                     </div>
 
-                                                    <p class="discount-info">
+                                                    {{-- <p class="discount-info">
                                                         Kindly click the box below to add this to your order now for
                                                         just {{ $formHolder->orderbump->product->sale_price }} instead
                                                         of paying normal price of
                                                         {{ $formHolder->orderbump->product_assumed_selling_price }}!
+                                                    </p> --}}
+
+                                                    <p class="discount-info">
+                                                        @php
+                                                            $product_price =
+                                                                (int) $formHolder->orderbump->product->sale_price;
+                                                            $discount_type =
+                                                                $formHolder->orderbump->orderbump_discount_type;
+                                                            $discount =
+                                                                (int) $formHolder->orderbump->orderbump_discount;
+
+                                                            if ($discount && $discount_type == 'fixed') {
+                                                                $amount = $product_price - $discount;
+                                                            } elseif ($discount && $discount_type == 'percentage') {
+                                                                $amount =
+                                                                    $product_price - $product_price * ($discount / 100);
+                                                            } else {
+                                                                $amount = $product_price;
+                                                            }
+                                                        @endphp
+                                                        Kindly click the box below to add this to your order now for
+                                                        just
+                                                        {{ $formHolder->orderbump->product->country->symbol }}
+                                                        {{ $amount }}
+                                                        @if ($product_price > $amount)
+                                                            instead
+                                                            of paying normal price of
+                                                            {{ $formHolder->orderbump->product->country->symbol }}
+                                                            {{ $product_price }}!
+                                                        @endif
+
                                                     </p>
 
                                                     <p class="more-info">
@@ -1051,7 +1082,17 @@
                                                             <span
                                                                 class="me-1 fw-bold">{{ $formHolder->orderbump->product->name }}
                                                                 =
-                                                                {{ $formHolder->orderbump->product->country->symbol }}{{ $formHolder->orderbump->product->sale_price }}</span>
+                                                                {{ $formHolder->orderbump->product->country->symbol }}{{ $amount }}
+
+                                                                @if ($product_price > $amount)
+                                                                    <span
+                                                                        style="opacity: 0.5; text-decoration: line-through">
+                                                                        {{ $formHolder->orderbump->product->country->symbol }}
+                                                                        {{ $product_price }}
+                                                                    </span>
+                                                                @endif
+
+                                                            </span>
                                                         </label>
                                                         @error('product')
                                                             <span class="invalid-feedback" role="alert">
@@ -1521,22 +1562,38 @@
 
                 currentView = viewId;
             }
-
             const next = () => {
                 var unique_key = $('.formholder_unique_key').val();
                 var current_order_id = $('.current_order_id').val();
                 var thankyou_unique_key = $(".thankyou_unique_key").val();
                 let redirect_url = $('.redirect_url').val();
-                if (redirect_url != '') {
-                    window.parent.location.href = redirect_url;
-                } else {
 
+                if (redirect_url != '') {
+                    try {
+                        // Create a URL object for the external redirect_url
+                        const url = new URL(redirect_url);
+
+                        // Use URLSearchParams to manage the query parameters
+                        const params = new URLSearchParams(url.search);
+
+                        // Append or update the order_id parameter
+                        params.set('kiptrak-backend-order-id', current_order_id);
+
+                        // Update the URL's search parameters
+                        url.search = params.toString();
+
+                        // Redirect to the updated URL
+                        window.parent.location.href = url.toString();
+                    } catch (error) {
+                        console.error("Invalid redirect URL:", error);
+                    }
+                } else {
                     if (thankyou_unique_key == '') {
                         const data = {
                             unique_key: unique_key,
                             order_id: current_order_id,
                             stage: "thankYou",
-                        }
+                        };
                         const params = $.param(data);
                         redirect_url = `/link/form/get-view?${params}`;
                         window.parent.location.href = redirect_url;
@@ -1549,6 +1606,8 @@
                     }
                 }
             }
+
+
 
             //initialise view
             // setView('main-section');
@@ -1797,15 +1856,20 @@
 
 
             const messages = [
-                "Hold on, the hamsters are spinning the wheels...",
-                "Just a moment, fueling up the rocket...",
-                "Good things take time... almost there!",
-                "Checking internet cables... all clear!",
-                "Loading... did you know bananas are berries?",
-                "Hang tight, we’re catching a shooting star!",
-                "Unicorns are processing your request. 🦄",
-                "Grabbing coffee for the servers... ☕"
+                "Processing your order... Making sure everything's perfect!",
+                "Hang tight, we're confirming your details...",
+                "Just a moment, we're packaging your request...",
+                "Getting everything ready... almost there!",
+                "Checking stock and preparing your order...",
+                "One last check to ensure a smooth delivery!",
+                "Finalizing your order... almost ready!",
+                "Reviewing your order... ensuring everything is correct!",
+                "Crossing the t's and dotting the i's... just a sec!",
+                "Good things are on the way! Wrapping up your order...",
+                "Your order is in progress... making sure everything adds up!",
+                "Don't worry, we're just double-checking your request!"
             ];
+
 
             function getRandomMessage() {
                 return messages[Math.floor(Math.random() * messages.length)];
@@ -1962,7 +2026,17 @@
                     // Show the loader and start simulating the progress
                     const interval = startLoader();
 
+                    const params = $.param({
+                        unique_key: unique_key,
+                        orderbump_product_checkbox: orderbump_product_checkbox,
+                        current_order_id: current_order_id
+                    }); // Converts data object to URL query string
+                    const newUrl = `/ajax-save-new-form-link-orderbump?${params}`; // Construct new URL
 
+
+                    // return;
+                    // Navigate to the new URL
+                    // window.location.href = newUrl; // Redirect to the new URL
 
                     $.ajax({
                         type: 'get',
@@ -2023,7 +2097,17 @@
                     // Show the loader and start simulating the progress
                     const interval = startLoader();
 
+                    const params = $.param({
+                        unique_key: unique_key,
+                        upsell_product_checkbox: upsell_product_checkbox,
+                        current_order_id: current_order_id
+                    }); // Converts data object to URL query string
+                    const newUrl = `/ajax-save-new-form-link-upsell?${params}`; // Construct new URL
 
+
+                    // return;
+                    // Navigate to the new URL
+                    // window.location.href = newUrl; // Redirect to the new URL
                     $.ajax({
                         type: 'get',
                         url: '/ajax-save-new-form-link-upsell',
@@ -2166,6 +2250,59 @@
                             'Something went wrong')
                     }
 
+                }
+            });
+
+            $('.downsell_submit_btn').click(function(e) {
+                e.preventDefault();
+
+                const submitButton = $(this)
+                const buttonOldText = $(this).text()
+                var unique_key = $(".formholder_unique_key").val();
+                var current_order_id = $(".current_order_id").val();
+                var upsell_product_checkbox = ''
+                if ($('.upsell_product_checkbox').val() != '') {
+                    var upsell_product_checkbox = $('.upsell_product_checkbox').val();
+                    submitButton.text('Please wait...');
+                    submitButton.prop('disabled', true);
+
+                    // Show the loader and start simulating the progress
+                    const interval = startLoader();
+
+
+                    $.ajax({
+                        type: 'get',
+                        url: '/ajax-save-new-form-link-upsell',
+                        data: {
+                            unique_key: unique_key,
+                            upsell_product_checkbox: upsell_product_checkbox,
+                            current_order_id: current_order_id
+                        },
+                        success: function(resp) {
+                            //console.log(resp)
+                            clearInterval(interval); // Stop the interval when request is done
+                            finishLoader(); // Fill the bar to 100%
+
+                            localStorage.setItem('upsell_stage', 'done');
+                            next();
+
+
+                        },
+                        error: function(e) {
+                            //Error
+                            console.log(e);
+                            toastr.error(
+                                'An error occurred while processing your request. Please try again later.'
+                            );
+                            submitButton.text(buttonOldText);
+                            submitButton.prop('disabled', false);
+                            clearInterval(interval); // Stop the interval when error occurs
+                            $("#loader-overlay").fadeOut();
+                        }
+                    });
+
+                } else {
+                    toastr.error('Something went wrong')
                 }
             });
         </script>
