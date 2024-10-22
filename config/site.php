@@ -1,6 +1,7 @@
 <?php
 
 return [
+
     /*
     |--------------------------------------------------------------------------
     | Order Statuses
@@ -33,33 +34,69 @@ return [
         'email',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Default Country Code
+    |--------------------------------------------------------------------------
+    |
+    | The default country code used for phone numbers in the application.
+    |
+    */
     'default_country_code' => '+234',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Supported Countries
+    |--------------------------------------------------------------------------
+    |
+    | This array contains the supported countries for phone number validation.
+    | Each entry includes the country code, local number length, and regex pattern
+    | for validating phone numbers with the country code.
+    |
+    */
     'supported_countries' => [
         [
             'country_code' => '+234',
-            'local_length' => 10, // Expected length of local numbers (Nigeria)
-            'regex' => '/^234\d{10}$/', // Nigeria's phone numbers with country code
+            'local_length' => 10, // Nigeria's local phone number length
+            'regex' => '/^234\d{10}$/', // Regex for Nigerian phone numbers with country code
         ],
         [
             'country_code' => '+44',
-            'local_length' => 10, // UK example
-            'regex' => '/^44\d{10}$/', // UK phone numbers with country code
+            'local_length' => 10, // UK's local phone number length
+            'regex' => '/^44\d{10}$/', // Regex for UK phone numbers with country code
         ],
         // Add more countries as needed
     ],
 
-
     /*
     |--------------------------------------------------------------------------
-    | WhatsApp Notification Configuration (adkombo)
+    | WhatsApp Notification Configuration (Adkombo)
     |--------------------------------------------------------------------------
     |
-    | These are the different communication channels used for notifications.
-    | The channels listed here should match the ones used in your system.
+    | The default configuration for WhatsApp notifications through the Adkombo API.
+    | Includes the session name and API key for sending messages via WhatsApp.
     |
     */
 
-    'default_adkombo_whatsapp_session_name' => '3560919_Test WhatsApp Device',
-    'adkombo_api_key' => 'e1961a42-abd3-4f32-80f8-54d24d86a6c5'
+    'adkombo_whatsapp' => [
+        'api_url' => 'https://api.adkombo.com/v1',
+        'default_session_name' => env("ADKOMBO_SESSION_NAME"),
+        'api_key' => env('ADKOMBO_API_KEY'),
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SMS Notification Configuration (BulkSMSNigeria)
+    |--------------------------------------------------------------------------
+    |
+    | The default configuration for SMS notifications through the BulkSMSNigeria API.
+    | Includes the API token for sending SMS messages.
+    |
+    */
+    'bulk_sms_nigeria' => [
+        'api_url' => 'https://api.bulksmsnigeria.com/api/v1/sms',
+        'api_token' => env('BULK_SMS_NIGERIA_API_TOKEN', ''),
+    ],
 
 ];

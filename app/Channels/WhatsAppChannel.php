@@ -91,11 +91,8 @@ class WhatsAppChannel
             return;
         }
 
-
-
         // Use your NotificationService to send the message
         $this->notificationService->sendWhatsAppMessage($dataToSend);
-
         Message::where('id', $whatsappData['id'])->update(['status' => 'sent', 'message_status' => 'sent']);
     }
 }

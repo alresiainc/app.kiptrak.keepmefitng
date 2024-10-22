@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Mail;
 use RuntimeException;
 use App\Mail\OrderEmail; // Import the Mailable class
+use App\Models\Message;
 use Illuminate\Support\Facades\Log;
 
 class EmailChannel
@@ -45,7 +46,7 @@ class EmailChannel
         // Send email and log success/failure
         try {
             Mail::to($emails)->send(new OrderEmail($subject, $message));
-
+            Message::where('id', $messageData['id'])->update(['status' => 'sent', 'message_status' => 'sent']);
             Log::info('Email sent successfully to: ' . implode(', ', $emails));
         } catch (\Exception $e) {
             Log::error('Failed to send email: ' . $e->getMessage());

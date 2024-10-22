@@ -3,81 +3,123 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class NotificationService
 {
-    private $apiUrl;
-    private $apiKey;
+    /**
+     * The WhatsApp API URL.
+     * 
+     * @var string
+     */
+    protected string $whatsAppApiUrl;
 
+    /**
+     * The WhatsApp API key used for authentication.
+     * 
+     * @var string
+     */
+    protected string $whatsAppApiKey;
+
+    /**
+     * The SMS API URL.
+     * 
+     * @var string
+     */
+    protected string $smsApiUrl;
+
+    /**
+     * The SMS API key used for authentication.
+     * 
+     * @var string
+     */
+    protected string $smsApiKey;
+
+    /**
+     * Constructor to initialize API URLs and API keys.
+     */
     public function __construct()
     {
-        $this->apiUrl = env('WHATSAPP_API_URL', 'https://ad.adkombo.com/api/whatsapp/send');
-        $this->apiKey = config('site.adkombo_api_key', 'e1961a42-abd3-4f32-80f8-54d24d86a6c5');
+        $this->whatsAppApiUrl = config('site.adkombo_whatsapp.api_url', 'https://ad.adkombo.com/api/whatsapp/send');
+        $this->whatsAppApiKey = config('site.adkombo_whatsapp.api_key', 'e1961a42-abd3-4f32-80f8-54d24d86a6c5');
+
+        $this->smsApiUrl = config('site.bulk_sms_nigeria.api_url', 'https://www.bulksmsnigeria.com/api/v2/sms');
+        $this->smsApiKey = config('site.bulk_sms_nigeria.api_token', 'EbZEBUsgTjDGsaVe09Cop1yLnrNrByMifqcP0U2TBzO27rBWOwX0Ssr35I5');
     }
 
     /**
-     * Send a WhatsApp message
+     * Send a WhatsApp message.
      * 
      * @param array $contacts
      * @return array
      */
-    public function sendWhatsAppMessage(array $contacts)
+    public function sendWhatsAppMessage(array $contacts): array
     {
-        // Prepare the data
         $postData = [
             'contact' => $contacts
         ];
 
-
-
-        Log::alert('Post Data: ', $postData);
-
-        // return;
-
-        // Initialize cURL
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $this->apiUrl,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode($postData),
-            CURLOPT_HTTPHEADER => [
-                "Api-key: {$this->apiKey}",
-                'Content-Type: application/json',
-            ],
+        return $this->sendRequest($this->whatsAppApiUrl, $postData, [
+            'Api-key' => $this->whatsAppApiKey
         ]);
-
-        // Execute the cURL request
-        $response = curl_exec($curl);
-
-        // Check for cURL errors
-        if (curl_errno($curl)) {
-            curl_close($curl);
-            return [
-                'success' => false,
-                'message' => 'cURL error: ' . curl_error($curl)
-            ];
-        }
-
-        // Decode the response
-        $decodedResponse = json_decode($response, true);
-        curl_close($curl);
-
-        Log::alert("whatsApp");
-        Log::alert($decodedResponse);
-        return $decodedResponse;
     }
 
-    public function sendSMSMessage(array $contacts)
+    /**
+     * Send an SMS message.
+     * 
+     * @param array $messageData
+     * @return array
+     */
+    public function sendSMSMessage(array $messageData): array
     {
+        $to = is_array($messageData['contacts']) ? implode(',', $messageData['contacts']) : $messageData['contacts'];
+        $body = $messageData['message'];
 
+        $postData = [
+            'api_token' => $this->smsApiKey,
+            'from' => 'KIPTRAK',
+            'to' => $to,
+            'body' => $body,
+            'gateway' => 'direct-refund',
+        ];
 
-        Log::alert("SMS");
-        return;
+        return $this->sendRequest($this->smsApiUrl, $postData, [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json'
+        ]);
+    }
+
+    /**
+     * Send a HTTP POST request to the given API endpoint.
+     * 
+     * @param string $url
+     * @param array $data
+     * @param array $headers
+     * @return array
+     */
+    protected function sendRequest(string $url, array $data, array $headers = []): array
+    {
+        try {
+            Log::info('Sending request to: ' . $url, ['payload' => $data]);
+
+            $response = Http::withHeaders($headers)->post($url, $data);
+
+            if ($response->failed()) {
+                Log::error('Request failed', ['response' => $response->json()]);
+                return [
+                    'success' => false,
+                    'message' => 'Failed to send request'
+                ];
+            }
+
+            Log::info('Request successful', ['response' => $response->json()]);
+            return $response->json();
+        } catch (\Exception $e) {
+            Log::error('Request exception', ['error' => $e->getMessage()]);
+            return [
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ];
+        }
     }
 }

@@ -38,6 +38,10 @@ Route::get('/wordpress/plugin-update/{plugin}/check', [WordPressPluginController
 Route::get('/test-fields', function () {
 
 
+    return view('emails.order-email')->with([
+        'subject' => "Heloo",
+        'content' => 'njkmnknj'
+    ]);
     // ModelsNotification::create([
     //     // 'user_id' => auth()->user()->id,
     //     'message' => 'This is a test',

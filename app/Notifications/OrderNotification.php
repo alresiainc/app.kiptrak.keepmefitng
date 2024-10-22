@@ -86,7 +86,7 @@ class OrderNotification extends Notification
         return [
             \App\Channels\EmailChannel::class,
             \App\Channels\WhatsAppChannel::class,
-            // \App\Channels\SmsChannel::class,
+            \App\Channels\SmsChannel::class,
             // \App\Channels\DatabaseChannel::class,
         ];
     }
@@ -165,14 +165,14 @@ class OrderNotification extends Notification
         $resolvedMessage = $this->resolveMessageTemplate($message);
         Log::alert("Sending SMS notification message: " . $resolvedMessage);
 
+
         return Message::create([
-            'title' => $title,
-            'body' => $resolvedMessage,
-            'type' => 'sms',
             'topic' => $title,
-            'recipients' => $notifiable->routeNotificationForSMS(),
+            'message' => $resolvedMessage,
+            'type' => 'sms',
+            'recipients' => \serialize([$notifiable->routeNotificationForSMS()]),
             'message_status' => 'pending',
-            'created_by' => 1,
+            'created_by' => $this?->order->staff_assigned_id,
         ]);
     }
 

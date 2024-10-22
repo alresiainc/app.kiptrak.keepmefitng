@@ -2,18 +2,32 @@
 
 <head>
     <style>
+        body {
+            padding: 20px;
+            font-family: "Rubik", Helvetica, Arial, serif;
+            font-family: "Open Sans", sans-serif;
+            background: #f6f9ff;
+            color: #444444;
+        }
+
+        main {
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 8px;
+        }
+
         header {
-            text-align: center;
             font-size: 24px;
-            color: rgb(219, 18, 18);
+            padding: 10px;
+            border-bottom: 3px solid #04512d;
+            font-weight: 600;
+            margin-bottom: 20px;
         }
 
 
 
         footer {
-            display: flex;
-            justify-content: space-between;
-            align-content: center;
+            padding: 35px;
         }
     </style>
 
@@ -22,21 +36,19 @@
 
 <body>
     <header>{{ $subject ?? '' }}</header>
-    <hr>
+
     <main>
         {!! $content !!}
     </main>
 
-    <hr>
     <footer>
-        <p>Thanks for your patronage</p>
-        <p>&copy; <span class="copyright-date"></span> <strong><span class="project-name">KIPTRAK</span></strong>. All
-            rights reserved</p>
+        <hr>
+        <div style="text-align: center">
+            &copy; <span class="copyright-date"> {{ date('Y') }}</span>
+            <strong>KIPTRAK</strong> <br>
+            Allrights reserved
+        </div>
     </footer>
-
-
-
-    <h1>Mail from kiptrak</h1>
 
 </body>
 

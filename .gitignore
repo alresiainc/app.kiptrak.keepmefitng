@@ -17,7 +17,7 @@ yarn-error.log
 
 # Do not ignore these directories and files
 !.gitignore
-!public/
+!/public/assets/
 !storage/
 !storage/app/
 !storage/app/wordpress-plugins/
