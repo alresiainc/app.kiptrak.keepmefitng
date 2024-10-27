@@ -32,6 +32,10 @@
         .select2-selection__arrow {
             height: 34px !important;
         }
+
+        .mce-content-body span.editor-hide {
+            display: none;
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
 @endsection
@@ -250,9 +254,10 @@
                         format: 'text'
                     }); // Get plain text for SMS/WhatsApp
                 }
+                alert(templateContent);
 
                 $('#template').val(templateContent); // Set the hidden field with content
-                $('#editTemplateForm').submit(); // Submit the form
+                // $('#editTemplateForm').submit(); // Submit the form
             });
         }
 
@@ -302,20 +307,39 @@
                 icons: 'default',
                 toolbar: 'cbold citalic cstrikethrough cmonospace cquote | undo redo', // Added more buttons
                 setup: function(editor) {
-
+                    editor.on('init', function() {
+                        editor.contentStyles.push(`
+                            .editor-hide {
+                                display: none;
+                            }
+                        `);
+                    });
                     // Bold button for WhatsApp (*text*)
                     editor.ui.registry.addButton('cbold', {
                         icon: 'bold',
                         tooltip: 'Bold (WhatsApp-style)',
+                        shortcut: 'meta+b',
                         onAction: function() {
                             let selectedText = editor.selection.getContent({
                                 format: 'text'
                             });
                             if (selectedText) {
-                                let formattedText = '*' + selectedText + '*';
+                                let formattedText = '<b><span class="editor-hide">*</span>' +
+                                    selectedText + '<span class="editor-hide">*</span></b>';
                                 editor.selection.setContent(
                                     formattedText); // Replace with formatted text
                             }
+                        }
+                    });
+                    // Custom shortcut for bold (Ctrl+B or Cmd+B)
+                    editor.shortcuts.add('meta+b', 'Bold (WhatsApp-style)', function() {
+                        let selectedText = editor.selection.getContent({
+                            format: 'text'
+                        });
+                        if (selectedText) {
+                            let formattedText = '<b><span class="editor-hide">*</span>' +
+                                selectedText + '<span class="editor-hide">*</span></b>';
+                            editor.selection.setContent(formattedText);
                         }
                     });
 
@@ -328,7 +352,9 @@
                                 format: 'text'
                             });
                             if (selectedText) {
-                                let formattedText = '_' + selectedText + '_';
+
+                                let formattedText = '<em><span class="editor-hide">_</span>' +
+                                    selectedText + '<span class="editor-hide">_</span></em>';
                                 editor.selection.setContent(
                                     formattedText); // Replace with formatted text
                             }
@@ -344,7 +370,9 @@
                                 format: 'text'
                             });
                             if (selectedText) {
-                                let formattedText = '~' + selectedText + '~';
+
+                                let formattedText = '<strike><span class="editor-hide">~</span>' +
+                                    selectedText + '<span class="editor-hide">~</span></strike>';
                                 editor.selection.setContent(
                                     formattedText); // Replace with formatted text
                             }
@@ -360,7 +388,9 @@
                                 format: 'text'
                             });
                             if (selectedText) {
-                                let formattedText = '```' + selectedText + '```';
+                                // let formattedText = '```' + selectedText + '```';
+                                let formattedText = '<code><span class="editor-hide">```</span>' +
+                                selectedText + '<span class="editor-hide">```</span></code>';
                                 editor.selection.setContent(
                                     formattedText); // Replace with formatted text
                             }
@@ -415,12 +445,17 @@
                                 format: 'text'
                             });
                             if (selectedText) {
-                                let formattedText = '> ' + selectedText;
+                                // let formattedText = '> ' + selectedText;
+                                let formattedText =
+                                    '<blockquote><span class="editor-hide">> </span>' +
+                                    selectedText + '</blockquote>';
                                 editor.selection.setContent(
                                     formattedText); // Replace with formatted text
                             }
                         }
                     });
+
+
 
                 },
                 forced_root_block: false, // Prevent wrapping content in <p> tags
