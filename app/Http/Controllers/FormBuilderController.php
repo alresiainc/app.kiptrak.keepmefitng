@@ -28,7 +28,7 @@ use App\Models\OrderBump;
 use App\Models\UpSell;
 use App\Models\Customer;
 use App\Models\CartAbandon;
-use App\Models\Downsell;
+use App\Models\DownSell;
 use App\Models\UpsellSetting;
 use App\Models\GeneralSetting;
 use App\Models\MessageTemplate;
@@ -1477,7 +1477,7 @@ class FormBuilderController extends Controller
             //update formHolder
             $formHolder->update(['downsell_id' => $downsell->id]);
         } else {
-            Downsell::where('id', $formHolder->downsell_id)->delete();
+            DownSell::where('id', $formHolder->downsell_id)->delete();
         }
 
         // dd(OutgoingStock::where('order_id', $formHolder->order->id)->first()->package_bundle);
