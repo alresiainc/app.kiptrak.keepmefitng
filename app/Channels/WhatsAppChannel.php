@@ -77,7 +77,7 @@ class WhatsAppChannel
 
             if ($staff) {
                 $session_name = $staff->adkombo_whatsapp_session_name ?? config('site.adkombo_whatsapp.default_session_name');
-                if ($session_name) {
+                if (!empty($session_name)) {
                     $individualWhatsappData['session_name'] = $session_name;
                 }
             }
