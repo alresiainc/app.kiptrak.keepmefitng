@@ -33,6 +33,7 @@
             height: 34px !important;
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
 @endsection
 
 @section('content')
@@ -101,7 +102,7 @@
                                                     {{-- <td>{{ $template->channel }}</td> --}}
                                                     <td data-bs-toggle="popoverrrr" data-trigger="hover"
                                                         data-content="{{ $message }}" title="Message">
-                                                        {{ $truncatedText }} </td>
+                                                        {!! $truncatedText !!} </td>
                                                     <td>
                                                         @if ($template->is_active)
                                                             <a href="{{ route('updateTemplateStatus', ['template' => $template->id, 'status' => 'deactivate']) }}"
@@ -123,7 +124,7 @@
                                                     <td>
                                                         <!-- Edit button to open modal -->
                                                         <button class="btn btn-sm btn-primary me-2"
-                                                            onclick="editTemplateModal({{ $template->id }}, '{{ $template->subject }}', `{!! $template->message !!}`)">Edit</button>
+                                                            onclick="editTemplateModal({{ $template->id }}, '{{ $template->subject }}', `{!! $template->message !!}`, '{{ $template->channel }}')">Edit</button>
                                                         {{-- @if ($template->is_active)
                                                             <a href="{{ route('updateTemplateStatus', ['template' => $template->id, 'status' => 'deactivate']) }}"
                                                                 class="btn btn-success btn-sm"
@@ -168,11 +169,15 @@
 
                         <div class="mb-2">
                             <label for="template">Message Template</label>
-                            <textarea name="template" id="template" class="form-control" cols="30" rows="10"></textarea>
+                            <div class="editor-container">
+                                <input type="hidden" name="template" id="template">
+                                <textarea id="template-editor" class="form-control" cols="30" rows="10"></textarea>
+                            </div>
+
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Update Template</button>
+                        <button type="submit" class="btn btn-primary update-template-btn">Update Template</button>
                     </div>
                 </form>
 
@@ -189,168 +194,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+
+
                     <!-- Content will be dynamically loaded here -->
-                    <div>
-                        <h2> Templates for Orders </h2>
-                        <table class='table table-bordered'>
-                            <thead>
-                                <tr>
-                                    <th>Placeholder</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>[customer_first_name]</td>
-                                    <td>First name of the customer</td>
-                                </tr>
-                                <tr>
-                                    <td>[customer_last_name]</td>
-                                    <td>Last name of the customer</td>
-                                </tr>
-                                <tr>
-                                    <td>[customer_phone_number]</td>
-                                    <td>Customer's phone number</td>
-                                </tr>
-                                <tr>
-                                    <td>[customer_whatsapp_phone_number]</td>
-                                    <td>Customer's WhatsApp phone number</td>
-                                </tr>
-                                <tr>
-                                    <td>[customer_delivery_address]</td>
-                                    <td>Customer's delivery address</td>
-                                </tr>
-                                <tr>
-                                    <td>[customer_city]</td>
-                                    <td>Customer's city</td>
-                                </tr>
-                                <tr>
-                                    <td>[customer_state]</td>
-                                    <td>Customer's state</td>
-                                </tr>
-                                <tr>
-                                    <td>[customer_delivery_duration]</td>
-                                    <td>Estimated delivery duration for the customer</td>
-                                </tr>
-                                <tr>
-                                    <td>[customer_email]</td>
-                                    <td>Customer's email address</td>
-                                </tr>
-                                <tr>
-                                    <td>[staff_name]</td>
-                                    <td>Full name of the staff member handling the order</td>
-                                </tr>
-                                <tr>
-                                    <td>[staff_first_name]</td>
-                                    <td>First name of the staff member</td>
-                                </tr>
-                                <tr>
-                                    <td>[staff_last_name]</td>
-                                    <td>Last name of the staff member</td>
-                                </tr>
-                                <tr>
-                                    <td>[staff_phone_number]</td>
-                                    <td>Phone number of the staff member</td>
-                                </tr>
-                                <tr>
-                                    <td>[staff_address]</td>
-                                    <td>Address of the staff member</td>
-                                </tr>
-                                <tr>
-                                    <td>[staff_city]</td>
-                                    <td>City of the staff member</td>
-                                </tr>
-                                <tr>
-                                    <td>[staff_state]</td>
-                                    <td>State of the staff member</td>
-                                </tr>
-                                <tr>
-                                    <td>[product_list]</td>
-                                    <td>List of products in the order</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_status]</td>
-                                    <td>Current status of the order</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_id]</td>
-                                    <td>ID of the order</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_delivery_address]</td>
-                                    <td>Delivery address for the order</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_extra_cost_amount]</td>
-                                    <td>Extra cost amount for the order</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_extra_cost_reason]</td>
-                                    <td>Reason for extra cost on the order</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_order_note]</td>
-                                    <td>Order notes or special instructions</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_expected_delivery_date]</td>
-                                    <td>Expected delivery date</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_actual_delivery_date]</td>
-                                    <td>Actual delivery date</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_url]</td>
-                                    <td>URL for tracking or order information</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_discount]</td>
-                                    <td>Discount applied to the order</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_amount_expected]</td>
-                                    <td>Expected amount for the order</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_amount_realised]</td>
-                                    <td>Amount realized from the order</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_delivery_duration]</td>
-                                    <td>Estimated duration for delivery</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_delivery_going_time]</td>
-                                    <td>Time when delivery started</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_delivery_meet_time]</td>
-                                    <td>Time when the delivery was met</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_delivery_returning_time]</td>
-                                    <td>Time when the delivery returned</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_delivery_going_distance]</td>
-                                    <td>Distance covered while going for delivery</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_delivery_returning_distance]</td>
-                                    <td>Distance covered while returning from delivery</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_delivery_going_cost]</td>
-                                    <td>Cost of going for delivery</td>
-                                </tr>
-                                <tr>
-                                    <td>[order_delivery_returning_cost]</td>
-                                    <td>Cost of returning from delivery</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    @include('pages.messages.placeholders.order-details')
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -362,28 +209,245 @@
 @endsection
 
 @section('extra_js')
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script>
-        function editTemplateModal(id, subject, template) {
-            // Set the values in the modal
+        function editTemplateModal(id, subject, template, type = 'whatsapp') {
+            // Clear previous modal content before setting new data
+            $('#template-editor').val(''); // Clear text area
+            tinymce.remove('#template-editor'); // Clear editor content
 
+            // Show the modal and set initial values
             $('#editTemplateModal').modal('show');
             $('#template_id').val(id);
             $('#subject').val(subject);
-            $('#template').val(template);
+            $('#template-editor').val(template); // Set template content
+
+            // Initialize the editor based on the type (whatsapp, sms, email)
+            switch (type) {
+                case 'email':
+                    initializeHTMLEditor('#template-editor'); // Rich text editor for email
+                    break;
+                case 'sms':
+                    initializePlainTextEditor('#template-editor'); // Plain text editor for SMS
+                    break;
+                case 'whatsapp':
+                    initializeWhatsAppEditor('#template-editor'); // Custom editor for WhatsApp
+                    break;
+            }
 
             // Update form action dynamically with the correct template ID
             $('#editTemplateForm').attr('action', '/update-message-template/' + id);
+
+            // Unbind any previously bound click events to avoid multiple handlers
+            $('.update-template-btn').off('click').on('click', function(e) {
+                e.preventDefault();
+
+                let templateContent;
+                if (type === 'email') {
+                    templateContent = tinymce.get('template-editor').getContent(); // Get HTML content for email
+                } else {
+                    templateContent = tinymce.get('template-editor').getContent({
+                        format: 'text'
+                    }); // Get plain text for SMS/WhatsApp
+                }
+
+                $('#template').val(templateContent); // Set the hidden field with content
+                $('#editTemplateForm').submit(); // Submit the form
+            });
         }
 
-        $(function() {
-
-            // Show popover when button is clicked
-            $('#loadPlaceholders').on('click', function() {
-                $('#placeholderModal').modal('show');
-            });
-
-
-            $('[data-bs-toggle="popover"]').popover()
+        // When the modal is hidden, clear the fields and editor
+        $('#editTemplateModal').on('hidden.bs.modal', function() {
+            $('#template-editor').val(''); // Clear textarea content
+            tinymce.remove('#template-editor'); // Remove the TinyMCE editor instance
         });
+
+        // Initialize the rich HTML editor (for email templates)
+        function initializeHTMLEditor(selector) {
+            tinymce.remove(selector);
+            tinymce.init({
+                selector: selector,
+                menubar: false,
+                plugins: "lists link image table code",
+                toolbar: "undo redo | styleselect | fontsize | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link image | code",
+                fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt", // Define font sizes
+            });
+        }
+
+        // Initialize a simple text editor (for SMS and WhatsApp templates)
+        function initializePlainTextEditor(selector) {
+            tinymce.remove(selector);
+            tinymce.init({
+                selector: selector,
+                toolbar: 'undo redo', // Minimal toolbar for text-only editors
+                menubar: false,
+                forced_root_block: false, // Prevent <p> tags
+                entity_encoding: 'raw', // Output plain text (no HTML)
+                valid_elements: 'none', // Restrict allowed elements (no HTML)
+                content_style: "body { font-family: Arial; font-size: 14px; }" // Basic styling
+            });
+        }
+
+        // WhatsApp-specific custom behavior (bold, italic, strikethrough)
+        // WhatsApp-specific custom behavior (bold, italic, strikethrough, monospace, lists)
+        function preserveLineBreaks(content) {
+            return content.replace(/\n/g, '<br>');
+        }
+
+        function initializeWhatsAppEditor(selector) {
+            tinymce.remove(selector);
+            tinymce.init({
+                selector: selector,
+                menubar: false,
+                icons: 'default',
+                toolbar: 'cbold citalic cstrikethrough cmonospace cquote | undo redo', // Added more buttons
+                setup: function(editor) {
+
+                    // Bold button for WhatsApp (*text*)
+                    editor.ui.registry.addButton('cbold', {
+                        icon: 'bold',
+                        tooltip: 'Bold (WhatsApp-style)',
+                        onAction: function() {
+                            let selectedText = editor.selection.getContent({
+                                format: 'text'
+                            });
+                            if (selectedText) {
+                                let formattedText = '*' + selectedText + '*';
+                                editor.selection.setContent(
+                                    formattedText); // Replace with formatted text
+                            }
+                        }
+                    });
+
+                    // Italic button for WhatsApp (_text_)
+                    editor.ui.registry.addButton('citalic', {
+                        icon: 'italic',
+                        tooltip: 'Italic (WhatsApp-style)',
+                        onAction: function() {
+                            let selectedText = editor.selection.getContent({
+                                format: 'text'
+                            });
+                            if (selectedText) {
+                                let formattedText = '_' + selectedText + '_';
+                                editor.selection.setContent(
+                                    formattedText); // Replace with formatted text
+                            }
+                        }
+                    });
+
+                    // Strikethrough button for WhatsApp (~text~)
+                    editor.ui.registry.addButton('cstrikethrough', {
+                        icon: 'strike-through',
+                        tooltip: 'Strikethrough (WhatsApp-style)',
+                        onAction: function() {
+                            let selectedText = editor.selection.getContent({
+                                format: 'text'
+                            });
+                            if (selectedText) {
+                                let formattedText = '~' + selectedText + '~';
+                                editor.selection.setContent(
+                                    formattedText); // Replace with formatted text
+                            }
+                        }
+                    });
+
+                    // Monospace button for WhatsApp (`text`)
+                    editor.ui.registry.addButton('cmonospace', {
+                        icon: 'sourcecode',
+                        tooltip: 'Monospace (WhatsApp-style)',
+                        onAction: function() {
+                            let selectedText = editor.selection.getContent({
+                                format: 'text'
+                            });
+                            if (selectedText) {
+                                let formattedText = '```' + selectedText + '```';
+                                editor.selection.setContent(
+                                    formattedText); // Replace with formatted text
+                            }
+                        }
+                    });
+
+                    // Unordered list (bullet points)
+                    editor.ui.registry.addButton('cbulletedlist', {
+                        icon: 'unordered-list',
+                        tooltip: 'Bulleted list',
+                        onAction: function() {
+                            let selectedText = editor.selection.getContent({
+                                format: 'text'
+                            });
+                            if (selectedText) {
+                                // Split text by newlines and add a bullet to each line
+                                let formattedText = selectedText.split('\n').map(line => '* ' +
+                                    line + '\n').join('\n');
+
+                                editor.selection.setContent(
+                                    formattedText); // Replace with formatted text
+                            }
+                        }
+                    });
+
+
+                    // Ordered list (numbered points)
+                    editor.ui.registry.addButton('cnumberedlist', {
+                        icon: 'ordered-list',
+                        tooltip: 'Numbered list',
+                        onAction: function() {
+                            let selectedText = editor.selection.getContent({
+                                format: 'text'
+                            });
+                            if (selectedText) {
+                                // Split text by newlines and add a number to each line
+                                let lines = selectedText.split('\n');
+                                let formattedText = lines.map((line, index) => (index + 1) + '. ' +
+                                    line).join('\n');
+                                editor.selection.setContent(
+                                    formattedText); // Replace with formatted text
+                            }
+                        }
+                    });
+
+
+                    editor.ui.registry.addButton('cquote', {
+                        icon: 'quote',
+                        tooltip: 'Quote',
+                        onAction: function() {
+                            let selectedText = editor.selection.getContent({
+                                format: 'text'
+                            });
+                            if (selectedText) {
+                                let formattedText = '> ' + selectedText;
+                                editor.selection.setContent(
+                                    formattedText); // Replace with formatted text
+                            }
+                        }
+                    });
+
+                },
+                forced_root_block: false, // Prevent wrapping content in <p> tags
+                entity_encoding: 'named', // Raw text encoding
+                content_style: "body { font-family: Arial; font-size: 14px; }",
+                plugins: 'paste',
+                paste_as_text: true, // Paste as plain text
+                formats: {
+                    removeformat: [{
+                            selector: 'b,strong,em,i,strike',
+                            remove: 'all',
+                            split: true,
+                            expand: false,
+                            deep: true
+                        },
+                        {
+                            selector: 'span',
+                            attributes: ['style'],
+                            remove: 'empty'
+                        }
+                    ]
+                },
+                init_instance_callback: function(editor) {
+                    let initialContent = preserveLineBreaks(editor.getContent()); // Convert newlines to <br>
+                    editor.setContent(initialContent);
+                }
+            });
+        }
     </script>
 @endsection

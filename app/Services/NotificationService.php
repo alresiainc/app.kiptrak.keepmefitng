@@ -36,6 +36,13 @@ class NotificationService
     protected string $smsApiKey;
 
     /**
+     * The SMS API Sender name
+     * 
+     * @var string
+     */
+    protected string $smsSender;
+
+    /**
      * Constructor to initialize API URLs and API keys.
      */
     public function __construct()
@@ -43,8 +50,9 @@ class NotificationService
         $this->whatsAppApiUrl = config('site.adkombo_whatsapp.api_url', 'https://ad.adkombo.com/api/whatsapp/send');
         $this->whatsAppApiKey = config('site.adkombo_whatsapp.api_key', 'e1961a42-abd3-4f32-80f8-54d24d86a6c5');
 
-        $this->smsApiUrl = config('site.bulk_sms_nigeria.api_url', 'https://www.bulksmsnigeria.com/api/v2/sms');
-        $this->smsApiKey = config('site.bulk_sms_nigeria.api_token', 'EbZEBUsgTjDGsaVe09Cop1yLnrNrByMifqcP0U2TBzO27rBWOwX0Ssr35I5');
+        $this->smsApiUrl = config('site.bulk_sms_nigeria.api_url', 'https://www.bulksmsnigeria.com/api/v1/sms/create');
+        $this->smsApiKey = config('site.bulk_sms_nigeria.api_token', 'qEbZEBUsgTjDGsaVe09Cop1yLnrNrByMifqcP0U2TBzO27rBWOwX0Ssr35I5');
+        $this->smsSender = config('site.bulk_sms_nigeria.sender_name', 'KIPTRAK');
     }
 
     /**
@@ -77,10 +85,10 @@ class NotificationService
 
         $postData = [
             'api_token' => $this->smsApiKey,
-            'from' => 'KIPTRAK',
+            'from' => $this->smsSender,
             'to' => $to,
             'body' => $body,
-            'gateway' => 'direct-refund',
+            // 'gateway' => 'direct-refund',
         ];
 
         return $this->sendRequest($this->smsApiUrl, $postData, [

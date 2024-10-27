@@ -26,8 +26,7 @@ class OrderNotification extends Notification
      */
     public function __construct($order, $message = '')
     {
-        Log::alert('first');
-        Log::alert($message);
+
         $updatedOrder = Order::where('id', $order->id)->first();
         $this->order = $updatedOrder;
         $this->messages = $this->processMessages($message);
@@ -108,7 +107,7 @@ class OrderNotification extends Notification
         $message = $this->messages['email']['message'] ?? '';
         $resolvedMessage = $this->resolveMessageTemplate($message);
 
-        Log::alert("Sending Email notification message: " . $resolvedMessage);
+
 
         return Message::create([
             'topic' => $title,
@@ -131,12 +130,10 @@ class OrderNotification extends Notification
         if (!isset($this->messages['whatsapp'])) {
             return []; // Return an empty array
         }
-        Log::alert($this->messages['whatsapp']);
+
         $message = $this->messages['whatsapp']['message'] ?? '';
         $title = $this->messages['whatsapp']['title'] ?? 'Order Notification';
         $resolvedMessage = $this->resolveMessageTemplate($message);
-        $body = '*' . $title . '*' . "\n" . $resolvedMessage;
-        Log::alert("Sending WhatsApp notification message: " . $resolvedMessage);
 
         return Message::create([
             'topic' => $title,
@@ -163,8 +160,6 @@ class OrderNotification extends Notification
         $title = $this->messages['sms']['title'] ?? '';
         $message = $this->messages['sms']['message'] ?? 'Order Notification';
         $resolvedMessage = $this->resolveMessageTemplate($message);
-        Log::alert("Sending SMS notification message: " . $resolvedMessage);
-
 
         return Message::create([
             'topic' => $title,
@@ -189,7 +184,6 @@ class OrderNotification extends Notification
         }
 
         $message = $this->messages['database']['message'] ?? '';
-        Log::alert("Sending Database notification message: " . $message);
         return [
             'message' => $message,
         ];
@@ -200,7 +194,7 @@ class OrderNotification extends Notification
     protected function generateProductDetails($products)
     {
 
-        Log::alert($products);
+
         $mainProducts = $products['mainProducts'] ?? [];
         $orderbump = $products['orderbump'] ?? [];
         $upsell = $products['upsell'] ?? [];

@@ -520,7 +520,7 @@ class MessageController extends Controller
 
     public function updateTemplate(MessageTemplate $template, Request $request)
     {
-
+        // dd($request->all());
         $template->update([
             'subject' => $request->subject,
             'message' => $request->template,

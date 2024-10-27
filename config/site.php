@@ -79,7 +79,7 @@ return [
     */
 
     'adkombo_whatsapp' => [
-        'api_url' => 'https://api.adkombo.com/v1',
+        'api_url' => 'https://ad.adkombo.com/api/whatsapp/send',
         'default_session_name' => env("ADKOMBO_SESSION_NAME"),
         'api_key' => env('ADKOMBO_API_KEY'),
 
@@ -95,8 +95,9 @@ return [
     |
     */
     'bulk_sms_nigeria' => [
-        'api_url' => 'https://api.bulksmsnigeria.com/api/v1/sms',
-        'api_token' => env('BULK_SMS_NIGERIA_API_TOKEN', ''),
+        'api_url' => 'https://www.bulksmsnigeria.com/api/v1/sms/create',
+        'api_token' => env('BULK_SMS_NIGERIA_API_TOKEN', 'qEbZEBUsgTjDGsaVe09Cop1yLnrNrByMifqcP0U2TBzO27rBWOwX0Ssr35I5'),
+        'sender_name' => env('SMS_SENDER_NAME', 'KIPTRAK'),
     ],
 
 ];
