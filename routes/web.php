@@ -58,6 +58,14 @@ Route::get('migrate', function () {
     return view('page')->with('success', 'Migration completed successfully');
 });
 
+Route::get('/do-clear', function () {
+
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
+    return redirect('/login')->with('success', 'cache, config, view, route cleared successfully');
+});
 
 Route::get('/reset-site', function () {
 
