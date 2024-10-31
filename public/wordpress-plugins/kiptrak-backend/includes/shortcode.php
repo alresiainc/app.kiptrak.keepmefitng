@@ -110,8 +110,8 @@ function kiptrak_shortcode($atts)
         return $iframe_html;
     } elseif ($type === 'order') {
         $current_order_id = '';
-        // Build the base iframe URL
-        $iframe_url = rtrim(trailingslashit($site_url), '/') . '/link/form/get-view';
+
+
         if ($stage == 'thankYou') {
 
             if ($id == 'any') {
@@ -122,7 +122,7 @@ function kiptrak_shortcode($atts)
                 $unique_key = $key;
             }
 
-            if (empty($current_order_id) || empty($unique_key)) {
+            if (empty($current_order_id)) {
                 return 'Error: Sorry order not available now!. Url param missing, can not get order details.';
             }
             // Prepare query parameters
@@ -139,6 +139,8 @@ function kiptrak_shortcode($atts)
 
             // Append the query parameters to the URL
             if (!empty($query_params)) {
+                // Build the base iframe URL link/order/zombot9jPZWLWD0yKhJtdHFUknRivL268957/invoice
+                $iframe_url = rtrim(trailingslashit($site_url), '/') . '/link/order/' . $current_order_id . '/invoice';
                 $iframe_url = add_query_arg($query_params, $iframe_url);
             }
 
