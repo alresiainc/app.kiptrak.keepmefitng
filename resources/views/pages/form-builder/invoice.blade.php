@@ -231,19 +231,21 @@
                                         <hr>
                                     </div>
                                     @foreach ($mainProducts_outgoingStocks as $main_outgoingStock)
-                                        @if ($main_outgoingStock->customer_acceptance_status == 'accepted')
+                                        @if (
+                                            $main_outgoingStock->customer_acceptance_status == 'accepted' &&
+                                                $main_outgoingStock->reason_removed == 'as_order_firstphase')
                                             <li class="col-lg-4 col-md-6">
                                                 <div class="itemside mb-3">
                                                     <div class="aside">
                                                         <img width="72" height="72"
-                                                            src="{{ asset('/storage/products/' . $main_outgoingStock->product->image) }}"
+                                                            src="{{ asset('/storage/products/' . $main_outgoingStock?->product?->image) }}"
                                                             class="img-sm rounded border">
                                                     </div>
                                                     <div class="info text-start">
-                                                        <p class="title">{{ $main_outgoingStock->product->name }}</p>
+                                                        <p class="title">{{ $main_outgoingStock?->product?->name }}
+                                                        </p>
                                                         <strong>N{{ $main_outgoingStock->amount_accrued }}
-                                                            ({{ $main_outgoingStock->quantity_removed }}
-                                                            items)
+                                                            ({{ $main_outgoingStock->quantity_removed }} items)
                                                         </strong>
                                                     </div>
                                                 </div>
@@ -253,7 +255,8 @@
 
                                     <!---for orderbump or upsell--->
                                     @if ($orderbumpProduct_revenue !== 0)
-                                        <li class="col-lg-4 col-md-6">
+
+                                        {{-- <li class="col-lg-4 col-md-6">
                                             <div class="itemside mb-3">
                                                 <div class="aside">
                                                     <img width="72" height="72"
@@ -268,11 +271,33 @@
                                                         item)</strong>
                                                 </div>
                                             </div>
-                                        </li>
+                                        </li> --}}
+                                        @foreach ($orderbump_outgoingStock as $orderbump)
+                                            @if ($orderbump->customer_acceptance_status == 'accepted' && $orderbump->reason_removed == 'as_orderbump')
+                                                <li class="col-lg-4 col-md-6">
+                                                    <div class="itemside mb-3">
+                                                        <div class="aside">
+                                                            <img width="72" height="72"
+                                                                src="{{ asset('/storage/products/' . $orderbump->product->image) }}"
+                                                                class="img-sm rounded border">
+                                                        </div>
+                                                        <div class="info text-start">
+                                                            <p class="title">
+                                                                {{ $orderbump->product->name }}
+                                                            </p>
+                                                            <strong>N{{ $orderbump->product->sale_price * $orderbump->quantity_removed }}
+                                                                ({{ $orderbump->quantity_removed }}
+                                                                item)
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            @endif
+                                        @endforeach
                                     @endif
 
                                     @if ($upsellProduct_revenue !== 0)
-                                        <li class="col-lg-4 col-md-6">
+                                        {{-- <li class="col-lg-4 col-md-6">
                                             <div class="itemside mb-3">
                                                 <div class="aside">
                                                     <img width="72" height="72"
@@ -285,7 +310,30 @@
                                                         ({{ $upsell_outgoingStock->quantity_removed }} item)</strong>
                                                 </div>
                                             </div>
-                                        </li>
+                                        </li> --}}
+
+                                        @foreach ($upsell_outgoingStock as $upsell)
+                                            @if ($upsell->customer_acceptance_status == 'accepted' && $upsell->reason_removed == 'as_upsell')
+                                                <li class="col-lg-4 col-md-6">
+                                                    <div class="itemside mb-3">
+                                                        <div class="aside">
+                                                            <img width="72" height="72"
+                                                                src="{{ asset('/storage/products/' . $upsell->product->image) }}"
+                                                                class="img-sm rounded border">
+                                                        </div>
+                                                        <div class="info text-start">
+                                                            <p class="title">
+                                                                {{ $upsell->product->name }}
+                                                            </p>
+                                                            <strong>N{{ $upsell->product->sale_price * $upsell->quantity_removed }}
+                                                                ({{ $upsell->quantity_removed }}
+                                                                item)
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            @endif
+                                        @endforeach
                                     @endif
 
                                 </ul>

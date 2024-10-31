@@ -776,6 +776,200 @@ class FormBuilderController extends Controller
             'redirect_url'
         ));
     }
+    public function invoice($key, Request $request)
+    {
+
+        // $order = Order::where('unique_key', $unique_key)->first();
+
+        $order = Order::where(function ($query) use ($key) {
+            $query->where('id', $key)
+                ->orWhere('unique_key', $key);
+        })->first();
+        if (!isset($order)) {
+            if ($request->expectsJson() || $request->wantsJson() || $request->errors_in_json == 'yes') {
+                return response()->json(['message' => 'Order not found'], 404);
+            }
+            \abort(404);
+        }
+
+
+        if (isset($order->customer)) {
+            $customer = ''; // to check against when the thankyou pg will be rendered
+            $orderId = '';
+            $qty_total = 0;
+            $order_total_amount = 0;
+            $grand_total = 0;
+            $mainProducts_outgoingStocks = '';
+            $orderbumpProduct_revenue = 0;
+            $orderbump_outgoingStock = '';
+            $upsellProduct_revenue = 0;
+            $upsell_outgoingStock = '';
+
+
+            // $order->outgoingStocks()->where(['customer_acceptance_status'=>NULL])
+            // ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
+
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+            $package_bundle_1 = [];
+            //loop to get $package_bundle_1 array, if customer is null
+            foreach ($outgoingStockPackageBundle as &$main_outgoingStock) {
+                if ($main_outgoingStock['customer_acceptance_status'] == null) {
+
+                    $package_bundles = [
+                        'customer_acceptance_status' => 'rejected',
+                        'reason_removed' => 'as_order_firstphase',
+                        'quantity_returned' => 1,
+                        'reason_returned' => 'declined',
+                    ];
+                    $package_bundle_1[] = $package_bundles;
+                }
+            }
+
+            //loop to get new copy of $outgoingStockPackageBundle array
+            foreach ($outgoingStockPackageBundle as $key => &$value) {
+                // Update values with similar keys
+                if (isset($package_bundle_1[$key])) {
+                    $value = array_merge($value, $package_bundle_1[$key]);
+                }
+            }
+            //pudate db column with new copy of $outgoingStockPackageBundle
+            $order->outgoingStock()->update(['package_bundle' => $outgoingStockPackageBundle]);
+
+            $formHolder = $order->formHolder;
+
+            $thankYou = $formHolder->thankYou;
+
+
+
+            //get customer
+            $customer =  $order->customer;
+            $orderId = $order->orderId($order);
+
+            //mainProduct_revenue
+            $mainProduct_revenue = 0;  //price * qty
+            $qty_main_product = 0;
+            // $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase',
+            // 'customer_acceptance_status'=>'accepted'])->get();
+
+            // if ( count($mainProducts_outgoingStocks) > 0 ) {
+            //     foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
+            //         if(isset($main_outgoingStock->product)) {
+            //             $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+            //         }
+            //     }
+            // }
+
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+            foreach ($outgoingStockPackageBundle as &$main_outgoingStock) {
+                if (($main_outgoingStock['reason_removed'] == 'as_order_firstphase') && ($main_outgoingStock['customer_acceptance_status'] == 'accepted')) {
+                    $product = Product::where('id', $main_outgoingStock['product_id'])->first();
+                    if (isset($product)) {
+                        //array_push($mainProducts_outgoingStocks, array('product' => $product)); 
+                        $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                        $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
+                        $qty_main_product += $main_outgoingStock['quantity_removed'];
+                    }
+                }
+            }
+            $mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
+            //////////////////////////////////////////////////////////////
+
+            //orderbump
+            $orderbumpProduct_revenue = 0; //price * qty
+            $orderbump_outgoingStock = '';
+            $qty_orderbump = 0;
+            // if (isset($formHolder->orderbump_id)) {
+            //     $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
+            //     if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+            //         $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+            //     }
+            // }
+
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+
+            if (isset($formHolder->orderbump_id)) {
+                foreach ($outgoingStockPackageBundle as &$orderbump_stock) {
+                    if (($orderbump_stock['reason_removed'] == 'as_orderbump') && ($orderbump_stock['customer_acceptance_status'] == 'accepted')) {
+                        $product = Product::where('id', $orderbump_stock['product_id'])->first();
+                        if (isset($product)) {
+                            $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                            $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
+                            $qty_orderbump += $orderbump_stock['quantity_removed'];
+                        }
+                    }
+                }
+            }
+            $orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : '';
+
+            //upsell
+            $upsellProduct_revenue = 0; //price * qty
+            $upsell_outgoingStock = '';
+            $qty_upsell = 0;
+            // if (isset($formHolder->upsell_id)) {
+            //     $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
+            //     if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+            //         $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+            //     }
+            // }
+
+            $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+
+            if (isset($formHolder->upsell_id)) {
+                foreach ($outgoingStockPackageBundle as &$upsell_stock) {
+                    if (($upsell_stock['reason_removed'] == 'as_upsell') && ($upsell_stock['customer_acceptance_status'] == 'accepted')) {
+                        $product = Product::where('id', $upsell_stock['product_id'])->first();
+                        if (isset($product)) {
+                            $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+                            $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
+                            $qty_upsell += $upsell_stock['quantity_removed'];
+                        }
+                    }
+                }
+            }
+            $upsell_outgoingStock = $upsellProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : '';
+
+            //order total amt
+            $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
+            $grand_total = $order_total_amount; //might include discount later
+
+            $orderId = ''; //used in thankYou section
+            if (isset($order->id)) {
+                $orderId = $order->orderId($order);
+            }
+
+            //package or product qty. sum = 0, if it doesnt exist
+            // $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
+            // $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
+            // $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
+            $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
+        } else {
+            if ($request->expectsJson() || $request->wantsJson() || $request->errors_in_json == 'yes') {
+                return response()->json(['message' => 'Customer details not found'], 404);
+            }
+            \abort(404);
+        }
+
+
+
+        // dd($outgoingStockPackageBundle);
+
+        return view('pages.form-builder.invoice', \compact(
+
+            'thankYou',
+            'order',
+            'orderId',
+            'customer',
+            'qty_total',
+            'order_total_amount',
+            'grand_total',
+            'mainProducts_outgoingStocks',
+            'orderbumpProduct_revenue',
+            'orderbump_outgoingStock',
+            'upsellProduct_revenue',
+            'upsell_outgoingStock'
+        ));
+    }
+
 
     //saving built form
     public function newFormBuilderPost(Request $request)
@@ -914,6 +1108,8 @@ class FormBuilderController extends Controller
                     'product_id' => $product->id,
                     'quantity_removed' => 1,
                     'amount_accrued' => $product->sale_price,
+                    'discount_type' => null,
+                    'discount_amount' => null,
                     'customer_acceptance_status' => null,
                     'reason_removed' => 'as_order_firstphase',
                     'quantity_returned' => 0,
@@ -989,11 +1185,14 @@ class FormBuilderController extends Controller
                 $orderbump->status = 'true';
                 $orderbump->save();
 
+
                 // Create a new package array for each product ID
                 $package_bundles = [
                     'product_id' => $request->orderbump_product,
                     'quantity_removed' => 1,
                     'amount_accrued' => $product->sale_price,
+                    'discount_type' => $request->orderbump_discount_type,
+                    'discount_amount' => $request->orderbump_discount,
                     'customer_acceptance_status' => null,
                     'reason_removed' => 'as_orderbump',
                     'quantity_returned' => 0,
@@ -1041,6 +1240,8 @@ class FormBuilderController extends Controller
                 'product_id' => $request->upsell_product,
                 'quantity_removed' => 1,
                 'amount_accrued' => $product->sale_price,
+                'discount_type' => null,
+                'discount_amount' => null,
                 'customer_acceptance_status' => null,
                 'reason_removed' => 'as_upsell',
                 'quantity_returned' => 0,
@@ -1084,6 +1285,8 @@ class FormBuilderController extends Controller
                 'product_id' => $request->downsell_product,
                 'quantity_removed' => 1,
                 'amount_accrued' => $product->sale_price,
+                'discount_type' => null,
+                'discount_amount' => null,
                 'customer_acceptance_status' => null,
                 'reason_removed' => 'as_downsell',
                 'quantity_returned' => 0,
@@ -3584,6 +3787,8 @@ class FormBuilderController extends Controller
                 // Make a copy of rows and create new records
                 $outgoingStockData = [
                     'product_id' => $outgoingStock['product_id'],
+                    'discount_type' => $outgoingStock['discount_type'] ?? null,
+                    'discount_amount' => $outgoingStock['discount_amount'] ?? null,
                     'quantity_removed' => 1,
                     'amount_accrued' => $product->sale_price,
                     'customer_acceptance_status' => $outgoingStock['customer_acceptance_status'],
@@ -4365,6 +4570,7 @@ class FormBuilderController extends Controller
     }
 
     //invoiceData(), callback for notifying admin abt new order
+
     public function invoiceData($formHolder, $customer, $order)
     {
         // $authUser = auth()->user();
@@ -4380,191 +4586,208 @@ class FormBuilderController extends Controller
         $soundNotification->order_id = $order->id;
         $soundNotification->status = 'new';
         $soundNotification->save();
-
-        //mainProduct_revenue
-        $mainProduct_revenue = 0;  //price * qty
-        $qty_main_product = 0;
-        // $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase', 'customer_acceptance_status'=>'accepted'])->get();
-
-        // if ( count($mainProducts_outgoingStocks) > 0 ) {
-        //     foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
-        //         if(isset($main_outgoingStock->product)) {
-        //             $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
-        //         } 
-        //     }
-        // }
-
-        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
-        foreach ($outgoingStockPackageBundle as $key => &$main_outgoingStock) {
-            if (($main_outgoingStock['reason_removed'] == 'as_order_firstphase') && ($main_outgoingStock['customer_acceptance_status'] == 'accepted')) {
-                $product = Product::where('id', $main_outgoingStock['product_id'])->first();
-                if (isset($product)) {
-                    //array_push($mainProducts_outgoingStocks, array('product' => $product)); 
-                    $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
-                    $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
-                    $qty_main_product += $main_outgoingStock['quantity_removed'];
-                }
-            } else {
-                // Remove the element from the array if the condition is not met
-                unset($outgoingStockPackageBundle[$key]);
-            }
-        }
-
-        //converting array immediate & nested(product) array to object. json_decode alone will not do it.
-        // $mainProducts_outgoingStocks = array_map(function ($item) {
-        //     return (object) $item;
-        // }, $outgoingStockPackageBundle);
-
-        $mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
-
-        //orderbump
-        $orderbumpProduct_revenue = 0; //price * qty
-        $orderbump_outgoingStock = '';
-        $qty_orderbump = 0;
-        // if (isset($formHolder->orderbump_id)) {
-        //     $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
-        //     if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
-        //         $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
-        //     }
-        // }
-
-        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
-
-        if (isset($formHolder->orderbump_id)) {
-            foreach ($outgoingStockPackageBundle as $key => &$orderbump_stock) {
-                if (($orderbump_stock['reason_removed'] == 'as_orderbump') && ($orderbump_stock['customer_acceptance_status'] == 'accepted')) {
-                    $product = Product::where('id', $orderbump_stock['product_id'])->first();
-                    if (isset($product)) {
-                        $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
-                        $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
-                        $qty_orderbump += $orderbump_stock['quantity_removed'];
-                    }
-                } else {
-                    // Remove the element from the array if the condition is not met
-                    unset($outgoingStockPackageBundle[$key]);
-                }
-            }
-        }
-        //$orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : '';
-        $orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockPackageBundle)))) : '';
-
-        //upsell
-        $upsellProduct_revenue = 0; //price * qty
-        $upsell_outgoingStock = '';
-        $qty_upsell = 0;
-        // if (isset($formHolder->upsell_id)) {
-        //     $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
-        //     if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
-        //         $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
-        //     }
-        // }
-
-        $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
-
-        if (isset($formHolder->upsell_id)) {
-            foreach ($outgoingStockPackageBundle as $key => &$upsell_stock) {
-                if (($upsell_stock['reason_removed'] == 'as_upsell') && ($upsell_stock['customer_acceptance_status'] == 'accepted')) {
-                    $product = Product::where('id', $upsell_stock['product_id'])->first();
-                    if (isset($product)) {
-                        $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
-                        $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
-                        $qty_upsell += $upsell_stock['quantity_removed'];
-                    }
-                } else {
-                    // Remove the element from the array if the condition is not met
-                    unset($outgoingStockPackageBundle[$key]);
-                }
-            }
-        }
-        $upsell_outgoingStock = $upsellProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockPackageBundle)))) : '';
-
-        //order total amt
-
-        $orderId = ''; //used in thankYou section
-        if ($order->id < 10) {
-            $orderId = '0000' . $order->id;
-        }
-        // <!-- > 10 < 100 -->
-        if (($order->id > 10) && ($order->id < 100)) {
-            $orderId = '000' . $order->id;
-        }
-        // <!-- > 100 < 1000 -->
-        if (($order->id) > 100 && ($order->id < 1000)) {
-            $orderId = '00' . $order->id;
-        }
-        // <!-- > 1000 < 10000++ -->
-        if (($order->id) > 1000 && ($order->id < 1000)) {
-            $orderId = '0' . $order->id;
-        }
-
-        //package or product qty. sum = 0, if it doesnt exist
-        // $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
-        // $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
-        // $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
-        $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
-
-        $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
-        $grand_total = $order_total_amount; //might include discount later
-
-        $admin = GeneralSetting::first();
-
-        // $whatsapp_phone_number = '';
-        // if (substr($customer->whatsapp_phone_number, 0, 1) === '0') {
-        //     $whatsapp_phone_number = '234' . substr($customer->whatsapp_phone_number, 1);
-        // }
-
-        //$whatsapp_msg = "Hi ".$customer->firstname." ".$customer->lastname.", you just placed order with Invoice-id: kp-".$orderId.". We will get back to you soon";
-        if ($staffAssigned == '') {
-            $whatsapp_msg = "Hello " . $customer->firstname . " " . $customer->lastname . " I am contacting you from KeepMeFit, concerning of the order you placed for ";
-        } else {
-            $whatsapp_msg = "Hello " . $customer->firstname . " " . $customer->lastname . ". My name is " . $staffAssigned . ", I am contacting you from KeepMeFit and I am the Customer Service Representative incharge of the order you placed for ";
-        }
-
-        $whatsapp_msg .= "";
-        foreach ($mainProducts_outgoingStocks as $main_outgoingStock):
-            if ($main_outgoingStock->customer_acceptance_status):
-                $whatsapp_msg .= " [Product: " . $main_outgoingStock->product->name . ". Price: " . $mainProduct_revenue . ". Qty: " . $main_outgoingStock->quantity_removed . "], ";
-            endif;
-        endforeach;
-
-        if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock != ''):
-            $whatsapp_msg .= "[Product: " . $orderbump_outgoingStock->product->name . ". Price: " . $orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed . ". Qty: " . $orderbump_outgoingStock->quantity_removed . "], ";
-        endif;
-
-        if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock != ''):
-            $whatsapp_msg .= "[Product: " . $upsell_outgoingStock->product->name . ". Price: " . $upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed . ". Qty: " . $upsell_outgoingStock->quantity_removed . "]. ";
-        endif;
-
-        $whatsapp_msg .= "I am reaching out to you to confirm your order and to let you know the delivery person will call you to deliver your order. Kindly confirm if the details you sent are correct ";
-
-        $whatsapp_msg .= "[Phone Number: " . $customer->phone_number . ". Whatsapp Phone Number: " . $customer->whatsapp_phone_number . ". Delivery Address: " . $customer->delivery_address . "]. ";
-
-        $whatsapp_msg .= "Please kindly let me know when we can deliver your order. Thank you!";
-
-        // //mail user about their new order
-        $invoiceData = [
-            'order' => $order,
-            'orderId' => $orderId,
-            'customer' => $customer,
-            'mainProducts_outgoingStocks' => $mainProducts_outgoingStocks,
-            'mainProduct_revenue' => $mainProduct_revenue,
-            'orderbump_outgoingStock' => $orderbump_outgoingStock,
-            'orderbumpProduct_revenue' => $orderbumpProduct_revenue,
-            'whatsapp_msg' => $whatsapp_msg,
-            'upsell_outgoingStock' => $upsell_outgoingStock,
-            'upsellProduct_revenue' => $upsellProduct_revenue,
-            'qty_total' => $qty_total,
-            'order_total_amount' => $order_total_amount,
-            'grand_total' => $grand_total,
-        ];
-
-        try {
-            Notification::route('mail', [$admin->official_notification_email, $customer->email])->notify(new NewOrder($invoiceData));
-        } catch (Exception $exception) {
-            // return back()->withError($exception->getMessage())->withInput();
-            return back();
-        }
+        return;
     }
+    // public function invoiceData($formHolder, $customer, $order)
+    // {
+    //     // $authUser = auth()->user();
+    //     // $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+    //     $staffAssigned = isset($order->staff_assigned_id) ? $order->staff->name : '';
+    //     //create soundNotification
+    //     $soundNotification = new SoundNotification();
+    //     $soundNotification->type = 'Order';
+    //     $soundNotification->topic = 'New Order';
+    //     $soundNotification->content = 'Customer placed an order';
+    //     $soundNotification->link = 'order-form/' . $order->unique_key;
+    //     $soundNotification->order_id = $order->id;
+    //     $soundNotification->status = 'new';
+    //     $soundNotification->save();
+
+    //     //mainProduct_revenue
+    //     $mainProduct_revenue = 0;  //price * qty
+    //     $qty_main_product = 0;
+    //     // $mainProducts_outgoingStocks = $order->outgoingStocks()->where(['reason_removed'=>'as_order_firstphase', 'customer_acceptance_status'=>'accepted'])->get();
+
+    //     // if ( count($mainProducts_outgoingStocks) > 0 ) {
+    //     //     foreach ($mainProducts_outgoingStocks as $key => $main_outgoingStock) {
+    //     //         if(isset($main_outgoingStock->product)) {
+    //     //             $mainProduct_revenue = $mainProduct_revenue + ($main_outgoingStock->product->sale_price * $main_outgoingStock->quantity_removed);
+    //     //         } 
+    //     //     }
+    //     // }
+
+    //     $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+    //     foreach ($outgoingStockPackageBundle as $key => &$main_outgoingStock) {
+    //         if (($main_outgoingStock['reason_removed'] == 'as_order_firstphase') && ($main_outgoingStock['customer_acceptance_status'] == 'accepted')) {
+    //             $product = Product::where('id', $main_outgoingStock['product_id'])->first();
+    //             if (isset($product)) {
+    //                 //array_push($mainProducts_outgoingStocks, array('product' => $product)); 
+    //                 $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+    //                 $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
+    //                 $qty_main_product += $main_outgoingStock['quantity_removed'];
+    //             }
+    //         } else {
+    //             // Remove the element from the array if the condition is not met
+    //             unset($outgoingStockPackageBundle[$key]);
+    //         }
+    //     }
+
+    //     //converting array immediate & nested(product) array to object. json_decode alone will not do it.
+    //     // $mainProducts_outgoingStocks = array_map(function ($item) {
+    //     //     return (object) $item;
+    //     // }, $outgoingStockPackageBundle);
+
+    //     $mainProducts_outgoingStocks = $mainProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : collect([]);
+
+    //     //orderbump
+    //     $orderbumpProduct_revenue = 0; //price * qty
+    //     $orderbump_outgoingStock = '';
+    //     $qty_orderbump = 0;
+    //     // if (isset($formHolder->orderbump_id)) {
+    //     //     $orderbump_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_orderbump')->first();
+    //     //     if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock->customer_acceptance_status == 'accepted') {
+    //     //         $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed);
+    //     //     }
+    //     // }
+
+    //     $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+
+    //     if (isset($formHolder->orderbump_id)) {
+    //         foreach ($outgoingStockPackageBundle as $key => &$orderbump_stock) {
+    //             if (($orderbump_stock['reason_removed'] == 'as_orderbump') && ($orderbump_stock['customer_acceptance_status'] == 'accepted')) {
+    //                 $product = Product::where('id', $orderbump_stock['product_id'])->first();
+    //                 if (isset($product)) {
+    //                     $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+    //                     $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
+    //                     $qty_orderbump += $orderbump_stock['quantity_removed'];
+    //                 }
+    //             } else {
+    //                 // Remove the element from the array if the condition is not met
+    //                 unset($outgoingStockPackageBundle[$key]);
+    //             }
+    //         }
+    //     }
+    //     //$orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode($outgoingStockPackageBundle)) : '';
+    //     $orderbump_outgoingStock = $orderbumpProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockPackageBundle)))) : '';
+
+    //     //upsell
+    //     $upsellProduct_revenue = 0; //price * qty
+    //     $upsell_outgoingStock = '';
+    //     $qty_upsell = 0;
+    //     // if (isset($formHolder->upsell_id)) {
+    //     //     $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
+    //     //     if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
+    //     //         $upsellProduct_revenue += $upsellProduct_revenue + ($upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed);
+    //     //     }
+    //     // }
+
+    //     $outgoingStockPackageBundle = $order->outgoingStock->package_bundle; //[{}, {}]
+
+    //     if (isset($formHolder->upsell_id)) {
+    //         foreach ($outgoingStockPackageBundle as $key => &$upsell_stock) {
+    //             if (($upsell_stock['reason_removed'] == 'as_upsell') && ($upsell_stock['customer_acceptance_status'] == 'accepted')) {
+    //                 $product = Product::where('id', $upsell_stock['product_id'])->first();
+    //                 if (isset($product)) {
+    //                     $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
+    //                     $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
+    //                     $qty_upsell += $upsell_stock['quantity_removed'];
+    //                 }
+    //             } else {
+    //                 // Remove the element from the array if the condition is not met
+    //                 unset($outgoingStockPackageBundle[$key]);
+    //             }
+    //         }
+    //     }
+    //     $upsell_outgoingStock = $upsellProduct_revenue > 0 ? json_decode(json_encode(array_merge(...array_values($outgoingStockPackageBundle)))) : '';
+
+    //     //order total amt
+
+    //     $orderId = ''; //used in thankYou section
+    //     if ($order->id < 10) {
+    //         $orderId = '0000' . $order->id;
+    //     }
+    //     // <!-- > 10 < 100 -->
+    //     if (($order->id > 10) && ($order->id < 100)) {
+    //         $orderId = '000' . $order->id;
+    //     }
+    //     // <!-- > 100 < 1000 -->
+    //     if (($order->id) > 100 && ($order->id < 1000)) {
+    //         $orderId = '00' . $order->id;
+    //     }
+    //     // <!-- > 1000 < 10000++ -->
+    //     if (($order->id) > 1000 && ($order->id < 1000)) {
+    //         $orderId = '0' . $order->id;
+    //     }
+
+    //     //package or product qty. sum = 0, if it doesnt exist
+    //     // $qty_main_product = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_order_firstphase'])->sum('quantity_removed');
+    //     // $qty_orderbump = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_orderbump'])->sum('quantity_removed');
+    //     // $qty_upsell = OutgoingStock::where(['order_id'=>$order->id, 'customer_acceptance_status'=>'accepted', 'reason_removed'=>'as_upsell'])->sum('quantity_removed');
+    //     $qty_total = $qty_main_product + $qty_orderbump + $qty_upsell;
+
+    //     $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
+    //     $grand_total = $order_total_amount; //might include discount later
+
+    //     $admin = GeneralSetting::first();
+
+    //     // $whatsapp_phone_number = '';
+    //     // if (substr($customer->whatsapp_phone_number, 0, 1) === '0') {
+    //     //     $whatsapp_phone_number = '234' . substr($customer->whatsapp_phone_number, 1);
+    //     // }
+
+    //     //$whatsapp_msg = "Hi ".$customer->firstname." ".$customer->lastname.", you just placed order with Invoice-id: kp-".$orderId.". We will get back to you soon";
+    //     if ($staffAssigned == '') {
+    //         $whatsapp_msg = "Hello " . $customer->firstname . " " . $customer->lastname . " I am contacting you from KeepMeFit, concerning of the order you placed for ";
+    //     } else {
+    //         $whatsapp_msg = "Hello " . $customer->firstname . " " . $customer->lastname . ". My name is " . $staffAssigned . ", I am contacting you from KeepMeFit and I am the Customer Service Representative incharge of the order you placed for ";
+    //     }
+
+    //     $whatsapp_msg .= "";
+    //     foreach ($mainProducts_outgoingStocks as $main_outgoingStock):
+    //         if ($main_outgoingStock->customer_acceptance_status):
+    //             $whatsapp_msg .= " [Product: " . $main_outgoingStock->product->name . ". Price: " . $mainProduct_revenue . ". Qty: " . $main_outgoingStock->quantity_removed . "], ";
+    //         endif;
+    //     endforeach;
+
+    //     if (isset($orderbump_outgoingStock->product) && $orderbump_outgoingStock != ''):
+    //         $whatsapp_msg .= "[Product: " . $orderbump_outgoingStock->product->name . ". Price: " . $orderbump_outgoingStock->product->sale_price * $orderbump_outgoingStock->quantity_removed . ". Qty: " . $orderbump_outgoingStock->quantity_removed . "], ";
+    //     endif;
+
+    //     if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock != ''):
+    //         $whatsapp_msg .= "[Product: " . $upsell_outgoingStock->product->name . ". Price: " . $upsell_outgoingStock->product->sale_price * $upsell_outgoingStock->quantity_removed . ". Qty: " . $upsell_outgoingStock->quantity_removed . "]. ";
+    //     endif;
+
+    //     $whatsapp_msg .= "I am reaching out to you to confirm your order and to let you know the delivery person will call you to deliver your order. Kindly confirm if the details you sent are correct ";
+
+    //     $whatsapp_msg .= "[Phone Number: " . $customer->phone_number . ". Whatsapp Phone Number: " . $customer->whatsapp_phone_number . ". Delivery Address: " . $customer->delivery_address . "]. ";
+
+    //     $whatsapp_msg .= "Please kindly let me know when we can deliver your order. Thank you!";
+
+    //     // //mail user about their new order
+    //     $invoiceData = [
+    //         'order' => $order,
+    //         'orderId' => $orderId,
+    //         'customer' => $customer,
+    //         'mainProducts_outgoingStocks' => $mainProducts_outgoingStocks,
+    //         'mainProduct_revenue' => $mainProduct_revenue,
+    //         'orderbump_outgoingStock' => $orderbump_outgoingStock,
+    //         'orderbumpProduct_revenue' => $orderbumpProduct_revenue,
+    //         'whatsapp_msg' => $whatsapp_msg,
+    //         'upsell_outgoingStock' => $upsell_outgoingStock,
+    //         'upsellProduct_revenue' => $upsellProduct_revenue,
+    //         'qty_total' => $qty_total,
+    //         'order_total_amount' => $order_total_amount,
+    //         'grand_total' => $grand_total,
+    //     ];
+
+    //     try {
+    //         Notification::route('mail', [$admin->official_notification_email, $customer->email])->notify(new NewOrder($invoiceData));
+    //     } catch (Exception $exception) {
+    //         // return back()->withError($exception->getMessage())->withInput();
+    //         return back();
+    //     }
+    // }
 
     /**
      * Display the specified resource.

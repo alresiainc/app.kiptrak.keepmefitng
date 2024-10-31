@@ -656,7 +656,7 @@ Route::group(['middleware' => 'auth'], function () {
 
 Route::get('/link/form/get-view', [FormBuilderController::class, 'viewPublicForm'])->name('form.get');
 
-
+Route::get('/link/order/{key}/invoice', [FormBuilderController::class, 'invoice'])->name('order.invoice');
 
 
 

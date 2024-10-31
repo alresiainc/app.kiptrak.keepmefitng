@@ -127,7 +127,7 @@ class ThankYouSettingController extends Controller
                 \abort(404);
             }
             if (isset($order->customer)) {
-                $order->outgoingStocks()->where(['customer_acceptance_status' => NULL])
+                $order->outgoingStock()->where(['customer_acceptance_status' => NULL])
                     ->update(['customer_acceptance_status' => 'rejected', 'quantity_returned' => 1, 'reason_returned' => 'declined']);
 
                 $formHolder = $order->formHolder;
@@ -199,7 +199,7 @@ class ThankYouSettingController extends Controller
                 //upsell
                 $upsellProduct_revenue = 0; //price * qty
                 $upsell_outgoingStock = '';
-                $$qty_upsell = 0;
+                $qty_upsell = 0;
                 //  if (isset($formHolder->upsell_id)) {
                 //      $upsell_outgoingStock = $order->outgoingStocks()->where('reason_removed', 'as_upsell')->first();
                 //      if (isset($upsell_outgoingStock->product) && $upsell_outgoingStock->customer_acceptance_status == 'accepted') {
@@ -442,25 +442,31 @@ class ThankYouSettingController extends Controller
 
         // Existing external URL
         $url = $thankYou->template_external_url;
+        if ($url) {
+            # code...
 
-        // Parse the URL to modify its query parameters
-        $parsedUrl = parse_url($url);
-        parse_str($parsedUrl['query'] ?? '', $queryParams);
 
-        // Add or update the order ID parameter
-        $queryParams['kiptrak-backend-order-id'] = $current_order_id; // Replace $current_order_id with your actual order ID
 
-        // Build the updated query string
-        $updatedQueryString = http_build_query($queryParams);
+            // Parse the URL to modify its query parameters
+            $parsedUrl = parse_url($url);
+            parse_str($parsedUrl['query'] ?? '', $queryParams);
 
-        // Reconstruct the full URL with the updated query string
-        $updatedUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] .
-            (isset($parsedUrl['path']) ? $parsedUrl['path'] : '') .
-            '?' . $updatedQueryString;
+            // Add or update the order ID parameter
+            $queryParams['kiptrak-backend-order-id'] = $current_order_id; // Replace $current_order_id with your actual order ID
+            $queryParams['kiptrak-backend-form-unique-key'] = $formHolder->unique_key;
+            // Build the updated query string
+            $updatedQueryString = http_build_query($queryParams);
 
-        // Redirect to the updated URL
-        $redirectUrl = Redirect::away($updatedUrl);
-        return $redirectUrl;
+            // Reconstruct the full URL with the updated query string
+            $updatedUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] .
+                (isset($parsedUrl['path']) ? $parsedUrl['path'] : '') .
+                '?' . $updatedQueryString;
+
+            // Redirect to the updated URL
+            $redirectUrl = Redirect::away($updatedUrl);
+            return $redirectUrl;
+        }
+        // dd($url);
 
 
         return view('pages.settings.thankYou.singleThankYou', \compact(

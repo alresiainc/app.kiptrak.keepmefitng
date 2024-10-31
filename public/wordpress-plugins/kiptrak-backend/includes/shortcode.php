@@ -109,21 +109,27 @@ function kiptrak_shortcode($atts)
 
         return $iframe_html;
     } elseif ($type === 'order') {
+        $current_order_id = '';
         // Build the base iframe URL
         $iframe_url = rtrim(trailingslashit($site_url), '/') . '/link/form/get-view';
         if ($stage == 'thankYou') {
 
-            if ($order_id == 'any') {
-                $order_id = isset($_GET['kiptrak-backend-order-id']) ? $_GET['kiptrak-backend-order-id'] : '';
-                if (empty($order_id)) {
-                    return 'Error: Sorry order not available now!. Url param missing, can not get order details.';
-                }
+            if ($id == 'any') {
+                $current_order_id = isset($_GET['kiptrak-backend-order-id']) ? $_GET['kiptrak-backend-order-id'] : '';
+                $unique_key = isset($_GET['kiptrak-backend-form-unique-key']) ? $_GET['kiptrak-backend-form-unique-key'] : '';
+            } else {
+                $current_order_id = $order_id;
+                $unique_key = $key;
+            }
+
+            if (empty($current_order_id) || empty($unique_key)) {
+                return 'Error: Sorry order not available now!. Url param missing, can not get order details.';
             }
             // Prepare query parameters
             $query_params = array();
 
-            if (!empty($order_id)) {
-                $query_params['order_id'] = $order_id;
+            if (!empty($current_order_id)) {
+                $query_params['order_id'] = $current_order_id;
             }
             if (!empty($stage)) {
                 $query_params['stage'] = $stage;

@@ -1578,6 +1578,7 @@
 
                         // Append or update the order_id parameter
                         params.set('kiptrak-backend-order-id', current_order_id);
+                        params.set('kiptrak-backend-form-unique-key', unique_key);
 
                         // Update the URL's search parameters
                         url.search = params.toString();
