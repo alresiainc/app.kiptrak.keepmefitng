@@ -63,31 +63,8 @@
 
 <body class="">
 
-    <!-- will be shown in singlelink-->
-    <nav class="navbar bg-light d-none">
-        <div class="container">
-            {{-- <a class="navbar-brand" href="/">
-        <img src="{{asset('/assets/img/logo.png')}}" alt="Kiptrak Logo" class="d-inline-block align-text-top" style="max-height: 130px; margin-right: 6px;" />
-        <span class="project-namek"></span>
-        </a> --}}
 
-            <a href="javascript:void(0);" class="logo d-flex align-items-center">
-                <img src="{{ asset('/assets/img/logo.png') }}" alt="Kiptrak Logo"
-                    style="max-height: 130px; margin-right: 6px;">
-                {{-- <span class="d-none d-lg-block project-name"></span> --}}
-            </a>
-        </div>
-    </nav>
 
-    <header id="header" class="header fixed-top d-flex align-items-center">
-        <div class="d-flex align-items-center justify-content-between">
-            <a href="javascript:void(0);" class="logo d-flex align-items-center d-none">
-                <img src="{{ asset('/assets/img/logo.png') }}" alt="Kiptrak Logo" style="width: 30%; !important">
-                <span class="d-none d-lg-block project-namek"></span>
-            </a>
-        </div>
-        <!-- End Logo -->
-    </header>
 
     <main
         class="container mb-5 py-5 min-vh-100 @if ($thankYou->body_border_radius != 'normal') {{ $thankYou->body_border_radius }} @endif"
@@ -118,38 +95,43 @@
 
         <div class="view" id="thankyou-section" style="margin-top: 10px;">
             <div class="row">
-                <div class="col-lg-12 mb-3 d-nonee">
-                    <article class="card shadow-sm">
-                        <div class="card-body">
-                            <div class="mt-4 mx-auto text-center" style="max-width:600px">
-                                <svg width="96px" height="96px" viewBox="0 0 96 96" version="1.1"
-                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <g id="round-check">
-                                            <circle id="Oval" fill="#D3FFD9" cx="48" cy="48"
-                                                r="48"></circle>
-                                            <circle id="Oval-Copy" fill="#87FF96" cx="48" cy="48"
-                                                r="36"></circle>
-                                            <polyline id="Line" stroke="#04B800" stroke-width="4"
-                                                stroke-linecap="round"
-                                                points="34.188562 49.6867496 44 59.3734993 63.1968462 40.3594229">
-                                            </polyline>
+                @if ($thankYou)
+                    <div class="col-lg-12 mb-3 d-nonee">
+                        <article class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="mt-4 mx-auto text-center" style="max-width:600px">
+                                    <svg width="96px" height="96px" viewBox="0 0 96 96" version="1.1"
+                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                            <g id="round-check">
+                                                <circle id="Oval" fill="#D3FFD9" cx="48" cy="48"
+                                                    r="48">
+                                                </circle>
+                                                <circle id="Oval-Copy" fill="#87FF96" cx="48" cy="48"
+                                                    r="36">
+                                                </circle>
+                                                <polyline id="Line" stroke="#04B800" stroke-width="4"
+                                                    stroke-linecap="round"
+                                                    points="34.188562 49.6867496 44 59.3734993 63.1968462 40.3594229">
+                                                </polyline>
+                                            </g>
                                         </g>
-                                    </g>
-                                </svg>
-                                <div class="my-3">
-                                    <h4 class="heading text-{{ $thankYou->heading_text_align }} fst-{{ $thankYou->heading_text_style }} fw-{{ $thankYou->heading_text_weight }} fs-{{ $thankYou->heading_text_size }}"
-                                        style="color: {{ $thankYou->heading_text_color }};">
-                                        {{ $thankYou->heading_text }}</h4>
+                                    </svg>
+                                    <div class="my-3">
+                                        <h4 class="heading text-{{ $thankYou->heading_text_align }} fst-{{ $thankYou->heading_text_style }} fw-{{ $thankYou->heading_text_weight }} fs-{{ $thankYou->heading_text_size }}"
+                                            style="color: {{ $thankYou->heading_text_color }};">
+                                            {{ $thankYou->heading_text }}</h4>
 
-                                    <p class="subheading text-{{ $thankYou->subheading_text_align }} fst-{{ $thankYou->subheading_text_style }} fw-{{ $thankYou->subheading_text_weight }} fs-{{ $thankYou->subheading_text_size }}"
-                                        style="color: {{ $thankYou->subheading_text_color }};">
-                                        {{ $thankYou->subheading_text }}</p>
+                                        <p class="subheading text-{{ $thankYou->subheading_text_align }} fst-{{ $thankYou->subheading_text_style }} fw-{{ $thankYou->subheading_text_weight }} fs-{{ $thankYou->subheading_text_size }}"
+                                            style="color: {{ $thankYou->subheading_text_color }};">
+                                            {{ $thankYou->subheading_text }}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </article>
-                </div>
+                        </article>
+                    </div>
+                @endif
+
 
                 <!--order-summary-->
                 @if ($customer != '')
