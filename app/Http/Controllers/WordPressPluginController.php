@@ -17,10 +17,7 @@ class WordPressPluginController extends Controller
 
         try {
             // Secure the endpoint with an API key
-            $apiKey = $request->query('api_key');
-            if ($apiKey !== config('wordpress.plugin_api_key')) {
-                return response()->json(['message' => 'Unauthorized'], 401);
-            }
+
 
             // Define the path to the folder containing the plugin update files
             $folderPath = public_path('wordpress-plugins/' . $plugin);
@@ -88,11 +85,6 @@ class WordPressPluginController extends Controller
     public function serveUpdate(Request $request, $plugin)
     {
         // Secure the endpoint with an API key
-        $apiKey = $request->query('api_key');
-        if ($apiKey !== config('wordpress.plugin_api_key')) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
         // Define the path to the folder containing the plugin update files
         $folderPath = public_path('wordpress-plugins/' . $plugin);
 
@@ -154,11 +146,7 @@ class WordPressPluginController extends Controller
     {
         try {
             // Secure the endpoint with an API key
-            // $apiKey = $request->query('api_key');
-            // if ($apiKey !== config('wordpress.plugin_api_key')) {
-            //     Log::info('Serving update for plugin: ' . $plugin);
-            //     return response()->json(['message' => 'Unauthorized'], 401);
-            // }
+
 
             // Define the path to the folder containing the plugin update files
             $folderPath = public_path('wordpress-plugins/' . $plugin);
@@ -188,8 +176,8 @@ class WordPressPluginController extends Controller
             }
 
             // Build the download URL dynamically
-            // $downloadUrl = route('wordpress.plugin.download', ['plugin' => $plugin, 'api_key' => $apiKey]);
-            $downloadUrl = route('wordpress.plugin.download', ['plugin' => $plugin, 'api_key' => $apiKey], true);
+
+            $downloadUrl = route('wordpress.plugin.download', ['plugin' => $plugin], true);
 
             // Return JSON response with plugin details
             return response()->json([
