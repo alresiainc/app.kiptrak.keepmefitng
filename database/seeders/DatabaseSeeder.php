@@ -25,13 +25,13 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             UserSeeder::class,
-            ProductSeeder::class, //comment later
-            IncomingStockSeeder::class, //comment later
-            WareHouseSeeder::class, //comment later
+            // ProductSeeder::class, //comment later
+            // IncomingStockSeeder::class, //comment later
+            // WareHouseSeeder::class, //comment later
             CountrySeeder::class,
             // SupplierSeeder::class,
             // CustomerSeeder::class,
-            AccountSeeder::class,
+            // AccountSeeder::class,
             // DepartmentSeeder::class,
             // EmployeeSeeder::class,
             CategorySeeder::class, //comment later

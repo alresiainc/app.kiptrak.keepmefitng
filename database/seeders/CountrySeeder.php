@@ -15,58 +15,38 @@ class CountrySeeder extends Seeder
      */
     public function run()
     {
-        $countries = array(
-            array("name" => "Nigeria", "currency" => "Naira", "symbol" => "₦",),
-            array("name" => "Ghana", "currency" => "Cedis", "symbol" => "GH₵",),
-            array("name" => "Kenya", "currency" => "Shilling", "symbol" => "KES",),
-            array("name" => "US", "currency" => "Dollar", "symbol" => "$",),
-            array("name" => "UK", "currency" => "Pound", "symbol" => "£",),
-        );
-        
-        //Nigeria
-        $country = new Country();
-        $country->name = 'Nigeria';
-        $country->currency = 'Naira';
-        $country->symbol = '₦';
-        $country->created_by = 1;
-        $country->status = 'true';
-        $country->save();
+        $countries = [
+            ["name" => "Nigeria", "currency" => "Naira", "symbol" => "₦"],
+            ["name" => "Ghana", "currency" => "Cedis", "symbol" => "GH₵"],
+            ["name" => "Kenya", "currency" => "Shilling", "symbol" => "KES"],
+            ["name" => "US", "currency" => "Dollar", "symbol" => "$"],
+            ["name" => "UK", "currency" => "Pound", "symbol" => "£"],
+            ["name" => "Canada", "currency" => "Canadian Dollar", "symbol" => "CAD$"],
+            ["name" => "Australia", "currency" => "Australian Dollar", "symbol" => "A$"],
+            ["name" => "India", "currency" => "Rupee", "symbol" => "₹"],
+            ["name" => "Japan", "currency" => "Yen", "symbol" => "¥"],
+            ["name" => "South Africa", "currency" => "Rand", "symbol" => "R"],
+            ["name" => "Brazil", "currency" => "Real", "symbol" => "R$"],
+            ["name" => "Mexico", "currency" => "Peso", "symbol" => "MX$"],
+            ["name" => "China", "currency" => "Yuan", "symbol" => "¥"],
+            ["name" => "Switzerland", "currency" => "Swiss Franc", "symbol" => "CHF"],
+            ["name" => "Russia", "currency" => "Ruble", "symbol" => "₽"],
+            ["name" => "South Korea", "currency" => "Won", "symbol" => "₩"],
+            ["name" => "Saudi Arabia", "currency" => "Riyal", "symbol" => "SAR"],
+            ["name" => "Turkey", "currency" => "Lira", "symbol" => "₺"],
+            ["name" => "Singapore", "currency" => "Singapore Dollar", "symbol" => "S$"],
+            ["name" => "United Arab Emirates", "currency" => "Dirham", "symbol" => "AED"],
+            ["name" => "Eurozone", "currency" => "Euro", "symbol" => "€"],
+        ];
 
-        //Ghana
-        $country = new Country();
-        $country->name = 'Ghana';
-        $country->currency = 'Cedis';
-        $country->symbol = 'GH₵';
-        $country->created_by = 1;
-        $country->status = 'true';
-        $country->save();
-        
-        //Kenya
-        $country = new Country();
-        $country->name = 'Kenya';
-        $country->currency = 'Shilling';
-        $country->symbol = 'KES';
-        $country->created_by = 1;
-        $country->status = 'true';
-        $country->save();
-
-        //US
-        $country = new Country();
-        $country->name = 'US';
-        $country->currency = 'Dollar';
-        $country->symbol = '$';
-        $country->created_by = 1;
-        $country->status = 'true';
-        $country->save();
-
-        //UK
-        $country = new Country();
-        $country->name = 'UK';
-        $country->currency = 'Pound';
-        $country->symbol = '£';
-        $country->created_by = 1;
-        $country->status = 'true';
-        $country->save();
-
+        foreach ($countries as $countryData) {
+            $country = new Country();
+            $country->name = $countryData['name'];
+            $country->currency = $countryData['currency'];
+            $country->symbol = $countryData['symbol'];
+            $country->created_by = 1;
+            $country->status = 'true';
+            $country->save();
+        }
     }
 }

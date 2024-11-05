@@ -20,8 +20,8 @@ class GeneralSettingSeeder extends Seeder
         $generalSetting->site_title = 'KIPTRAK';
         $generalSetting->site_description = 'CRM APPLICATION PLATFORM';
         $generalSetting->currency = 1;
-        $generalSetting->developed_by = 'Ugo Sunday Raphael';
-        $generalSetting->official_notification_email = 'ralphsunny114@gmail.com';
+        $generalSetting->developed_by = 'Wisdom Uba';
+        $generalSetting->official_notification_email = 'info@kiptrak.com.ng';
         $generalSetting->attendance_time = '08:00';
         $generalSetting->created_by = 1;
         $generalSetting->status = 'true';
