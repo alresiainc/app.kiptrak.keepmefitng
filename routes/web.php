@@ -96,16 +96,18 @@ Route::get('/reset-site', function () {
 // });
 
 Route::get('/storage-link', function () {
-    $targetFolder = storage_path('app/public'); // Corrected the typo here
-    $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
-    
-    // Check if the symbolic link already exists
-    if (!file_exists($linkFolder)) {
-        symlink($targetFolder, $linkFolder); // Create the symlink
-        return 'Symlink created successfully!';
-    } else {
-        return 'Symlink already exists!';
-    }
+
+    Artisan::call('storage:link');
+    // $targetFolder = storage_path('app/public'); // Corrected the typo here
+    // $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
+
+    // // Check if the symbolic link already exists
+    // if (!file_exists($linkFolder)) {
+    //     symlink($targetFolder, $linkFolder); // Create the symlink
+    //     return 'Symlink created successfully!';
+    // } else {
+    //     return 'Symlink already exists!';
+    // }
 });
 
 
