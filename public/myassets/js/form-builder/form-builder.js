@@ -1329,7 +1329,7 @@ $(document).ready(function () {
                                 
                                 <div class="d-flex flex-column flex-md-row w-100 align-items-start flex-wrap gap-2">
                                     <div class="product-img-container">
-                                        <img class="product-img img-fluid rounded" src="/uploads/products/${imageUrl}" alt="Image">
+                                        <img class="product-img img-fluid rounded" src="/storage/products/${imageUrl}" alt="Image">
                                         
                                     </div>
                                     <div class="product-info d-flex flex-column">

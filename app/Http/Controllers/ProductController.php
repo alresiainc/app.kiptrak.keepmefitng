@@ -277,8 +277,8 @@ class ProductController extends Controller
         //image
         if ($request->image) {
             $oldImage = $product->image; //1.jpg
-            if (Storage::disk('uploads')->exists('products/' . $oldImage)) {
-                Storage::disk('uploads')->delete('products/' . $oldImage);
+            if (Storage::disk('public')->exists('products/' . $oldImage)) {
+                Storage::disk('public')->delete('products/' . $oldImage);
                 /*
                     Delete Multiple files this way
                     Storage::delete(['upload/test.png', 'upload/test2.png']);
@@ -286,7 +286,7 @@ class ProductController extends Controller
             }
             $imageName = time() . '.' . $request->image->extension();
             //store products in folder
-            $request->image->storeAs('products', $imageName, 'uploads');
+            $request->image->storeAs('products', $imageName, 'public');
             $product->image = $imageName;
         }
 

@@ -363,7 +363,7 @@ class FormBuilderController extends Controller
             $formPackage['currency_symbol'] = $product->country?->symbol;
             $formPackage['currency'] = $product->country?->currency;
             $formPackage['stock_available'] = $product->stock_available();
-            $formPackage['image_url'] = url('/uploads/products/' . $product->image);
+            $formPackage['image_url'] = url('/storage/products/' . $product->image);
 
             $formPackage['available_colors'] = !empty($product->color) && is_array($product->color) ? $product->color : (!empty($product->color) ? [$product->color] : []);
             $formPackage['available_sizes'] = !empty($product->size) && is_array($product->size) ? $product->size : (!empty($product->size) ? [$product->size] : []);
@@ -637,7 +637,7 @@ class FormBuilderController extends Controller
             $formPackage['currency_symbol'] = $product->country?->symbol;
             $formPackage['currency'] = $product->country?->currency;
             $formPackage['stock_available'] = $product->stock_available();
-            $formPackage['image_url'] = url('/uploads/products/' . $product->image);
+            $formPackage['image_url'] = url('/storage/products/' . $product->image);
 
             $formPackage['available_colors'] = !empty($product->color) && is_array($product->color) ? $product->color : (!empty($product->color) ? [$product->color] : []);
             $formPackage['available_sizes'] = !empty($product->size) && is_array($product->size) ? $product->size : (!empty($product->size) ? [$product->size] : []);
