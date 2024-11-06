@@ -89,10 +89,23 @@ Route::get('/reset-site', function () {
 //     return view('welcome');
 // });
 //symlink for sites that allow
+// Route::get('/storage-link', function () {
+//     $targetFolder = storage_path('app/pulbic');
+//     $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
+//     symlink($targetFolder, $linkFolder);
+// });
+
 Route::get('/storage-link', function () {
-    $targetFolder = storage_path('app/pulbic');
+    $targetFolder = storage_path('app/public'); // Corrected the typo here
     $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
-    symlink($targetFolder, $linkFolder);
+    
+    // Check if the symbolic link already exists
+    if (!file_exists($linkFolder)) {
+        symlink($targetFolder, $linkFolder); // Create the symlink
+        return 'Symlink created successfully!';
+    } else {
+        return 'Symlink already exists!';
+    }
 });
 
 
