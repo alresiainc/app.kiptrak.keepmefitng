@@ -48,17 +48,17 @@ class UserSeeder extends Seeder
             $user->save();
         }
 
-        for ($a = 0; $a < 20; $a++) {
-            $faker = Factory::create();
-            $user = new \App\Models\User();
-            $user->name = $faker->name();
-            $user->email = $faker->unique()->safeEmail; // Ensures unique email
-            $user->password = Hash::make('password');
-            $user->type = 'staff';
-            $user->phone_1 = $faker->phoneNumber();
-            $user->phone_2 = $faker->phoneNumber();
-            $user->country_id = 1;
-            $user->save();
-        }
+        // for ($a = 0; $a < 20; $a++) {
+        //     $faker = Factory::create();
+        //     $user = new \App\Models\User();
+        //     $user->name = $faker->name();
+        //     $user->email = $faker->unique()->safeEmail; // Ensures unique email
+        //     $user->password = Hash::make('password');
+        //     $user->type = 'staff';
+        //     $user->phone_1 = $faker->phoneNumber();
+        //     $user->phone_2 = $faker->phoneNumber();
+        //     $user->country_id = 1;
+        //     $user->save();
+        // }
     }
 }
