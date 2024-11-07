@@ -133,12 +133,9 @@ function kiptrak_about_tab()
 <?php
 }
 
-
 // Documentation tab content
 function kiptrak_documentation_tab()
 {
-
-
     // Define the path to the documentation markdown file
     $documentation_file_path = plugin_dir_path(__FILE__) . '../documentation.md'; // Make sure this path is correct
 

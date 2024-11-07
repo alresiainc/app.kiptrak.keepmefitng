@@ -3,6 +3,7 @@
 // Kiptrak Shortcode Function
 function kiptrak_shortcode($atts)
 {
+
     // Get the stored URL from settings
     $site_url = esc_url(get_option('kiptrak_backend_url'));
 

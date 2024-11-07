@@ -36,5 +36,3 @@ add_action('admin_menu', function () {
     // Add the settings page callback without creating a menu item
     add_submenu_page(null, 'Kiptrak Settings', 'Kiptrak', 'manage_options', 'kiptrak-settings', 'kiptrak_settings_page');
 });
-// Include the settings page HTML
-// require_once plugin_dir_path(__FILE__) . '../admin/settings-page.php';

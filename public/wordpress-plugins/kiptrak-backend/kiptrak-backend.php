@@ -12,7 +12,6 @@ if (!defined('ABSPATH')) {
     exit; // Prevent direct access
 }
 
-
 if (!defined('KIPTRAK_PLUGIN_DIR')) {
     define('KIPTRAK_PLUGIN_DIR', plugin_dir_path(__FILE__));
 }
