@@ -133,7 +133,7 @@ class WordPressPluginController extends Controller
         }
 
         // Clean up: delete the temporary directory
-        // File::deleteDirectory($tempDir);
+        File::deleteDirectory($tempDir);
 
         // Serve the zip file for download
         return Response::download($zipFileName)->deleteFileAfterSend(true);

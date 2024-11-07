@@ -33,11 +33,11 @@ class Customer extends Model
                 'firstname' => ['first_name', 'firstname', 'name', 'full_name', 'first', 'given_name', 'forename'],
                 'lastname' => ['last_name', 'lastname', 'surname', 'family_name', 'second_name', 'last', 'surname_name'],
                 'phone_number' => ['phone_number', 'phone', 'number', 'mobile_number', 'contact_number', 'mobile', 'phoneNumber', 'cell', 'cellphone', 'cell_number', 'telephone', 'tel_number'],
-                'whatsapp_phone_number' => ['contact', 'whatsapp_number', 'whatsapp_number', 'whatsapp', 'whatsApp', 'phone', 'number', 'mobile_number', 'contact_number', 'mobile', 'whatsapp_number', 'wa_number', 'whatsapp_contact', 'whatsappPhone'],
-                'email' => ['email', 'email_address', 'e-mail', 'mail', 'contact_email'],
+                'whatsapp_phone_number' => ['contact', 'whatsapp_number', 'whatsapp_number', 'whatsapp', 'whatsApp', 'phone', 'number', 'mobile_number', 'contact_number', 'mobile', 'whatsapp_number', 'wa_number', 'whatsapp_contact', 'whatsappPhone', 'active_whatsapp_number', 'active_whatsapp_number'],
+                'email' => ['email', 'email_address', 'e-mail', 'mail', 'contact_email', 'active_email', 'active_email_address'],
                 'city' => ['city', 'location', 'town', 'municipality', 'urban_area', 'metropolis'],
                 'state' => ['state', 'region', 'province', 'territory', 'county', 'district'],
-                'delivery_address' => ['address', 'delivery_address', 'shipping_address', 'postal_address', 'street_address', 'recipient_address'],
+                'delivery_address' => ['address', 'delivery_address', 'shipping_address', 'postal_address', 'street_address', 'recipient_address', 'full_address', 'full_delivery_address'],
                 'delivery_duration' => ['duration', 'delivery_duration', 'time', 'delivery_time', 'shipping_time', 'estimated_time', 'eta', 'delivery_period'],
             ];
 

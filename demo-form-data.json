@@ -1,32 +1,15 @@
 [
     {
-        "type": "image",
+        "type": "form",
         "config": {
-            "width": "250px",
-            "height": "108px",
-            "textAlign": "center",
-            "src": "http://kiptrak.test/assets/img/logo.png",
-            "column_width": "col-sm-12",
-            "marginBottom": "0px",
-            "marginTop": "0px",
-            "marginLeft": "0px",
-            "marginRight": "0px"
-        }
-    },
-    {
-        "type": "text",
-        "config": {
-            "mode": "advanced",
-            "color": "rgb(69, 69, 69)",
-            "fontWeight": "400",
-            "fontFamily": "\"Open Sans\", sans-serif",
-            "fontSize": "16px",
-            "fontStyle": "normal",
-            "textAlign": "start",
-            "textTransform": "none",
-            "textDecoration": "none solid rgb(69, 69, 69)",
-            "content": "<p style=\"text-align: center;\"><span style=\"font-size: 24pt;\"><strong>Order Form Description</strong></span></p>\n<p style=\"text-align: center;\">This order form is designed to collect essential information from customers wishing to place an order for products. It includes various input fields that ensure the order details are captured accurately and comprehensively.</p>",
-            "column_width": "col-sm-12",
+            "label": "FIRST NAME ",
+            "size": "md",
+            "type": "text",
+            "placeholder": "",
+            "defaultValue": "",
+            "required": "true",
+            "name": "first_name_",
+            "column_width": "col-sm-6",
             "marginBottom": "0px",
             "marginTop": "0px",
             "marginLeft": "0px",
@@ -36,14 +19,30 @@
     {
         "type": "form",
         "config": {
-            "label": "Full Name",
+            "label": "LAST NAME",
             "size": "md",
             "type": "text",
-            "placeholder": "Enter value",
+            "placeholder": "",
+            "defaultValue": "",
+            "required": "true",
+            "name": "last_name",
+            "column_width": "col-sm-6",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px"
+        }
+    },
+    {
+        "type": "form",
+        "config": {
+            "label": "PHONE NUMBER",
+            "size": "md",
+            "type": "tel",
+            "placeholder": "",
             "defaultValue": "",
             "required": true,
-            "options": [],
-            "name": "full_name",
+            "name": "phone_number",
             "column_width": "col-sm-12",
             "marginBottom": "0px",
             "marginTop": "0px",
@@ -54,14 +53,14 @@
     {
         "type": "form",
         "config": {
-            "label": "Email Address",
+            "label": "ACTIVE WHATSAPP NUMBER",
             "size": "md",
-            "type": "text",
-            "placeholder": "Enter value",
+            "type": "tel",
+            "placeholder": "",
             "defaultValue": "",
-            "required": "true",
-            "name": "email_address",
-            "column_width": "col-sm-6",
+            "required": true,
+            "name": "active_whatsapp_number",
+            "column_width": "col-sm-12",
             "marginBottom": "0px",
             "marginTop": "0px",
             "marginLeft": "0px",
@@ -71,30 +70,13 @@
     {
         "type": "form",
         "config": {
-            "label": "Phone Number",
+            "label": "FULL DELIVERY ADDRESS (INCLUDE CITY OF RESIDENCE)",
             "size": "md",
             "type": "text",
-            "placeholder": "Enter value",
-            "defaultValue": "",
-            "required": "true",
-            "name": "phone_number",
-            "column_width": "col-sm-6",
-            "marginBottom": "0px",
-            "marginTop": "0px",
-            "marginLeft": "0px",
-            "marginRight": "0px"
-        }
-    },
-    {
-        "type": "form",
-        "config": {
-            "label": "Address",
-            "size": "md",
-            "type": "textarea",
             "placeholder": "",
             "defaultValue": "",
             "required": false,
-            "name": "address",
+            "name": "full_delivery_address_(include_city_of_residence)",
             "column_width": "col-sm-12",
             "marginBottom": "0px",
             "marginTop": "0px",
@@ -105,34 +87,85 @@
     {
         "type": "form",
         "config": {
-            "label": "Preferred Delivery Time",
+            "label": "STATE WHERE YOU LIVE",
             "size": "md",
-            "type": "select",
-            "placeholder": "Enter value",
+            "type": "text",
+            "placeholder": "",
             "defaultValue": "",
-            "required": "false",
-            "options": ["Within 24 hours", "within 48 hours"],
-            "name": "preferred_delivery_time",
+            "required": true,
+            "name": "state_where_you_live",
             "column_width": "col-sm-12",
             "marginBottom": "0px",
             "marginTop": "0px",
             "marginLeft": "0px",
-            "marginRight": "0px",
-            "content": "Preferred Delivery Time"
+            "marginRight": "0px"
         }
     },
     {
         "type": "product",
         "config": {
-            "package_choice": "package_multi",
-            "label": "Product",
-            "selected_package": [1, 2, 3],
-            "column_width": "col-sm-4",
+            "package_choice": "package_single",
+            "label": "SELECT A PACKAGE FROM BELOW",
+            "selected_package": [1],
+            "column_width": "col-sm-12",
             "marginBottom": "0px",
             "marginTop": "0px",
             "marginLeft": "0px",
             "marginRight": "0px",
-            "name": "product"
+            "name": "select_a_package_from_below"
+        }
+    },
+    {
+        "type": "form",
+        "config": {
+            "label": "CHOOSE WHEN YOU WANT YOUR ORDER TO BE DELIVERED",
+            "size": "md",
+            "type": "checkbox",
+            "placeholder": "",
+            "defaultValue": "",
+            "required": false,
+            "options": ["Within 24 hours", "within 48 hours"],
+            "name": "choose_when_you_want_your_order_to_be_delivered",
+            "column_width": "col-sm-12",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px"
+        }
+    },
+    {
+        "type": "form",
+        "config": {
+            "label": "WILL YOU BE AVAILABLE TO RECEIVE YOUR ORDER WITHIN 24 - 48 HOURS FROM NOW? ",
+            "size": "md",
+            "type": "checkbox",
+            "placeholder": "",
+            "defaultValue": "",
+            "required": "false",
+            "options": ["Yes I will be available"],
+            "name": "will_you_be_available_to_receive_your_order_within_24_-_48_hours_from_now?_",
+            "column_width": "col-sm-12",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px"
+        }
+    },
+    {
+        "type": "form",
+        "config": {
+            "label": "ACTIVE EMAIL",
+            "size": "md",
+            "type": "email",
+            "placeholder": "",
+            "defaultValue": "",
+            "required": false,
+            "name": "active_email",
+            "column_width": "col-sm-12",
+            "marginBottom": "0px",
+            "marginTop": "0px",
+            "marginLeft": "0px",
+            "marginRight": "0px"
         }
     }
 ]

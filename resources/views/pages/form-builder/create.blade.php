@@ -231,9 +231,9 @@
 
 
         /* .text-field-content {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        pointer-events: auto;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        user-select: text;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            pointer-events: auto;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            user-select: text;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        } */
 
         .text-field-content,
         .form-submit-btn {
@@ -1160,9 +1160,9 @@
                 const expected_form = [
                     // "First Name",
                     // "Last Name",
-                    "Phone Number",
-                    "Whatsapp Phone Number",
-                    "Email",
+                    // "Phone Number",
+                    // "Whatsapp Phone Number",
+                    // "Email",
                     // "State",
                     // "City",
                     // "Address"
