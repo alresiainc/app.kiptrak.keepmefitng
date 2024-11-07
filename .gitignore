@@ -20,4 +20,4 @@ yarn-error.log
 !/public/assets/
 !storage/
 !storage/app/
-!storage/app/wordpress-plugins/
+!storage/app/wordpress-plugins/*
