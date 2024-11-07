@@ -723,7 +723,10 @@
                                                 text-align: {{ $form['textAlign'] ?? 'inherit' }};">
                                             @if ($config_type == 'form' && !in_array($form['type'], ['select', 'textarea', 'radio', 'checkbox']))
                                                 <div class="contact-parent">
-                                                    <label class="form-label">{{ $form['label'] }}</label>
+                                                    <label class="form-label">{{ $form['label'] }} @if ($form['required'])
+                                                            <span class="text-danger">*</span>
+                                                        @endif
+                                                    </label>
 
                                                     <input type="{{ $form['type'] }}"
                                                         data-name="{{ $form['name'] }}" name="{{ $form['name'] }}"
@@ -745,7 +748,10 @@
                                             @if ($config_type == 'form' && in_array($form['type'], ['radio', 'checkbox']))
                                                 <div class="form-group w-100"
                                                     style="margin-left: {{ $form['margin_left'] ?? '0' }}; margin-right: {{ $form['margin_right'] ?? '0' }}; margin-top: {{ $form['margin_top'] ?? '0' }}; margin-bottom: {{ $form['margin_bottom'] ?? '0' }};">
-                                                    <label class="form-label">{{ $form['label'] }}</label>
+                                                    <label class="form-label">{{ $form['label'] }} @if ($form['required'])
+                                                            <span class="text-danger">*</span>
+                                                        @endif
+                                                    </label>
                                                     <div class="d-flex gap-1">
                                                         @if (isset($form['options']) && count($form['options']) > 0)
                                                             @foreach ($form['options'] as $option)
@@ -773,7 +779,10 @@
 
                                             @if ($config_type == 'form' && $form['type'] == 'select')
                                                 <div class="form-group w-100">
-                                                    <label class="form-label">{{ $form['label'] }}</label>
+                                                    <label class="form-label">{{ $form['label'] }} @if ($form['required'])
+                                                            <span class="text-danger">*</span>
+                                                        @endif
+                                                    </label>
                                                     <select data-name="{{ $form['name'] }}"
                                                         name="{{ $form['name'] }}"
                                                         value="{{ old($form['name'], $form['default_value'] ?? '') }}"
@@ -795,7 +804,10 @@
 
                                             @if ($config_type == 'form' && $form['type'] == 'textarea')
                                                 <div class="form-group w-100">
-                                                    <label class="form-label">{{ $form['label'] }}</label>
+                                                    <label class="form-label">{{ $form['label'] }} @if ($form['required'])
+                                                            <span class="text-danger">*</span>
+                                                        @endif
+                                                    </label>
                                                     <textarea data-name="{{ $form['name'] }}" name="{{ $form['name'] }}"
                                                         class="form-field contact-input custom-select form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror"
                                                         placeholder="{{ $form['placeholder'] }}" @if ($form['required']) required @endif>{{ old($form['name'], $form['default_value'] ?? '') }}</textarea>
