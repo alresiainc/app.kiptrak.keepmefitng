@@ -880,7 +880,7 @@
                                                         {{-- @dd($products); --}}
                                                         @php
                                                             $is_combo = $item['combo_product_ids'] ? true : false;
-                                                            $isRequired = true;
+                                                            $isRequired = false;
                                                         @endphp
                                                         <div
                                                             class="{{ $form['column_width'] ?? 'col-sm-12' }} product_package_item">
@@ -1962,6 +1962,13 @@
                         return $(this).val() + '-' + selected_qty;
                     }
                 }).get();
+
+                const hasProducts = $('input[name^="product_packages[]"]').length > 0;
+                if (hasProducts && product_packages.length == 0) {
+                    toastr.error('Please select at least one product package');
+                    return;
+                }
+
 
                 const isValid = $("#form").validate().form();
 
