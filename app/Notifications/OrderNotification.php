@@ -307,12 +307,10 @@ class OrderNotification extends Notification
             }
 
 
-
-            $comboItems = collect($comboProducts)->pluck('name')->implode(', ');
-
             $comboItems = collect($comboProducts)
                 ->map(function ($product) {
-                    return "{$product->name} ({$product?->country?->symbol}{$product->sale_price})";
+                    $formattedPrice = number_format($product->sale_price); // Format the sale_price
+                    return "{$product->name} ({$product?->country?->symbol}{$formattedPrice})";
                 })
                 ->implode(', ');
             $quantity = $item->quantity_removed; // The product Quantity
@@ -344,11 +342,11 @@ class OrderNotification extends Notification
                     if ((int)$quantity > 1) {
                         $formattedDetails .= "<div>quantity: <span>{$quantity}</span></div>";
                     }
-                    $formattedDetails .= "<div>Price: <span>{$currency}{number_format($original_price)}</span></div>";
+                    $formattedDetails .= "<div>Price: <span>{$currency}" . number_format($original_price) . "</span></div>";
 
                     if ($discount && $discount_type) {
-                        $formattedDetails .= "<div>Discount Price: <span>{$currency}{number_format($discount_price)}</span></div>";
-                        $formattedDetails .= "<div>Price after discount: <span>{$currency}{number_format($price_after_discount)}</span></div>";
+                        $formattedDetails .= "<div>Discount Price: <span>{$currency}" . number_format($discount_price) . "</span></div>";
+                        $formattedDetails .= "<div>Price after discount: <span>{$currency}" . number_format($price_after_discount) . "</span></div>";
                     }
                     // $formattedDetails .= "<hr>";
                     $formattedDetails .= "<br>";
@@ -365,10 +363,10 @@ class OrderNotification extends Notification
                     if ((int)$quantity > 1) {
                         $formattedDetails .= "\nquantity: *{$quantity}*";
                     }
-                    $formattedDetails .= "\nPrice: *{$currency}{number_format($original_price)}*";
+                    $formattedDetails .= "\nPrice: *{$currency}" . number_format($original_price) . "*";
                     if ($discount && $discount_type) {
-                        $formattedDetails .= "\nDiscount Price: *{$currency}{number_format($discount_price)}*";
-                        $formattedDetails .= "\nPrice after discount: *{$currency}{number_format($price_after_discount)}*";
+                        $formattedDetails .= "\nDiscount Price: *{$currency}" . number_format($discount_price) . "*";
+                        $formattedDetails .= "\nPrice after discount: *{$currency}" . number_format($price_after_discount) . "*";
                     }
                     break;
 
@@ -384,10 +382,10 @@ class OrderNotification extends Notification
                     if ((int)$quantity > 1) {
                         $formattedDetails .= "\nquantity: {$quantity}";
                     }
-                    $formattedDetails .= "\nPrice: {$currency}{number_format($original_price)}";
+                    $formattedDetails .= "\nPrice: {$currency}" . number_format($original_price);
                     if ($discount && $discount_type) {
-                        $formattedDetails .= "\nDiscount Price: {$currency}{number_format($discount_price)}";
-                        $formattedDetails .= "\nPrice after discount: {$currency}{number_format($price_after_discount)}";
+                        $formattedDetails .= "\nDiscount Price: {$currency}" . number_format($discount_price);
+                        $formattedDetails .= "\nPrice after discount: {$currency}" . number_format($price_after_discount);
                     }
                     break;
             }
