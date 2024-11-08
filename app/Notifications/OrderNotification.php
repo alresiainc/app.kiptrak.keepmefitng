@@ -105,7 +105,7 @@ class OrderNotification extends Notification
         }
         $title = $this->messages['email']['title'] ?? 'Order Notification';
         $message = $this->messages['email']['message'] ?? '';
-        $resolvedMessage = $this->resolveMessageTemplate($message);
+        $resolvedMessage = $this->resolveMessageTemplate($message, 'email');
 
 
 
@@ -133,7 +133,7 @@ class OrderNotification extends Notification
 
         $message = $this->messages['whatsapp']['message'] ?? '';
         $title = $this->messages['whatsapp']['title'] ?? 'Order Notification';
-        $resolvedMessage = $this->resolveMessageTemplate($message);
+        $resolvedMessage = $this->resolveMessageTemplate($message, 'whatsapp');
 
         return Message::create([
             'topic' => $title,
@@ -159,7 +159,7 @@ class OrderNotification extends Notification
         }
         $title = $this->messages['sms']['title'] ?? '';
         $message = $this->messages['sms']['message'] ?? 'Order Notification';
-        $resolvedMessage = $this->resolveMessageTemplate($message);
+        $resolvedMessage = $this->resolveMessageTemplate($message, 'sms');
 
         return Message::create([
             'topic' => $title,
@@ -191,9 +191,45 @@ class OrderNotification extends Notification
     /**
      * Generate product details string.
      */
-    protected function generateProductDetails($products)
-    {
+    // protected function generateProductDetails($products, $type)
+    // {
 
+
+    //     $mainProducts = $products['mainProducts'] ?? [];
+    //     $orderbump = $products['orderbump'] ?? [];
+    //     $upsell = $products['upsell'] ?? [];
+    //     $downsell = $products['downsell'] ?? [];
+
+    //     $details = "";
+
+    //     foreach ($mainProducts as $mainProduct) {
+    //         $details .= "\n\n{$mainProduct->product->name}";
+    //         $details .= "\nPrice: " . ($mainProduct->product->sale_price * $mainProduct->quantity_removed);
+    //         $details .= "\nQty: {$mainProduct->quantity_removed}";
+    //     }
+
+    //     if ($orderbump) {
+    //         $details .= "\n\n{$orderbump->product->name}";
+    //         $details .= "\nPrice: " . ($orderbump->product->sale_price * $orderbump->quantity_removed);
+    //         $details .= "\nQty: {$orderbump->quantity_removed}";
+    //     }
+
+    //     if ($upsell) {
+    //         $details .= "\n\n{$upsell->product->name}";
+    //         $details .= "\nPrice: " . ($upsell->product->sale_price * $upsell->quantity_removed);
+    //         $details .= "\nQty: {$upsell->quantity_removed}";
+    //     }
+
+    //     if ($downsell) {
+    //         $details .= "\n\n{$downsell->product->name}";
+    //         $details .= "\nPrice: " . ($downsell->product->sale_price * $downsell->quantity_removed);
+    //         $details .= "\nQty: {$downsell->quantity_removed}";
+    //     }
+
+    //     return trim($details);
+    // }
+    protected function generateProductDetails($products, $type)
+    {
 
         $mainProducts = $products['mainProducts'] ?? [];
         $orderbump = $products['orderbump'] ?? [];
@@ -202,32 +238,165 @@ class OrderNotification extends Notification
 
         $details = "";
 
+        if ($type == 'email') {
+            $details = "<h2>PRODUCT DETAILS</h2>";
+        } elseif ($type == 'whatsapp') {
+            $details = "\n\n*PRODUCT DETAILS*";
+        } else {
+            $details = "\n\nPRODUCT DETAILS";
+        }
+
         foreach ($mainProducts as $mainProduct) {
-            $details .= "\n\n{$mainProduct->product->name}";
-            $details .= "\nPrice: " . ($mainProduct->product->sale_price * $mainProduct->quantity_removed);
-            $details .= "\nQty: {$mainProduct->quantity_removed}";
+            $details .= $this->formatProductDetails($mainProduct, $type);
+        }
+
+        if ($orderbump || $upsell || $downsell) {
+            if ($type == 'email') {
+                $details .= "<h2>ADDITIONAL PRODUCT(s)</h2>";
+            } elseif ($type == 'whatsapp') {
+                $details .= "\n\n*ADDITIONAL PRODUCT(s)*";
+            } else {
+                $details .= "\n\nADDITIONAL PRODUCT(s)";
+            }
         }
 
         if ($orderbump) {
-            $details .= "\n\n{$orderbump->product->name}";
-            $details .= "\nPrice: " . ($orderbump->product->sale_price * $orderbump->quantity_removed);
-            $details .= "\nQty: {$orderbump->quantity_removed}";
+            $details .= $this->formatProductDetails($orderbump, $type);
         }
 
         if ($upsell) {
-            $details .= "\n\n{$upsell->product->name}";
-            $details .= "\nPrice: " . ($upsell->product->sale_price * $upsell->quantity_removed);
-            $details .= "\nQty: {$upsell->quantity_removed}";
+            $details .= $this->formatProductDetails($upsell, $type);
         }
 
         if ($downsell) {
-            $details .= "\n\n{$downsell->product->name}";
-            $details .= "\nPrice: " . ($downsell->product->sale_price * $downsell->quantity_removed);
-            $details .= "\nQty: {$downsell->quantity_removed}";
+            $details .= $this->formatProductDetails($downsell, $type);
         }
 
-        return trim($details);
+        $details .= "\n\n";
+
+        return $details;
     }
+
+    protected function formatProductDetails($item, $type)
+    {
+        $formattedDetails = "";
+        if ($item->product) {
+            $product = $item->product; // The Product model instance
+            $currency = $product?->country?->symbol ?? '₦'; // The Country model instance
+            $product_price = $product->sale_price; //the Product Price
+            $name = $product->name; // The product name
+            $isCombo = $item->isCombo; // The product is combo
+            $comboProducts = [];
+
+            $combo = \unserialize($product->combo_product_ids); // e.g., ['4-2', '1-2']
+            $combo = is_array($combo) ? $combo : [];
+
+            foreach ($combo as $idQty) {
+                $explode = explode('-', $idQty);
+
+                if (count($explode) === 2) { // Check if we have exactly 2 elements (ID and quantity)
+                    $id = $explode[0];
+                    $qty = $explode[1];
+
+                    $product = Product::find($id);
+                    if ($product) {
+                        $product->quantity_combined = $qty; // Append the quantity attribute
+                        $comboProducts[] = $product; // Add the product to the array
+                    }
+                }
+            }
+
+
+
+            $comboItems = collect($comboProducts)->pluck('name')->implode(', ');
+
+            $comboItems = collect($comboProducts)
+                ->map(function ($product) {
+                    return "{$product->name} ({$product?->country?->symbol}{$product->sale_price})";
+                })
+                ->implode(', ');
+            $quantity = $item->quantity_removed; // The product Quantity
+
+            $original_price = $product_price * $quantity;
+            $discount_type = $item->discount_type;
+            $discount = $item->discount_amount;
+
+            if ($discount && $discount_type == 'fixed') {
+                $amount = $product_price - $discount;
+            } elseif ($discount && $discount_type == 'percentage') {
+                $amount =
+                    $product_price - $product_price * ($discount / 100);
+            } else {
+                $amount = $product_price;
+            }
+            $discount_price = number_format($amount * $quantity);
+            $price_after_discount = number_format($original_price - $discount_price);
+            $original_price = number_format($original_price);
+
+            switch ($type) {
+                case 'email':
+
+                    if ($isCombo) {
+                        $formattedDetails .= "<div> <strong>{$name} </strong>(Combo)</div>";
+                        $formattedDetails .= "<div>Combo Items: <span>{$comboItems}</span></div>";
+                    } else {
+                        $formattedDetails .= "<div> <strong>{$name} </strong></div>";
+                    }
+                    if ((int)$quantity > 1) {
+                        $formattedDetails .= "<div>quantity: <span>{$quantity}</span></div>";
+                    }
+                    $formattedDetails .= "<div>Price: <span>{$currency}{$original_price}</span></div>";
+
+                    if ($discount && $discount_type) {
+                        $formattedDetails .= "<div>Discount Price: <span>{$currency}{$discount_price}</span></div>";
+                        $formattedDetails .= "<div>Price after discount: <span>{$currency}{$price_after_discount}</span></div>";
+                    }
+                    // $formattedDetails .= "<hr>";
+                    $formattedDetails .= "<br>";
+                    break;
+
+                case 'whatsapp':
+
+                    if ($isCombo) {
+                        $formattedDetails .= "\n\n*{$name}* (Combo)";
+                        $formattedDetails .= "\nCombo Items: {$comboItems}";
+                    } else {
+                        $formattedDetails .= "\n\n*{$name}*";
+                    }
+                    if ((int)$quantity > 1) {
+                        $formattedDetails .= "\nquantity: *{$quantity}*";
+                    }
+                    $formattedDetails .= "\nPrice: *{$currency}{$original_price}*";
+                    if ($discount && $discount_type) {
+                        $formattedDetails .= "\nDiscount Price: *{$currency}{$discount_price}*";
+                        $formattedDetails .= "\nPrice after discount: *{$currency}{$price_after_discount}*";
+                    }
+                    break;
+
+                case 'sms':
+                default:
+
+                    if ($isCombo) {
+                        $formattedDetails .= "\n\n{$name} (Combo)";
+                        $formattedDetails .= "\nCombo Items: {$comboItems}";
+                    } else {
+                        $formattedDetails .= "\n\n{$name}";
+                    }
+                    if ((int)$quantity > 1) {
+                        $formattedDetails .= "\nquantity: {$quantity}";
+                    }
+                    $formattedDetails .= "\nPrice: {$currency}{$original_price}";
+                    if ($discount && $discount_type) {
+                        $formattedDetails .= "\nDiscount Price: {$currency}{$discount_price}";
+                        $formattedDetails .= "\nPrice after discount: {$currency}{$price_after_discount}";
+                    }
+                    break;
+            }
+        }
+
+        return $formattedDetails;
+    }
+
 
     /**
      * Retrieve and process main products for the order.
@@ -335,7 +504,7 @@ class OrderNotification extends Notification
         return $downsellStock;
     }
 
-    protected function resolveMessageTemplate($template)
+    protected function resolveMessageTemplate($template, $type = null)
     {
 
         $customer = $this->order->customer;
@@ -350,7 +519,9 @@ class OrderNotification extends Notification
             "orderbump" => $orderbump,
             "upsell" => $upsell,
             "downsell" => $downsell,
-        ]);
+        ], $type);
+
+
 
         $data = [
             'customer_first_name' => $customer->firstname ?? '',
@@ -371,7 +542,7 @@ class OrderNotification extends Notification
             'staff_state' => $staff->state ?? '',
             'product_list' => $productDetails,
             'order_status' => $this->order->status,
-            'order_id' => $this->order->id,
+            'order_id' => $this->order->orderCode($this->order->id),
             "order_delivery_address" => $this->order->delivery_address,
             "order_extra_cost_amount" => $this->order->extra_cost_amount,
             "order_extra_cost_reason" => $this->order->extra_cost_reason,

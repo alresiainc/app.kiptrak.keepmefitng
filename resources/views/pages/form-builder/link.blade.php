@@ -607,6 +607,12 @@
             color: white;
             border-color: #04512d;
         }
+
+        .orderbump-product-image {
+            width: 250px;
+            text-align: center;
+            margin: auto;
+        }
     </style>
 
     <style>
@@ -632,6 +638,10 @@
 
         .progress-bar {
             background-color: #04512d !important;
+        }
+
+        .form-error {
+            color: red;
         }
     </style>
 </head>
@@ -870,6 +880,7 @@
                                                         {{-- @dd($products); --}}
                                                         @php
                                                             $is_combo = $item['combo_product_ids'] ? true : false;
+                                                            $isRequired = true;
                                                         @endphp
                                                         <div
                                                             class="{{ $form['column_width'] ?? 'col-sm-12' }} product_package_item">
@@ -877,8 +888,9 @@
                                                                 type="{{ $form['package_choice'] == 'package_single' ? 'radio' : 'checkbox' }}"
                                                                 name="product_packages[]"
                                                                 id="package{{ $key }}"
-                                                                class="me-3 product-package product-checker"
-                                                                value="{{ $item['id'] }}-{{ $item['price'] }}" />
+                                                                class="me-3 product-package product-checker form-field"
+                                                                value="{{ $item['id'] }}-{{ $item['price'] }}"
+                                                                @if ($isRequired) required @endif />
                                                             <label for="package{{ $key }}"
                                                                 class="product_field form-label me-3 product-item p-3 rounded shadow-sm w-100"
                                                                 style="min-width: 100%; width: 100%;">
