@@ -215,6 +215,12 @@
 @section('extra_js')
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script>
+        $('#loadPlaceholders').on('click', function() {
+            $('#placeholderModal').modal('show');
+        })
+
+
+
         function editTemplateModal(id, subject, template, type = 'whatsapp') {
             // Clear previous modal content before setting new data
             $('#template-editor').val(''); // Clear text area
@@ -254,10 +260,10 @@
                         format: 'text'
                     }); // Get plain text for SMS/WhatsApp
                 }
-                alert(templateContent);
+
 
                 $('#template').val(templateContent); // Set the hidden field with content
-                // $('#editTemplateForm').submit(); // Submit the form
+                $('#editTemplateForm').submit(); // Submit the form
             });
         }
 
@@ -286,9 +292,9 @@
                 selector: selector,
                 toolbar: 'undo redo', // Minimal toolbar for text-only editors
                 menubar: false,
-                forced_root_block: false, // Prevent <p> tags
-                entity_encoding: 'raw', // Output plain text (no HTML)
-                valid_elements: 'none', // Restrict allowed elements (no HTML)
+                // forced_root_block: false, // Prevent <p> tags
+                // entity_encoding: 'raw', // Output plain text (no HTML)
+                // valid_elements: 'none', // Restrict allowed elements (no HTML)
                 content_style: "body { font-family: Arial; font-size: 14px; }" // Basic styling
             });
         }
@@ -458,26 +464,26 @@
 
 
                 },
-                forced_root_block: false, // Prevent wrapping content in <p> tags
-                entity_encoding: 'named', // Raw text encoding
-                content_style: "body { font-family: Arial; font-size: 14px; }",
+                // forced_root_block: false, // Prevent wrapping content in <p> tags
+                // entity_encoding: 'named', // Raw text encoding
+                // content_style: "body { font-family: Arial; font-size: 14px; }",
                 plugins: 'paste',
-                paste_as_text: true, // Paste as plain text
-                formats: {
-                    removeformat: [{
-                            selector: 'b,strong,em,i,strike',
-                            remove: 'all',
-                            split: true,
-                            expand: false,
-                            deep: true
-                        },
-                        {
-                            selector: 'span',
-                            attributes: ['style'],
-                            remove: 'empty'
-                        }
-                    ]
-                },
+                // paste_as_text: true, // Paste as plain text
+                // formats: {
+                //     removeformat: [{
+                //             selector: 'b,strong,em,i,strike',
+                //             remove: 'all',
+                //             split: true,
+                //             expand: false,
+                //             deep: true
+                //         },
+                //         {
+                //             selector: 'span',
+                //             attributes: ['style'],
+                //             remove: 'empty'
+                //         }
+                //     ]
+                // },
                 init_instance_callback: function(editor) {
                     let initialContent = preserveLineBreaks(editor.getContent()); // Convert newlines to <br>
                     editor.setContent(initialContent);
