@@ -1963,16 +1963,17 @@
                     }
                 }).get();
 
-                const hasProducts = $('input[name^="product_packages[]"]').length > 0;
-                if (hasProducts && product_packages.length == 0) {
-                    toastr.error('Please select at least one product package');
-                    return;
-                }
 
 
                 const isValid = $("#form").validate().form();
 
                 if (isValid) {
+                    const hasProducts = $('input[name^="product_packages[]"]').length > 0;
+                    if (hasProducts && product_packages.length == 0) {
+                        toastr.error('Please select at least one product package');
+                        return;
+                    }
+
                     const formValues = getFormValues();
                     var has_orderbump = $(".has_orderbump").val();
                     var has_upsell = $(".has_upsell").val();
