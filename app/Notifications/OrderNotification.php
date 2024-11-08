@@ -329,9 +329,8 @@ class OrderNotification extends Notification
             } else {
                 $amount = $product_price;
             }
-            $discount_price = number_format($amount * $quantity);
-            $price_after_discount = number_format($original_price - $discount_price);
-            $original_price = number_format($original_price);
+            $discount_price = $amount * $quantity;
+            $price_after_discount = $original_price - $discount_price;
 
             switch ($type) {
                 case 'email':
@@ -348,8 +347,8 @@ class OrderNotification extends Notification
                     $formattedDetails .= "<div>Price: <span>{$currency}{$original_price}</span></div>";
 
                     if ($discount && $discount_type) {
-                        $formattedDetails .= "<div>Discount Price: <span>{$currency}{$discount_price}</span></div>";
-                        $formattedDetails .= "<div>Price after discount: <span>{$currency}{$price_after_discount}</span></div>";
+                        $formattedDetails .= "<div>Discount Price: <span>{$currency}{number_format($discount_price}}</span></div>";
+                        $formattedDetails .= "<div>Price after discount: <span>{$currency}{number_format($price_after_discount}}</span></div>";
                     }
                     // $formattedDetails .= "<hr>";
                     $formattedDetails .= "<br>";
@@ -368,8 +367,8 @@ class OrderNotification extends Notification
                     }
                     $formattedDetails .= "\nPrice: *{$currency}{$original_price}*";
                     if ($discount && $discount_type) {
-                        $formattedDetails .= "\nDiscount Price: *{$currency}{$discount_price}*";
-                        $formattedDetails .= "\nPrice after discount: *{$currency}{$price_after_discount}*";
+                        $formattedDetails .= "\nDiscount Price: *{$currency}{number_format($discount_price}}*";
+                        $formattedDetails .= "\nPrice after discount: *{$currency}{number_format($price_after_discount}}*";
                     }
                     break;
 
@@ -387,8 +386,8 @@ class OrderNotification extends Notification
                     }
                     $formattedDetails .= "\nPrice: {$currency}{$original_price}";
                     if ($discount && $discount_type) {
-                        $formattedDetails .= "\nDiscount Price: {$currency}{$discount_price}";
-                        $formattedDetails .= "\nPrice after discount: {$currency}{$price_after_discount}";
+                        $formattedDetails .= "\nDiscount Price: {$currency}{number_format($discount_price}}";
+                        $formattedDetails .= "\nPrice after discount: {$currency}{number_format($price_after_discount}}";
                     }
                     break;
             }
