@@ -106,7 +106,7 @@
                                                     {{-- <td>{{ $template->channel }}</td> --}}
                                                     <td data-bs-toggle="popoverrrr" data-trigger="hover"
                                                         data-content="{{ $message }}" title="Message">
-                                                        {!! $truncatedText !!} </td>
+                                                        {{ $truncatedText }} </td>
                                                     <td>
                                                         @if ($template->is_active)
                                                             <a href="{{ route('updateTemplateStatus', ['template' => $template->id, 'status' => 'deactivate']) }}"
@@ -225,6 +225,7 @@
             // Clear previous modal content before setting new data
             $('#template-editor').val(''); // Clear text area
             tinymce.remove('#template-editor'); // Clear editor content
+            alert(template);
 
             // Show the modal and set initial values
             $('#editTemplateModal').modal('show');
@@ -314,12 +315,17 @@
                 toolbar: 'cbold citalic cstrikethrough cmonospace cquote | undo redo', // Added more buttons
                 setup: function(editor) {
                     editor.on('init', function() {
-                        editor.contentStyles.push(`
-                            .editor-hide {
-                                display: none;
-                            }
-                        `);
+                        let content = editor.getContent();
+                        content = content.replace(/\n/g, '<br><br>');
+                        editor.setContent(content);
                     });
+                    // editor.on('init', function() {
+                    //     editor.contentStyles.push(`
+                //         .editor-hide {
+                //             display: none;
+                //         }
+                //     `);
+                    // });
                     // Bold button for WhatsApp (*text*)
                     editor.ui.registry.addButton('cbold', {
                         icon: 'bold',
@@ -468,26 +474,29 @@
                 // entity_encoding: 'named', // Raw text encoding
                 // content_style: "body { font-family: Arial; font-size: 14px; }",
                 plugins: 'paste',
-                // paste_as_text: true, // Paste as plain text
-                // formats: {
-                //     removeformat: [{
-                //             selector: 'b,strong,em,i,strike',
-                //             remove: 'all',
-                //             split: true,
-                //             expand: false,
-                //             deep: true
-                //         },
-                //         {
-                //             selector: 'span',
-                //             attributes: ['style'],
-                //             remove: 'empty'
-                //         }
-                //     ]
-                // },
+                paste_as_text: true, // Paste as plain text
+                formats: {
+                    removeformat: [{
+                            selector: 'b,strong,em,i,strike',
+                            remove: 'all',
+                            split: true,
+                            expand: false,
+                            deep: true
+                        },
+                        {
+                            selector: 'span',
+                            attributes: ['style'],
+                            remove: 'empty'
+                        }
+                    ]
+                },
                 init_instance_callback: function(editor) {
                     let initialContent = preserveLineBreaks(editor.getContent()); // Convert newlines to <br>
                     editor.setContent(initialContent);
-                }
+                },
+                forced_root_block: false,
+                content_style: "white-space: pre-wrap;", // Ensures that line breaks are respected in the editor display
+
             });
         }
     </script>
