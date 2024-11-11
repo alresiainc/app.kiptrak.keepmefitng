@@ -45,9 +45,9 @@ class OrderController extends Controller
 
         if ($authUser->isSuperAdmin || $user_role->permissions->contains('slug', 'view-all-orders')) {
 
-            $orders = Order::all();
+            $orders = Order::orderBy('id', 'DESC')->get();
             if ($status == "") {
-                $orders = Order::all();
+                $orders = Order::orderBy('id', 'DESC')->get();
             }
             if ($status == "new") {
                 $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->get();
