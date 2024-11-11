@@ -191,15 +191,21 @@
                                         </dl>
                                         <dl class="dlist-align">
                                             <dt class="fw-bolder">Order Amount:</dt>
-                                            <dd>N<span class="order_amount">{{ $order_total_amount }}</span></dd>
+                                            <dd>N<span
+                                                    class="order_amount">{{ number_format($order_total_amount) }}</span>
+                                            </dd>
                                         </dl>
                                         <dl class="dlist-align">
                                             <dt class="fw-bolder">Discount:</dt>
-                                            <dd>N0.00</dd>
+                                            {{-- <dd>N0.00</dd> --}}
+                                            <dd>N<span class="order_amount">{{ number_format($discount) }}</span></dd>
                                         </dl>
                                         <dl class="dlist-align">
                                             <dt class="fw-bolder">Grand Total:</dt>
-                                            <dd>N<span class="grand_total">{{ $grand_total }}</span></dd>
+                                            <dd>N<span
+                                                    class="grand_total">{{ number_format($grand_total - $discount) }}</span>
+                                            </dd>
+                                            {{-- <dd>N<span class="grand_total">{{ $grand_total }}</span></dd> --}}
                                         </dl>
                                         </p>
                                     </div> <!-- col.// -->
@@ -225,9 +231,24 @@
                                                     <div class="info text-start">
                                                         <p class="title">{{ $main_outgoingStock?->product?->name }}
                                                         </p>
-                                                        <strong>N{{ $main_outgoingStock->amount_accrued }}
+                                                        @php
+                                                            $amount = (new \App\Helpers\helper())->stockDiscount(
+                                                                $main_outgoingStock->amount_accrued,
+                                                                $main_outgoingStock->discount_amount,
+                                                                $main_outgoingStock->discount_type,
+                                                            );
+                                                        @endphp
+                                                        <strong>N{{ $amount }}
+                                                            @if ($amount < $main_outgoingStock->amount_accrued)
+                                                                <smal
+                                                                    style="text-decoration: line-through; opacify: 0.5; font-weight:500;">
+                                                                    N{{ $main_outgoingStock->amount_accrued }}</smal>
+                                                            @endif
                                                             ({{ $main_outgoingStock->quantity_removed }} items)
                                                         </strong>
+                                                        {{-- <strong>N{{ $main_outgoingStock->amount_accrued }}
+                                                            ({{ $main_outgoingStock->quantity_removed }} items)
+                                                        </strong> --}}
                                                     </div>
                                                 </div>
                                             </li>
@@ -266,10 +287,25 @@
                                                             <p class="title">
                                                                 {{ $orderbump->product->name }}
                                                             </p>
-                                                            <strong>N{{ $orderbump->product->sale_price * $orderbump->quantity_removed }}
+                                                            @php
+                                                                $amount = (new \App\Helpers\helper())->stockDiscount(
+                                                                    $orderbump->amount_accrued,
+                                                                    $orderbump->discount_amount,
+                                                                    $orderbump->discount_type,
+                                                                );
+                                                            @endphp
+                                                            <strong>N{{ $amount }}
+                                                                @if ($amount < $orderbump->amount_accrued)
+                                                                    <smal
+                                                                        style="text-decoration: line-through; opacify: 0.5; font-weight:500;">
+                                                                        N{{ $orderbump->amount_accrued }}</smal>
+                                                                @endif
+                                                                ({{ $orderbump->quantity_removed }} items)
+                                                            </strong>
+                                                            {{-- <strong>N{{ $orderbump->product->sale_price * $orderbump->quantity_removed }}
                                                                 ({{ $orderbump->quantity_removed }}
                                                                 item)
-                                                            </strong>
+                                                            </strong> --}}
                                                         </div>
                                                     </div>
                                                 </li>
@@ -306,10 +342,25 @@
                                                             <p class="title">
                                                                 {{ $upsell->product->name }}
                                                             </p>
-                                                            <strong>N{{ $upsell->product->sale_price * $upsell->quantity_removed }}
+                                                            @php
+                                                                $amount = (new \App\Helpers\helper())->stockDiscount(
+                                                                    $upsell->amount_accrued,
+                                                                    $upsell->discount_amount,
+                                                                    $upsell->discount_type,
+                                                                );
+                                                            @endphp
+                                                            <strong>N{{ $amount }}
+                                                                @if ($amount < $upsell->amount_accrued)
+                                                                    <smal
+                                                                        style="text-decoration: line-through; opacify: 0.5; font-weight:500;">
+                                                                        N{{ $upsell->amount_accrued }}</smal>
+                                                                @endif
+                                                                ({{ $upsell->quantity_removed }} items)
+                                                            </strong>
+                                                            {{-- <strong>N{{ $upsell->product->sale_price * $upsell->quantity_removed }}
                                                                 ({{ $upsell->quantity_removed }}
                                                                 item)
-                                                            </strong>
+                                                            </strong> --}}
                                                         </div>
                                                     </div>
                                                 </li>

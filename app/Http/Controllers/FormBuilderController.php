@@ -798,13 +798,14 @@ class FormBuilderController extends Controller
             $orderId = '';
             $qty_total = 0;
             $order_total_amount = 0;
+            $order_discount_amount = 0;
             $grand_total = 0;
             $mainProducts_outgoingStocks = '';
             $orderbumpProduct_revenue = 0;
             $orderbump_outgoingStock = '';
             $upsellProduct_revenue = 0;
             $upsell_outgoingStock = '';
-
+            $discount = 0;
 
             // $order->outgoingStocks()->where(['customer_acceptance_status'=>NULL])
             // ->update(['customer_acceptance_status'=>'rejected', 'quantity_returned'=>1, 'reason_returned'=>'declined']);
@@ -868,6 +869,11 @@ class FormBuilderController extends Controller
                         $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
                         $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
                         $qty_main_product += $main_outgoingStock['quantity_removed'];
+                        $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                            $main_outgoingStock['amount_accrued'] ?? 0,
+                            $main_outgoingStock['discount_amount'] ?? 0,
+                            $main_outgoingStock['discount_type'] ?? 'fixed',
+                        );
                     }
                 }
             }
@@ -895,6 +901,11 @@ class FormBuilderController extends Controller
                             $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
                             $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
                             $qty_orderbump += $orderbump_stock['quantity_removed'];
+                            $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                                $orderbump_stock['amount_accrued'] ?? 0,
+                                $orderbump_stock['discount_amount'] ?? 0,
+                                $orderbump_stock['discount_type'] ?? 'fixed',
+                            );
                         }
                     }
                 }
@@ -922,6 +933,11 @@ class FormBuilderController extends Controller
                             $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
                             $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
                             $qty_upsell += $upsell_stock['quantity_removed'];
+                            $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                                $upsell_stock['amount_accrued'] ?? 0,
+                                $upsell_stock['discount_amount'] ?? 0,
+                                $upsell_stock['discount_type'] ?? 'fixed',
+                            );
                         }
                     }
                 }
@@ -930,6 +946,7 @@ class FormBuilderController extends Controller
 
             //order total amt
             $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
+            $discount = $order_total_amount - $order_discount_amount;
             $grand_total = $order_total_amount; //might include discount later
 
             $orderId = ''; //used in thankYou section
@@ -961,6 +978,8 @@ class FormBuilderController extends Controller
             'customer',
             'qty_total',
             'order_total_amount',
+            'order_discount_amount',
+            'discount',
             'grand_total',
             'mainProducts_outgoingStocks',
             'orderbumpProduct_revenue',
@@ -1467,6 +1486,8 @@ class FormBuilderController extends Controller
                 $package_bundles = [
                     'product_id' => $product->id,
                     'quantity_removed' => 1,
+                    'discount_type' => null,
+                    'discount_amount' => null,
                     'amount_accrued' => $product->sale_price,
                     'customer_acceptance_status' => null,
                     'reason_removed' => 'as_order_firstphase',
@@ -1553,6 +1574,8 @@ class FormBuilderController extends Controller
                 $package_bundles = [
                     'product_id' => $request->orderbump_product,
                     'quantity_removed' => 1,
+                    'discount_type' => $request->orderbump_discount_type,
+                    'discount_amount' => $request->orderbump_discount,
                     'amount_accrued' => $product->sale_price,
                     'customer_acceptance_status' => null,
                     'reason_removed' => 'as_orderbump',
@@ -3765,349 +3788,538 @@ class FormBuilderController extends Controller
         $order = $formHolder->order;
 
         //cos order was created initially @ newFormBuilderPost, incase the form originted from edited or duplicate form
-        if (isset($order->customer_id)) {
+        // if (isset($order->customer_id)) {
 
-            //save Order
-            $newOrder = new Order();
-            $newOrder->form_holder_id = $formHolder->id;
-            $newOrder->source_type = 'form_holder_module';
-            $newOrder->status = 'new';
-            $newOrder->save();
+        //     //save Order
+        //     $newOrder = new Order();
+        //     $newOrder->form_holder_id = $formHolder->id;
+        //     $newOrder->source_type = 'form_holder_module';
+        //     $newOrder->status = 'new';
+        //     $newOrder->save();
 
-            //making a copy from the former outgoingStocks, in the case of dealing with an edited or duplicated form
-
-
-            //////////////////////////////////////////////////////////
-            //making a copy from the former outgoingStock, in the case of dealing with an edited or duplicated form
-            $outgoingStockPackageBundleFormer = $order->outgoingStock->package_bundle;
-            // dd($order->outgoingStock->package_bundle);
-            $package_bundle_1 = [];
-            foreach ($outgoingStockPackageBundleFormer as $i => $outgoingStock) {
-                $product = Product::find($outgoingStock['product_id']);
-                // Make a copy of rows and create new records
-                $outgoingStockData = [
-                    'product_id' => $outgoingStock['product_id'],
-                    'discount_type' => $outgoingStock['discount_type'] ?? null,
-                    'discount_amount' => $outgoingStock['discount_amount'] ?? null,
-                    'quantity_removed' => 1,
-                    'amount_accrued' => $product->sale_price,
-                    'customer_acceptance_status' => $outgoingStock['customer_acceptance_status'],
-                    'reason_removed' => $outgoingStock['reason_removed'], //as_order_firstphase
-                    'quantity_returned' => 0,
-                    'reason_returned' => isset($outgoingStock['reason_removed']) ? $outgoingStock['reason_removed'] : null,
-                    'isCombo' => isset($outgoingStock['isCombo']) ? 'true' : null,
-                ];
-
-                $package_bundle_1[] = $outgoingStockData;
-            }
-
-            // Create a new OutgoingStock record
-            $newOutgoingStock = new OutgoingStock();
-            $newOutgoingStock->order_id = $newOrder->id;
-            $newOutgoingStock->created_by = $order->outgoingStock->created_by;
-            $newOutgoingStock->status = $order->outgoingStock->status;
-            $newOutgoingStock->package_bundle = $package_bundle_1;
-            $newOutgoingStock->save();
-
-            #remove later
-            $outgoingStock = OutgoingStock::where('order_id', $newOrder->id)->first();
-
-            $outgoingStockPackageBundle = $outgoingStock->package_bundle; //[{},{}]
-            // dd($outgoingStockPackageBundle);
-            //NEW CODES
-            foreach ($data['product_packages'] ?? [] as $key => $product_id) {
-                if (!empty($product_id)) {
-                    // Extract product details from the string
-                    $idPriceQty = explode('-', $product_id);
-                    $productId = $idPriceQty[0];     // Product ID
-                    $saleUnitPrice = $idPriceQty[1]; // Unit price
-                    $qtyRemoved = $idPriceQty[2];    // Quantity removed
-
-                    // Calculate the amount accrued
-                    $amount_accrued = $qtyRemoved * $saleUnitPrice;
-
-                    foreach ($outgoingStockPackageBundle as &$stock) {
-                        // Fetch the product information from the database
-                        $product = Product::find($stock['product_id']);
-
-                        // Check if the product ID from $outgoingStockPackageBundle matches and reason_removed is 'as_order_firstphase'
-                        if ($stock['product_id'] == (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
-                            $stock['quantity_removed'] = $qtyRemoved;
-                            $stock['amount_accrued'] = $amount_accrued;
-                            $stock['customer_acceptance_status'] = 'accepted';
-                        }
-                    }
-                }
-            }
-
-            // Additional loop to set 'rejected' status if the product is not found in $data['product_packages']
-            foreach ($outgoingStockPackageBundle as &$stock) {
-                $productFound = false;
-                foreach ($data['product_packages'] ?? [] as $product_id) {
-                    if (!empty($product_id)) {
-                        $idPriceQty = explode('-', $product_id);
-                        $productId = $idPriceQty[0];
-
-                        // Check if the product ID matches
-                        if ($stock['product_id'] == (int) $productId) {
-                            $productFound = true;
-                            break;
-                        }
-                    }
-                }
-
-                // If the product is not found in $data['product_packages'] and reason_removed is 'as_order_firstphase', mark as rejected
-                if (!$productFound && $stock['reason_removed'] == 'as_order_firstphase') {
-                    $product = Product::find($stock['product_id']); // Fetch the product details
-                    $stock['customer_acceptance_status'] = 'rejected';
-                    $stock['amount_accrued'] = $product->sale_price;
-                    $stock['quantity_returned'] = $stock['quantity_removed'];
-                    $stock['reason_returned'] = 'declined';
-                }
-            }
-
-            #remove later
-            $outgoingStock->update(['package_bundle' => $outgoingStockPackageBundle]);
+        //     //making a copy from the former outgoingStocks, in the case of dealing with an edited or duplicated form
 
 
-            $customer = new Customer();
-            $customer->order_id = $newOrder->id;
-            $customer->form_holder_id = $formHolder->id;
-            $customer->firstname = $data['firstname'] ?? '';
-            $customer->lastname = $data['lastname'] ?? '';
-            $customer->phone_number = $data['phone_number'] ?? '';
-            $customer->whatsapp_phone_number = $data['whatsapp_phone_number'] ?? '';
-            $customer->email = $data['active_email'] ?? '';
-            $customer->city = $data['city'] ?? '';
-            $customer->state = $data['state'] ?? '';
-            $customer->delivery_address = $data['address'] ?? '';
-            $customer->delivery_duration = $data['delivery_duration'] ?? '';
-            $customer->created_by = 1;
-            $customer->data = $data['form_fields'] ?? [];
-            $customer->status = 'true';
-            $customer->save();
+        //     //////////////////////////////////////////////////////////
+        //     //making a copy from the former outgoingStock, in the case of dealing with an edited or duplicated form
+        //     $outgoingStockPackageBundleFormer = $order->outgoingStock->package_bundle;
+        //     // dd($order->outgoingStock->package_bundle);
+        //     $package_bundle_1 = [];
+        //     foreach ($outgoingStockPackageBundleFormer as $i => $outgoingStock) {
+        //         $product = Product::find($outgoingStock['product_id']);
+        //         // Make a copy of rows and create new records
+        //         $outgoingStockData = [
+        //             'product_id' => $outgoingStock['product_id'],
+        //             'discount_type' => $outgoingStock['discount_type'] ?? null,
+        //             'discount_amount' => $outgoingStock['discount_amount'] ?? null,
+        //             'quantity_removed' => 1,
+        //             'amount_accrued' => $product->sale_price,
+        //             'customer_acceptance_status' => $outgoingStock['customer_acceptance_status'],
+        //             'reason_removed' => $outgoingStock['reason_removed'], //as_order_firstphase
+        //             'quantity_returned' => 0,
+        //             'reason_returned' => isset($outgoingStock['reason_removed']) ? $outgoingStock['reason_removed'] : null,
+        //             'isCombo' => isset($outgoingStock['isCombo']) ? 'true' : null,
+        //         ];
 
-            //update order status
-            //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
-            $newOrder = Order::find($newOrder->id);
-            $newOrder->customer_id = $customer->id;
-            $newOrder->status = 'new';
-            // $newOrder->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
-            if ($customer->delivery_duration) {
-                $newOrder->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
-            }
+        //         $package_bundle_1[] = $outgoingStockData;
+        //     }
 
-            $nextStaff = (new FormHelper())->getNextAvailableStaff($formHolder, true);
-            $newOrder->staff_assigned_id = $nextStaff?->id ?? null;
-            $newOrder->save();
+        //     // Create a new OutgoingStock record
+        //     $newOutgoingStock = new OutgoingStock();
+        //     $newOutgoingStock->order_id = $newOrder->id;
+        //     $newOutgoingStock->created_by = $order->outgoingStock->created_by;
+        //     $newOutgoingStock->status = $order->outgoingStock->status;
+        //     $newOutgoingStock->package_bundle = $package_bundle_1;
+        //     $newOutgoingStock->save();
 
-            //Send Message to the assigned staff if any
-            $assigned_staff_messages = [];
-            foreach ($channels as $type) {
-                $message_type = MessageTemplate::where('type', $type . '_new_order_assigned')->first();
-                if ($message_type && $message_type->is_active) {
-                    $assigned_staff_messages[$type]['title'] = $message_type->subject;
-                    $assigned_staff_messages[$type]['message'] = $message_type->message;
-                }
-            }
-            $nextStaff?->notify(new OrderNotification($newOrder, $assigned_staff_messages));
+        //     #remove later
+        //     $outgoingStock = OutgoingStock::where('order_id', $newOrder->id)->first();
 
+        //     $outgoingStockPackageBundle = $outgoingStock->package_bundle; //[{},{}]
+        //     // dd($outgoingStockPackageBundle);
+        //     //NEW CODES
+        //     foreach ($data['product_packages'] ?? [] as $key => $product_id) {
+        //         if (!empty($product_id)) {
+        //             // Extract product details from the string
+        //             $idPriceQty = explode('-', $product_id);
+        //             $productId = $idPriceQty[0];     // Product ID
+        //             $saleUnitPrice = $idPriceQty[1]; // Unit price
+        //             $qtyRemoved = $idPriceQty[2];    // Quantity removed
 
-            $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
-            $has_upsell = isset($formHolder->upsell_id) ? true : false;
-            $data['has_orderbump'] = $has_orderbump;
-            $data['has_upsell'] = $has_upsell;
-            $data['order_id'] = $newOrder->id;
-            $data['staff_assigned_id'] = $newOrder->staff_assigned_id;
-            $data['nextStaff'] = $nextStaff;
+        //             // Calculate the amount accrued
+        //             $amount_accrued = $qtyRemoved * $saleUnitPrice;
 
+        //             foreach ($outgoingStockPackageBundle as &$stock) {
+        //                 // Fetch the product information from the database
+        //                 $product = Product::find($stock['product_id']);
 
+        //                 // Check if the product ID from $outgoingStockPackageBundle matches and reason_removed is 'as_order_firstphase'
+        //                 if ($stock['product_id'] == (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
+        //                     $stock['quantity_removed'] = $qtyRemoved;
+        //                     $stock['amount_accrued'] = $amount_accrued;
+        //                     $stock['customer_acceptance_status'] = 'accepted';
+        //                 }
+        //             }
+        //         }
+        //     }
 
-            //call notify fxn
-            if ($has_orderbump == false && $has_upsell == false) {
-                $this->invoiceData($formHolder, $customer, $newOrder);
-                //Send Message to the customer
-                $customer_messages = [];
-                foreach ($channels as $type) {
-                    if ($nextStaff) {
-                        $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_staff')->first();
-                        if ($message_type && $message_type->is_active) {
-                            $customer_messages[$type]['title'] = $message_type->subject;
-                            $customer_messages[$type]['message'] = $message_type->message;
-                        }
-                    } else {
-                        $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_no_staff')->first();
-                        if ($message_type && $message_type->is_active) {
-                            $customer_messages[$type]['title'] = $message_type->subject;
-                            $customer_messages[$type]['message'] = $message_type->message;
-                        }
-                    }
-                }
-                $customer?->notify(new OrderNotification($newOrder, $customer_messages));
-            }
+        //     // Additional loop to set 'rejected' status if the product is not found in $data['product_packages']
+        //     foreach ($outgoingStockPackageBundle as &$stock) {
+        //         $productFound = false;
+        //         foreach ($data['product_packages'] ?? [] as $product_id) {
+        //             if (!empty($product_id)) {
+        //                 $idPriceQty = explode('-', $product_id);
+        //                 $productId = $idPriceQty[0];
 
-            Log::alert('New order');
-            Log::alert([
-                'status' => true,
-                'data' => $data,
-            ]);
+        //                 // Check if the product ID matches
+        //                 if ($stock['product_id'] == (int) $productId) {
+        //                     $productFound = true;
+        //                     break;
+        //                 }
+        //             }
+        //         }
 
-            return response()->json([
-                'status' => true,
-                'data' => $data,
-            ]);
-        } else {
+        //         // If the product is not found in $data['product_packages'] and reason_removed is 'as_order_firstphase', mark as rejected
+        //         if (!$productFound && $stock['reason_removed'] == 'as_order_firstphase') {
+        //             $product = Product::find($stock['product_id']); // Fetch the product details
+        //             $stock['customer_acceptance_status'] = 'rejected';
+        //             $stock['amount_accrued'] = $product->sale_price;
+        //             $stock['quantity_returned'] = $stock['quantity_removed'];
+        //             $stock['reason_returned'] = 'declined';
+        //         }
+        //     }
 
-            //update package in OutgoingStock
-
-            #remove later
-            $outgoingStock = OutgoingStock::where('order_id', $order->id)->first();
-            $outgoingStockPackageBundle = $outgoingStock->package_bundle; //[{},{}]
-
-            //NEW CODES
-            foreach ($data['product_packages'] ?? [] as $key => $product_id) {
-                if (!empty($product_id)) {
-                    // Extract product details from the string
-                    $idPriceQty = explode('-', $product_id);
-                    $productId = $idPriceQty[0];     // Product ID
-                    $saleUnitPrice = $idPriceQty[1]; // Unit price
-                    $qtyRemoved = $idPriceQty[2];    // Quantity removed
-
-                    // Calculate the amount accrued
-                    $amount_accrued = $qtyRemoved * $saleUnitPrice;
-
-                    foreach ($outgoingStockPackageBundle as &$stock) {
-                        // Fetch the product information from the database
-                        $product = Product::find($stock['product_id']);
-
-                        // Check if the product ID from $outgoingStockPackageBundle matches and reason_removed is 'as_order_firstphase'
-                        if ($stock['product_id'] == (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
-                            $stock['quantity_removed'] = $qtyRemoved;
-                            $stock['amount_accrued'] = $amount_accrued;
-                            $stock['customer_acceptance_status'] = 'accepted';
-                        }
-                    }
-                }
-            }
-
-            // Additional loop to set 'rejected' status if the product is not found in $data['product_packages']
-            foreach ($outgoingStockPackageBundle as &$stock) {
-                $productFound = false;
-                foreach ($data['product_packages'] ?? [] as $product_id) {
-                    if (!empty($product_id)) {
-                        $idPriceQty = explode('-', $product_id);
-                        $productId = $idPriceQty[0];
-
-                        // Check if the product ID matches
-                        if ($stock['product_id'] == (int) $productId) {
-                            $productFound = true;
-                            break;
-                        }
-                    }
-                }
-
-                // If the product is not found in $data['product_packages'] and reason_removed is 'as_order_firstphase', mark as rejected
-                if (!$productFound && $stock['reason_removed'] == 'as_order_firstphase') {
-                    $product = Product::find($stock['product_id']); // Fetch the product details
-                    $stock['customer_acceptance_status'] = 'rejected';
-                    $stock['amount_accrued'] = $product->sale_price;
-                    $stock['quantity_returned'] = $stock['quantity_removed'];
-                    $stock['reason_returned'] = 'declined';
-                }
-            }
-            #remove later
-
-            #remove later
-            $outgoingStock->update(['package_bundle' => $outgoingStockPackageBundle]);
-            #remove later
-
-            $customer = new Customer();
-            $customer->order_id = $order->id;
-            $customer->form_holder_id = $formHolder->id;
-            $customer->firstname = $data['firstname'] ?? '';
-            $customer->lastname = $data['lastname'] ?? '';
-            $customer->phone_number = $data['phone_number'] ?? '';
-            $customer->whatsapp_phone_number = $data['whatsapp_phone_number'] ?? '';
-            $customer->email = $data['active_email'] ?? '';
-            $customer->city = $data['city'] ?? '';
-            $customer->state = $data['state'] ?? '';
-            $customer->delivery_address = $data['address'] ?? '';
-            $customer->delivery_duration = $data['delivery_duration'] ?? '';
-            $customer->created_by = 1;
-            $customer->data = $data['form_fields'] ?? [];
-            $customer->status = 'true';
-            $customer->save();
-
-            //update order status
-            //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
-            $order->customer_id = $customer->id;
-            $order->status = 'new';
-            if ($customer->delivery_duration) {
-                $order->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
-            }
+        //     #remove later
+        //     $outgoingStock->update(['package_bundle' => $outgoingStockPackageBundle]);
 
 
-            $nextStaff = (new FormHelper())->getNextAvailableStaff($formHolder, true);
-            $order->staff_assigned_id = $nextStaff?->id ?? null;
-            $order->save();
+        //     $customer = new Customer();
+        //     $customer->order_id = $newOrder->id;
+        //     $customer->form_holder_id = $formHolder->id;
+        //     $customer->firstname = $data['firstname'] ?? '';
+        //     $customer->lastname = $data['lastname'] ?? '';
+        //     $customer->phone_number = $data['phone_number'] ?? '';
+        //     $customer->whatsapp_phone_number = $data['whatsapp_phone_number'] ?? '';
+        //     $customer->email = $data['active_email'] ?? '';
+        //     $customer->city = $data['city'] ?? '';
+        //     $customer->state = $data['state'] ?? '';
+        //     $customer->delivery_address = $data['address'] ?? '';
+        //     $customer->delivery_duration = $data['delivery_duration'] ?? '';
+        //     $customer->created_by = 1;
+        //     $customer->data = $data['form_fields'] ?? [];
+        //     $customer->status = 'true';
+        //     $customer->save();
 
-            //Send Message to the assigned staff if any
-            $assigned_staff_messages = [];
-            foreach ($channels as $type) {
-                $message_type = MessageTemplate::where('type', $type . '_new_order_assigned')->first();
-                if ($message_type && $message_type->is_active) {
-                    $assigned_staff_messages[$type]['title'] = $message_type->subject;
-                    $assigned_staff_messages[$type]['message'] = $message_type->message;
-                }
-            }
-            $nextStaff?->notify(new OrderNotification($order, $assigned_staff_messages));
+        //     //update order status
+        //     //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
+        //     $newOrder = Order::find($newOrder->id);
+        //     $newOrder->customer_id = $customer->id;
+        //     $newOrder->status = 'new';
+        //     // $newOrder->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
+        //     if ($customer->delivery_duration) {
+        //         $newOrder->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
+        //     }
 
-            $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
-            $has_upsell = isset($formHolder->upsell_id) ? true : false;
-            $data['has_orderbump'] = $has_orderbump;
-            $data['has_upsell'] = $has_upsell;
-            $data['order_id'] = $order->id;
-            $data['staff_assigned_id'] = $order->staff_assigned_id;
-            $data['nextStaff'] = $nextStaff;
+        //     $nextStaff = (new FormHelper())->getNextAvailableStaff($formHolder, true);
+        //     $newOrder->staff_assigned_id = $nextStaff?->id ?? null;
+        //     $newOrder->save();
 
-            $data['order'] = $order->outgoingStock->package_bundle;
+        //     //Send Message to the assigned staff if any
+        //     $assigned_staff_messages = [];
+        //     foreach ($channels as $type) {
+        //         $message_type = MessageTemplate::where('type', $type . '_new_order_assigned')->first();
+        //         if ($message_type && $message_type->is_active) {
+        //             $assigned_staff_messages[$type]['title'] = $message_type->subject;
+        //             $assigned_staff_messages[$type]['message'] = $message_type->message;
+        //         }
+        //     }
+        //     $nextStaff?->notify(new OrderNotification($newOrder, $assigned_staff_messages));
 
-            //call notify fxn
-            if ($has_orderbump == false && $has_upsell == false) {
-                $this->invoiceData($formHolder, $customer, $order);
+
+        //     $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
+        //     $has_upsell = isset($formHolder->upsell_id) ? true : false;
+        //     $data['has_orderbump'] = $has_orderbump;
+        //     $data['has_upsell'] = $has_upsell;
+        //     $data['order_id'] = $newOrder->id;
+        //     $data['staff_assigned_id'] = $newOrder->staff_assigned_id;
+        //     $data['nextStaff'] = $nextStaff;
 
 
 
-                //Send Message to the assigned staff if any
-                $customer_messages = [];
-                foreach ($channels as $type) {
-                    if ($nextStaff) {
-                        $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_staff')->first();
-                        if ($message_type && $message_type->is_active) {
-                            $customer_messages[$type]['title'] = $message_type->subject;
-                            $customer_messages[$type]['message'] = $message_type->message;
-                        }
-                    } else {
-                        $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_no_staff')->first();
-                        if ($message_type && $message_type->is_active) {
-                            $customer_messages[$type]['title'] = $message_type->subject;
-                            $customer_messages[$type]['message'] = $message_type->message;
-                        }
-                    }
-                }
-                $customer?->notify(new OrderNotification($order, $customer_messages));
-            }
+        //     //call notify fxn
+        //     if ($has_orderbump == false && $has_upsell == false) {
+        //         $this->invoiceData($formHolder, $customer, $newOrder);
+        //         //Send Message to the customer
+        //         $customer_messages = [];
+        //         foreach ($channels as $type) {
+        //             if ($nextStaff) {
+        //                 $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_staff')->first();
+        //                 if ($message_type && $message_type->is_active) {
+        //                     $customer_messages[$type]['title'] = $message_type->subject;
+        //                     $customer_messages[$type]['message'] = $message_type->message;
+        //                 }
+        //             } else {
+        //                 $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_no_staff')->first();
+        //                 if ($message_type && $message_type->is_active) {
+        //                     $customer_messages[$type]['title'] = $message_type->subject;
+        //                     $customer_messages[$type]['message'] = $message_type->message;
+        //                 }
+        //             }
+        //         }
+        //         $customer?->notify(new OrderNotification($newOrder, $customer_messages));
+        //     }
 
-            Log::alert('New order');
-            Log::alert([
-                'status' => true,
-                'data' => $data,
-            ]);
-            return response()->json([
-                'status' => true,
-                'data' => $data,
-            ]);
+        //     Log::alert('New order');
+        //     Log::alert([
+        //         'status' => true,
+        //         'data' => $data,
+        //     ]);
+
+        //     return response()->json([
+        //         'status' => true,
+        //         'data' => $data,
+        //     ]);
+        // } else {
+
+        //     //update package in OutgoingStock
+
+        //     #remove later
+        //     $outgoingStock = OutgoingStock::where('order_id', $order->id)->first();
+        //     $outgoingStockPackageBundle = $outgoingStock->package_bundle; //[{},{}]
+
+        //     //NEW CODES
+        //     foreach ($data['product_packages'] ?? [] as $key => $product_id) {
+        //         if (!empty($product_id)) {
+        //             // Extract product details from the string
+        //             $idPriceQty = explode('-', $product_id);
+        //             $productId = $idPriceQty[0];     // Product ID
+        //             $saleUnitPrice = $idPriceQty[1]; // Unit price
+        //             $qtyRemoved = $idPriceQty[2];    // Quantity removed
+
+        //             // Calculate the amount accrued
+        //             $amount_accrued = $qtyRemoved * $saleUnitPrice;
+
+        //             foreach ($outgoingStockPackageBundle as &$stock) {
+        //                 // Fetch the product information from the database
+        //                 $product = Product::find($stock['product_id']);
+
+        //                 // Check if the product ID from $outgoingStockPackageBundle matches and reason_removed is 'as_order_firstphase'
+        //                 if ($stock['product_id'] == (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
+        //                     $stock['quantity_removed'] = $qtyRemoved;
+        //                     $stock['amount_accrued'] = $amount_accrued;
+        //                     $stock['customer_acceptance_status'] = 'accepted';
+        //                 }
+        //             }
+        //         }
+        //     }
+
+        //     // Additional loop to set 'rejected' status if the product is not found in $data['product_packages']
+        //     foreach ($outgoingStockPackageBundle as &$stock) {
+        //         $productFound = false;
+        //         foreach ($data['product_packages'] ?? [] as $product_id) {
+        //             if (!empty($product_id)) {
+        //                 $idPriceQty = explode('-', $product_id);
+        //                 $productId = $idPriceQty[0];
+
+        //                 // Check if the product ID matches
+        //                 if ($stock['product_id'] == (int) $productId) {
+        //                     $productFound = true;
+        //                     break;
+        //                 }
+        //             }
+        //         }
+
+        //         // If the product is not found in $data['product_packages'] and reason_removed is 'as_order_firstphase', mark as rejected
+        //         if (!$productFound && $stock['reason_removed'] == 'as_order_firstphase') {
+        //             $product = Product::find($stock['product_id']); // Fetch the product details
+        //             $stock['customer_acceptance_status'] = 'rejected';
+        //             $stock['amount_accrued'] = $product->sale_price;
+        //             $stock['quantity_returned'] = $stock['quantity_removed'];
+        //             $stock['reason_returned'] = 'declined';
+        //         }
+        //     }
+        //     #remove later
+
+        //     #remove later
+        //     $outgoingStock->update(['package_bundle' => $outgoingStockPackageBundle]);
+        //     #remove later
+
+        //     $customer = new Customer();
+        //     $customer->order_id = $order->id;
+        //     $customer->form_holder_id = $formHolder->id;
+        //     $customer->firstname = $data['firstname'] ?? '';
+        //     $customer->lastname = $data['lastname'] ?? '';
+        //     $customer->phone_number = $data['phone_number'] ?? '';
+        //     $customer->whatsapp_phone_number = $data['whatsapp_phone_number'] ?? '';
+        //     $customer->email = $data['active_email'] ?? '';
+        //     $customer->city = $data['city'] ?? '';
+        //     $customer->state = $data['state'] ?? '';
+        //     $customer->delivery_address = $data['address'] ?? '';
+        //     $customer->delivery_duration = $data['delivery_duration'] ?? '';
+        //     $customer->created_by = 1;
+        //     $customer->data = $data['form_fields'] ?? [];
+        //     $customer->status = 'true';
+        //     $customer->save();
+
+        //     //update order status
+        //     //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
+        //     $order->customer_id = $customer->id;
+        //     $order->status = 'new';
+        //     if ($customer->delivery_duration) {
+        //         $order->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
+        //     }
+
+
+        //     $nextStaff = (new FormHelper())->getNextAvailableStaff($formHolder, true);
+        //     $order->staff_assigned_id = $nextStaff?->id ?? null;
+        //     $order->save();
+
+        //     //Send Message to the assigned staff if any
+        //     $assigned_staff_messages = [];
+        //     foreach ($channels as $type) {
+        //         $message_type = MessageTemplate::where('type', $type . '_new_order_assigned')->first();
+        //         if ($message_type && $message_type->is_active) {
+        //             $assigned_staff_messages[$type]['title'] = $message_type->subject;
+        //             $assigned_staff_messages[$type]['message'] = $message_type->message;
+        //         }
+        //     }
+        //     $nextStaff?->notify(new OrderNotification($order, $assigned_staff_messages));
+
+        //     $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
+        //     $has_upsell = isset($formHolder->upsell_id) ? true : false;
+        //     $data['has_orderbump'] = $has_orderbump;
+        //     $data['has_upsell'] = $has_upsell;
+        //     $data['order_id'] = $order->id;
+        //     $data['staff_assigned_id'] = $order->staff_assigned_id;
+        //     $data['nextStaff'] = $nextStaff;
+
+        //     $data['order'] = $order->outgoingStock->package_bundle;
+
+        //     //call notify fxn
+        //     if ($has_orderbump == false && $has_upsell == false) {
+        //         $this->invoiceData($formHolder, $customer, $order);
+
+
+
+        //         //Send Message to the assigned staff if any
+        //         $customer_messages = [];
+        //         foreach ($channels as $type) {
+        //             if ($nextStaff) {
+        //                 $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_staff')->first();
+        //                 if ($message_type && $message_type->is_active) {
+        //                     $customer_messages[$type]['title'] = $message_type->subject;
+        //                     $customer_messages[$type]['message'] = $message_type->message;
+        //                 }
+        //             } else {
+        //                 $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_no_staff')->first();
+        //                 if ($message_type && $message_type->is_active) {
+        //                     $customer_messages[$type]['title'] = $message_type->subject;
+        //                     $customer_messages[$type]['message'] = $message_type->message;
+        //                 }
+        //             }
+        //         }
+        //         $customer?->notify(new OrderNotification($order, $customer_messages));
+        //     }
+
+        //     Log::alert('New order');
+        //     Log::alert([
+        //         'status' => true,
+        //         'data' => $data,
+        //     ]);
+        //     return response()->json([
+        //         'status' => true,
+        //         'data' => $data,
+        //     ]);
+        // }
+
+
+        //save Order
+        $newOrder = new Order();
+        $newOrder->form_holder_id = $formHolder->id;
+        $newOrder->source_type = 'form_holder_module';
+        $newOrder->status = 'new';
+        $newOrder->save();
+
+        //making a copy from the former outgoingStocks, in the case of dealing with an edited or duplicated form
+
+
+        //////////////////////////////////////////////////////////
+        //making a copy from the former outgoingStock, in the case of dealing with an edited or duplicated form
+        $outgoingStockPackageBundleFormer = $order->outgoingStock->package_bundle;
+
+        // dd($order->outgoingStock->package_bundle);
+        $package_bundle_1 = [];
+        foreach ($outgoingStockPackageBundleFormer as $i => $outgoingStock) {
+            $product = Product::find($outgoingStock['product_id']);
+            // Make a copy of rows and create new records
+            $outgoingStockData = [
+                'product_id' => $outgoingStock['product_id'],
+                'discount_type' => $outgoingStock['discount_type'] ?? null,
+                'discount_amount' => $outgoingStock['discount_amount'] ?? null,
+                'quantity_removed' => 1,
+                'amount_accrued' => $product->sale_price,
+                'customer_acceptance_status' => $outgoingStock['customer_acceptance_status'],
+                'reason_removed' => $outgoingStock['reason_removed'], //as_order_firstphase
+                'quantity_returned' => 0,
+                'reason_returned' => isset($outgoingStock['reason_removed']) ? $outgoingStock['reason_removed'] : null,
+                'isCombo' => isset($outgoingStock['isCombo']) ? 'true' : null,
+            ];
+
+            $package_bundle_1[] = $outgoingStockData;
         }
+
+        // Create a new OutgoingStock record
+        $newOutgoingStock = new OutgoingStock();
+        $newOutgoingStock->order_id = $newOrder->id;
+        $newOutgoingStock->created_by = $order->outgoingStock->created_by;
+        $newOutgoingStock->status = $order->outgoingStock->status;
+        $newOutgoingStock->package_bundle = $package_bundle_1;
+        $newOutgoingStock->save();
+
+        #remove later
+        $outgoingStock = OutgoingStock::where('order_id', $newOrder->id)->first();
+
+        $outgoingStockPackageBundle = $outgoingStock->package_bundle; //[{},{}]
+        // dd($outgoingStockPackageBundle);
+        //NEW CODES
+        foreach ($data['product_packages'] ?? [] as $key => $product_id) {
+            if (!empty($product_id)) {
+                // Extract product details from the string
+                $idPriceQty = explode('-', $product_id);
+                $productId = $idPriceQty[0];     // Product ID
+                $saleUnitPrice = $idPriceQty[1]; // Unit price
+                $qtyRemoved = $idPriceQty[2];    // Quantity removed
+
+                // Calculate the amount accrued
+                $amount_accrued = $qtyRemoved * $saleUnitPrice;
+
+                foreach ($outgoingStockPackageBundle as &$stock) {
+                    // Fetch the product information from the database
+                    $product = Product::find($stock['product_id']);
+
+                    // Check if the product ID from $outgoingStockPackageBundle matches and reason_removed is 'as_order_firstphase'
+                    if ($stock['product_id'] == (int) $productId && $stock['reason_removed'] == 'as_order_firstphase') {
+                        $stock['quantity_removed'] = $qtyRemoved;
+                        $stock['amount_accrued'] = $amount_accrued;
+                        $stock['customer_acceptance_status'] = 'accepted';
+                    }
+                }
+            }
+        }
+
+        // Additional loop to set 'rejected' status if the product is not found in $data['product_packages']
+        foreach ($outgoingStockPackageBundle as &$stock) {
+            $productFound = false;
+            foreach ($data['product_packages'] ?? [] as $product_id) {
+                if (!empty($product_id)) {
+                    $idPriceQty = explode('-', $product_id);
+                    $productId = $idPriceQty[0];
+
+                    // Check if the product ID matches
+                    if ($stock['product_id'] == (int) $productId) {
+                        $productFound = true;
+                        break;
+                    }
+                }
+            }
+
+            // If the product is not found in $data['product_packages'] and reason_removed is 'as_order_firstphase', mark as rejected
+            if (!$productFound && $stock['reason_removed'] == 'as_order_firstphase') {
+                $product = Product::find($stock['product_id']); // Fetch the product details
+                $stock['customer_acceptance_status'] = 'rejected';
+                $stock['amount_accrued'] = $product->sale_price;
+                $stock['quantity_returned'] = $stock['quantity_removed'];
+                $stock['reason_returned'] = 'declined';
+            }
+        }
+
+
+        #remove later
+        $outgoingStock->update(['package_bundle' => $outgoingStockPackageBundle]);
+
+
+        $customer = new Customer();
+        $customer->order_id = $newOrder->id;
+        $customer->form_holder_id = $formHolder->id;
+        $customer->firstname = $data['firstname'] ?? '';
+        $customer->lastname = $data['lastname'] ?? '';
+        $customer->phone_number = $data['phone_number'] ?? '';
+        $customer->whatsapp_phone_number = $data['whatsapp_phone_number'] ?? '';
+        $customer->email = $data['active_email'] ?? '';
+        $customer->city = $data['city'] ?? '';
+        $customer->state = $data['state'] ?? '';
+        $customer->delivery_address = $data['address'] ?? '';
+        $customer->delivery_duration = $data['delivery_duration'] ?? '';
+        $customer->created_by = 1;
+        $customer->data = $data['form_fields'] ?? [];
+        $customer->status = 'true';
+        $customer->save();
+
+        //update order status
+        //DB::table('orders')->update(['customer_id'=>$customer->id, 'status'=>'new']);
+        $newOrder = Order::find($newOrder->id);
+        $newOrder->customer_id = $customer->id;
+        $newOrder->status = 'new';
+        // $newOrder->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
+        if ($customer->delivery_duration) {
+            $newOrder->expected_delivery_date = Carbon::parse($customer->created_at->addDays($customer->delivery_duration))->format('Y-m-d');
+        }
+
+        $nextStaff = (new FormHelper())->getNextAvailableStaff($formHolder, true);
+        $newOrder->staff_assigned_id = $nextStaff?->id ?? null;
+        $newOrder->save();
+
+        //Send Message to the assigned staff if any
+        $assigned_staff_messages = [];
+        foreach ($channels as $type) {
+            $message_type = MessageTemplate::where('type', $type . '_new_order_assigned')->first();
+            if ($message_type && $message_type->is_active) {
+                $assigned_staff_messages[$type]['title'] = $message_type->subject;
+                $assigned_staff_messages[$type]['message'] = $message_type->message;
+            }
+        }
+        $nextStaff?->notify(new OrderNotification($newOrder, $assigned_staff_messages));
+
+
+        $has_orderbump = isset($formHolder->orderbump_id) ? true : false;
+        $has_upsell = isset($formHolder->upsell_id) ? true : false;
+        $data['has_orderbump'] = $has_orderbump;
+        $data['has_upsell'] = $has_upsell;
+        $data['order_id'] = $newOrder->id;
+        $data['staff_assigned_id'] = $newOrder->staff_assigned_id;
+        $data['nextStaff'] = $nextStaff;
+
+
+
+        //call notify fxn
+        if ($has_orderbump == false && $has_upsell == false) {
+            $this->invoiceData($formHolder, $customer, $newOrder);
+            //Send Message to the customer
+            $customer_messages = [];
+            foreach ($channels as $type) {
+                if ($nextStaff) {
+                    $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_staff')->first();
+                    if ($message_type && $message_type->is_active) {
+                        $customer_messages[$type]['title'] = $message_type->subject;
+                        $customer_messages[$type]['message'] = $message_type->message;
+                    }
+                } else {
+                    $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_no_staff')->first();
+                    if ($message_type && $message_type->is_active) {
+                        $customer_messages[$type]['title'] = $message_type->subject;
+                        $customer_messages[$type]['message'] = $message_type->message;
+                    }
+                }
+            }
+            $customer?->notify(new OrderNotification($newOrder, $customer_messages));
+        }
+
+
+
+        return response()->json([
+            'status' => true,
+            'data' => $data,
+        ]);
     }
 
     //saveNewFormOrderBumpFromCustomer

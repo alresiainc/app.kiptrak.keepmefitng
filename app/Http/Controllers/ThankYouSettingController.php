@@ -283,12 +283,14 @@ class ThankYouSettingController extends Controller
         $orderId = '';
         $qty_total = 0;
         $order_total_amount = 0;
+        $order_discount_amount = 0;
         $grand_total = 0;
         $mainProducts_outgoingStocks = '';
         $orderbumpProduct_revenue = 0;
         $orderbump_outgoingStock = '';
         $upsellProduct_revenue = 0;
         $upsell_outgoingStock = '';
+        $discount = 0;
         if ($current_order_id !== "") {
             $order = Order::where('id', $current_order_id)->first();
             if (!isset($order)) {
@@ -358,6 +360,12 @@ class ThankYouSettingController extends Controller
                             $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
                             $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
                             $qty_main_product += $main_outgoingStock['quantity_removed'];
+
+                            $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                                $main_outgoingStock['amount_accrued'] ?? 0,
+                                $main_outgoingStock['discount_amount'] ?? 0,
+                                $main_outgoingStock['discount_type'] ?? 'fixed',
+                            );
                         }
                     }
                 }
@@ -385,6 +393,12 @@ class ThankYouSettingController extends Controller
                                 $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
                                 $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
                                 $qty_orderbump += $orderbump_stock['quantity_removed'];
+
+                                $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                                    $orderbump_stock['amount_accrued'] ?? 0,
+                                    $orderbump_stock['discount_amount'] ?? 0,
+                                    $orderbump_stock['discount_type'] ?? 'fixed',
+                                );
                             }
                         }
                     }
@@ -412,6 +426,12 @@ class ThankYouSettingController extends Controller
                                 $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
                                 $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
                                 $qty_upsell += $upsell_stock['quantity_removed'];
+
+                                $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                                    $upsell_stock['amount_accrued'] ?? 0,
+                                    $upsell_stock['discount_amount'] ?? 0,
+                                    $upsell_stock['discount_type'] ?? 'fixed',
+                                );
                             }
                         }
                     }
@@ -420,7 +440,9 @@ class ThankYouSettingController extends Controller
 
                 //order total amt
                 $order_total_amount = $mainProduct_revenue + $orderbumpProduct_revenue + $upsellProduct_revenue;
+                $discount = $order_total_amount - $order_discount_amount;
                 $grand_total = $order_total_amount; //might include discount later
+
 
                 $orderId = ''; //used in thankYou section
                 if (isset($order->id)) {
@@ -468,6 +490,7 @@ class ThankYouSettingController extends Controller
         }
         // dd($url);
 
+        // dd($discount);
 
         return view('pages.settings.thankYou.singleThankYou', \compact(
             'thankYou',
@@ -476,12 +499,14 @@ class ThankYouSettingController extends Controller
             'customer',
             'qty_total',
             'order_total_amount',
+            'order_discount_amount',
             'grand_total',
             'mainProducts_outgoingStocks',
             'orderbumpProduct_revenue',
             'orderbump_outgoingStock',
             'upsellProduct_revenue',
-            'upsell_outgoingStock'
+            'upsell_outgoingStock',
+            'discount'
         ));
     }
 

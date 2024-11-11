@@ -347,8 +347,10 @@ class OrderNotification extends Notification
             } else {
                 $amount = $product_price;
             }
-            $discount_price = $amount * $quantity;
-            $price_after_discount = $original_price - $discount_price;
+            // $discount_price = $amount * $quantity;
+            $discount_price = $original_price - $amount;
+            $price_after_discount = $amount;
+
 
             switch ($type) {
                 case 'email':

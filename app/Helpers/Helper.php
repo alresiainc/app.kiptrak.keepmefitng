@@ -360,6 +360,19 @@ class Helper
         return $stock_available;
     }
 
+    public function stockDiscount($sale_price, $discount, $discount_type = 'fixed')
+    {
+
+        if ($discount && $discount_type == 'fixed') {
+            $amount = $sale_price - $discount;
+        } elseif ($discount && $discount_type == 'percentage') {
+            $amount =
+                $sale_price - $sale_price * ($discount / 100);
+        } else {
+            $amount = $sale_price;
+        }
+        return $amount;
+    }
 
     /**
      * Match form fields with required fields intelligently.
