@@ -151,6 +151,16 @@ if (!isset($authUser)) {
                                     class="bi bi-card-list"></i><span>Cancelled Orders</span></a>
                         </li>
                         <li>
+                            <a href="{{ route('allOrders', 'rescheduled_order') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Rescheduled
+                                    Order</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'order_in_transit') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Order In
+                                    Transit</span></a>
+                        </li>
+                        <li>
                             <a href="{{ route('allOrders') }}"><i style="font-size: 100%!important;"
                                     class="bi bi-card-list"></i><span>All Orders</span></a>
                         </li>

@@ -11,8 +11,8 @@ class Message extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $guarded = []; 
-    
+    protected $guarded = [];
+
     protected static function boot()
     {
         parent::boot();
@@ -23,10 +23,11 @@ class Message extends Model
     }
 
     //check if unique_key exists
-    private function createUniqueKey($string){
+    private function createUniqueKey($string)
+    {
         if (static::whereUniqueKey($unique_key = $string)->exists()) {
             $random = rand(1000, 9000);
-            $unique_key = $string.''.$random;
+            $unique_key = $string . '' . $random;
             return $unique_key;
         }
 
@@ -34,17 +35,36 @@ class Message extends Model
     }
 
     //recipient users
-    public function users($recipients) {
-        $recipients = unserialize($recipients);
+    public function users($recipients)
+    {
+        $recipients = \unserialize($recipients);
         $users = User::whereIn('id', $recipients)->get();
 
         return $users;
     }
 
-    public function customers($recipients) {
-        $recipients = unserialize($recipients);
+    public function customers($recipients)
+    {
+
+        $recipients = \unserialize($recipients);
         $customers = Customer::whereIn('id', $recipients)->get();
 
         return $customers;
+    }
+
+    public function resolveRecipients()
+    {
+        $recipients = @\unserialize($this->recipients);
+
+        // Check if unserialize was successful and the result is an array
+        if ($recipients === false || !is_array($recipients)) {
+            return collect(); // Return an empty collection to avoid errors
+        }
+
+        if (isset($this->to) && $this->to === 'employees') {
+            return User::whereIn('id', $recipients)->get();
+        } else {
+            return Customer::whereIn('id', $recipients)->get();
+        }
     }
 }

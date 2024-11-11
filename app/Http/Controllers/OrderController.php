@@ -69,6 +69,14 @@ class OrderController extends Controller
                 $orders = Order::where('status', 'delivered_and_remitted')->orderBy('id', 'DESC')->get();
             }
 
+            if ($status == "rescheduled_order") {
+                $orders = Order::where('status', 'rescheduled_order')->orderBy('id', 'DESC')->get();
+            }
+
+            if ($status == "order_in_transit") {
+                $orders = Order::where('status', 'order_in_transit')->orderBy('id', 'DESC')->get();
+            }
+
             $entries = false;
             $formHolder = '';
             // if ($status !== "") {
@@ -116,6 +124,13 @@ class OrderController extends Controller
             }
             if ($status == "delivered_and_remitted") {
                 $orders = Order::where('status', 'delivered_and_remitted')->where('agent_assigned_id', $authUser->id)->orWhere('staff_assigned_id', $authUser->id)->orWhere('created_by', $authUser->id)->orderBy('id', 'DESC')->get();
+            }
+            if ($status == "rescheduled_order") {
+                $orders = Order::where('status', 'rescheduled_order')->orderBy('id', 'DESC')->get();
+            }
+
+            if ($status == "order_in_transit") {
+                $orders = Order::where('status', 'order_in_transit')->orderBy('id', 'DESC')->get();
             }
 
             //orders whose dates are greater-than today
@@ -193,13 +208,13 @@ class OrderController extends Controller
 
         foreach ($channels as $type) {
             $message_type = MessageTemplate::where('type', $type . '_order_status_changed_to_' . $status)->first();
+
             if ($message_type) {
-                $messages[$type]['title'] = $message_type->title;
+                $messages[$type]['title'] = $message_type->subject;
                 $messages[$type]['message'] = $message_type->message;
             }
         }
 
-        Log::alert($messages);
 
         $customer = $order->customer;
         $order->update(['status' => $status]);

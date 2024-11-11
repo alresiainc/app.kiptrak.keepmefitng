@@ -225,13 +225,13 @@
             // Clear previous modal content before setting new data
             $('#template-editor').val(''); // Clear text area
             tinymce.remove('#template-editor'); // Clear editor content
-            alert(template);
 
             // Show the modal and set initial values
             $('#editTemplateModal').modal('show');
             $('#template_id').val(id);
             $('#subject').val(subject);
-            $('#template-editor').val(template); // Set template content
+            // content.replace(/\n/g, '<br>'); // Replace newlines with <br> for HTML
+            $('#template-editor').val(template.replace(/\n/g, '<br>')); // Set template content
 
             // Initialize the editor based on the type (whatsapp, sms, email)
             switch (type) {

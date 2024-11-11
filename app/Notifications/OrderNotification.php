@@ -2,9 +2,12 @@
 
 namespace App\Notifications;
 
+use App\Models\Agent;
+use App\Models\Customer;
 use App\Models\Message;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -111,8 +114,10 @@ class OrderNotification extends Notification
 
         return Message::create([
             'topic' => $title,
+            'to' => $this->setTo($notifiable), // Using the new setTo() method
             'message' => $resolvedMessage,
             'type' => 'email',
+            // 'recipients' => \serialize([$notifiable->id]),
             'recipients' => \serialize([$notifiable->routeNotificationForEmail()]),
             'message_status' => 'pending',
             'created_by' => $this?->order->staff_assigned_id,
@@ -137,8 +142,10 @@ class OrderNotification extends Notification
 
         return Message::create([
             'topic' => $title,
+            'to' => $this->setTo($notifiable), // Using the new setTo() method
             'message' => $resolvedMessage,
             'type' => 'whatsapp',
+            // 'recipients' => \serialize([$notifiable->id]),
             'recipients' => \serialize([$notifiable->routeNotificationForWhatsapp()]),
             'message_status' => 'pending',
             'created_by' => $this?->order->staff_assigned_id,
@@ -163,8 +170,10 @@ class OrderNotification extends Notification
 
         return Message::create([
             'topic' => $title,
+            'to' => $this->setTo($notifiable), // Using the new setTo() method
             'message' => $resolvedMessage,
             'type' => 'sms',
+            // 'recipients' => \serialize([$notifiable->id]),
             'recipients' => \serialize([$notifiable->routeNotificationForSMS()]),
             'message_status' => 'pending',
             'created_by' => $this?->order->staff_assigned_id,
@@ -188,6 +197,17 @@ class OrderNotification extends Notification
             'message' => $message,
         ];
     }
+
+    public function setTo($notifiable)
+    {
+        return match (true) {
+            $notifiable instanceof Agent => 'agents',
+            $notifiable instanceof Customer => 'customers',
+            $notifiable instanceof User => 'employees',
+            default => 'unknown'
+        };
+    }
+
     /**
      * Generate product details string.
      */

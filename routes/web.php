@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\Customer;
 use Carbon\Carbon;
 use App\Helpers\FieldMatcher;
+use App\Models\MessageTemplate;
 use App\Models\Notification as ModelsNotification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
@@ -58,6 +59,34 @@ Route::get('migrate', function () {
     return view('page')->with('success', 'Migration completed successfully');
 });
 
+Route::get('/update-db', function () {
+    $orders_statuses = [
+        'order_in_transit' => 'Order In Transit',
+        'rescheduled_order' => 'Rescheduled Order'
+    ];
+    $channels = config('site.notification_channels');
+
+    // Loop through each channel and status to create the templates for order status changes
+    foreach ($channels as $channel) {
+
+        $messageTemplate = new MessageTemplate();
+        $messageTemplate->name = "Order Changed to Rescheduled Order";
+        $messageTemplate->channel = $channel;
+        $messageTemplate->type = "{$channel}_order_status_changed_to_rescheduled_order";
+        $messageTemplate->subject = "Rescheduled Order";
+        $messageTemplate->message = "Hi [customer_first_name] [customer_last_name], quick update - your order has been rescheduled based on your request to shift the date for your delivery. \n\n We will do our BEST to deliver on the rescheduled date. Remember, Delay is DANGEROUS \n\n Please make sure to be available on that day to receive it. \n\nIn the meantime, do you have any questions? Need help? \n\n Reply here, and we'll take care of it fast! \n\n[staff_name], Customer Service";
+        $messageTemplate->save();
+
+        $messageTemplate = new MessageTemplate();
+        $messageTemplate->name = "Order Changed to Order In Transit";
+        $messageTemplate->channel = $channel;
+        $messageTemplate->type = "{$channel}_order_status_changed_to_order_in_transit";
+        $messageTemplate->subject = "Order Sent out for Delivery:";
+        $messageTemplate->message = "Hello [customer_first_name] [customer_last_name]! Exciting news - your order is on the way, and the rider will deliver it to you today! Kindly pay to the delivery agent and collect your order.  \n\n It's currently in transit, and we can't wait for you to start enjoying the result you've always wanted. \n\nPlease be with your phone so that when he calls, you will respond. The delivery person has other customers to deliver to, so please don't keep the delivery person waiting. \n\nIf you need any help or have any questions while you wait, just reply to this message. \n\n Get ready - it'll be at your doorstep soon! \n\nThanks for your patronage. \n\n[staff_name], Customer Service";
+        $messageTemplate->save();
+    }
+});
+
 Route::get('/do-clear', function () {
 
     Artisan::call('cache:clear');
@@ -67,7 +96,7 @@ Route::get('/do-clear', function () {
     return redirect('/login')->with('success', 'cache, config, view, route cleared successfully');
 });
 
-Route::get('/reset-site', function () {
+Route::get('/reset-sitessss', function () {
 
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
@@ -76,9 +105,9 @@ Route::get('/reset-site', function () {
 
     //remember to change env to local, to avoid 'STDIN' constant error
 
-    Artisan::call('migrate:refresh', [
-        '--seed' => true
-    ]);
+    // Artisan::call('migrate:refresh', [
+    //     '--seed' => true
+    // ]);
 
     return redirect('/login')->with('success', 'Site reset successfully');
 
@@ -527,6 +556,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/sent-whatsapp-messages/{source?}', [MessageController::class, 'sentWhatsappMessage'])->name('sentWhatsappMessage'); //sentWhatsappMessage
     Route::get('/sent-email-messages', [MessageController::class, 'sentEmailMessage'])->name('sentEmailMessage'); //sentEmailMessage
     Route::post('/sent-email-messages', [MessageController::class, 'sentEmailMessageUpdate'])->name('sentEmailMessageUpdate'); //sentEmailMessageUpdate
+    Route::post('/sent-sms-messages', [MessageController::class, 'sentSmsMessageUpdate'])->name('sentSmsMessageUpdate'); //sentSmsMessageUpdate
+    Route::post('/sent-whatsapp-messages', [MessageController::class, 'sentWhatsappMessageUpdate'])->name('sentWhatsappMessageUpdate'); //sentEmailMessageUpdate
 
     Route::get('/view-message-templates/{channel}', [MessageController::class, 'viewTemplates'])->name('viewMessageTemplates'); //viewTemplate
     Route::post('/update-message-template/{template}', [MessageController::class, 'updateTemplate'])->name('updateMessageTemplate'); //updateTemplate

@@ -143,8 +143,8 @@
                                                 <tr>
                                                     <td data-categoryname="{{ isset($message->to) ? $message->to : '' }}"
                                                         class="categoryname">{{ $message->topic }}</td>
-
-                                                    @php
+                                                    <td>{{ implode(', ', \unserialize($message->recipients)) }}</td>
+                                                    {{-- @php
                                                         $users = $message->users($message->recipients);
                                                         $customers = $message->customers($message->recipients);
                                                     @endphp
@@ -169,7 +169,7 @@
                                                                     class="badge badge-dark mr-1">{{ $user->phone_1 }}</span>
                                                             @endforeach
                                                         @endif
-                                                    </td>
+                                                    </td> --}}
 
                                                     <td>{{ substr($message->message, 0, 30) . '...' }} <br>
                                                         <span class="badge badge-dark"
@@ -205,7 +205,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <form id="sendMailForm" action="{{ route('sentEmailMessageUpdate') }}" method="POST">@csrf
+                <form id="sendMailForm" action="{{ route('sentWhatsappMessageUpdate') }}" method="POST">@csrf
                     <div class="modal-body">
                         <input type="hidden" name="message_id" id="message_id" value="">
 

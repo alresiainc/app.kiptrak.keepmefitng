@@ -142,8 +142,8 @@
 
                                                     <td data-categoryname="{{ isset($message->to) ? $message->to : '' }}"
                                                         class="categoryname">{{ $message->topic }}</td>
-
-                                                    @php
+                                                    <td>{{ implode(', ', \unserialize($message->recipients)) }}</td>
+                                                    {{-- @php
                                                         $users = $message->users($message->recipients);
                                                         $customers = $message->customers($message->recipients);
                                                     @endphp
@@ -169,7 +169,7 @@
                                                             @endforeach
                                                         @endif
 
-                                                    </td>
+                                                    </td> --}}
                                                     <td>{{ substr($message->message, 0, 30) . '...' }} <br>
                                                         <span class="badge badge-dark"
                                                             onclick="editSentMailModal('{{ $message->id }}', `{{ $message->topic }}`, `{{ $message->message }}`)"

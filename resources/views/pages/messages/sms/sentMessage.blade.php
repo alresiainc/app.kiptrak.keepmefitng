@@ -78,8 +78,40 @@
                                                 <tr>
 
                                                     <td>{{ $message->topic }}</td>
-                                                    <td>{{ $message->recipients }}</td>
-                                                    <td>{{ $message->message }}</td>
+
+                                                    <td>{{ implode(', ', \unserialize($message->recipients)) }}</td>
+                                                    {{-- @php
+                                                        $users = $message->users($message->recipients);
+                                                        $customers = $message->customers($message->recipients);
+                                                    @endphp
+                                                    <td>
+                                                        @if (isset($message->to) && $message->to == 'employees')
+                                                            @foreach ($users as $user)
+                                                                <span
+                                                                    class="badge badge-dark mr-1">{{ $user->email }}</span>
+                                                            @endforeach
+                                                        @endif
+
+                                                        @if (isset($message->to) && $message->to == 'customers')
+                                                            @foreach ($customers as $customer)
+                                                                <span
+                                                                    class="badge badge-dark mr-1">{{ $customer->email }}</span>
+                                                            @endforeach
+                                                        @endif
+
+                                                        @if (isset($message->to) && $message->to == 'agents')
+                                                            @foreach ($users as $user)
+                                                                <span
+                                                                    class="badge badge-dark mr-1">{{ $user->email }}</span>
+                                                            @endforeach
+                                                        @endif
+
+                                                    </td> --}}
+                                                    <td>{{ substr($message->message, 0, 30) . '...' }} <br>
+                                                        <span class="badge badge-dark"
+                                                            onclick="editSentMailModal('{{ $message->id }}', `{{ $message->topic }}`, `{{ $message->message }}`)"
+                                                            style="cursor: pointer;">view more</span>
+                                                    </td>
                                                     <td>{!! $message->message_status == 'sent'
                                                         ? '<span class="badge badge-success">Sent</span>'
                                                         : '<span class="badge badge-dark">Draft</span>' !!}</td>
@@ -149,11 +181,49 @@
             </div>
         </div>
     </div>
+    <!--sendMailModal -->
+    <div class="modal fade" id="sendMailModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="sendMailModalLabel">View Whatsapp Message</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
+                <form id="sendMailForm" action="{{ route('sentSmsMessageUpdate') }}" method="POST">@csrf
+                    <div class="modal-body">
+                        <input type="hidden" name="message_id" id="message_id" value="">
+
+                        <div class="d-grid mb-3">
+                            <label for="">Topic</label>
+                            <input type="text" name="topic" id="topic" class="form-control" placeholder="">
+                        </div>
+
+                        <div class="d-grid mb-2">
+                            <label for="">Message</label>
+                            <textarea name="message" id="message" class="form-control" cols="30" rows="10"></textarea>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary sendMailBtn">Re-send Message</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('extra_js')
     <script>
+        function editSentMailModal($id = "", $topic = "", $message = "") {
+            $('#sendMailModal').modal("show");
+            $('#message_id').val($id);
+            $('#topic').val($topic);
+            $('#message').val($message);
+        }
+
         $('.addCategoryBtn').click(function(e) {
             e.preventDefault();
             var category_name = $("form .category_name").val();

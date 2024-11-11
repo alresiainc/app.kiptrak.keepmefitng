@@ -17,6 +17,8 @@ return [
         'cancelled' => 'Cancelled',
         'delivered_not_remitted' => 'Delivered Not Remitted',
         'delivered_and_remitted' => 'Delivered & Remitted',
+        'order_in_transit' => 'Order In Transit',
+        'rescheduled_order' => 'Rescheduled Order'
     ],
 
     /*
@@ -96,7 +98,7 @@ return [
     */
     'bulk_sms_nigeria' => [
         'api_url' => 'https://www.bulksmsnigeria.com/api/v1/sms/create',
-        'api_token' => env('BULK_SMS_NIGERIA_API_TOKEN', 'qEbZEBUsgTjDGsaVe09Cop1yLnrNrByMifqcP0U2TBzO27rBWOwX0Ssr35I5'),
+        'api_token' => env('BULK_SMS_NIGERIA_API_TOKEN'),
         'sender_name' => env('SMS_SENDER_NAME', 'KIPTRAK'),
     ],
 
