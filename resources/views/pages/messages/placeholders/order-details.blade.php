@@ -97,7 +97,7 @@
                 <td>Reason for extra cost on the order</td>
             </tr>
             <tr>
-                <td>[order_order_note]</td>
+                <td>[order_note]</td>
                 <td>Order notes or special instructions</td>
             </tr>
             <tr>

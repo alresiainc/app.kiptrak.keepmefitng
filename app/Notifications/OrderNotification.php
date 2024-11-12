@@ -565,7 +565,7 @@ class OrderNotification extends Notification
             "order_delivery_address" => $this->order->delivery_address,
             "order_extra_cost_amount" => $this->order->extra_cost_amount,
             "order_extra_cost_reason" => $this->order->extra_cost_reason,
-            "order_order_note" => $this->order->order_note,
+            "order_note" => $this->order->order_note,
             "order_expected_delivery_date" => $this->order->expected_delivery_date,
             "order_actual_delivery_date" => $this->order->actual_delivery_date,
             "order_url" => $this->order->url,

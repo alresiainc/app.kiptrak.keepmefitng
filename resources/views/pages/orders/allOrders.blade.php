@@ -43,8 +43,8 @@
 
         .whatsapp-icon {
             /* font-size: 22px;
-                color: #012970;
-                margin-right: 25px; */
+                                                                                                                                                                        color: #012970;
+                                                                                                                                                                        margin-right: 25px; */
             position: relative;
         }
 
@@ -225,18 +225,22 @@
 
                                                         <!--Delivery Due Date-->
                                                         <td>
+                                                            {{-- @if (isset($order->expected_delivery_date)) --}}
                                                             @if (isset($order->expected_delivery_date))
                                                                 {{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('D, jS M Y') }}
-
-                                                                <span class="badge badge-dark"
-                                                                    onclick="changeDeliveryDateModal('{{ $order->id }}', '{{ $order->orderCode($order->id) }}', '{{ ucFirst($order->status) }}', '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
-                        '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')"
-                                                                    style="cursor: pointer;">
-                                                                    <i class="bi bi-plus"></i> <span>Change Delivery
-                                                                        Date</span></span>
                                                             @else
-                                                                No reponse
+                                                                Not set
                                                             @endif
+
+                                                            <span class="badge badge-dark"
+                                                                onclick="changeDeliveryDateModal('{{ $order->id }}', '{{ $order->orderCode($order->id) }}',  `{{ ucFirst(str_replace('_', ' ', $order->status)) }}`, '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                        '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')"
+                                                                style="cursor: pointer;">
+                                                                <i class="bi bi-plus"></i> <span>Change Delivery
+                                                                    Date</span></span>
+                                                            {{-- @else
+                                                                No reponse
+                                                            @endif --}}
 
                                                         </td>
 
@@ -421,8 +425,10 @@
                                                                             href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_and_remitted']) }}">Delivered
                                                                             & Remitted</a></li>
 
-                                                                    <li><a class="dropdown-item"
-                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'rescheduled_order']) }}">Rescheduled
+                                                                    <li><a class="dropdown-item rescheduled-orderr"
+                                                                            onclick="rescheduledOrder('{{ $order->id }}', '{{ $order->orderCode($order->id) }}', `{{ ucFirst(str_replace('_', ' ', $order->status)) }}`, `{{ $order->customer->firstname . ' ' . $order->customer->lastname }}`,
+                        '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')"
+                                                                            {{-- href="{{ route('updateOrderStatus', [$order->unique_key, 'rescheduled_order']) }}" --}}>Rescheduled
                                                                             Order</a></li>
 
                                                                     <li><a class="dropdown-item"
@@ -707,10 +713,11 @@
                                 id="" value="">
                         </div>
 
+
                         <div class="d-grid mb-3">
                             <label for="">Update Order Status | Optional</label>
                             <select name="order_status" data-live-search="true"
-                                class="custom-select form-control border border-dark">
+                                class="custom-select form-control border border-dark order-status-selector">
                                 <option value="" selected>Nothing Selected</option>
 
                                 <option value="new">New</option>
@@ -718,7 +725,8 @@
                                 <option value="cancelled">Cancelled</option>
                                 <option value="delivered_not_remitted">Delivered Not Remitted</option>
                                 <option value="delivered_and_remitted">Delivered and Remitted</option>
-
+                                <option value="rescheduled_order">Rescheduled Order</option>
+                                <option value="order_in_transit">Order in transit</option>
                             </select>
                         </div>
 
@@ -730,6 +738,59 @@
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary addAgentBtn">Update Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="reschdeduleOrderModal" tabindex="-1" aria-labelledby="reschdeduleOrderModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title fs-7">Reschdedule Order <br> Order: <span class="order_code"
+                            style="color: #04512d"></span> &nbsp; Order Status: <span class="order_status"
+                            style="color: #04512d"></span>
+                        <br>Customer: <span class="order_customer text-success" style="color: #04512d"></span>
+                    </div>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('updateOrderDateStatus') }}" method="POST">@csrf
+                    <div class="modal-body">
+
+                        <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                        <div class="d-grid mb-3">
+                            <label for="">Reschdeduled Date</label>
+                            <input type="text" name="order_delivery_date"
+                                class="order_delivery_date form-control @error('order_delivery_date') is-invalid @enderror"
+                                id="" value="">
+                        </div>
+                        <div class="d-none">
+                            <label for="">Update Order Status | Optional</label>
+                            <select name="order_status" data-live-search="true"
+                                class="custom-select form-control border border-dark order-status-selector">
+                                <option value="">Nothing Selected</option>
+
+                                <option value="new">New</option>
+                                <option value="pending">Pending</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="delivered_not_remitted">Delivered Not Remitted</option>
+                                <option value="delivered_and_remitted">Delivered and Remitted</option>
+                                <option value="rescheduled_order" selected>Rescheduled Order</option>
+                                <option value="order_in_transit">Order in transit</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <label for="">Note | Optional</label>
+                            <textarea name="order_note" id="" cols="30" rows="3" class="form-control"></textarea>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary addAgentBtn">Reschdedule Order</button>
                     </div>
                 </form>
             </div>
@@ -774,9 +835,22 @@
         }
 
 
+
         function changeDeliveryDateModal($orderId = "", $orderCode = "", $orderStatus = "", $orderCustomer = "",
             $orderDeliveryDate = "") {
+
             $('#changeDeliveryDateModal').modal("show");
+            $('.order_id').val($orderId);
+            $('.order_code').html($orderCode);
+            $('.order_status').html($orderStatus);
+            $('.order_customer').html($orderCustomer);
+            $('.order_delivery_date').val($orderDeliveryDate);
+        }
+
+        function rescheduledOrder($orderId = "", $orderCode = "", $orderStatus = "", $orderCustomer = "",
+            $orderDeliveryDate = "") {
+
+            $('#reschdeduleOrderModal').modal("show");
             $('.order_id').val($orderId);
             $('.order_code').html($orderCode);
             $('.order_status').html($orderStatus);
@@ -787,6 +861,9 @@
 
     <!---sending multi-mail---->
     <script>
+        $('.rescheduled-order').on('click', function(e) {
+            $('#changeDeliveryDateModal').modal("show");
+        });
         //toggle all checks
         $('#users-master').on('click', function(e) {
             if ($(this).is(':checked', true)) {

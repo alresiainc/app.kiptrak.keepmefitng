@@ -229,6 +229,7 @@ class OrderController extends Controller
         $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
         $data = $request->all();
+
         $order_id = $data['order_id'];
         $order_delivery_date = $data['order_delivery_date'];
         $order_status = $data['order_status'];
@@ -240,6 +241,22 @@ class OrderController extends Controller
         $order->order_note = !empty($order_note) ? $order_note : null;
         $order->expected_delivery_date = !empty($order_delivery_date) ? $order_delivery_date : $order->expected_delivery_date;
         $order->save();
+        $channels = config('site.notification_channels') ?? [];
+
+        $messages = [];
+
+        foreach ($channels as $type) {
+            $message_type = MessageTemplate::where('type', $type . '_order_status_changed_to_' . $order_status)->first();
+
+            if ($message_type) {
+                $messages[$type]['title'] = $message_type->subject;
+                $messages[$type]['message'] = $message_type->message;
+            }
+        }
+
+
+        $customer = $order->customer;
+        $customer?->notify(new OrderNotification($order, $messages));
 
         //upd order
         //DB::table('orders')->where('id',$order_id)->update(['status'=>$status, 'order_note'=>$order_note, 'expected_delivery_date'=>$order_delivery_date]);
