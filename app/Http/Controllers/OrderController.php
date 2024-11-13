@@ -209,7 +209,7 @@ class OrderController extends Controller
         foreach ($channels as $type) {
             $message_type = MessageTemplate::where('type', $type . '_order_status_changed_to_' . $status)->first();
 
-            if ($message_type) {
+            if ($message_type && $message_type->is_active) {
                 $messages[$type]['title'] = $message_type->subject;
                 $messages[$type]['message'] = $message_type->message;
             }
