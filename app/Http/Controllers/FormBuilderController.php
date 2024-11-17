@@ -869,7 +869,7 @@ class FormBuilderController extends Controller
                         $main_outgoingStock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
                         $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
                         $qty_main_product += $main_outgoingStock['quantity_removed'];
-                        $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                        $order_discount_amount += (int)(new \App\Helpers\Helper())->stockDiscount(
                             $main_outgoingStock['amount_accrued'] ?? 0,
                             $main_outgoingStock['discount_amount'] ?? 0,
                             $main_outgoingStock['discount_type'] ?? 'fixed',
@@ -901,7 +901,7 @@ class FormBuilderController extends Controller
                             $orderbump_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
                             $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
                             $qty_orderbump += $orderbump_stock['quantity_removed'];
-                            $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                            $order_discount_amount += (int)(new \App\Helpers\Helper())->stockDiscount(
                                 $orderbump_stock['amount_accrued'] ?? 0,
                                 $orderbump_stock['discount_amount'] ?? 0,
                                 $orderbump_stock['discount_type'] ?? 'fixed',
@@ -933,7 +933,7 @@ class FormBuilderController extends Controller
                             $upsell_stock['product'] = $product; //append 'product' key to $outgoingStockPackageBundle array
                             $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
                             $qty_upsell += $upsell_stock['quantity_removed'];
-                            $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                            $order_discount_amount += (int)(new \App\Helpers\Helper())->stockDiscount(
                                 $upsell_stock['amount_accrued'] ?? 0,
                                 $upsell_stock['discount_amount'] ?? 0,
                                 $upsell_stock['discount_type'] ?? 'fixed',

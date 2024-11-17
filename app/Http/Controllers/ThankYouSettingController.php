@@ -394,7 +394,7 @@ class ThankYouSettingController extends Controller
                                 $orderbumpProduct_revenue = $orderbumpProduct_revenue + ($product->sale_price * $orderbump_stock['quantity_removed']);
                                 $qty_orderbump += $orderbump_stock['quantity_removed'];
 
-                                $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                                $order_discount_amount += (int)(new \App\Helpers\Helper())->stockDiscount(
                                     $orderbump_stock['amount_accrued'] ?? 0,
                                     $orderbump_stock['discount_amount'] ?? 0,
                                     $orderbump_stock['discount_type'] ?? 'fixed',
@@ -427,7 +427,7 @@ class ThankYouSettingController extends Controller
                                 $upsellProduct_revenue = $upsellProduct_revenue + ($product->sale_price * $upsell_stock['quantity_removed']);
                                 $qty_upsell += $upsell_stock['quantity_removed'];
 
-                                $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                                $order_discount_amount += (int)(new \App\Helpers\Helper())->stockDiscount(
                                     $upsell_stock['amount_accrued'] ?? 0,
                                     $upsell_stock['discount_amount'] ?? 0,
                                     $upsell_stock['discount_type'] ?? 'fixed',

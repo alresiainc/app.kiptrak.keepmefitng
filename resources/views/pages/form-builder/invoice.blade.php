@@ -233,7 +233,7 @@
                                                         <p class="title">{{ $main_outgoingStock?->product?->name }}
                                                         </p>
                                                         @php
-                                                            $amount = (new \App\Helpers\helper())->stockDiscount(
+                                                            $amount = (new \App\Helpers\Helper())->stockDiscount(
                                                                 $main_outgoingStock->amount_accrued,
                                                                 $main_outgoingStock->discount_amount,
                                                                 $main_outgoingStock->discount_type,
@@ -289,7 +289,7 @@
                                                                 {{ $orderbump->product->name }}
                                                             </p>
                                                             @php
-                                                                $amount = (new \App\Helpers\helper())->stockDiscount(
+                                                                $amount = (new \App\Helpers\Helper())->stockDiscount(
                                                                     $orderbump->amount_accrued,
                                                                     $orderbump->discount_amount,
                                                                     $orderbump->discount_type,
@@ -344,7 +344,7 @@
                                                                 {{ $upsell->product->name }}
                                                             </p>
                                                             @php
-                                                                $amount = (new \App\Helpers\helper())->stockDiscount(
+                                                                $amount = (new \App\Helpers\Helper())->stockDiscount(
                                                                     $upsell->amount_accrued,
                                                                     $upsell->discount_amount,
                                                                     $upsell->discount_type,
