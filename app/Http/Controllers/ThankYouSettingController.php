@@ -361,7 +361,7 @@ class ThankYouSettingController extends Controller
                             $mainProduct_revenue = $mainProduct_revenue + ($product->sale_price * $main_outgoingStock['quantity_removed']);
                             $qty_main_product += $main_outgoingStock['quantity_removed'];
 
-                            $order_discount_amount += (int)(new \App\Helpers\helper())->stockDiscount(
+                            $order_discount_amount += (int)(new \App\Helpers\Helper())->stockDiscount(
                                 $main_outgoingStock['amount_accrued'] ?? 0,
                                 $main_outgoingStock['discount_amount'] ?? 0,
                                 $main_outgoingStock['discount_type'] ?? 'fixed',
