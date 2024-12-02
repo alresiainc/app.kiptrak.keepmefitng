@@ -4016,7 +4016,7 @@ class FormBuilderController extends Controller
         }
 
 
-        $result = (new FormHelper())->customerExists($formHolder->id, $data, $outgoingStockPackageBundle);
+        // $result = (new FormHelper())->customerExists($formHolder->id, $data, $outgoingStockPackageBundle);
 
         // if ($result['exists']) {
         //     $orders = $result['orders'];
