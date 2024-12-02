@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Support\Facades\Log;
 
@@ -89,5 +90,136 @@ class FormHelper
         }
 
         return null; // Return null if no staff are available or auto distribution is disabled
+    }
+    // public function customerExists($form_holder_id, $inputData = [], $package_bundle = [])
+    // {
+    //     // Define field variations (from your code)
+    //     $fieldVariations = [
+    //         'firstname' => ['first_name', 'firstname', 'name', 'full_name', 'first', 'given_name', 'forename'],
+    //         'lastname' => ['last_name', 'lastname', 'surname', 'family_name', 'second_name', 'last', 'surname_name'],
+    //         'phone_number' => ['phone_number', 'phone', 'number', 'mobile_number', 'contact_number', 'mobile', 'phoneNumber', 'cell', 'cellphone', 'cell_number', 'telephone', 'tel_number'],
+    //         'whatsapp_phone_number' => ['contact', 'whatsapp_number', 'whatsapp', 'phone', 'number', 'mobile_number', 'contact_number', 'mobile', 'wa_number', 'whatsapp_contact', 'whatsappPhone', 'active_whatsapp_number'],
+    //         'email' => ['email', 'email_address', 'e-mail', 'mail', 'contact_email', 'active_email', 'active_email_address'],
+    //         'city' => ['city', 'location', 'town', 'municipality', 'urban_area', 'metropolis'],
+    //         'state' => ['state', 'region', 'province', 'territory', 'county', 'district'],
+    //         'delivery_address' => ['address', 'delivery_address', 'shipping_address', 'postal_address', 'street_address', 'recipient_address', 'full_address', 'full_delivery_address'],
+    //         'delivery_duration' => ['duration', 'delivery_duration', 'time', 'delivery_time', 'shipping_time', 'estimated_time', 'eta', 'delivery_period'],
+    //     ];
+
+    //     // Use the FieldMatcher class to map input data to normalized fields
+    //     $matchedData = (new FieldMatcher())->matchFields($fieldVariations, $inputData);
+
+    //     // Build the query to check for an existing customer
+    //     $query = Customer::query();
+
+    //     foreach ($matchedData as $field => $value) {
+    //         if (!empty($value)) {
+    //             $query->where($field, $value);
+    //         }
+    //     }
+
+    //     // Check for matching customers and retrieve their IDs
+    //     $customers = $query->select('id')->get();
+
+    //     if ($customers->isNotEmpty()) {
+    //         $customerIds = $customers->pluck('id')->toArray();
+    //         $orders = Order::whereIn('customer_id', $customerIds)
+    //             ->where('form_holder_id', $form_holder_id)
+    //             ->get();
+
+    //             //each other package_bundle //json
+    //             $outgoingStock = $order->outgoingStock;
+    //     $outgoingStockPackageBundle = $outgoingStock->package_bundle; 
+
+    //     //Current package_bundle
+    //     $current_package_bundle = $package_bundle; //json
+
+    //         return [
+    //             'exists' => true,
+    //             'orders' => $orders,
+    //             'customer_ids' => $customerIds,
+    //         ];
+    //     }
+
+    //     return [
+    //         'exists' => false,
+    //         'orders' => [],
+    //         'customer_ids' => [],
+    //     ];
+    // }
+    public function customerExists($form_holder_id, $inputData = [], $package_bundle = [])
+    {
+        // Define field variations (from your code)
+        $fieldVariations = [
+            'firstname' => ['first_name', 'firstname', 'name', 'full_name', 'first', 'given_name', 'forename'],
+            'lastname' => ['last_name', 'lastname', 'surname', 'family_name', 'second_name', 'last', 'surname_name'],
+            'phone_number' => ['phone_number', 'phone', 'number', 'mobile_number', 'contact_number', 'mobile', 'phoneNumber', 'cell', 'cellphone', 'cell_number', 'telephone', 'tel_number'],
+            'whatsapp_phone_number' => ['contact', 'whatsapp_number', 'whatsapp', 'phone', 'number', 'mobile_number', 'contact_number', 'mobile', 'wa_number', 'whatsapp_contact', 'whatsappPhone', 'active_whatsapp_number'],
+            'email' => ['email', 'email_address', 'e-mail', 'mail', 'contact_email', 'active_email', 'active_email_address'],
+            'city' => ['city', 'location', 'town', 'municipality', 'urban_area', 'metropolis'],
+            'state' => ['state', 'region', 'province', 'territory', 'county', 'district'],
+            'delivery_address' => ['address', 'delivery_address', 'shipping_address', 'postal_address', 'street_address', 'recipient_address', 'full_address', 'full_delivery_address'],
+            'delivery_duration' => ['duration', 'delivery_duration', 'time', 'delivery_time', 'shipping_time', 'estimated_time', 'eta', 'delivery_period'],
+        ];
+
+        // Use the FieldMatcher class to map input data to normalized fields
+        $matchedData = (new FieldMatcher())->matchFields($fieldVariations, $inputData);
+
+        // Build the query to check for an existing customer
+        $query = Customer::query();
+
+        foreach ($matchedData as $field => $value) {
+            if (!empty($value)) {
+                $query->where($field, $value);
+            }
+        }
+
+        // Check for matching customers and retrieve their IDs
+        $customers = $query->select('id')->get();
+        Log::alert("customers");
+        Log::alert($customers);
+        if ($customers->isNotEmpty()) {
+            $customerIds = $customers->pluck('id')->toArray();
+            $orders = Order::whereIn('customer_id', $customerIds)
+                ->where('form_holder_id', $form_holder_id)
+                ->get();
+            Log::alert("orders");
+            Log::alert($orders);
+
+            foreach ($orders as $order) {
+                $outgoingStock = $order->outgoingStock;
+
+                if ($outgoingStock) {
+                    $outgoingStockPackageBundle = $outgoingStock->package_bundle; // Already cast as array
+
+                    // Check if all key-value pairs in the current package bundle exist in the outgoing stock package bundle
+                    $allKeyValuePairsExist = true;
+                    foreach ($package_bundle as $key => $value) {
+                        if (!array_key_exists($key, $outgoingStockPackageBundle) || $outgoingStockPackageBundle[$key] !== $value) {
+                            $allKeyValuePairsExist = false;
+                            break;
+                        }
+                        Log::alert("package_bundle");
+                        Log::alert($package_bundle);
+                        Log::alert("outgoingStockPackageBundle");
+                        Log::alert($outgoingStockPackageBundle);
+                    }
+                    if ($allKeyValuePairsExist) {
+                        return [
+                            'exists' => true,
+                            'orders' => $orders,
+                            'customer_ids' => $customerIds,
+                            'matching_order_id' => $order->id,
+                        ];
+                    }
+                }
+            }
+        }
+
+        return [
+            'exists' => false,
+            'orders' => [],
+            'customer_ids' => [],
+        ];
     }
 }

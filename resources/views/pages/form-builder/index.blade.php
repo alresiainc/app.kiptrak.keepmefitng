@@ -422,17 +422,21 @@
         }
 
         function embedFormModal(formUrl = "") {
-            let shortCode, iFrameCode;
+            let shortCode, iFrameCode, formEmbedUrl;
 
             // Show the modal
             $('#embedFormModal').modal("show");
 
 
-            $('#embedFormModal').find('#formEmbedUrl').val(formUrl);
 
             // Extract the unique key from the URL
             const urlParts = formUrl.split('/');
             const uniqueKey = urlParts[urlParts.length - 1]; // Get the last segment of the URL
+
+            const siteurl = window.location.origin; // Gets the base URL (protocol + domain + port if any)
+            formEmbedUrl = `${siteurl}/link/form/get-view?key=${uniqueKey}`;
+
+            $('#embedFormModal').find('#formEmbedUrl').val(formEmbedUrl);
 
             // WP short code
             shortCode = `[kiptrak type="form" key="${uniqueKey}"]`;

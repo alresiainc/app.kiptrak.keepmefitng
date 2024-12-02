@@ -68,7 +68,8 @@ class NotificationService
         ];
 
         return $this->sendRequest($this->whatsAppApiUrl, $postData, [
-            'Api-key' => $this->whatsAppApiKey
+            'Api-key' => $this->whatsAppApiKey,
+            'Content-Type' => 'application/json'
         ]);
     }
 
@@ -108,10 +109,10 @@ class NotificationService
     protected function sendRequest(string $url, array $data, array $headers = []): array
     {
         try {
-            Log::info('Sending request to: ' . $url, ['payload' => $data]);
+            Log::info('Sending request to: ' . $url, ['payload' => $data, 'headers' => $headers]);
 
             $response = Http::withHeaders($headers)->post($url, $data);
-
+            Log::info('Request response', ['response' => $response]);
             if ($response->failed()) {
                 Log::error('Request failed', ['response' => $response->json()]);
                 return [

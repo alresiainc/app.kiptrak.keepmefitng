@@ -2010,6 +2010,12 @@
                         success: function(resp) {
                             clearInterval(interval); // Stop the interval when request is done
                             finishLoader(); // Fill the bar to 100%
+                            if (!resp.status) {
+                                toastr.error(resp.message);
+                                submitButton.text(buttonOldText);
+                                submitButton.prop('disabled', false)
+                                return;
+                            }
                             $(".main_stage").val('done');
                             localStorage.setItem('main_stage', 'done');
                             $('.current_order_id').val(resp.data.order_id);

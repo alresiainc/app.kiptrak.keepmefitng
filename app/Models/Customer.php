@@ -99,6 +99,8 @@ class Customer extends Model
         });
     }
 
+
+
     //check if unique_key exists
     private function createUniqueKey($string)
     {
