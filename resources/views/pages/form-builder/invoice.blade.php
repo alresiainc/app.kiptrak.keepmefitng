@@ -58,7 +58,7 @@
         }
     </style>
 
-
+    {!! $headerScripts !!}
 </head>
 
 <body class="">
@@ -420,5 +420,6 @@
             .save();
     }
 </script>
+{!! $footerScripts !!}
 
 </html>

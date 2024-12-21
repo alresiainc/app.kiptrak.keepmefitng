@@ -878,6 +878,10 @@ if (!isset($authUser)) {
                                 class="bi bi-card-list"></i><span>General Settings</span></a>
                     </li>
                     <li>
+                        <a href="{{ route('scripts') }}"><i style="font-size: 100%!important;"
+                                class="bi bi-card-list"></i><span>Header & Footer Scripts</span></a>
+                    </li>
+                    <li>
                         <a href="{{ route('settings.integration') }}"><i style="font-size: 100%!important;"
                                 class="bi bi-card-list"></i><span>Integrations</span></a>
                     </li>

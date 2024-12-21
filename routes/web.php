@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\Customer;
 use Carbon\Carbon;
 use App\Helpers\FieldMatcher;
+// use App\Http\Controllers\Admin\ScriptController;
 use App\Models\MessageTemplate;
 use App\Models\Notification as ModelsNotification;
 use Illuminate\Support\Arr;
@@ -697,6 +698,9 @@ Route::group(['middleware' => 'auth'], function () {
     //Route::get('/nLargest', [TaskController::class, 'nLargest'])->name('nLargest'); //kLargest
 
     Route::get('/integration', [\App\Http\Controllers\SettingsController::class, 'integration'])->name('settings.integration');
+
+    Route::get('/scripts', [ScriptController::class, 'scripts'])->name('scripts');
+    Route::post('/scripts', [ScriptController::class, 'update'])->name('update.scripts');
 });
 
 

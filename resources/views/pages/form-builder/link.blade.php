@@ -644,6 +644,7 @@
             color: red;
         }
     </style>
+    {!! $headerScripts !!}
 </head>
 
 <body class="">
@@ -2426,7 +2427,7 @@
             });
         });
     </script>
-
+    {!! $footerScripts !!}
 
 </body>
 

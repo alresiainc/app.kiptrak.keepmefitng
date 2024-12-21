@@ -76,7 +76,7 @@
         }
     </style>
     @yield('extra_css')
-
+    {!! $headerScripts !!}
 </head>
 
 
@@ -238,7 +238,7 @@
 
         });
     </script>
-
+    {!! $footerScripts !!}
 </body>
 
 </html>
