@@ -281,7 +281,9 @@ class Product extends Model
             $qty = $explode[1];
             $product = Product::find($id);
             $products[] = $product;
-            $products[$key]->quantity_combined = $qty; //append key
+            if ($products[$key]) {
+                $products[$key]->quantity_combined = $qty; //append key
+            }
         }
         return $products;
     }
