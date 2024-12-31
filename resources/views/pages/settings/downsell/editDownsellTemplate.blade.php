@@ -14,8 +14,8 @@
         }
 
         /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
-                color: #999;
-            } */
+                    color: #999;
+                } */
         div.filter-option-inner-inner {
             color: #000 !important;
         }
@@ -511,7 +511,28 @@
                                         </span>
                                     @enderror
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label for="" class="form-label">Header Scripts</label>
+                                        <textarea id="header_scripts" name="header_scripts" class="form-control" rows="5">{{ old('header_scripts', $downsellTemplate->header_scripts) }}</textarea>
+                                        @error('header_scripts')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
 
+                                    <div class="col-md-12">
+                                        <label for="" class="form-label">Footer Scripts</label>
+                                        <textarea id="footer_scripts" name="footer_scripts" class="form-control" rows="5">{{ old('footer_scripts', $downsellTemplate->footer_scripts) }}</textarea>
+
+                                        @error('footer_scripts')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
                                 <div class="text-end">
                                     <button type="submit" class="btn btn-primary">Save Template</button>
                                     <button type="reset" class="btn btn-secondary">Reset</button>

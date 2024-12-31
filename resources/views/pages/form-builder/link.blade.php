@@ -645,6 +645,8 @@
         }
     </style>
     {!! $headerScripts !!}
+
+    {!! $formHolder->header_scripts !!}
 </head>
 
 <body class="">
@@ -654,7 +656,7 @@
             <div class="spinner-border " role="status" id="spinner-icon" style="margin-bottom: 15px; color:#04512d">
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <p id="funny-message">Hang tight, magic is happening...</p>
+            <p id="funny-messages">Please wail... while we process your Order</p>
             <p>Progress: <span id="progress-percentage">0%</span></p>
             <div class="progress">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
@@ -1921,7 +1923,7 @@
 
                 // Update messages every few seconds
                 const messageInterval = setInterval(() => {
-                    $("#funny-message").text(getRandomMessage());
+                    // $("#funny-message").text(getRandomMessage());
                 }, 3000);
 
                 // Stop the message interval when the loader is hidden
@@ -2428,7 +2430,7 @@
         });
     </script>
     {!! $footerScripts !!}
-
+    {!! $formHolder->footer_scripts !!}
 </body>
 
 </html>

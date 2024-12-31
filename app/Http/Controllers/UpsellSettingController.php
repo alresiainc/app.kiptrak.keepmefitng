@@ -125,7 +125,8 @@ class UpsellSettingController extends Controller
         $upsellTemplate->button_text_align = $data['button_text_align']; //left, center, right
         $upsellTemplate->button_text_color = $data['button_text_color'];
         $upsellTemplate->button_text_weight = $data['button_text_weight'];
-        $upsellTemplate->button_text_weight = $data['button_text_weight'];
+        $upsellTemplate->header_scripts = $data['header_scripts'];
+        $upsellTemplate->footer_scripts = $data['footer_scripts'];
 
         $upsellTemplate->created_by = 1;
         $upsellTemplate->status = 'true';
@@ -219,6 +220,9 @@ class UpsellSettingController extends Controller
         $upsellTemplate->button_text_style = $data['button_text_style']; //normal, itallic
         $upsellTemplate->button_text_align = $data['button_text_align']; //left, center, right
         $upsellTemplate->button_text_color = $data['button_text_color'];
+
+        $upsellTemplate->header_scripts = $data['header_scripts'];
+        $upsellTemplate->footer_scripts = $data['footer_scripts'];
 
         $upsellTemplate->created_by = 1;
         $upsellTemplate->status = 'true';
@@ -348,6 +352,9 @@ class UpsellSettingController extends Controller
         $downsellTemplate->button_text_weight = $data['button_text_weight'];
         $downsellTemplate->button_text_weight = $data['button_text_weight'];
 
+        $downsellTemplate->header_scripts = $data['header_scripts'];
+        $downsellTemplate->footer_scripts = $data['footer_scripts'];
+
         $downsellTemplate->created_by = 1;
         $downsellTemplate->status = 'true';
 
@@ -440,6 +447,8 @@ class UpsellSettingController extends Controller
         $downsellTemplate->button_text_style = $data['button_text_style']; //normal, itallic
         $downsellTemplate->button_text_align = $data['button_text_align']; //left, center, right
         $downsellTemplate->button_text_color = $data['button_text_color'];
+        $downsellTemplate->header_scripts = $data['header_scripts'];
+        $downsellTemplate->footer_scripts = $data['footer_scripts'];
 
         $downsellTemplate->created_by = 1;
         $downsellTemplate->status = 'true';

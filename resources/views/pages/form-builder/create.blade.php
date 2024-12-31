@@ -231,9 +231,9 @@
 
 
         /* .text-field-content {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            pointer-events: auto;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            user-select: text;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        pointer-events: auto;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        user-select: text;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    } */
 
         .text-field-content,
         .form-submit-btn {
@@ -695,6 +695,12 @@
                                                 <i class="bi bi-box me-2"></i> <span
                                                     class="d-none d-md-block">Product</span>
                                             </div>
+                                            {{-- <div class="draggable d-flex align-items-center" data-type="optional-product"
+                                                data-bs-toggle="tooltip" data-bs-placement="auto"
+                                                data-bs-title="Add extra optional product">
+                                                <i class="bi bi-box me-2"></i> <span class="d-none d-md-block">Other
+                                                    Product</span>
+                                            </div> --}}
                                             <div class="draggable d-flex align-items-center" data-type="seperator"
                                                 data-bs-toggle="tooltip" data-bs-placement="auto"
                                                 data-bs-title="Add a line to seprate form content">
@@ -897,6 +903,23 @@
                                                     aria-labelledby="downSale" data-bs-parent="#settingsAccordion">
                                                     <div class="accordion-body">
                                                         @include('pages.form-builder.components.downsell-settings-form')
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="accordion-item">
+                                                <div class="accordion-header" id="scripts">
+                                                    <div class="tab-item-header collapsed" data-bs-toggle="collapse"
+                                                        data-bs-target="#collapseScripts" aria-expanded="false"
+                                                        aria-controls="collapseScripts">
+                                                        <div>Header & Footer Scripts</div>
+                                                        <i class="bi bi-caret-right-fill"></i>
+                                                    </div>
+                                                </div>
+                                                <div id="collapseScripts" class="accordion-collapse collapse"
+                                                    aria-labelledby="scripts" data-bs-parent="#settingsAccordion">
+                                                    <div class="accordion-body">
+                                                        @include('pages.form-builder.components.scripts-settings')
 
                                                     </div>
                                                 </div>

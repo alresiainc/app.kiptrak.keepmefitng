@@ -81,6 +81,8 @@ class ThankYouSettingController extends Controller
         $thankYou->onhover_button_text_color = $data['onhover_button_text_color'];
         $thankYou->onhover_button_text_weight = $data['onhover_button_text_weight'];
         $thankYou->onhover_button_text_size = $data['onhover_button_text_size'];
+        $thankYou->header_scripts = $data['header_scripts'];
+        $thankYou->footer_scripts = $data['footer_scripts'];
 
         $thankYou->created_by = $authUser->id;
         $thankYou->status = 'true';
@@ -579,6 +581,8 @@ class ThankYouSettingController extends Controller
         $thankYou->onhover_button_text_color = $data['onhover_button_text_color'];
         $thankYou->onhover_button_text_weight = $data['onhover_button_text_weight'];
         $thankYou->onhover_button_text_size = $data['onhover_button_text_size'];
+        $thankYou->header_scripts = $data['header_scripts'];
+        $thankYou->footer_scripts = $data['footer_scripts'];
 
         $thankYou->created_by = $authUser->id;
         $thankYou->status = 'true';

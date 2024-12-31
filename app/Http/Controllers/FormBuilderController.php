@@ -1220,6 +1220,8 @@ class FormBuilderController extends Controller
         $formHolder->slug = $request->form_code; //like form_code
         $formHolder->form_data = \serialize($form_data_array);
         $formHolder->setting_data = \serialize($setting_data);
+        $formHolder->header_scripts = $request->header_scripts;
+        $formHolder->footer_scripts = $request->footer_scripts;
 
         $formHolder->created_by = $authUser->id;
         $formHolder->status = 'true';
@@ -1587,6 +1589,8 @@ class FormBuilderController extends Controller
 
         $formHolder->form_data = \serialize($form_data_array);
         $formHolder->setting_data = \serialize($setting_data);
+        $formHolder->header_scripts = $request->header_scripts;
+        $formHolder->footer_scripts = $request->footer_scripts;
         $formHolder->status = 'true';
         $formHolder->save();
 

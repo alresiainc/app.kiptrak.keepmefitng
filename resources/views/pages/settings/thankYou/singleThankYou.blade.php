@@ -58,7 +58,7 @@
         }
     </style>
 
-
+    {!! $thankYou->header_scripts !!}
 </head>
 
 <body class="">
@@ -408,6 +408,8 @@
         <polyline id="SvgjsPolyline1003" points="0,0"></polyline>
         <path id="SvgjsPath1004" d="M0 0 "></path>
     </svg>
+
+    {!! $thankYou->footer_scripts !!}
 </body>
 
 <script>

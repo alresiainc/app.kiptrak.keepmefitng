@@ -169,6 +169,16 @@ $(document).ready(function () {
                         '</div><div class="product-container canvas-content row"><label for="package0" class="product_field form-label  me-3 product-item p-3 rounded shadow-sm"><span class="me-1 product-title">Add products to display here</span></label></div> <span class="item-move text-center"><i class="bi bi-grip-vertical" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Drag item to another position"></i></span></div>'
                 );
                 break;
+            case "optional-product":
+                label =
+                    data?.config?.label ?? getNextLabelName("Optional Product");
+                // Add a class "product-element" to identify product elements
+                element = $(
+                    '<div class="canvas-element col-sm-12 product-element"><span class="item-remove text-center"><i class="bi bi-x-lg" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Remove item from form"></i></span><div class="product-label text-field-content" contenteditable="true">' +
+                        label +
+                        '</div><div class="product-container canvas-content row"><label for="package0" class="optional_product_field form-label  me-3 product-item p-3 rounded shadow-sm"><span class="me-1 product-title">Add products to display here</span></label></div> <span class="item-move text-center"><i class="bi bi-grip-vertical" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Drag item to another position"></i></span></div>'
+                );
+                break;
             case "seperator":
                 element = $(
                     '<div class="canvas-element col-sm-12"><span class="item-remove text-center"><i class="bi bi-x-lg" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Remove item from form"></i></span><hr class="canvas-content canvas-element-seperator"> <span class="item-move text-center"><i class="bi bi-grip-vertical" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Drag item to another position"></i></span></div>'
@@ -385,6 +395,10 @@ $(document).ready(function () {
             product_field(form, element);
         }
 
+        if (type === "optional-product") {
+            product_field(form, element, "optional_product_field");
+        }
+
         if (type === "form") {
             form_field(form, element);
         }
@@ -574,6 +588,13 @@ $(document).ready(function () {
                 break;
 
             case "product":
+                config = {
+                    package_choice:
+                        element.data("package-choice") || "package_single",
+                    label: element.prev(".product-label").text() || "",
+                    selected_package: element.data("selected-package") || [],
+                };
+            case "optional-product":
                 config = {
                     package_choice:
                         element.data("package-choice") || "package_single",
@@ -1116,7 +1137,7 @@ $(document).ready(function () {
         updateConfig(element, "text", config);
     }
 
-    function product_field(form, element) {
+    function product_field(form, element, p_type = "product_field") {
         var canvasElement = element.parents(".canvas-element");
         var data = canvasElement?.data("config");
         let config = data?.config
@@ -1222,16 +1243,29 @@ $(document).ready(function () {
                     "<label class='product-label'>" + config.label + "</label>"
                 ).insertBefore(element);
             }
-            updateConfig(element, "product", {
-                label: config.label,
-            });
+            if (p_type == "product_field") {
+                updateConfig(element, "product", {
+                    label: config.label,
+                });
+            } else {
+                updateConfig(element, "additional_products", {
+                    label: config.label,
+                });
+            }
         });
 
         element.prev(".product-label").on("input", function (e) {
             e.stopPropagation();
             const updatedText = $(this).text();
             config.label = updatedText;
-            updateConfig(element, "product", { label: updatedText });
+
+            if (p_type == "product_field") {
+                updateConfig(element, "product", { label: updatedText });
+            } else {
+                updateConfig(element, "additional_products", {
+                    label: updatedText,
+                });
+            }
             $("#product-label").val(updatedText);
             $(this).trigger("change");
         });
@@ -1250,11 +1284,16 @@ $(document).ready(function () {
                 displaySelectedValues(element, "checkbox");
             }
             element.attr("data-package-choice", choice);
-            updateConfig(element, "product", {
-                package_choice: choice,
-            });
+            if (p_type == "product_field") {
+                updateConfig(element, "product", {
+                    package_choice: choice,
+                });
+            } else {
+                updateConfig(element, "additional_products", {
+                    package_choice: choice,
+                });
+            }
         });
-        $;
 
         displaySelectedValues(
             element,
@@ -1317,8 +1356,12 @@ $(document).ready(function () {
                      <div class="${
                          column_size ?? "col-sm-12"
                      } product-wrapper mt-3">
-                     <input type="${type}" name="product_packages[]" class="me-3 product-package product-checker" value="${productId}" id="product-${productId}">
-                        <label for="product-${productId}" class="product_field me-3 product-item p-3 rounded shadow-sm" style="min-width: 100%; width: 100%;">
+                     <input type="${type}" ${
+                            p_type == "product_field"
+                                ? 'name="product_packages[]"'
+                                : 'name="optional_products[]"'
+                        }  class="me-3 product-package product-checker" value="${productId}" id="product-${productId}">
+                        <label for="product-${productId}" class="${p_type} me-3 product-item p-3 rounded shadow-sm" style="min-width: 100%; width: 100%;">
                             <div>
                         <div class="product-title me-1 fw-bold mb-2">${name} ${
                             is_combo
@@ -1457,11 +1500,20 @@ $(document).ready(function () {
             }
 
             config.selected_package = selected;
-
-            element.attr("data-selected-package", JSON.stringify(selected)),
+            element.attr("data-selected-package", JSON.stringify(selected));
+            if (p_type == "product_field") {
                 updateConfig(element, "product", {
                     selected_package: selected,
                 });
+            } else {
+                updateConfig(element, "additional_products", {
+                    selected_package: selected,
+                });
+            }
+            element.attr("data-selected-package", JSON.stringify(selected));
+            // updateConfig(element, "product", {
+            //     selected_package: selected,
+            // });
         }
 
         // Function to create a package field (row with select and remove button)
@@ -1523,7 +1575,11 @@ $(document).ready(function () {
             displaySelectedValues(element);
         });
 
-        updateConfig(element, "product", config);
+        if (p_type == "product_field") {
+            updateConfig(element, "product", config);
+        } else {
+            updateConfig(element, "additional_products", config);
+        }
     }
 
     function image_field(form, element) {
