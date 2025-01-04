@@ -35,6 +35,8 @@ $(document).ready(function () {
         }
     };
 
+    function loadStates() {}
+
     // window.addDefaultItems = addDefaultItems();
 
     // Call the function to add default items
@@ -90,6 +92,34 @@ $(document).ready(function () {
                     existingProduct.removeAttr("data-bs-toggle"); // Remove the tooltip attribute
                 }, 5000);
                 ui.item.remove(); // Remove the dragged item as we won't add another product
+            } else if (
+                type === "additional-product" &&
+                $(".drop-container").find(".additional-product-element")
+                    .length > 0
+            ) {
+                // If a product already exists, show the properties form for the existing product and remove the new one
+                const existingProduct = $(".drop-container").find(
+                    ".additional-product-element"
+                );
+                showPropertiesForm("additional-product", existingProduct);
+                // Add the tooltip to the existing product
+                existingProduct.attr(
+                    "title",
+                    "You Already have an additional product element in the form. select products from the properties section"
+                );
+                existingProduct.attr("data-bs-toggle", "tooltip");
+
+                // Initialize the tooltip
+                const tooltip = new bootstrap.Tooltip(existingProduct[0]);
+                tooltip.show(); // Show the tooltip
+
+                // Set a timeout to dispose of the tooltip after it shows
+                setTimeout(() => {
+                    tooltip.dispose(); // Remove the tooltip instance
+                    existingProduct.removeAttr("title"); // Remove the title attribute
+                    existingProduct.removeAttr("data-bs-toggle"); // Remove the tooltip attribute
+                }, 5000);
+                ui.item.remove(); // Remove the dragged item as we won't add another product
             } else {
                 // If no product exists, add a new one
                 addElementToCanvas(type, ui.item);
@@ -111,6 +141,32 @@ $(document).ready(function () {
             // If a product already exists, show the properties form for the existing product
             const existingProduct =
                 $(".drop-container").find(".product-element");
+            showPropertiesForm("product", existingProduct);
+
+            // Add the tooltip to the existing product
+            existingProduct.attr(
+                "title",
+                "You Already have a product element in the form. select products from the properties section"
+            );
+            existingProduct.attr("data-bs-toggle", "tooltip");
+
+            // Initialize the tooltip
+            const tooltip = new bootstrap.Tooltip(existingProduct[0]);
+            tooltip.show(); // Show the tooltip
+            // Set a timeout to dispose of the tooltip after it shows
+            setTimeout(() => {
+                tooltip.dispose(); // Remove the tooltip instance
+                existingProduct.removeAttr("title"); // Remove the title attribute
+                existingProduct.removeAttr("data-bs-toggle"); // Remove the tooltip attribute
+            }, 5000);
+        } else if (
+            type === "additional-product" &&
+            $(".drop-container").find(".additional-product-element").length > 0
+        ) {
+            // If a product already exists, show the properties form for the existing product
+            const existingProduct = $(".drop-container").find(
+                ".additional-product-element"
+            );
             showPropertiesForm("product", existingProduct);
 
             // Add the tooltip to the existing product
@@ -169,12 +225,12 @@ $(document).ready(function () {
                         '</div><div class="product-container canvas-content row"><label for="package0" class="product_field form-label  me-3 product-item p-3 rounded shadow-sm"><span class="me-1 product-title">Add products to display here</span></label></div> <span class="item-move text-center"><i class="bi bi-grip-vertical" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Drag item to another position"></i></span></div>'
                 );
                 break;
-            case "optional-product":
+            case "additional-product":
                 label =
                     data?.config?.label ?? getNextLabelName("Optional Product");
-                // Add a class "product-element" to identify product elements
+                // Add a class "additional-product-element" to identify product elements
                 element = $(
-                    '<div class="canvas-element col-sm-12 product-element"><span class="item-remove text-center"><i class="bi bi-x-lg" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Remove item from form"></i></span><div class="product-label text-field-content" contenteditable="true">' +
+                    '<div class="canvas-element col-sm-12 additional-product-element"><span class="item-remove text-center"><i class="bi bi-x-lg" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Remove item from form"></i></span><div class="product-label text-field-content" contenteditable="true">' +
                         label +
                         '</div><div class="product-container canvas-content row"><label for="package0" class="optional_product_field form-label  me-3 product-item p-3 rounded shadow-sm"><span class="me-1 product-title">Add products to display here</span></label></div> <span class="item-move text-center"><i class="bi bi-grip-vertical" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Drag item to another position"></i></span></div>'
                 );
@@ -222,6 +278,11 @@ $(document).ready(function () {
 
         let column_width;
         if (type == "product") {
+            column_width = getBootstrapColumnClass(
+                data?.config?.column_width ??
+                    element?.find(".product-wrapper").first().attr("class")
+            );
+        } else if (type == "additional-product") {
             column_width = getBootstrapColumnClass(
                 data?.config?.column_width ??
                     element?.find(".product-wrapper").first().attr("class")
@@ -392,10 +453,10 @@ $(document).ready(function () {
         }
 
         if (type === "product") {
-            product_field(form, element);
+            product_field(form, element, "product_field");
         }
 
-        if (type === "optional-product") {
+        if (type === "additional-product") {
             product_field(form, element, "optional_product_field");
         }
 
@@ -594,7 +655,7 @@ $(document).ready(function () {
                     label: element.prev(".product-label").text() || "",
                     selected_package: element.data("selected-package") || [],
                 };
-            case "optional-product":
+            case "additional_products":
                 config = {
                     package_choice:
                         element.data("package-choice") || "package_single",
@@ -609,7 +670,7 @@ $(document).ready(function () {
         }
 
         // Add properties common for all types
-        if (type == "product") {
+        if (type == "product" || type == "additional_products") {
             config.column_width = getBootstrapColumnClass(
                 element?.find(".product-wrapper").first()?.attr("class")
             );
@@ -1137,7 +1198,7 @@ $(document).ready(function () {
         updateConfig(element, "text", config);
     }
 
-    function product_field(form, element, p_type = "product_field") {
+    function product_field(form, element, p_type = null) {
         var canvasElement = element.parents(".canvas-element");
         var data = canvasElement?.data("config");
         let config = data?.config
@@ -1192,12 +1253,20 @@ $(document).ready(function () {
 
         // Add select fields based on items in selectedPackages
         selectedPackages.forEach((item) => {
-            create_package_field(container, item);
+            create_package_field(
+                container,
+                item,
+                p_type == "product_field" ? false : true
+            );
         });
 
         // Add any remaining select fields needed to reach a total of 3
         for (let i = 0; i < numToCreate; i++) {
-            create_package_field(container);
+            create_package_field(
+                container,
+                null,
+                p_type == "product_field" ? false : true
+            );
         }
         let ell = $("<div>");
         ell.append(`<div><label class="propertiy-label">Label:</label>
@@ -1231,7 +1300,11 @@ $(document).ready(function () {
         form.prepend(ell);
 
         $(".add_package").click(function () {
-            create_package_field(container);
+            create_package_field(
+                container,
+                null,
+                p_type == "product_field" ? false : true
+            );
         });
 
         $("#product-label").on("input", function () {
@@ -1276,12 +1349,21 @@ $(document).ready(function () {
         element.prev(".product-label").focus();
         element.prev(".product-label").on("click", placeCaretOnClick);
 
+        $("#package-choice").off("change");
         $("#package-choice").on("change", function () {
             const choice = $(this).val();
             if (choice === "package_single") {
-                displaySelectedValues(element, "radio");
+                displaySelectedValues(
+                    element,
+                    "radio",
+                    p_type == "product_field" ? false : true
+                );
             } else {
-                displaySelectedValues(element, "checkbox");
+                displaySelectedValues(
+                    element,
+                    "checkbox",
+                    p_type == "product_field" ? false : true
+                );
             }
             element.attr("data-package-choice", choice);
             if (p_type == "product_field") {
@@ -1297,13 +1379,24 @@ $(document).ready(function () {
 
         displaySelectedValues(
             element,
-            config.package_choice === "package_single" ? "radio" : "checkbox"
+            config.package_choice === "package_single" ? "radio" : "checkbox",
+            p_type == "product_field" ? false : true
         );
 
         // Define a function to gather and display all selected values from all select fields
-        function displaySelectedValues(element, type = null) {
+        function displaySelectedValues(
+            element,
+            type = null,
+            isOptionalProduct = false
+        ) {
             let package_choice = $(form).find("#package-choice").val();
             let column_size = $(form).find("#column-size").val();
+            let productSelector;
+            if (isOptionalProduct == true) {
+                productSelector = ".additional-product-selector";
+            } else {
+                productSelector = ".product-selector";
+            }
 
             if (!type) {
                 if (package_choice === "package_single") {
@@ -1315,10 +1408,10 @@ $(document).ready(function () {
 
             // Clear previous content before appending the updated HTML
             element.html("");
-            // Get all product-selector elements
+            // Get all productSelector elements
             var selected = [];
             $(form)
-                .find(".product-selector")
+                .find(productSelector)
                 .each(function () {
                     // Find the currently selected option within this select field
                     var selectedOption = $(this).find("option:selected");
@@ -1493,33 +1586,65 @@ $(document).ready(function () {
                     }
                 });
 
-            if (selected?.length == 0) {
-                element.html(
-                    '<div class="no-product"><i class="bi bi-bag-plus"></i> Select products to preview them here</div>'
-                );
-            }
-
-            config.selected_package = selected;
-            element.attr("data-selected-package", JSON.stringify(selected));
             if (p_type == "product_field") {
+                if (selected?.length == 0) {
+                    element.html(
+                        '<div class="no-product"><i class="bi bi-bag-plus"></i> Select products to preview them here</div>'
+                    );
+                }
+                config.selected_package = selected;
                 updateConfig(element, "product", {
                     selected_package: selected,
                 });
-            } else {
+                element.attr("data-selected-package", JSON.stringify(selected));
+                console.log(
+                    "productSelector:",
+                    productSelector,
+                    "type:",
+                    p_type,
+                    "selected:",
+                    selected
+                );
+            } else if (p_type == "optional_product_field") {
+                if (selected?.length == 0) {
+                    element.html(
+                        '<div class="no-product"><i class="bi bi-bag-plus"></i> Select products to preview additional products here</div>'
+                    );
+                }
+                config.selected_package = selected;
                 updateConfig(element, "additional_products", {
                     selected_package: selected,
                 });
+                element.attr("data-selected-package", JSON.stringify(selected));
+                console.log(
+                    "productSelector:",
+                    productSelector,
+                    "type:",
+                    p_type,
+                    "selected:",
+                    selected
+                );
             }
-            element.attr("data-selected-package", JSON.stringify(selected));
+            // element.attr("data-selected-package", JSON.stringify(selected));
             // updateConfig(element, "product", {
             //     selected_package: selected,
             // });
         }
 
         // Function to create a package field (row with select and remove button)
-        function create_package_field(_this, selected = null) {
+        function create_package_field(
+            _this,
+            selected = null,
+            isOptionalProduct = false
+        ) {
             var select = $(".package_select").val(); // Get the value of the select box (assuming it's HTML)
             var originalSelect = $(select);
+
+            if (isOptionalProduct == true) {
+                productSelector = "additional-product-selector";
+            } else {
+                productSelector = "product-selector";
+            }
 
             if (!originalSelect.length) {
                 console.error(
@@ -1533,7 +1658,7 @@ $(document).ready(function () {
 
             // Set the classes for the cloned select element
             originalSelect.attr({
-                class: "form-control form-control-sm product-selector",
+                class: "form-control form-control-sm " + productSelector,
             });
 
             // If a selected value is provided, find and select the option with the matching data-id
@@ -1566,14 +1691,27 @@ $(document).ready(function () {
 
             rem.click(function () {
                 $(this).closest(".product-container").remove();
-                displaySelectedValues(element);
+                displaySelectedValues(
+                    element,
+                    null,
+                    p_type == "product_field" ? false : true
+                );
             });
         }
 
-        $(form).on("change", ".product-selector", function () {
-            // Call the function to display all selected values
-            displaySelectedValues(element);
-        });
+        $(form).off("change");
+        $(form).on(
+            "change",
+            ".product-selector, .additional-product-selector",
+            function () {
+                // Call the function to display all selected values
+                displaySelectedValues(
+                    element,
+                    null,
+                    p_type == "product_field" ? false : true
+                );
+            }
+        );
 
         if (p_type == "product_field") {
             updateConfig(element, "product", config);
@@ -1878,10 +2016,22 @@ $(document).ready(function () {
         <option value="textarea" ${
             config.type == "textarea" ? "selected" : ""
         }>Textarea</option>
+        <option value="states" ${
+            config.type == "states" ? "selected" : ""
+        }>States</option>
+         <option value="date" ${
+             config.type == "date" ? "selected" : ""
+         }>Date</option>
     </select>
     <div id="field-options-container" style="display: none;">
         <label class="propertiy-label">Select Options (Comma-separated):</label>
         <input type="text" class="form-control form-control-sm" id="field-options" value="${config.options?.join(
+            ", "
+        )}">
+    </div>
+    <div id="date-options-container" style="display: none;">
+        <label class="propertiy-label">Selectable Days ahead (leave empty to allow any date):</label>
+        <input type="text" class="form-control form-control-sm" id="date-options" value="${config.options?.join(
             ", "
         )}">
     </div>
@@ -1990,6 +2140,7 @@ $(document).ready(function () {
                         " canvas-content form-control select2'></select>"
                 );
                 $("#field-options-container").show();
+                $("#date-options-container").hide();
                 updateFieldOptions("select"); // Initialize with existing options
             } else if (selectedType === "textarea") {
                 newElement = $(
@@ -1998,12 +2149,33 @@ $(document).ready(function () {
                         " canvas-content form-control'></textarea>"
                 );
                 $("#field-options-container").hide();
+                $("#date-options-container").hide();
             } else if (["radio", "checkbox"].includes(selectedType)) {
                 newElement = $(
                     "<div class='canvas-content d-flex gap-1'><small>Add options to display</small></div>"
                 );
                 $("#field-options-container").show();
+                $("#date-options-container").hide();
                 updateFieldOptions(selectedType);
+            } else if (selectedType === "states") {
+                newElement = $(
+                    "<select class='" +
+                        config.size +
+                        " canvas-content form-control select2 state-select'><option>-Select States-</option><option>States will be listed here...</option></select>"
+                );
+                $("#field-options-container").hide();
+                $("#date-options-container").hide();
+            } else if (selectedType === "date") {
+                newElement = $(
+                    "<input type='" +
+                        selectedType +
+                        "' class='" +
+                        config.size +
+                        " canvas-content form-control'>"
+                );
+                $("#field-options-container").hide();
+                $("#date-options-container").show();
+                updateFieldOptions("date"); // Initialize with existing options
             } else {
                 newElement = $(
                     "<input type='" +
@@ -2013,6 +2185,7 @@ $(document).ready(function () {
                         " canvas-content form-control'>"
                 );
                 $("#field-options-container").hide();
+                $("#date-options-container").hide();
             }
 
             // Replace the existing element with the new element
@@ -2037,12 +2210,17 @@ $(document).ready(function () {
             element.trigger("change");
         });
 
-        $("#field-options").on("input", function () {
+        $("#field-options, #date-options").on("input", function () {
             updateFieldOptions($("#input-type").val());
         });
 
         function updateFieldOptions(type = null) {
-            const optionsString = $("#field-options").val();
+            let optionsString;
+            if (type == "date") {
+                optionsString = $("#date-options").val();
+            } else {
+                optionsString = $("#field-options").val();
+            }
 
             const options = optionsString
                 .split(",")
@@ -2089,7 +2267,11 @@ $(document).ready(function () {
             });
         }
 
-        if (["select", "textarea", "radio", "checkbox"].includes(config.type)) {
+        if (
+            ["select", "textarea", "radio", "checkbox", "date"].includes(
+                config.type
+            )
+        ) {
             $("#input-type").trigger("change");
         }
 
@@ -2117,7 +2299,7 @@ $(document).ready(function () {
         });
 
         // Initialize the select options if the element is a select
-        if (element.is("select")) {
+        if (element.is("select") && !element.hasClass("state-select")) {
             $("#input-type").val("select");
             $("#field-options-container").show();
         } else if (element.is("textarea")) {

@@ -43,8 +43,8 @@
 
         .whatsapp-icon {
             /* font-size: 22px;
-                                                                                                                                                                        color: #012970;
-                                                                                                                                                                        margin-right: 25px; */
+                                                                                                                                                                                    color: #012970;
+                                                                                                                                                                                    margin-right: 25px; */
             position: relative;
         }
 
@@ -80,18 +80,45 @@
             </div><!-- End Page Title -->
         @else
             <div class="pagetitle">
-                <h1>Orders @if (!isset($status) || $status == 'new')
+                <h1>
+                    Orders
+                    @if (!isset($status) || $status == 'new')
                         New
-                    @elseif($status == 'pending')
+                    @elseif ($status == 'pending')
                         Pending
-                    @elseif($status == 'cancelled')
+                    @elseif ($status == 'cancelled')
                         Cancelled
-                    @elseif($status == 'delivered_not_remitted')
+                    @elseif ($status == 'delivered_not_remitted')
                         Delivered not Remitted
-                    @elseif($status == 'delivered_and_remitted')
+                    @elseif ($status == 'delivered_and_remitted')
                         Delivered and Remitted
+                    @elseif ($status == 'rescheduled_order')
+                        Rescheduled Order
+                    @elseif ($status == 'order_in_transit')
+                        Order in Transit
+                    @elseif ($status == 'order_confirmed')
+                        Order Confirmed
+                    @elseif ($status == 'order_sent_out')
+                        Order Sent Out
+                    @elseif ($status == 'delivery_attempted_1')
+                        Delivery Attempted 1
+                    @elseif ($status == 'delivery_attempted_2')
+                        Delivery Attempted 2
+                    @elseif ($status == 'delivery_attempted_3')
+                        Delivery Attempted 3
+                    @elseif ($status == 'cancelled_admin')
+                        Cancelled by Admin
+                    @elseif ($status == 'customer_unreachable')
+                        Customer Unreachable
+                    @elseif ($status == 'cancelled_customer')
+                        Cancelled by Customer
+                    @elseif ($status == 'rejected_customer')
+                        Rejected by Customer
+                    @elseif ($status == 'duplicate_order')
+                        Duplicate Order
                     @endif
                 </h1>
+
                 <nav>
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/">Home</a></li>
@@ -338,7 +365,7 @@
 
                                                         <td>{{ $order->created_at->format('Y-m-d') }}</td>
 
-                                                        <td>
+                                                        <td class="d-none">
 
                                                             <div class="btn-group">
                                                                 @if (!isset($order->status) || $order->status == 'new')
@@ -443,6 +470,155 @@
 
 
 
+                                                        </td>
+
+                                                        <td>
+                                                            <div class="btn-group">
+                                                                @if (!isset($order->status) || $order->status == 'new')
+                                                                    <button type="button"
+                                                                        class="btn btn-info btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>New Order</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'pending')
+                                                                    <button type="button"
+                                                                        class="btn btn-danger btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Pending Order</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'order_confirmed')
+                                                                    <button type="button"
+                                                                        class="btn btn-primary btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Order Confirmed</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'rescheduled_order')
+                                                                    <button type="button"
+                                                                        class="btn btn-warning btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Order Rescheduled</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'order_sent_out')
+                                                                    <button type="button"
+                                                                        class="btn btn-info btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Order Sent Out for Delivery</span>
+                                                                    </button>
+                                                                @elseif(
+                                                                    $order->status == 'delivery_attempted_1' ||
+                                                                        $order->status == 'delivery_attempted_2' ||
+                                                                        $order->status == 'delivery_attempted_3')
+                                                                    <button type="button"
+                                                                        class="btn btn-secondary btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Delivery Attempted</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'cancelled_admin')
+                                                                    <button type="button"
+                                                                        class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Order Cancelled by Admin</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'customer_unreachable')
+                                                                    <button type="button"
+                                                                        class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Customer Unreachable</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'cancelled_customer')
+                                                                    <button type="button"
+                                                                        class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Order Cancelled by Customer</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'rejected_customer')
+                                                                    <button type="button"
+                                                                        class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Order Rejected by Customer</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'duplicate_order')
+                                                                    <button type="button"
+                                                                        class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Order Cancelled Due to Duplicate Order</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'delivered_not_remitted')
+                                                                    <button type="button"
+                                                                        class="btn btn-warning btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Delivered Not Remitted</span>
+                                                                    </button>
+                                                                @elseif($order->status == 'delivered_and_remitted')
+                                                                    <button type="button"
+                                                                        class="btn btn-success btn-sm dropdown-toggle rounded-pill fw-bolder"
+                                                                        data-bs-toggle="dropdown"
+                                                                        style="font-size: 10px;">
+                                                                        <span>Delivered & Remitted</span>
+                                                                    </button>
+                                                                @endif
+                                                                <ul class="dropdown-menu">
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'new']) }}">New
+                                                                            Order</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'pending']) }}">Pending
+                                                                            Order</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'order_confirmed']) }}">Order
+                                                                            Confirmed</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="rescheduledOrder('{{ $order->id }}', '{{ $order->orderCode($order->id) }}', `{{ ucFirst(str_replace('_', ' ', $order->status)) }}`, `{{ $order->customer->firstname . ' ' . $order->customer->lastname }}`,
+                        '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')"
+                                                                            {{-- href="{{ route('updateOrderStatus', [$order->unique_key, 'rescheduled_order']) }}" --}}>Order
+                                                                            Rescheduled</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'order_sent_out']) }}">Order
+                                                                            Sent Out for Delivery</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'delivery_attempted_1']) }}">Delivery
+                                                                            Attempted 1</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'delivery_attempted_2']) }}">Delivery
+                                                                            Attempted 2</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'delivery_attempted_3']) }}">Delivery
+                                                                            Attempted 3</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'cancelled_admin']) }}">Order
+                                                                            Cancelled by Admin</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'customer_unreachable']) }}">Customer
+                                                                            Unreachable</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'cancelled_customer']) }}">Order
+                                                                            Cancelled by Customer</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'rejected_customer']) }}">Order
+                                                                            Rejected by Customer</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'duplicate_order']) }}">Order
+                                                                            Cancelled Due to Duplicate Order</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_not_remitted']) }}">Delivered
+                                                                            Not Remitted</a></li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_and_remitted']) }}">Delivered
+                                                                            & Remitted</a></li>
+                                                                </ul>
+                                                            </div>
                                                         </td>
 
                                                         <td>

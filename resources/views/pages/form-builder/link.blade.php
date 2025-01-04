@@ -734,7 +734,15 @@
                                                 margin-left: {{ $form['marginLeft'] ?? '0' }};
                                                 margin-right: {{ $form['marginRight'] ?? '0' }};
                                                 text-align: {{ $form['textAlign'] ?? 'inherit' }};">
-                                            @if ($config_type == 'form' && !in_array($form['type'], ['select', 'textarea', 'radio', 'checkbox']))
+                                            @if ($config_type == 'form' && !in_array($form['type'], ['select', 'textarea', 'radio', 'checkbox', 'states']))
+                                                @php
+                                                    $date_option =
+                                                        $form['type'] == 'date' && $form['options'][0]
+                                                            ? $form['options'][0]
+                                                            : false;
+                                                @endphp
+
+
                                                 <div class="contact-parent">
                                                     <label class="form-label">{{ $form['label'] }} @if ($form['required'])
                                                             <span class="text-danger">*</span>
@@ -742,6 +750,9 @@
                                                     </label>
 
                                                     <input type="{{ $form['type'] }}"
+                                                        @if ($form['type'] == 'date') min="{{ date('Y-m-d') }}"
+                                                        max="{{ date('Y-m-d', strtotime('+' . $form['options'][0] . ' days')) }}" 
+                                                    {{-- @dd($form['options'][0]) --}} @endif
                                                         data-name="{{ $form['name'] }}" name="{{ $form['name'] }}"
                                                         value="{{ old($form['name'], $form['default_value'] ?? '') }}"
                                                         class="form-field contact-input form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror"
@@ -826,6 +837,63 @@
                                                         placeholder="{{ $form['placeholder'] }}" @if ($form['required']) required @endif>{{ old($form['name'], $form['default_value'] ?? '') }}</textarea>
                                                 </div>
                                             @endif
+
+                                            @if ($config_type == 'form' && $form['type'] == 'states')
+                                                <div class="form-group w-100">
+                                                    <label class="form-label">{{ $form['label'] }} @if ($form['required'])
+                                                            <span class="text-danger">*</span>
+                                                        @endif
+                                                    </label>
+                                                    <select data-name="{{ $form['name'] }}"
+                                                        name="{{ $form['name'] }}"
+                                                        class="form-field contact-input custom-select form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror"
+                                                        placeholder="{{ $form['placeholder'] }}"
+                                                        @if ($form['required']) required @endif>
+                                                        {{-- {{ old($form['name'], $form['default_value'] ?? '') }} --}}
+                                                        <option value="">-select state-</option>
+                                                        <option>Abia</option>
+                                                        <option>Abuja</option>
+                                                        <option>Adamawa</option>
+                                                        <option>Akwa Ibom</option>
+                                                        <option>Anambra</option>
+                                                        <option>Bauchi</option>
+                                                        <option>Bayelsa</option>
+                                                        <option>Benue</option>
+                                                        <option>Borno</option>
+                                                        <option>Cross River</option>
+                                                        <option>Delta</option>
+                                                        <option>Ebonyi</option>
+                                                        <option>Edo</option>
+                                                        <option>Ekiti</option>
+                                                        <option>Enugu</option>
+                                                        <option>Gombe</option>
+                                                        <option>Imo</option>
+                                                        <option>Jigawa</option>
+                                                        <option>Kaduna</option>
+                                                        <option>Kano</option>
+                                                        <option>Katsina</option>
+                                                        <option>Kebbi</option>
+                                                        <option>Kogi</option>
+                                                        <option>Kwara</option>
+                                                        <option>Lagos</option>
+                                                        <option>Nasarawa</option>
+                                                        <option>Niger</option>
+                                                        <option>Ogun</option>
+                                                        <option>Ondo</option>
+                                                        <option>Osun</option>
+                                                        <option>Oyo</option>
+                                                        <option>Plateau</option>
+                                                        <option>Rivers</option>
+                                                        <option>Sokoto</option>
+                                                        <option>Taraba</option>
+                                                        <option>Yobe</option>
+                                                        <option>Zamfara</option>
+                                                    </select>
+                                                </div>
+                                            @endif
+
+
+
 
 
                                             @if ($config_type == 'text')

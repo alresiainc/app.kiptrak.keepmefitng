@@ -126,7 +126,7 @@ if (!isset($authUser)) {
                     <i class="bi bi-cart3"></i>
                     <span>Orders</span><i class="bi bi-chevron-down ms-auto"></i>
                 </a>
-                <ul id="orders-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                {{-- <ul id="orders-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
                     @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-order-list')))
                         <li>
                             <a href="{{ route('allOrders', 'new') }}"><i style="font-size: 100%!important;"
@@ -172,7 +172,98 @@ if (!isset($authUser)) {
                                     class="bi bi-card-list"></i><span>Cart Abandoned</span></a>
                         </li>
                     @endif
+                </ul> --}}
+                <ul id="orders-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                    @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-order-list')))
+                        <li>
+                            <a href="{{ route('allOrders', 'new') }}"><i style="font-size: 100%!important;"
+                                    class="bi bi-card-list"></i><span>New Orders</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'pending') }}"><i style="font-size: 100%!important;"
+                                    class="bi bi-card-list"></i><span>Pending Orders</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'order_confirmed') }}"><i style="font-size: 100%!important;"
+                                    class="bi bi-card-list"></i><span>Order Confirmed</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'rescheduled_order') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Order
+                                    Rescheduled</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'order_sent_out') }}"><i style="font-size: 100%!important;"
+                                    class="bi bi-card-list"></i><span>Order Sent Out for Delivery</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'delivery_attempted_1') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Delivery
+                                    Attempted 1</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'delivery_attempted_2') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Delivery
+                                    Attempted 2</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'delivery_attempted_3') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Delivery
+                                    Attempted 3</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'cancelled_admin') }}"><i style="font-size: 100%!important;"
+                                    class="bi bi-card-list"></i><span>Cancelled by Admin</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'customer_unreachable') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Customer
+                                    Unreachable</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'cancelled_customer') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Cancelled by
+                                    Customer</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'rejected_customer') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Rejected by
+                                    Customer</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'duplicate_order') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Cancelled Due
+                                    to Duplicate Order</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'delivered_not_remitted') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Delivered Not
+                                    Remitted</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'delivered_and_remitted') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Delivered &
+                                    Remitted</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders', 'order_in_transit') }}"><i
+                                    style="font-size: 100%!important;" class="bi bi-card-list"></i><span>Order In
+                                    Transit</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ route('allOrders') }}"><i style="font-size: 100%!important;"
+                                    class="bi bi-card-list"></i><span>All Orders</span></a>
+                        </li>
+                    @endif
+
+                    @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-order-list')))
+                        <li>
+                            <a href="{{ route('cartAbandon') }}"><i style="font-size: 100%!important;"
+                                    class="bi bi-card-list"></i><span>Cart Abandoned</span></a>
+                        </li>
+                    @endif
                 </ul>
+
             </li>
         @endif
 
@@ -183,7 +274,8 @@ if (!isset($authUser)) {
                     ($user_role->slug == 'warehouse-manager' ||
                         $user_role->permissions->contains('slug', 'view-warehouse-list'))))
             <li class="nav-item">
-                <a class="nav-link collapsed" data-bs-target="#warehouse-nav" data-bs-toggle="collapse" href="#"
+                <a class="nav-link collapsed" data-bs-target="#warehouse-nav" data-bs-toggle="collapse"
+                    href="#"
                     @if (
                         $routeName == 'allWarehouse' ||
                             $routeName == 'addWarehouse' ||

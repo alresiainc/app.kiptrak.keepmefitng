@@ -231,9 +231,9 @@
 
 
         /* .text-field-content {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            pointer-events: auto;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            user-select: text;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            pointer-events: auto;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            user-select: text;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        } */
 
         .text-field-content,
         .form-submit-btn {
@@ -695,12 +695,12 @@
                                                 <i class="bi bi-box me-2"></i> <span
                                                     class="d-none d-md-block">Product</span>
                                             </div>
-                                            {{-- <div class="draggable d-flex align-items-center" data-type="optional-product"
-                                                data-bs-toggle="tooltip" data-bs-placement="auto"
-                                                data-bs-title="Add extra optional product">
+                                            <div class="draggable d-flex align-items-center"
+                                                data-type="additional-product" data-bs-toggle="tooltip"
+                                                data-bs-placement="auto" data-bs-title="Add extra optional product">
                                                 <i class="bi bi-box me-2"></i> <span class="d-none d-md-block">Other
                                                     Product</span>
-                                            </div> --}}
+                                            </div>
                                             <div class="draggable d-flex align-items-center" data-type="seperator"
                                                 data-bs-toggle="tooltip" data-bs-placement="auto"
                                                 data-bs-title="Add a line to seprate form content">
@@ -938,6 +938,10 @@
 
                     <!---used in my-form-builder.js--->
                     <input type="hidden" class="package_select" value="{{ $package_select }}">
+                    {{-- <input type="hidden" class="states_select" value="{{ $package_select }}"> --}}
+                    <select name="states_select" id="states_select" class="states_select">
+                        <option value="">-Select States-</option>
+                    </select>
 
 
                 </form>
