@@ -93,7 +93,7 @@ $(document).ready(function () {
                 }, 5000);
                 ui.item.remove(); // Remove the dragged item as we won't add another product
             } else if (
-                type === "additional-product" &&
+                type === "additional_products" &&
                 $(".drop-container").find(".additional-product-element")
                     .length > 0
             ) {
@@ -101,7 +101,7 @@ $(document).ready(function () {
                 const existingProduct = $(".drop-container").find(
                     ".additional-product-element"
                 );
-                showPropertiesForm("additional-product", existingProduct);
+                showPropertiesForm("additional_products", existingProduct);
                 // Add the tooltip to the existing product
                 existingProduct.attr(
                     "title",
@@ -160,7 +160,7 @@ $(document).ready(function () {
                 existingProduct.removeAttr("data-bs-toggle"); // Remove the tooltip attribute
             }, 5000);
         } else if (
-            type === "additional-product" &&
+            type === "additional_products" &&
             $(".drop-container").find(".additional-product-element").length > 0
         ) {
             // If a product already exists, show the properties form for the existing product
@@ -225,7 +225,7 @@ $(document).ready(function () {
                         '</div><div class="product-container canvas-content row"><label for="package0" class="product_field form-label  me-3 product-item p-3 rounded shadow-sm"><span class="me-1 product-title">Add products to display here</span></label></div> <span class="item-move text-center"><i class="bi bi-grip-vertical" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Drag item to another position"></i></span></div>'
                 );
                 break;
-            case "additional-product":
+            case "additional_products":
                 label =
                     data?.config?.label ?? getNextLabelName("Optional Product");
                 // Add a class "additional-product-element" to identify product elements
@@ -282,7 +282,7 @@ $(document).ready(function () {
                 data?.config?.column_width ??
                     element?.find(".product-wrapper").first().attr("class")
             );
-        } else if (type == "additional-product") {
+        } else if (type == "additional_products") {
             column_width = getBootstrapColumnClass(
                 data?.config?.column_width ??
                     element?.find(".product-wrapper").first().attr("class")
@@ -456,7 +456,7 @@ $(document).ready(function () {
             product_field(form, element, "product_field");
         }
 
-        if (type === "additional-product") {
+        if (type === "additional_products") {
             product_field(form, element, "optional_product_field");
         }
 
@@ -726,7 +726,12 @@ $(document).ready(function () {
             const config =
                 element.dataset.config || element.tagName.toLowerCase();
 
-            formConfig.push(JSON.parse(config));
+            try {
+                formConfig.push(JSON.parse(config));
+            } catch (error) {
+                console.log("error:", error);
+                console.log("in config:", config);
+            }
         });
 
         // Ensure the element with ID 'form_data_json' exists before attempting to set its value

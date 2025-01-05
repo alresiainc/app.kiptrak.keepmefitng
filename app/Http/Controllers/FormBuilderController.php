@@ -1123,6 +1123,7 @@ class FormBuilderController extends Controller
         $missing_fields = [];
         $duplicated_fields = [];
         $selected_package = [];
+        $additional_packages = [];
         // Expected form labels
         $expected_form = [
             // "First Name",
@@ -1148,6 +1149,11 @@ class FormBuilderController extends Controller
                 if ($item['type'] === 'product' && !empty($item['config']['selected_package'])) {
                     $hasProduct = true;
                     $selected_package = $item['config']['selected_package'];
+                }
+
+                if ($item['type'] === 'additional_products' && !empty($item['config']['selected_package'])) {
+                    $hasProduct = true;
+                    $additional_packages = $item['config']['selected_package'];
                 }
                 // Check for form type
                 if ($item['type'] === 'form') {
@@ -1251,7 +1257,31 @@ class FormBuilderController extends Controller
                     'customer_acceptance_status' => null,
                     'reason_removed' => 'as_order_firstphase',
                     'quantity_returned' => 0,
+                    'is_additional' => false,
                     'reason_returned' => null,
+                    'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
+                ];
+                $package_bundle[] = $package_bundles;
+                ////////////////////////////////////////////
+            }
+        }
+
+        foreach ($additional_packages as $package) {
+            if (!empty($package)) {
+                $product = Product::where('id', $package)->first();
+                $product_ids[] = $product->id;
+                // Create a new package array for each product ID
+                $package_bundles = [
+                    'product_id' => $product->id,
+                    'quantity_removed' => 1,
+                    'amount_accrued' => $product->sale_price,
+                    'discount_type' => null,
+                    'discount_amount' => null,
+                    'customer_acceptance_status' => null,
+                    'reason_removed' => 'as_order_firstphase',
+                    'quantity_returned' => 0,
+                    'reason_returned' => null,
+                    'is_additional' => true,
                     'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
                 ];
                 $package_bundle[] = $package_bundles;
@@ -1492,6 +1522,7 @@ class FormBuilderController extends Controller
         $missing_fields = [];
         $duplicated_fields = [];
         $selected_package = [];
+        $additional_packages = [];
         // Expected form labels
         $expected_form = [
             // "First Name",
@@ -1518,6 +1549,12 @@ class FormBuilderController extends Controller
                 if ($item['type'] === 'product' && !empty($item['config']['selected_package'])) {
                     $hasProduct = true;
                     $selected_package = $item['config']['selected_package'];
+                }
+
+
+                if ($item['type'] === 'additional_products' && !empty($item['config']['selected_package'])) {
+                    $hasProduct = true;
+                    $additional_packages = $item['config']['selected_package'];
                 }
                 // Check for form type
                 if ($item['type'] === 'form') {
@@ -1614,11 +1651,36 @@ class FormBuilderController extends Controller
                     'reason_removed' => 'as_order_firstphase',
                     'quantity_returned' => 0,
                     'reason_returned' => null,
+                    'is_additional' => false,
                     'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
                 ];
                 $package_bundle[] = $package_bundles;
             }
         }
+
+        foreach ($additional_packages as $package) {
+            if (!empty($package)) {
+                $product = Product::where('id', $package)->first();
+                $product_ids[] = $product->id;
+                // Create a new package array for each product ID
+                $package_bundles = [
+                    'product_id' => $product->id,
+                    'quantity_removed' => 1,
+                    'amount_accrued' => $product->sale_price,
+                    'discount_type' => null,
+                    'discount_amount' => null,
+                    'customer_acceptance_status' => null,
+                    'reason_removed' => 'as_order_firstphase',
+                    'quantity_returned' => 0,
+                    'reason_returned' => null,
+                    'is_additional' => true,
+                    'isCombo' => isset($product->combo_product_ids) ? 'true' : null,
+                ];
+                $package_bundle[] = $package_bundles;
+                ////////////////////////////////////////////
+            }
+        }
+
 
 
 
