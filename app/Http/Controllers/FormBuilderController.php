@@ -723,6 +723,7 @@ class FormBuilderController extends Controller
 
 
         $selected_package = [];
+        $additional_packages = [];
         foreach ($formData ?? [] as $item) {
             if (isset($item['type'])) {
                 // Check for product type
@@ -735,7 +736,20 @@ class FormBuilderController extends Controller
             }
         }
 
+        foreach ($formData ?? [] as $item) {
+            if (isset($item['type'])) {
+                // Check for product type
+                if ($item['type'] === 'additional_products' && !empty($item['config']['selected_package'])) {
+                    $hasProduct = true;
+                    $item_package = $item['config']['selected_package'];
+
+                    $additional_packages[]  = $item_package;
+                }
+            }
+        }
+
         $packages = Arr::flatten($selected_package);
+        $additional_packages = Arr::flatten($additional_packages);
         $formPackage = [];
 
 
@@ -743,6 +757,7 @@ class FormBuilderController extends Controller
 
         //products package
         $products = [];
+        $additional_products = [];
         foreach ($packages as $key => $package) {
             $product = Product::where('id', $package)->first();
             // dd($product);
@@ -761,6 +776,29 @@ class FormBuilderController extends Controller
 
             $products[] = $formPackage;
         }
+
+        foreach ($additional_packages as $key => $package) {
+            $product = Product::where('id', $package)->first();
+            // dd($product);
+            $formPackage['id'] = $package; //product_id
+            $formPackage['name'] = $product->name;
+            $formPackage['combo_product_ids'] = isset($product->combo_product_ids) ? true : false;
+            $formPackage['short_description'] = $product->short_description;
+            $formPackage['price'] = $product->sale_price;
+            $formPackage['currency_symbol'] = $product->country?->symbol;
+            $formPackage['currency'] = $product->country?->currency;
+            $formPackage['stock_available'] = $product->stock_available();
+            $formPackage['image_url'] = url('/storage/products/' . $product->image);
+
+            $formPackage['available_colors'] = !empty($product->color) && is_array($product->color) ? $product->color : (!empty($product->color) ? [$product->color] : []);
+            $formPackage['available_sizes'] = !empty($product->size) && is_array($product->size) ? $product->size : (!empty($product->size) ? [$product->size] : []);
+
+            $additional_products[] = $formPackage;
+        }
+
+
+
+
         //name, labels, type, in dat order
 
         //for thankyou part
@@ -867,7 +905,7 @@ class FormBuilderController extends Controller
             // event(new TestEvent($invoiceData));
             $this->invoiceData($formHolder, $customer, $order);
         }
-        // dd($formData);
+        // dd($additional_products);
 
         return view('pages.form-builder.link', compact(
             'authUser',
@@ -876,6 +914,7 @@ class FormBuilderController extends Controller
             'settingsData',
             'formData',
             'products',
+            'additional_products',
             'mainProducts_outgoingStocks',
             'order',
             'orderId',

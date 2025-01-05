@@ -945,7 +945,8 @@
 
                                         @if ($config_type == 'product' && count($products) > 0)
                                             <div class="col-12">
-                                                <div class="product-label text-field-content">Label</div>
+                                                <div class="product-label text-field-content">{{ $form['label'] }}
+                                                </div>
                                                 <div class="product-container row">
                                                     @foreach ($products as $key => $item)
                                                         {{-- @dd($products); --}}
@@ -958,11 +959,141 @@
                                                             <input
                                                                 type="{{ $form['package_choice'] == 'package_single' ? 'radio' : 'checkbox' }}"
                                                                 name="product_packages[]"
-                                                                id="package{{ $key }}"
+                                                                id="package-{{ $key }}"
                                                                 class="me-3 product-package product-checker form-field"
                                                                 value="{{ $item['id'] }}-{{ $item['price'] }}"
                                                                 @if ($isRequired) required @endif />
-                                                            <label for="package{{ $key }}"
+                                                            <label for="package-{{ $key }}"
+                                                                class="product_field form-label me-3 product-item p-3 rounded shadow-sm w-100"
+                                                                style="min-width: 100%; width: 100%;">
+
+                                                                <div>
+                                                                    <div class="product-title me-1 fw-bold mb-2">
+                                                                        {{ $item['name'] }} @if ($is_combo)
+                                                                            <span
+                                                                                class="badge badge-success"><span>Combo</span></span>'
+                                                                        @endif
+                                                                    </div>
+
+
+                                                                    <div
+                                                                        class="d-flex flex-column flex-md-row w-100 align-items-start flex-wrap gap-2">
+                                                                        <div class="product-img-container me-3">
+                                                                            <img class="product-img img-fluid rounded"
+                                                                                src="{{ $item['image_url'] }}"
+                                                                                alt="{{ $item['name'] }} Image">
+
+                                                                        </div>
+                                                                        <div
+                                                                            class="product-info d-flex flex-wrap flex-column">
+                                                                            <div class="text-sm text-muted fw-bold">
+                                                                                {{ $item['currency'] }}{{ $item['price'] }}
+                                                                            </div>
+                                                                            <div
+                                                                                class="d-flex align-items-center mb-2 gap-1  @if ($item['combo_product_ids']) d-none @endif">
+                                                                                <span
+                                                                                    style="font-size: 14px; font-weight: 600; opacity: 0.5;">
+                                                                                    Qty:
+                                                                                </span>
+                                                                                <div class="input-group product-qty">
+                                                                                    <button
+                                                                                        class="btn btn-sm btn-icon btn-light border minusQty"
+                                                                                        type="button">
+                                                                                        <i class="bi bi-dash"></i>
+                                                                                    </button>
+                                                                                    <input
+                                                                                        class="form-control border text-center select_product_qty"
+                                                                                        placeholder="" value="1"
+                                                                                        min="1"
+                                                                                        name="select_product_qty[{{ $item['id'] }}]"
+                                                                                        max="{{ $item['stock_available'] }}">
+                                                                                    <button
+                                                                                        class="btn btn-sm btn-icon btn-light border plusQty"
+                                                                                        type="button">
+                                                                                        <i class="bi bi-plus-lg"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div
+                                                                                class="size-options d-flex align-items-center mt-1 {{ !empty($item['available_sizes']) ? '' : 'd-none' }}">
+                                                                                <span
+                                                                                    style="font-size: 14px; font-weight: 600; opacity: 0.5;">Sizes:
+                                                                                </span>
+                                                                                @foreach ($item['available_sizes'] as $size)
+                                                                                    <input type="radio"
+                                                                                        id="size-{{ $size }}"
+                                                                                        name="product_size"
+                                                                                        value="{{ $size }}"
+                                                                                        class="size-radio d-none">
+                                                                                    <label
+                                                                                        for="size-{{ $size }}"
+                                                                                        class="size-box">{{ $size }}</label>
+                                                                                @endforeach
+                                                                            </div>
+
+                                                                            <div
+                                                                                class="color-options d-flex align-items-center mt-1 {{ !empty($item['available_colors']) ? '' : 'd-none' }}">
+                                                                                <span
+                                                                                    style="font-size: 14px; font-weight: 600; opacity: 0.5;">Colors:
+                                                                                </span>
+                                                                                @foreach ($item['available_colors'] as $color)
+                                                                                    <input type="radio"
+                                                                                        id="color-{{ $color }}"
+                                                                                        name="product_color"
+                                                                                        value="{{ $color }}"
+                                                                                        class="color-radio d-none">
+                                                                                    <label
+                                                                                        for="color-{{ $color }}"
+                                                                                        class="color-circle">{{ $color }}</label>
+                                                                                @endforeach
+                                                                            </div>
+
+                                                                            <div
+                                                                                class="{{ $is_combo ? '' : 'd-none' }}">
+                                                                                <span
+                                                                                    class="">{{ $item['short_description'] }}</span>
+                                                                            </div>
+
+
+
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </label>
+                                                        </div>
+                                                    @endforeach
+
+                                                    @error('selected_products')
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $message }}</strong>
+                                                        </span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if ($config_type == 'additional_products' && count($additional_products) > 0)
+                                            <div class="col-12">
+                                                <div class="product-label text-field-content">{{ $form['label'] }}
+                                                </div>
+                                                <div class="additional-product-container row">
+                                                    @foreach ($additional_products as $key => $item)
+                                                        {{-- @dd($products); --}}
+                                                        @php
+                                                            $is_combo = $item['combo_product_ids'] ? true : false;
+                                                            $isRequired = false;
+                                                        @endphp
+                                                        <div
+                                                            class="{{ $form['column_width'] ?? 'col-sm-12' }} product_package_item">
+                                                            <input
+                                                                type="{{ $form['package_choice'] == 'package_single' ? 'radio' : 'checkbox' }}"
+                                                                name="additional_product_packages[]"
+                                                                id="additional-package-{{ $key }}"
+                                                                class="me-3 additional-product-package product-checker form-field"
+                                                                value="{{ $item['id'] }}-{{ $item['price'] }}"
+                                                                @if ($isRequired) required @endif />
+                                                            <label for="additional-package-{{ $key }}"
                                                                 class="product_field form-label me-3 product-item p-3 rounded shadow-sm w-100"
                                                                 style="min-width: 100%; width: 100%;">
 
@@ -1810,7 +1941,7 @@
 
             //cart-abandon-package
             var packages = [];
-            $(".product-package").click(function() {
+            $(".product-packagef").click(function() {
                 var cartAbandoned_id = $('.cartAbandoned_id').val();
                 var unique_key = $(".formholder_unique_key").val();
                 var product_package = $(this).val();
@@ -1840,34 +1971,41 @@
                     var packages_copy = unique(packages);
                 }
 
+                console.log("packages:", packages);
+
+            })
+            $(".additional-product-package").click(function() {
+
+                var cartAbandoned_id = $('.cartAbandoned_id').val();
+                var unique_key = $(".formholder_unique_key").val();
+                var product_package = $(this).val();
+                var package_field_type = $(this).attr('type');
+                var selected_qty = $(this).closest(".product_package_item").find(".select_product_qty")
+                    .val();
+                product_package = $(this).val(); //1-1000-10
 
 
-                // var last_Val = $('input.contact-input:last').val();
-                // var last_inputName = $('input.contact-input:last').attr('data-name');
+                if (package_field_type == 'radio') {
+                    if (packages.length > 0) {
+                        packages = []
+                    }
+                    packages.push(product_package) //store in array
+                    //check for duplicates
+                    var packages_copy = unique(packages);
+                } else {
+                    packages = [];
+                    $('.additional-product-container .additional-product-package').each(function() {
+                        var type = $(this).attr('type');
+                        var value = $(this).val();
+                        if ($(this).is(':checked')) {
+                            packages.push(value) //store in array
+                        }
+                    })
+                    //check for duplicates
+                    var packages_copy = unique(packages);
+                }
 
-                // if (last_Val == '' || last_Val == null) {
-                //     var msg = last_inputName + ' ' + 'must be filled';
-                //     alert(msg)
-                // } else {
-                //     var inputVal = last_Val + '|' + last_inputName;
-                //     $.ajax({
-                //         type: 'get',
-                //         url: '/cart-abandon-package',
-                //         data: {
-                //             unique_key: unique_key,
-                //             cartAbandoned_id: cartAbandoned_id,
-                //             product_package: packages_copy,
-                //             inputVal: inputVal
-                //         },
-                //         success: function(resp) {
-                //             //console.log(resp)
-
-                //         },
-                //         error: function() {
-                //             alert("Error");
-                //         }
-                //     });
-                // }
+                console.log("additional-packages:", packages);
 
             })
 
@@ -2034,6 +2172,18 @@
                     }
                 }).get();
 
+                var additional_product_packages = $('input[name^="additional_product_packages[]"]').map(function() {
+                    if ($(this).is(':checked')) {
+                        var selected_qty = $(this).closest(".product_package_item").find(".select_product_qty")
+                            .val();
+                        return $(this).val() + '-' + selected_qty;
+                    }
+                }).get();
+
+                const all_packages = product_packages.concat(additional_product_packages);
+
+
+
 
 
                 const isValid = $("#form").validate().form();
@@ -2055,7 +2205,7 @@
                     const data = {
                         unique_key: unique_key,
                         cartAbandoned_id: cartAbandoned_id,
-                        product_packages: product_packages,
+                        product_packages: all_packages,
                         form_fields: formValues
                     };
 
