@@ -231,9 +231,9 @@
 
 
         /* .text-field-content {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            pointer-events: auto;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            user-select: text;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                pointer-events: auto;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                user-select: text;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            } */
 
         .text-field-content,
         .form-submit-btn {
@@ -938,10 +938,8 @@
 
                     <!---used in my-form-builder.js--->
                     <input type="hidden" class="package_select" value="{{ $package_select }}">
-                    {{-- <input type="hidden" class="states_select" value="{{ $package_select }}"> --}}
-                    <select name="states_select" id="states_select" class="states_select">
-                        <option value="">-Select States-</option>
-                    </select>
+
+
 
 
                 </form>
