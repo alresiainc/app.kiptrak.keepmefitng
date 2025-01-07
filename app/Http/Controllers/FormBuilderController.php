@@ -760,21 +760,25 @@ class FormBuilderController extends Controller
         $additional_products = [];
         foreach ($packages as $key => $package) {
             $product = Product::where('id', $package)->first();
-            // dd($product);
-            $formPackage['id'] = $package; //product_id
-            $formPackage['name'] = $product->name;
-            $formPackage['combo_product_ids'] = isset($product->combo_product_ids) ? true : false;
-            $formPackage['short_description'] = $product->short_description;
-            $formPackage['price'] = $product->sale_price;
-            $formPackage['currency_symbol'] = $product->country?->symbol;
-            $formPackage['currency'] = $product->country?->currency;
-            $formPackage['stock_available'] = $product->stock_available();
-            $formPackage['image_url'] = url('/storage/products/' . $product->image);
+            if ($product) {
 
-            $formPackage['available_colors'] = !empty($product->color) && is_array($product->color) ? $product->color : (!empty($product->color) ? [$product->color] : []);
-            $formPackage['available_sizes'] = !empty($product->size) && is_array($product->size) ? $product->size : (!empty($product->size) ? [$product->size] : []);
 
-            $products[] = $formPackage;
+                // dd($product);
+                $formPackage['id'] = $package; //product_id
+                $formPackage['name'] = $product->name;
+                $formPackage['combo_product_ids'] = isset($product->combo_product_ids) ? true : false;
+                $formPackage['short_description'] = $product->short_description;
+                $formPackage['price'] = $product->sale_price;
+                $formPackage['currency_symbol'] = $product->country?->symbol;
+                $formPackage['currency'] = $product->country?->currency;
+                $formPackage['stock_available'] = $product->stock_available();
+                $formPackage['image_url'] = url('/storage/products/' . $product->image);
+
+                $formPackage['available_colors'] = !empty($product->color) && is_array($product->color) ? $product->color : (!empty($product->color) ? [$product->color] : []);
+                $formPackage['available_sizes'] = !empty($product->size) && is_array($product->size) ? $product->size : (!empty($product->size) ? [$product->size] : []);
+
+                $products[] = $formPackage;
+            }
         }
 
         foreach ($additional_packages as $key => $package) {
