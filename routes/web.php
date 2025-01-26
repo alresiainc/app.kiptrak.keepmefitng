@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\Customer;
 use Carbon\Carbon;
 use App\Helpers\FieldMatcher;
+use App\Helpers\Naija\Naija;
 // use App\Http\Controllers\Admin\ScriptController;
 use App\Models\MessageTemplate;
 use App\Models\Notification as ModelsNotification;
@@ -37,6 +38,12 @@ Route::get('/wordpress/plugin-update/{plugin}/download.zip', [WordPressPluginCon
 Route::get('/wordpress/plugin-update/{plugin}/check', [WordPressPluginController::class, 'check'])->name('wordpress.plugin.checkUpdate');
 
 
+Route::get('/test-helper', function () {
+    $states = Naija::states();
+
+
+    dd($states);
+});
 Route::get('/test-fields', function () {
 
 
@@ -90,15 +97,17 @@ Route::get('/update-db', function () {
 
 
 Route::get('/update-order-messages', function () {
+
+    MessageTemplate::whereNotNull('id')->delete();
     $orders_statuses = [
         'new' => 'New',
-        'new_from_alarm' => 'New From Alarm',
+        // 'new_from_alarm' => 'New From Alarm',
         'pending' => 'Pending',
         'cancelled' => 'Cancelled',
         'delivered_not_remitted' => 'Delivered Not Remitted',
         'delivered_and_remitted' => 'Delivered and Remitted',
         'rescheduled_order' => 'Rescheduled Order',
-        'order_in_transit' => 'Order In Transit',
+        // 'order_in_transit' => 'Order In Transit',
         'order_confirmed' => 'Order Confirmed',
         'order_sent_out' => 'Order Sent Out',
         'delivery_attempted_1' => 'Delivery Attempted 1',
@@ -109,11 +118,13 @@ Route::get('/update-order-messages', function () {
         'cancelled_customer' => 'Cancelled by Customer',
         'rejected_customer' => 'Rejected by Customer',
         'duplicate_order' => 'Duplicate Order',
-        'total_follow_ups' => 'Total Follow Ups',
-        'today_follow_ups' => 'Today Follow Ups',
-        'tomorrow_follow_ups' => 'Tomorrow Follow Ups',
-        'other_orders' => 'Other Orders'
+        // 'total_follow_ups' => 'Total Follow Ups',
+        // 'today_follow_ups' => 'Today Follow Ups',
+        // 'tomorrow_follow_ups' => 'Tomorrow Follow Ups',
+        // 'other_orders' => 'Other Orders'
     ];
+
+
 
 
     $channels = config('site.notification_channels');
@@ -129,15 +140,16 @@ Route::get('/update-order-messages', function () {
                 $messageTemplate->channel = $channel;
                 $messageTemplate->type = $type;
                 $messageTemplate->subject = $statusLabel;
+                $messageTemplate->is_active = false;
 
                 // Custom message based on the status
-                if ($status === 'rescheduled_order') {
-                    $messageTemplate->message = "Hi [customer_first_name] [customer_last_name], quick update - your order has been rescheduled based on your request to shift the date for your delivery. \n\n We will do our BEST to deliver on the rescheduled date. Remember, Delay is DANGEROUS \n\n Please make sure to be available on that day to receive it. \n\nIn the meantime, do you have any questions? Need help? \n\n Reply here, and we'll take care of it fast! \n\n[staff_name], Customer Service";
-                } elseif ($status === 'order_in_transit') {
-                    $messageTemplate->message = "Hello [customer_first_name] [customer_last_name]! Exciting news - your order is on the way, and the rider will deliver it to you today! Kindly pay to the delivery agent and collect your order.  \n\n It's currently in transit, and we can't wait for you to start enjoying the result you've always wanted. \n\nPlease be with your phone so that when he calls, you will respond. The delivery person has other customers to deliver to, so please don't keep the delivery person waiting. \n\nIf you need any help or have any questions while you wait, just reply to this message. \n\n Get ready - it'll be at your doorstep soon! \n\nThanks for your patronage. \n\n[staff_name], Customer Service";
-                } else {
-                    $messageTemplate->message = "Hello [customer_first_name] [customer_last_name], your order status has been updated to '{$statusLabel}'. For any questions or concerns, please reply to this message.\n\nThank you for choosing us!\n\n[staff_name], Customer Service";
-                }
+                // if ($status === 'rescheduled_order') {
+                //     $messageTemplate->message = "Hi [customer_first_name] [customer_last_name], quick update - your order has been rescheduled based on your request to shift the date for your delivery. \n\n We will do our BEST to deliver on the rescheduled date. Remember, Delay is DANGEROUS \n\n Please make sure to be available on that day to receive it. \n\nIn the meantime, do you have any questions? Need help? \n\n Reply here, and we'll take care of it fast! \n\n[staff_name], Customer Service";
+                // } elseif ($status === 'order_in_transit') {
+                //     $messageTemplate->message = "Hello [customer_first_name] [customer_last_name]! Exciting news - your order is on the way, and the rider will deliver it to you today! Kindly pay to the delivery agent and collect your order.  \n\n It's currently in transit, and we can't wait for you to start enjoying the result you've always wanted. \n\nPlease be with your phone so that when he calls, you will respond. The delivery person has other customers to deliver to, so please don't keep the delivery person waiting. \n\nIf you need any help or have any questions while you wait, just reply to this message. \n\n Get ready - it'll be at your doorstep soon! \n\nThanks for your patronage. \n\n[staff_name], Customer Service";
+                // } else {
+                //     $messageTemplate->message = "Hello [customer_first_name] [customer_last_name], your order status has been updated to '{$statusLabel}'. For any questions or concerns, please reply to this message.\n\nThank you for choosing us!\n\n[staff_name], Customer Service";
+                // }
 
                 $messageTemplate->save();
             }
@@ -257,6 +269,7 @@ Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'loginPost'])->name('loginPost');
 Route::get('/form-embedded/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'formEmbedded'])->name('formEmbedded');
 
+Route::get('/states/get_lgas_by_state', [State::class, 'get_lgas_by_state'])->name('state.lgas');
 Route::get('/form-short-code/{id}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'viewForm'])->name('newFormLink');
 
 Route::get('/get-form/{unique_key}/{current_order_id?}/{stage?}', [FormBuilderController::class, 'viewForm'])->name('newFormLink');
@@ -532,7 +545,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/add-upsell-templates', [UpsellSettingController::class, 'addUpsellTemplatePost'])->name('addUpsellTemplatePost');
     Route::get('/edit-upsell-templates/{unique_key}', [UpsellSettingController::class, 'editUpsellTemplate'])->name('editUpsellTemplate');
     Route::post('/edit-upsell-templates/{unique_key}', [UpsellSettingController::class, 'editUpsellTemplatePost'])->name('editUpsellTemplatePost');
-
+    Route::get('/duplicate-upsell-templates/{unique_key}', [UpsellSettingController::class, 'duplicateUpsellTemplate'])->name('duplicateUpsellTemplate');
 
     //allDownsellTemplates 
     Route::get('/all-downsell-templates', [UpsellSettingController::class, 'allDownsellTemplates'])->name('allDownsellTemplates');

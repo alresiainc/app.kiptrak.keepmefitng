@@ -1,0 +1,187 @@
+{
+    "abia": {
+        "name": "Abia",
+        "official_name": "Abia State",
+        "short_code": "AB"
+    },
+    "adamawa": {
+        "name": "Adamawa",
+        "official_name": "Adamawa State",
+        "short_code": "AD"
+    },
+    "akwa_ibom": {
+        "name": "Akwa Ibom",
+        "official_name": "Akwa Ibom State",
+        "short_code": "AK"
+    },
+    "anambra": {
+        "name": "Anambra",
+        "official_name": "Anambra State",
+        "short_code": "AN"
+    },
+    "bauchi": {
+        "name": "Bauchi",
+        "official_name": "Bauchi State",
+        "short_code": "BA"
+    },
+    "bayelsa": {
+        "name": "Bayelsa",
+        "official_name": "Bayelsa State",
+        "short_code": "BA"
+    },
+    "benue": {
+        "name": "Benue",
+        "official_name": "Benue State",
+        "short_code": "BA"
+    },
+    "borno": {
+        "name": "Borno",
+        "official_name": "Benue State",
+        "short_code": "BA"
+    },
+    "cross_river": {
+        "name": "Cross River",
+        "official_name": "Cross River State",
+        "short_code": "BA"
+    },
+    "delta": {
+        "name": "Delta",
+        "official_name": "Delta State",
+        "short_code": "BA"
+    },
+    "ebonyi": {
+        "name": "Ebonyi",
+        "official_name": "Ebonyi State",
+        "short_code": "BA"
+    },
+    "edo": {
+        "name": "Edo",
+        "official_name": "Edo State",
+        "short_code": "BA"
+    },
+    "ekiti": {
+        "name": "Ekiti",
+        "official_name": "Ekiti State",
+        "short_code": "BA"
+    },
+    "enugu": {
+        "name": "Enugu",
+        "official_name": "Enugu State",
+        "short_code": "BA"
+    },
+    "fct": {
+        "name": "Federal Capital Territory",
+        "official_name": "Federal Capital Territory",
+        "short_code": "BA"
+    },
+    "gombe": {
+        "name": "Gombe",
+        "official_name": "Gombe State",
+        "short_code": "BA"
+    },
+    "imo": {
+        "name": "Imo",
+        "official_name": "Imo State",
+        "short_code": "BA"
+    },
+    "jigawa": {
+        "name": "Jigawa",
+        "official_name": "Jigawa State",
+        "short_code": "BA"
+    },
+    "kaduna": {
+        "name": "Kaduna",
+        "official_name": "Kaduna State",
+        "short_code": "BA"
+    },
+    "kano": {
+        "name": "Kano",
+        "official_name": "Kaduna State",
+        "short_code": "BA"
+    },
+    "katsina": {
+        "name": "Katsina",
+        "official_name": "Katsina State",
+        "short_code": "BA"
+    },
+    "kebbi": {
+        "name": "Kebbi",
+        "official_name": "Kebbi State",
+        "short_code": "BA"
+    },
+    "kogi": {
+        "name": "Kogi",
+        "official_name": "Kogi State",
+        "short_code": "BA"
+    },
+    "kwara": {
+        "name": "Kwara",
+        "official_name": "Kwara State",
+        "short_code": "BA"
+    },
+    "lagos": {
+        "name": "Lagos",
+        "official_name": "Lagos State",
+        "short_code": "BA"
+    },
+    "nasarawa": {
+        "name": "Nasarawa",
+        "official_name": "Nasarawa State",
+        "short_code": "BA"
+    },
+    "niger": {
+        "name": "Niger",
+        "official_name": "Niger State",
+        "short_code": "BA"
+    },
+    "ogun": {
+        "name": "Ogun",
+        "official_name": "Ogun State",
+        "short_code": "BA"
+    },
+    "ondo": {
+        "name": "Ondo",
+        "official_name": "Ondo State",
+        "short_code": "BA"
+    },
+    "osun": {
+        "name": "Osun",
+        "official_name": "State of Osun",
+        "short_code": "BA"
+    },
+    "oyo": {
+        "name": "Oyo",
+        "official_name": "Oyo State",
+        "short_code": "BA"
+    },
+    "plateau": {
+        "name": "Plateau",
+        "official_name": "Plateau State",
+        "short_code": "BA"
+    },
+    "rivers": {
+        "name": "Rivers",
+        "official_name": "Rivers State",
+        "short_code": "BA"
+    },
+    "sokoto": {
+        "name": "Sokoto",
+        "official_name": "Sokoto State",
+        "short_code": "BA"
+    },
+    "taraba": {
+        "name": "Taraba",
+        "official_name": "Taraba State",
+        "short_code": "BA"
+    },
+    "yobe": {
+        "name": "Yobe",
+        "official_name": "Yobe State",
+        "short_code": "BA"
+    },
+    "zamfara": {
+        "name": "Zamfara",
+        "official_name": "Zamfara State",
+        "short_code": "BA"
+    }
+}

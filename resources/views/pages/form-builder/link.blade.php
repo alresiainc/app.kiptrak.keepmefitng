@@ -734,7 +734,7 @@
                                                 margin-left: {{ $form['marginLeft'] ?? '0' }};
                                                 margin-right: {{ $form['marginRight'] ?? '0' }};
                                                 text-align: {{ $form['textAlign'] ?? 'inherit' }};">
-                                            @if ($config_type == 'form' && !in_array($form['type'], ['select', 'textarea', 'radio', 'checkbox', 'states']))
+                                            @if ($config_type == 'form' && !in_array($form['type'], ['select', 'textarea', 'radio', 'checkbox', 'states', 'date']))
                                                 @php
                                                     $date_option =
                                                         $form['type'] == 'date' && $form['options'][0]
@@ -768,6 +768,53 @@
 
                                                 </div>
                                             @endif
+
+                                            @if ($config_type == 'form' && $form['type'] == 'date')
+                                                @php
+                                                    $date_option =
+                                                        $form['type'] == 'date' && $form['options'][0]
+                                                            ? $form['options'][0]
+                                                            : false;
+                                                @endphp
+
+
+                                                <div class="contact-parent">
+                                                    <label class="form-label">{{ $form['label'] }}
+                                                        @if ($form['required'])
+                                                            <span class="text-danger">*</span>
+                                                        @endif
+                                                    </label>
+                                                    <select name="{{ $form['name'] }}" data-selector="date"
+                                                        class="form-control select2 date-selector form-field"
+                                                        @if ($form['required']) required @endif
+                                                        @error($form['name']) is-invalid @enderror
+                                                        placeholder="{{ $form['placeholder'] }}">
+                                                        <option value="">Select Delivery Date</option>
+                                                        <option value="<?= date('Y-m-d') ?>">Today</option>
+                                                        <option value="<?= date('Y-m-d', strtotime('+1 day')) ?>">
+                                                            Tomorrow</option>
+                                                        <option value="custom">Pick a specific date.</option>
+                                                    </select>
+
+                                                    <div class="form-group date-toggle contact-parent custom-date-group mt-3"
+                                                        id="custom-date-group" style="display: none;">
+                                                        <label>Select a Custom Date</label>
+                                                        <input type="{{ $form['type'] }}" min="{{ date('Y-m-d') }}"
+                                                            max="{{ date('Y-m-d', strtotime('+' . $form['options'][0] . ' days')) }}"
+                                                            data-name="{{ $form['name'] }}"
+                                                            value="<?= date('Y-m-d') ?>"
+                                                            class="custom-date-picker form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }}">
+                                                    </div>
+                                                    <!--if such error-->
+                                                    @error($form['name'])
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $message }}</strong>
+                                                        </span>
+                                                    @enderror
+
+                                                </div>
+                                            @endif
+
 
                                             @if ($config_type == 'form' && in_array($form['type'], ['radio', 'checkbox']))
                                                 <div class="form-group w-100"
@@ -839,56 +886,34 @@
                                             @endif
 
                                             @if ($config_type == 'form' && $form['type'] == 'states')
-                                                <div class="form-group w-100">
-                                                    <label class="form-label">{{ $form['label'] }} @if ($form['required'])
-                                                            <span class="text-danger">*</span>
-                                                        @endif
-                                                    </label>
-                                                    <select data-name="{{ $form['name'] }}"
-                                                        name="{{ $form['name'] }}"
-                                                        class="form-field contact-input custom-select form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror"
-                                                        placeholder="{{ $form['placeholder'] }}"
-                                                        @if ($form['required']) required @endif>
-                                                        {{-- {{ old($form['name'], $form['default_value'] ?? '') }} --}}
-                                                        <option value="">-select state-</option>
-                                                        <option>Abia</option>
-                                                        <option>Abuja</option>
-                                                        <option>Adamawa</option>
-                                                        <option>Akwa Ibom</option>
-                                                        <option>Anambra</option>
-                                                        <option>Bauchi</option>
-                                                        <option>Bayelsa</option>
-                                                        <option>Benue</option>
-                                                        <option>Borno</option>
-                                                        <option>Cross River</option>
-                                                        <option>Delta</option>
-                                                        <option>Ebonyi</option>
-                                                        <option>Edo</option>
-                                                        <option>Ekiti</option>
-                                                        <option>Enugu</option>
-                                                        <option>Gombe</option>
-                                                        <option>Imo</option>
-                                                        <option>Jigawa</option>
-                                                        <option>Kaduna</option>
-                                                        <option>Kano</option>
-                                                        <option>Katsina</option>
-                                                        <option>Kebbi</option>
-                                                        <option>Kogi</option>
-                                                        <option>Kwara</option>
-                                                        <option>Lagos</option>
-                                                        <option>Nasarawa</option>
-                                                        <option>Niger</option>
-                                                        <option>Ogun</option>
-                                                        <option>Ondo</option>
-                                                        <option>Osun</option>
-                                                        <option>Oyo</option>
-                                                        <option>Plateau</option>
-                                                        <option>Rivers</option>
-                                                        <option>Sokoto</option>
-                                                        <option>Taraba</option>
-                                                        <option>Yobe</option>
-                                                        <option>Zamfara</option>
-                                                    </select>
+                                                <div class="contact-parent">
+                                                    <div class="form-group w-100 mb-3">
+                                                        <label class="form-label">{{ $form['label'] }} @if ($form['required'])
+                                                                <span class="text-danger">*</span>
+                                                            @endif
+                                                        </label>
+                                                        <select data-name="{{ $form['name'] }}" data-selector="state"
+                                                            name="{{ $form['name'] }}"
+                                                            class="form-field contact-input custom-select form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }} @error($form['name']) is-invalid @enderror state-selector"
+                                                            placeholder="{{ $form['placeholder'] }}"
+                                                            @if ($form['required']) required @endif>
+                                                            <option value="">-select state-</option>
+                                                            @foreach (\App\Helpers\Naija\Naija::states() as $key => $states)
+                                                                <option data-state-key="{{ $key }}">
+                                                                    {{ $states['name'] }}</option>
+                                                            @endforeach
+                                                            {{-- {{ old($form['name'], $form['default_value'] ?? '') }} --}}
+
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group w-100">
+                                                        <label>Select The Local Government Area (Optional)</label>
+                                                        <select name="lga" id="lga"
+                                                            class="form-field contact-input lga-input custom-select form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }}">
+                                                            <option value="">Select LGA</option>
+                                                        </select>
+                                                        <span id="lga_msg" class="text-danger"></span>
+                                                    </div>
                                                 </div>
                                             @endif
 
@@ -1761,6 +1786,69 @@
                     $(this).closest('.product-qty').find('input').val(product_quantity)
                 }
             });
+
+            // When State changes, fetch LGAs
+            $(".state-selector").on("change", function() {
+                $("#lga").empty().append('<option value="">Select LGA</option>').prop("disabled", true);
+
+                var stateName = $(this).find("option:selected").text(); // Get the name (state name)
+                var stateKey = $(this).find("option:selected").data(
+                    'state-key'); // Get the name (state name) //state-key
+
+                if (stateName) {
+                    // alert(stateName);
+                    // Fetch LGAs via AJAX
+                    $.ajax({
+                        url: "/states/get_lgas_by_state", // Replace with your route or API endpoint
+                        type: "GET",
+                        data: {
+                            state_name: stateKey
+                        },
+                        dataType: "json",
+                        success: function(response) {
+                            $("#lga").empty().append('<option value="">Select LGA</option>');
+                            // $("#city").empty().append('<option value="">Select City/Town</option>').prop("disabled", true);
+
+                            if (response.success) {
+                                console.log("response.success:", response);
+
+                                $.each(response.lgas, function(key, value) {
+                                    $("#lga").append('<option value="' + value.name +
+                                        '">' + value.name + '</option>');
+                                });
+
+                                // $.each(response.cities, function(key, value) {
+                                //     $("#city").append('<option value="' + value.name + '">' + value.name + '</option>');
+                                // });
+
+
+                                $("#lga").prop("disabled", false);
+                                // $("#city").prop("disabled", false);
+                            }
+                        },
+                        error: function() {
+                            // alert("Error fetching LGAs.");
+                        },
+                    });
+                } else {
+                    $("#lga").empty().append('<option value="">Select LGA</option>').prop("disabled", true);
+                    // $("#city").empty().append('<option value="">Select City/Town</option>').prop("disabled", true);
+                }
+            });
+
+            $(".date-selector").on('change', function(e) {
+                e.preventDefault();
+                const customDateGroup = $('.custom-date-group');
+                const customDateInput = $('.custom-date-picker');
+                if ($(this).val() === 'custom') {
+                    customDateGroup.slideDown();
+                    customDateInput.val('{{ date('Y-m-d') }}');
+                    customDateInput.focus();
+                } else {
+                    customDateGroup.slideUp();
+                    customDateInput.val('');
+                }
+            });
         });
     </script>
 
@@ -2035,9 +2123,27 @@
                             // Get file input value (file names)
                             value = $(this).prop("files");
                             break;
+
                         default:
+                            console.log('is-selector', $(this).data('selector'));
                             // Get the value for text, email, password, and other input types
-                            value = $(this).val();
+                            var selectedvalue = $(this).val();
+                            var selector = $(this).data('selector');
+                            if (selectedvalue == 'custom' && selector == 'date') {
+
+                                value = $(this).parents('.contact-parent').find('.custom-date-picker').val();
+                                console.log('date', value);
+                            } else if (selector == 'state') {
+
+                                value = $(this).val() + ' - ' + $(this).parents('.contact-parent').find('.lga-input')
+                                    .val();
+                                console.log('state', value);
+                            } else {
+                                value = $(this).val();
+                            }
+
+
+                            // value = $(this).val();
                     }
 
                     // For radio buttons, we only store the value once (for the checked one)

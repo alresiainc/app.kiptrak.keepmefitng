@@ -158,6 +158,30 @@ class UpsellSettingController extends Controller
         return view('pages.settings.upsell.editUpsellTemplate', \compact('authUser', 'user_role', 'upsellTemplate'));
     }
 
+    public function duplicateUpsellTemplate($unique_key)
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $upsellTemplate = UpsellSetting::where('unique_key', $unique_key);
+        // $sale_code = $sale->first()->sale_code;
+        if (!$upsellTemplate->exists()) {
+            abort(404);
+        }
+        $upsellTemplate = $upsellTemplate->first();
+
+        $string = 'kpups-' . date("Ymd") . '-' . date("his");
+        $randomStrings = UpsellSetting::where('template_code', 'like', $string . '%')->pluck('template_code');
+
+        do {
+            $randomString = 'kpups-' . date("Ymd") . '-' . date("his");
+        } while ($randomStrings->contains($randomString));
+
+        $template_code = $randomString;
+        // dd($template_code);
+        return view('pages.settings.upsell.duplicateUpsellTemplate', \compact('authUser', 'user_role', 'upsellTemplate', 'template_code'));
+    }
+
     /**
      * Show the form for editing the specified resource.
      *

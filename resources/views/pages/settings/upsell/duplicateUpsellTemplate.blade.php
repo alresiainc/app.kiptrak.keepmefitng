@@ -14,8 +14,8 @@
         }
 
         /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
-                                                    color: #999;
-                                                } */
+                                                            color: #999;
+                                                        } */
         div.filter-option-inner-inner {
             color: #000 !important;
         }
@@ -53,9 +53,8 @@
                     <div class="card">
                         <div class="card-body">
 
-                            <form class="row g-3 needs-validation"
-                                action="{{ route('editUpsellTemplatePost', $upsellTemplate->unique_key) }}" method="POST"
-                                enctype="multipart/form-data">@csrf
+                            <form class="row g-3 needs-validation" action="{{ route('addUpsellTemplatePost') }}"
+                                method="POST" enctype="multipart/form-data">@csrf
                                 <div class="col-md-12 mb-3">The field labels marked with * are required input fields.</div>
 
                                 <div class="col-md-12">
@@ -66,7 +65,7 @@
                                     <label for="" class="form-label">Template ID</label>
                                     <input type="text" name="template_code"
                                         class="form-control @error('template_code') is-invalid @enderror"
-                                        value="{{ $upsellTemplate->template_code }}" readonly>
+                                        value="{{ $template_code }}" readonly>
                                     @error('template_code')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
