@@ -772,7 +772,7 @@
                                             @if ($config_type == 'form' && $form['type'] == 'date')
                                                 @php
                                                     $date_option =
-                                                        $form['type'] == 'date' && $form['options'][0]
+                                                        $form['type'] == 'date' && isset($form['options'][0])
                                                             ? $form['options'][0]
                                                             : false;
                                                 @endphp
@@ -799,8 +799,10 @@
                                                     <div class="form-group date-toggle contact-parent custom-date-group mt-3"
                                                         id="custom-date-group" style="display: none;">
                                                         <label>Select a Custom Date</label>
-                                                        <input type="{{ $form['type'] }}" min="{{ date('Y-m-d') }}"
-                                                            max="{{ date('Y-m-d', strtotime('+' . $form['options'][0] . ' days')) }}"
+                                                        <input type="date" min="{{ date('Y-m-d') }}"
+                                                            @if (isset($form['options'][0])) max="{{ date('Y-m-d', strtotime('+' . $form['options'][0] . ' days')) }}"
+                                                             @else
+                                                              max="{{ date('Y-m-d', strtotime('+ 7 days')) }}" @endif
                                                             data-name="{{ $form['name'] }}"
                                                             value="<?= date('Y-m-d') ?>"
                                                             class="custom-date-picker form-control form-control-{{ $form['size'] ?? 'md' }} {{ $form['name'] }}">

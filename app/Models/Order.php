@@ -85,7 +85,7 @@ class Order extends Model
         }
         // <!-- > 100 < 1000 -->
         if (($orderId) > 100 && ($orderId < 1000)) {
-            return $orderCode = 'kp-00' . $order->id;
+            return $orderCode = 'kp-00' . $orderId;
         }
         // <!-- > 1000 < 10000++ -->
         if (($orderId) > 1000 && ($orderId < 10000)) {

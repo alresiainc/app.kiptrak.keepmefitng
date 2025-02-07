@@ -100,7 +100,10 @@ Route::get('/update-order-messages', function () {
 
     MessageTemplate::whereNotNull('id')->delete();
     $orders_statuses = [
-        'new' => 'New',
+        'new_order_assigned' => "New Order Assigned Message",
+        'new_order_message_with_staff' => "New Order Message with Staff",
+        'new_order_message_with_no_staff' => "New Order Message without Staff",
+        // 'new' => 'New',
         // 'new_from_alarm' => 'New From Alarm',
         'pending' => 'Pending',
         'cancelled' => 'Cancelled',
@@ -121,7 +124,8 @@ Route::get('/update-order-messages', function () {
         // 'total_follow_ups' => 'Total Follow Ups',
         // 'today_follow_ups' => 'Today Follow Ups',
         // 'tomorrow_follow_ups' => 'Tomorrow Follow Ups',
-        // 'other_orders' => 'Other Orders'
+        // 'other_orders' => 'Other Orders',
+
     ];
 
 
@@ -131,25 +135,45 @@ Route::get('/update-order-messages', function () {
 
     foreach ($orders_statuses as $status => $statusLabel) {
         foreach ($channels as $channel) {
-            $type = "{$channel}_order_status_changed_to_{$status}";
+
+
+            if ($status === 'new_order_assigned') {
+                $name = "New Order Assigned Message";
+                $type = "{$channel}_new_order_assigned";
+            } elseif ($status === 'new_order_message_with_staff') {
+                $name = "New Order Message with Staff";
+                $type = "{$channel}_new_order_message_with_staff";
+            } elseif ($status === 'new_order_message_with_no_staff') {
+                $name = "New Order Message without Staff";
+                $type = "{$channel}_new_order_message_with_no_staff";
+            } else {
+                $name = "Order Changed to {$statusLabel}";
+                $type = "{$channel}_order_status_changed_to_{$status}";
+            }
+
 
             // Check if a message template for this type already exists
             if (!MessageTemplate::where('type', $type)->exists()) {
                 $messageTemplate = new MessageTemplate();
-                $messageTemplate->name = "Order Changed to {$statusLabel}";
+                // 'new_order_assigned' => "New Order Assigned Message",
+                // 'new_order_message_with_staff' => "New Order Message with Staff",
+                // 'new_order_message_with_no_staff' => "New Order Message without Staff",
+                $messageTemplate->name = $name;
                 $messageTemplate->channel = $channel;
                 $messageTemplate->type = $type;
                 $messageTemplate->subject = $statusLabel;
                 $messageTemplate->is_active = false;
 
                 // Custom message based on the status
-                // if ($status === 'rescheduled_order') {
-                //     $messageTemplate->message = "Hi [customer_first_name] [customer_last_name], quick update - your order has been rescheduled based on your request to shift the date for your delivery. \n\n We will do our BEST to deliver on the rescheduled date. Remember, Delay is DANGEROUS \n\n Please make sure to be available on that day to receive it. \n\nIn the meantime, do you have any questions? Need help? \n\n Reply here, and we'll take care of it fast! \n\n[staff_name], Customer Service";
-                // } elseif ($status === 'order_in_transit') {
-                //     $messageTemplate->message = "Hello [customer_first_name] [customer_last_name]! Exciting news - your order is on the way, and the rider will deliver it to you today! Kindly pay to the delivery agent and collect your order.  \n\n It's currently in transit, and we can't wait for you to start enjoying the result you've always wanted. \n\nPlease be with your phone so that when he calls, you will respond. The delivery person has other customers to deliver to, so please don't keep the delivery person waiting. \n\nIf you need any help or have any questions while you wait, just reply to this message. \n\n Get ready - it'll be at your doorstep soon! \n\nThanks for your patronage. \n\n[staff_name], Customer Service";
-                // } else {
-                //     $messageTemplate->message = "Hello [customer_first_name] [customer_last_name], your order status has been updated to '{$statusLabel}'. For any questions or concerns, please reply to this message.\n\nThank you for choosing us!\n\n[staff_name], Customer Service";
-                // }
+                if ($status === 'rescheduled_order') {
+                    $messageTemplate->message = "Hi [customer_first_name] [customer_last_name], quick update - your order has been rescheduled based on your request to shift the date for your delivery. \n\n We will do our BEST to deliver on the rescheduled date. Remember, Delay is DANGEROUS \n\n Please make sure to be available on that day to receive it. \n\nIn the meantime, do you have any questions? Need help? \n\n Reply here, and we'll take care of it fast! \n\n[staff_name], Customer Service";
+                } elseif ($status === 'order_in_transit') {
+                    $messageTemplate->message = "Hello [customer_first_name] [customer_last_name]! Exciting news - your order is on the way, and the rider will deliver it to you today! Kindly pay to the delivery agent and collect your order.  \n\n It's currently in transit, and we can't wait for you to start enjoying the result you've always wanted. \n\nPlease be with your phone so that when he calls, you will respond. The delivery person has other customers to deliver to, so please don't keep the delivery person waiting. \n\nIf you need any help or have any questions while you wait, just reply to this message. \n\n Get ready - it'll be at your doorstep soon! \n\nThanks for your patronage. \n\n[staff_name], Customer Service";
+                } else {
+                    $messageTemplate->message = "Hello [customer_first_name] [customer_last_name], your order status has been updated to '{$statusLabel}'. For any questions or concerns, please reply to this message.\n\nThank you for choosing us!\n\n[staff_name], Customer Service";
+                }
+
+
 
                 $messageTemplate->save();
             }

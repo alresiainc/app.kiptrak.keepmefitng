@@ -4029,6 +4029,7 @@ class FormBuilderController extends Controller
         $newOrder->form_holder_id = $formHolder->id;
         $newOrder->source_type = 'form_holder_module';
         $newOrder->status = 'new';
+        $newOrder->form_fields = json_encode($data['form_fields'] ?? []);
         $newOrder->save();
 
         //making a copy from the former outgoingStocks, in the case of dealing with an edited or duplicated form
@@ -4125,21 +4126,30 @@ class FormBuilderController extends Controller
         }
 
 
-        // $result = (new FormHelper())->customerExists($formHolder->id, $data, $outgoingStockPackageBundle);
+        $result = (new FormHelper())->customerExists($formHolder->id, $data, $outgoingStockPackageBundle);
 
-        // if ($result['exists']) {
-        //     $orders = $result['orders'];
-        //     $matching_order_id = $result['matching_order_id'];
-        //     $outgoingStock->delete();
-        //     $newOrder->delete();
-        //     return response()->json([
-        //         'status' => false,
-        //         'data' => $orders,
-        //         'message' => 'Seems you have already submitted this form. Please wait while we process your previous order. If you have any questions, please contact us.',
-        //         'matching_order_id' => $matching_order_id,
-        //         'outgoingStockPackageBundle' => $outgoingStockPackageBundle
-        //     ]);
-        // }
+        if ($result['exists']) {
+            $orders = $result['orders'];
+            $matching_order_id = $result['matching_order_id'];
+            $outgoingStock->delete();
+            $newOrder->delete();
+
+            Log::alert("there is match:", [
+                'status' => false,
+                'data' => $orders,
+                'message' => 'Seems you have already submitted this form. Please wait while we process your previous order. If you have any questions, please contact us.',
+                'matching_order_id' => $matching_order_id,
+                'outgoingStockPackageBundle' => $outgoingStockPackageBundle
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'data' => $orders,
+                'message' => 'Seems you have already submitted this form. Please wait while we process your previous order. If you have any questions, please contact us.',
+                'matching_order_id' => $matching_order_id,
+                'outgoingStockPackageBundle' => $outgoingStockPackageBundle
+            ]);
+        }
 
         #remove later
         $outgoingStock->update(['package_bundle' => $outgoingStockPackageBundle]);
@@ -4179,7 +4189,10 @@ class FormBuilderController extends Controller
         //Send Message to the assigned staff if any
         $assigned_staff_messages = [];
         foreach ($channels as $type) {
+
             $message_type = MessageTemplate::where('type', $type . '_new_order_assigned')->first();
+            Log::alert($type . '_new_order_assigned');
+            Log::alert(json_encode($message_type));
             if ($message_type && $message_type->is_active) {
                 $assigned_staff_messages[$type]['title'] = $message_type->subject;
                 $assigned_staff_messages[$type]['message'] = $message_type->message;
@@ -4204,13 +4217,19 @@ class FormBuilderController extends Controller
             //Send Message to the customer
             $customer_messages = [];
             foreach ($channels as $type) {
+
+
                 if ($nextStaff) {
+                    Log::alert($type . '_new_order_message_with_staff');
+                    Log::alert(json_encode($message_type));
                     $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_staff')->first();
                     if ($message_type && $message_type->is_active) {
                         $customer_messages[$type]['title'] = $message_type->subject;
                         $customer_messages[$type]['message'] = $message_type->message;
                     }
                 } else {
+                    Log::alert($type . '_new_order_message_with_no_staff');
+                    Log::alert(json_encode($message_type));
                     $message_type = MessageTemplate::where('type', $type . '_new_order_message_with_no_staff')->first();
                     if ($message_type && $message_type->is_active) {
                         $customer_messages[$type]['title'] = $message_type->subject;

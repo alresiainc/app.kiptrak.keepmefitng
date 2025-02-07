@@ -29,6 +29,8 @@ class OrderNotification extends Notification
      */
     public function __construct($order, $message = '')
     {
+        Log::alert('order' . json_encode($order));
+        Log::alert('message' . json_encode($message));
 
         $updatedOrder = Order::where('id', $order->id)->first();
         $this->order = $updatedOrder;

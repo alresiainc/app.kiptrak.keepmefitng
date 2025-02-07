@@ -149,6 +149,188 @@ class FormHelper
     // }
     public function customerExists($form_holder_id, $inputData = [], $package_bundle = [])
     {
+
+        $form_fields = $inputData['form_fields'];
+        Log::alert('form_fields', ['form_fields' => $form_fields]);
+        // Retrieve all customers and check JSON 'data' field for a match
+        $customers = Customer::select('id', 'data')->get();
+        Log::alert("Fetched Customers:", ['customers' => $customers]);
+
+        $customerIds = [];
+
+
+
+        foreach ($customers as $customer) {
+            // Decode JSON column 'data'
+            $customerData = $customer->data;
+
+            // Ensure both are arrays before comparison
+            if (!is_array($customerData) || !is_array($form_fields)) {
+                continue;
+            }
+
+            // Normalize: Sort Arrays to Avoid Key Order Issues
+            ksort($customerData);
+            ksort($form_fields);
+
+            // Compare customer data with input data
+            if ($customerData == $form_fields) { // Use == (not ===) to ignore minor type mismatches
+                $customerIds[] = $customer->id;
+            }
+        }
+
+        // If no customers were found, return early
+        if (empty($customerIds)) {
+            return [
+                'exists' => false,
+                'orders' => [],
+                'customer_ids' => [],
+            ];
+        }
+
+        Log::alert("Matching Customer IDs:", ['customer_ids' => $customerIds]);
+
+        // Fetch orders for the matched customers within the same form_holder_id
+        $orders = Order::whereIn('customer_id', $customerIds)
+            ->where('form_holder_id', $form_holder_id)
+            ->get();
+
+        Log::alert("Orders found:", ['orders' => $orders]);
+
+        foreach ($orders as $order) {
+            $outgoingStock = $order->outgoingStock;
+
+            if (!$outgoingStock) {
+                continue;
+            }
+
+            $outgoingStockPackageBundle = $outgoingStock->package_bundle;
+
+            if (!is_array($outgoingStockPackageBundle)) {
+                continue;
+            }
+
+            // Sort both arrays before comparison
+            ksort($package_bundle);
+            ksort($outgoingStockPackageBundle);
+
+            // Check if the package bundle matches exactly
+            if ($package_bundle == $outgoingStockPackageBundle) {
+                Log::alert("Matching Order Found:", [
+                    'matching_order_id' => $order->id,
+                    'package_bundle' => $package_bundle,
+                    'outgoingStockPackageBundle' => $outgoingStockPackageBundle
+                ]);
+
+                return [
+                    'exists' => true,
+                    'orders' => $orders,
+                    'customer_ids' => $customerIds,
+                    'matching_order_id' => $order->id,
+                ];
+            }
+        }
+
+        return [
+            'exists' => false,
+            'orders' => [],
+            'customer_ids' => $customerIds, // Keep the found customers even if no order matched
+        ];
+    }
+
+
+    public function customerExistss($form_holder_id, $inputData = [], $package_bundle = [])
+    {
+        $fieldVariations = [
+            'firstname' => ['first_name', 'firstname', 'name', 'full_name', 'first', 'given_name', 'forename'],
+            'lastname' => ['last_name', 'lastname', 'surname', 'family_name', 'second_name', 'last', 'surname_name'],
+            'phone_number' => ['phone_number', 'phone', 'number', 'mobile_number', 'contact_number', 'mobile', 'phoneNumber', 'cell', 'cellphone', 'cell_number', 'telephone', 'tel_number'],
+            'whatsapp_phone_number' => ['contact', 'whatsapp_number', 'whatsapp', 'phone', 'number', 'mobile_number', 'contact_number', 'mobile', 'wa_number', 'whatsapp_contact', 'whatsappPhone', 'active_whatsapp_number'],
+            'email' => ['email', 'email_address', 'e-mail', 'mail', 'contact_email', 'active_email', 'active_email_address'],
+            'city' => ['city', 'location', 'town', 'municipality', 'urban_area', 'metropolis'],
+            'state' => ['state', 'region', 'province', 'territory', 'county', 'district'],
+            'delivery_address' => ['address', 'delivery_address', 'shipping_address', 'postal_address', 'street_address', 'recipient_address', 'full_address', 'full_delivery_address'],
+            'delivery_duration' => ['duration', 'delivery_duration', 'time', 'delivery_time', 'shipping_time', 'estimated_time', 'eta', 'delivery_period'],
+        ];
+
+        // Match input fields to standard fields
+        $matchedData = (new FieldMatcher())->matchFields($fieldVariations, $inputData);
+        Log::alert("matchedData:", ['matchedData' => $matchedData]);
+        // Query to check if a matching customer exists
+        $query = Customer::query();
+        foreach ($matchedData as $field => $value) {
+            if ($value !== null && $value !== '') {
+                $query->where($field, '=', trim($value)); // Trim spaces
+            } else {
+                $query->whereNull($field); // Ensure missing fields are NULL
+            }
+        }
+
+
+        // $customers  = Customer::where('firstname')
+
+        // Retrieve matching customers
+        $customers = $query->select('id')->get();
+        Log::alert("customers:", ['customers' => $customers]);
+        if ($customers->isEmpty()) {
+            return [
+                'exists' => false,
+                'orders' => [],
+                'customer_ids' => [],
+            ];
+        }
+
+        $customerIds = $customers->pluck('id')->toArray();
+
+        // Fetch orders by the found customers within the same form_holder_id
+        $orders = Order::whereIn('customer_id', $customerIds)
+            ->where('form_holder_id', $form_holder_id)
+            ->get();
+
+        Log::alert("Orders found:", ['orders' => $orders]);
+
+        foreach ($orders as $order) {
+            $outgoingStock = $order->outgoingStock;
+
+            if (!$outgoingStock) {
+                continue;
+            }
+
+            $outgoingStockPackageBundle = $outgoingStock->package_bundle;
+
+            if (!is_array($outgoingStockPackageBundle)) {
+                continue;
+            }
+
+            ksort($package_bundle);
+            ksort($outgoingStockPackageBundle);
+
+            // Check if the package bundle matches exactly
+            if ($package_bundle == $outgoingStockPackageBundle) {
+                // Log::alert("there is match:", [
+                //     'incoming' => $package_bundle,
+                //     'existing' => $outgoingStockPackageBundle
+                // ]);
+
+                return [
+                    'exists' => true,
+                    'orders' => $orders,
+                    'customer_ids' => $customerIds,
+                    'matching_order_id' => $order->id,
+                    'outgoingStockPackageBundle' => $outgoingStockPackageBundle,
+                ];
+            }
+        }
+
+        return [
+            'exists' => false,
+            'orders' => [],
+            'customer_ids' => [],
+        ];
+    }
+
+    public function customerExistsss($form_holder_id, $inputData = [], $package_bundle = [])
+    {
         // Define field variations (from your code)
         $fieldVariations = [
             'firstname' => ['first_name', 'firstname', 'name', 'full_name', 'first', 'given_name', 'forename'],
@@ -176,22 +358,21 @@ class FormHelper
 
         // Check for matching customers and retrieve their IDs
         $customers = $query->select('id')->get();
-        Log::alert("customers");
-        Log::alert($customers);
+
         if ($customers->isNotEmpty()) {
             $customerIds = $customers->pluck('id')->toArray();
             $orders = Order::whereIn('customer_id', $customerIds)
                 ->where('form_holder_id', $form_holder_id)
                 ->get();
+
             Log::alert("orders");
             Log::alert($orders);
-
             foreach ($orders as $order) {
                 $outgoingStock = $order->outgoingStock;
 
                 if ($outgoingStock) {
                     $outgoingStockPackageBundle = $outgoingStock->package_bundle; // Already cast as array
-
+                    // dd($outgoingStockPackageBundle);
                     // Check if all key-value pairs in the current package bundle exist in the outgoing stock package bundle
                     $allKeyValuePairsExist = true;
                     foreach ($package_bundle as $key => $value) {
@@ -204,6 +385,7 @@ class FormHelper
                         Log::alert("outgoingStockPackageBundle");
                         Log::alert($outgoingStockPackageBundle);
                     }
+
                     if ($allKeyValuePairsExist) {
                         return [
                             'exists' => true,

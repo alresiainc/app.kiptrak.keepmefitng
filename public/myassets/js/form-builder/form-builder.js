@@ -2036,7 +2036,7 @@ $(document).ready(function () {
     </div>
     <div id="date-options-container" style="display: none;">
         <label class="propertiy-label">Selectable Days ahead (leave empty to allow any date):</label>
-        <input type="text" class="form-control form-control-sm" id="date-options" value="${config.options?.join(
+        <input type="number"  value="7" min="0" class="form-control form-control-sm" id="date-options" value="${config.options?.join(
             ", "
         )}">
     </div>
