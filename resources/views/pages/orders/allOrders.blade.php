@@ -43,8 +43,8 @@
 
         .whatsapp-icon {
             /* font-size: 22px;
-                                                                                                                                                                                    color: #012970;
-                                                                                                                                                                                    margin-right: 25px; */
+                                                                                                                                                                                                                                                                                                                                                                color: #012970;
+                                                                                                                                                                                                                                                                                                                                                                margin-right: 25px; */
             position: relative;
         }
 
@@ -203,17 +203,19 @@
                             <div class="row mb-3">
                                 <div class="col-lg-3 col-md-6">
                                     <label for="">Start Date</label>
-                                    <input type="text" name="start_date" id="min" class="form-control filter">
+                                    <input type="text" name="start_date" id="start_date" autocomplete="false"
+                                        class="form-control  order_date" readonly>
                                 </div>
 
                                 <div class="col-lg-3 col-md-6">
                                     <label for="">End Date</label>
-                                    <input type="text" name="end_date" id="max" class="form-control filter">
+                                    <input type="text" name="end_date" id="end_date" autocomplete="false"
+                                        class="form-control order_date" readonly>
                                 </div>
                             </div>
 
                             <div class="table table-responsive">
-                                <table id="products-table" class="table custom-table" style="width:100%">
+                                <table id="orders-table" class="table table-striped custom-table2" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th><input type="checkbox" id="users-master"></th>
@@ -252,7 +254,7 @@
 
                                                         <!--Delivery Due Date-->
                                                         <td>
-                                                            {{-- @if (isset($order->expected_delivery_date)) --}}
+
                                                             @if (isset($order->expected_delivery_date))
                                                                 {{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('D, jS M Y') }}
                                                             @else
@@ -261,13 +263,11 @@
 
                                                             <span class="badge badge-dark"
                                                                 onclick="changeDeliveryDateModal('{{ $order->id }}', '{{ $order->orderCode($order->id) }}',  `{{ ucFirst(str_replace('_', ' ', $order->status)) }}`, '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
-                        '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')"
+                                                                    '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')"
                                                                 style="cursor: pointer;">
                                                                 <i class="bi bi-plus"></i> <span>Change Delivery
                                                                     Date</span></span>
-                                                            {{-- @else
-                                                                No reponse
-                                                            @endif --}}
+
 
                                                         </td>
 
@@ -365,112 +365,7 @@
 
                                                         <td>{{ $order->created_at->format('Y-m-d') }}</td>
 
-                                                        <td class="d-none">
 
-                                                            <div class="btn-group">
-                                                                @if (!isset($order->status) || $order->status == 'new')
-                                                                    <button type="button"
-                                                                        class="btn btn-info btn-sm dropdown-toggle rounded-pill fw-bolder"
-                                                                        data-bs-toggle="dropdown"
-                                                                        style="font-size: 10px;">
-                                                                        <span>new</span>
-                                                                    </button>
-                                                                @elseif($order->status == 'pending')
-                                                                    <button type="button"
-                                                                        class="btn btn-danger btn-sm dropdown-toggle rounded-pill fw-bolder"
-                                                                        data-bs-toggle="dropdown"
-                                                                        style="font-size: 10px;">
-                                                                        <span>pending</span>
-                                                                    </button>
-                                                                @elseif($order->status == 'cancelled')
-                                                                    <button type="button"
-                                                                        class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder"
-                                                                        data-bs-toggle="dropdown"
-                                                                        style="font-size: 10px;">
-                                                                        <span>cancelled</span>
-                                                                    </button>
-                                                                @elseif($order->status == 'delivered_not_remitted')
-                                                                    <button type="button"
-                                                                        class="btn btn-warning btn-sm dropdown-toggle rounded-pill fw-bolder"
-                                                                        data-bs-toggle="dropdown"
-                                                                        style="font-size: 10px;">
-                                                                        <span>delivered not remitted</span>
-                                                                    </button>
-                                                                @elseif($order->status == 'delivered_and_remitted')
-                                                                    <button type="button"
-                                                                        class="btn btn-success btn-sm dropdown-toggle rounded-pill fw-bolder"
-                                                                        data-bs-toggle="dropdown"
-                                                                        style="font-size: 10px;">
-                                                                        <span>delivered & remitted</span>
-                                                                    </button>
-                                                                @elseif($order->status == 'rescheduled_order')
-                                                                    <button type="button"
-                                                                        class="btn btn-success btn-sm dropdown-toggle rounded-pill fw-bolder"
-                                                                        data-bs-toggle="dropdown"
-                                                                        style="font-size: 10px;">
-                                                                        <span>Rescheduled Order</span>
-                                                                    </button>
-                                                                @elseif($order->status == 'order_in_transit')
-                                                                    <button type="button"
-                                                                        class="btn btn-success btn-sm dropdown-toggle rounded-pill fw-bolder"
-                                                                        data-bs-toggle="dropdown"
-                                                                        style="font-size: 10px;">
-                                                                        <span>Order In Transit</span>
-                                                                    </button>
-                                                                @endif
-                                                                <ul class="dropdown-menu">
-
-                                                                    <li><a class="dropdown-item"
-                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'new']) }}">New</a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <hr class="dropdown-divider">
-                                                                    </li>
-
-                                                                    <li><a class="dropdown-item"
-                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'pending']) }}">Pending</a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <hr class="dropdown-divider">
-                                                                    </li>
-
-                                                                    <li><a class="dropdown-item"
-                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'cancelled']) }}">Cancelled</a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <hr class="dropdown-divider">
-                                                                    </li>
-
-                                                                    <li><a class="dropdown-item"
-                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_not_remitted']) }}">Delivered
-                                                                            Not Remitted</a></li>
-                                                                    <li>
-                                                                        <hr class="dropdown-divider">
-                                                                    </li>
-
-                                                                    <li><a class="dropdown-item"
-                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_and_remitted']) }}">Delivered
-                                                                            & Remitted</a></li>
-
-                                                                    <li><a class="dropdown-item rescheduled-orderr"
-                                                                            onclick="rescheduledOrder('{{ $order->id }}', '{{ $order->orderCode($order->id) }}', `{{ ucFirst(str_replace('_', ' ', $order->status)) }}`, `{{ $order->customer->firstname . ' ' . $order->customer->lastname }}`,
-                        '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')"
-                                                                            {{-- href="{{ route('updateOrderStatus', [$order->unique_key, 'rescheduled_order']) }}" --}}>Rescheduled
-                                                                            Order</a></li>
-
-                                                                    <li><a class="dropdown-item"
-                                                                            href="{{ route('updateOrderStatus', [$order->unique_key, 'order_in_transit']) }}">Order
-                                                                            In Transit</a></li>
-                                                                    <li>
-                                                                        <hr class="dropdown-divider">
-                                                                    </li>
-
-                                                                </ul>
-                                                            </div>
-
-
-
-                                                        </td>
 
                                                         <td>
                                                             <div class="btn-group">
@@ -581,7 +476,7 @@
                                                                             Confirmed</a></li>
                                                                     <li><a class="dropdown-item"
                                                                             onclick="rescheduledOrder('{{ $order->id }}', '{{ $order->orderCode($order->id) }}', `{{ ucFirst(str_replace('_', ' ', $order->status)) }}`, `{{ $order->customer->firstname . ' ' . $order->customer->lastname }}`,
-                        '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')"
+                                                                 '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')"
                                                                             {{-- href="{{ route('updateOrderStatus', [$order->unique_key, 'rescheduled_order']) }}" --}}>Order
                                                                             Rescheduled</a></li>
                                                                     <li><a class="dropdown-item"
@@ -986,6 +881,13 @@
             format: 'Y-m-d',
             timepicker: false,
         });
+
+        jQuery('.order_date').datetimepicker({
+            datepicker: true,
+            //showPeriod: true,
+            format: 'Y-m-d',
+            timepicker: false,
+        });
     </script>
 
     <!---add & change agent, change delivery date---->
@@ -1116,7 +1018,7 @@
     </script>
 
     <?php if($entries) : ?>
-    <script>
+    {{-- <script>
         var minDate, maxDate;
 
         // Custom filtering function which will search data in column four between two values(dates)
@@ -1136,12 +1038,12 @@
                 }
                 return false;
             }
-        );
+        ); --}}
     </script>
     <?php endif ?>
 
     <?php if(!$entries) : ?>
-    <script>
+    {{-- <script>
         var minDate, maxDate;
 
         // Custom filtering function which will search data in column four between two values(dates)
@@ -1162,7 +1064,7 @@
                 return false;
             }
         );
-    </script>
+    </script> --}}
     <?php endif ?>
 
     <script>
@@ -1213,6 +1115,68 @@
                     });
                 }
             }
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            var ordersTable = $('#orders-table').DataTable({
+                pageLength: 10, // Default rows per page
+                lengthMenu: [
+                    [10, 25, 50, 100],
+                    [10, 25, 50, 100]
+                ], // Page length options
+                ordering: true, // Enable sorting
+                searching: true, // Enable search box
+                paging: true, // Enable pagination
+                info: true, // Show table information
+                responsive: true, // Make table responsive
+            });
+
+            // Custom filtering function for date range
+            $.fn.dataTable.ext.search.push(function(settings, searchData) {
+                var min = $('#start_date').val();
+                var max = $('#end_date').val();
+                var dateStr = searchData[8]; // "Date Created" column (0-based index)
+
+                if (!dateStr) return false; // If no date found, exclude row
+
+                var date = new Date(dateStr); // Convert "YYYY-MM-DD" to Date object
+                var minDate = min ? new Date(min) : null;
+                var maxDate = max ? new Date(max) : null;
+
+                if ((!minDate || date >= minDate) && (!maxDate || date <= maxDate)) {
+                    return true;
+                }
+                return false;
+            });
+
+            // $.fn.dataTable.ext.search.push(function(settings, searchData) {
+            //     var min = $('#min').val();
+            //     var max = $('#max').val();
+
+            //     var date = searchData[8];
+
+            //     if ((min == '' && max == '') ||
+            //         (min == '' && date <= max) ||
+            //         (min <= date && max == '') ||
+            //         (min <= date && date <= max)) {
+            //         return true;
+            //     }
+
+            //     return false;
+            // });
+
+
+            $('#start_date, #end_date').on('keyup change', function() {
+                ordersTable.draw();
+            });
+
+            // Apply filtering when date inputs change
+            // $('#min, #max').on('change', function() {
+
+
+            //     ordersTable.draw();
+            // });
         });
     </script>
 @endsection
