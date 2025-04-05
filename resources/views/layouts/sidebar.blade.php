@@ -970,6 +970,10 @@ if (!isset($authUser)) {
                                 class="bi bi-card-list"></i><span>General Settings</span></a>
                     </li>
                     <li>
+                        <a href="{{ route('serlzo.index') }}"><i style="font-size: 100%!important;"
+                                class="bi bi-whatsapp"></i><span>Serlzo WhatsApp Account</span></a>
+                    </li>
+                    <li>
                         <a href="{{ route('scripts') }}"><i style="font-size: 100%!important;"
                                 class="bi bi-card-list"></i><span>Header & Footer Scripts</span></a>
                     </li>

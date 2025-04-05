@@ -592,6 +592,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/general-setting', [GeneralSettingController::class, 'generalSetting'])->name('generalSetting');
     Route::post('/general-setting', [GeneralSettingController::class, 'generalSettingPost'])->name('generalSettingPost');
 
+    //serlzo
+    Route::get('/serlzo-setting', [SerlzoWhatsAppAccountController::class, 'index'])->name('serlzo.index');
+    Route::post('/serlzo-setting/register', [SerlzoWhatsAppAccountController::class, 'register'])->name('serlzo.register');
+    Route::post('/serlzo-setting/login', [SerlzoWhatsAppAccountController::class, 'login'])->name('serlzo.login');
+    Route::get('/serlzo-setting/generate-qr-code/{token}', [SerlzoWhatsAppAccountController::class, 'generateQrCode'])->name('serlzo.qr');
+    Route::get('/serlzo-setting/status/{token}', [SerlzoWhatsAppAccountController::class, 'checkStatus'])->name('serlzo.status');
+    Route::delete('/serlzo-setting/{token}', [SerlzoWhatsAppAccountController::class, 'deleteDevice'])->name('serlzo.delete');
+
     //companyStructure
     Route::get('/company-structure', [GeneralSettingController::class, 'companyStructure'])->name('companyStructure');
 
