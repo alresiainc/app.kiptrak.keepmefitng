@@ -215,10 +215,11 @@
                         // Only alert once per token
                         if (onModal && !connectedStatusMap[token]) {
                             connectedStatusMap[token] = true; // Mark as connected
-                            let modal = document.getElementById("qrModal");
-                            if (modal) {
-                                modal.style.display = "none";
-                            }
+                            $('#qrModal').modal('hide');
+                            // let modal = document.getElementById("qrModal");
+                            // if (modal) {
+                            //     modal.style.display = "none";
+                            // }
                             alert("Connection successful! The device is now connected.");
                         }
 
@@ -268,7 +269,8 @@
                     };
 
                     // Show modal first
-                    modal.style.display = "block";
+                    // modal.style.display = "block";
+                    $('#qrModal').modal('show');
 
                     // Clear previous intervals
                     if (qrImg.dataset.intervalId) {
