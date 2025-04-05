@@ -192,6 +192,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            const connectedStatusMap = {};
             const checkAccountStatus = async (token, onModal = false) => {
                 try {
                     let response = await fetch(`/serlzo-setting/status/${token}`);
@@ -211,17 +212,19 @@
                         btn.classList.replace("btn-primary", "btn-success");
                         btn.disabled = true;
 
-                        if (onModal) {
-                            // Hide modal and alert the user when connected
+                        // Only alert once per token
+                        if (onModal && !connectedStatusMap[token]) {
+                            connectedStatusMap[token] = true; // Mark as connected
                             let modal = document.getElementById("qrModal");
                             if (modal) {
-                                modal.style.display = "none"; // Hide the modal
+                                modal.style.display = "none";
                             }
                             alert("Connection successful! The device is now connected.");
                         }
 
                     } else {
-                        // Update button to "Not Connected"
+                        // Reset flag so alert works next time user tries
+                        connectedStatusMap[token] = false;
                         btn.innerText = "Connect";
                         btn.classList.replace("btn-success", "btn-primary");
                         btn.disabled = false;
@@ -230,6 +233,7 @@
                     console.error("Error checking status:", error);
                 }
             };
+
 
             document.querySelectorAll(".connect-btn").forEach(button => {
                 button.addEventListener("click", async function() {
@@ -279,7 +283,7 @@
                         if (qrImg.src.includes("loading.gif")) {
                             console.warn(
                                 "QR code still showing loader, retrying fetch..."
-                                );
+                            );
                             await loadQRCode();
                         }
                     }, 5000);
