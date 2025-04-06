@@ -15,8 +15,8 @@
         }
 
         /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
-                    color: #999;
-                } */
+                            color: #999;
+                        } */
         div.filter-option-inner-inner {
             color: #000 !important;
         }
@@ -237,17 +237,62 @@
                                     @enderror
                                 </div>
 
+
+
+
                                 <div class="col-md-6">
-                                    <label for="" class="form-label">WhatsApp (adkombo) Session Name</label>
-                                    <input type="text" name="adkombo_whatsapp_session_name"
-                                        class="form-control @error('adkombo_whatsapp_session_name') is-invalid @enderror"
-                                        placeholder=""
-                                        value="{{ isset($staff->adkombo_whatsapp_session_name) ? $staff->adkombo_whatsapp_session_name : '' }}">
-                                    @error('adkombo_whatsapp_session_name')
+                                    @php
+                                        $errorMessage = '';
+                                        $accounts = [];
+                                        try {
+                                            $apiKey = \App\Models\GeneralSetting::first()?->serlzo_api_key;
+                                            $response = Http::withHeaders(['x-serlzo-api-key' => $apiKey])->get(
+                                                'https://whatsapp-reseller.serlzo.com/whatsapp/get-all-whatsapp-accounts',
+                                            );
+
+                                            if ($response->status() === 200) {
+                                                $accounts = collect($response->json()['data'] ?? [])->filter(function (
+                                                    $account,
+                                                ) {
+                                                    return $account['status'] == 'active';
+                                                });
+                                                if (count($accounts) == 0) {
+                                                    $errorMessage = 'No active account found';
+                                                }
+                                            } else {
+                                                $errorMessage = 'No account found';
+                                            }
+                                        } catch (\Throwable $e) {
+                                            $errorMessage = $e->getMessage();
+                                        }
+
+                                    @endphp
+                                    <label for="" class="form-label">WhatsApp (serlzo) Account Token @if ($errorMessage)
+                                            <span class="text-warning text-sm">
+                                                <strong>{{ $errorMessage }}</strong>
+                                            </span>
+                                        @endif
+                                    </label>
+
+                                    <select name="serlzo_account_token" data-live-search="true"
+                                        class="custom-select form-control border tags @error('country') is-invalid @enderror">
+
+                                        <option value="1">Select WhatsApp Account</option>
+
+                                        @foreach ($accounts as $account)
+                                            <option value="{{ $account['token'] }}"
+                                                @if ($staff->serlzo_account_token == $account['token'])  @endif>{{ $account['username'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+
+                                    @error('serlzo_account_token')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
                                         </span>
                                     @enderror
+
                                 </div>
 
                                 <div class="text-end">
