@@ -27,13 +27,18 @@
                 <div class="col-md-6 offset-md-3">
                     <div class="card">
                         <div class="card-body">
-                            @if (Session::has('error'))
-                                @php $errors = Session::get('error'); @endphp
+                            @if (Session::has('error') || isset($error))
+                                @php
+                                    $errors = Session::get('error') ?? $error;
+                                    // dd($errors);
+                                @endphp
 
                                 @if (is_array($errors))
-                                    @foreach ($errors as $err)
-                                        <div class="alert alert-danger text-center">{{ $err }}</div>
-                                    @endforeach
+                                    <div class="alert alert-danger text-center">
+                                        @foreach ($errors as $err)
+                                            {{ $err }},
+                                        @endforeach
+                                    </div>
                                 @else
                                     <div class="alert alert-danger text-center">{{ $errors }}</div>
                                 @endif
@@ -44,19 +49,13 @@
                                 <form action="{{ route('serlzo.login') }}" method="POST">@csrf
                                     <div class="mb-3">
                                         <label for="email" class="form-label">Email</label>
-                                        <input type="email" name="email"
-                                            class="form-control @error('email') is-invalid @enderror" required>
-                                        @error('email')
-                                            <span class="invalid-feedback">{{ $message }}</span>
-                                        @enderror
+                                        <input type="email" name="email" class="form-control" required>
+
                                     </div>
                                     <div class="mb-3">
                                         <label for="password" class="form-label">Password</label>
-                                        <input type="password" name="password"
-                                            class="form-control @error('password') is-invalid @enderror" required>
-                                        @error('password')
-                                            <span class="invalid-feedback">{{ $message }}</span>
-                                        @enderror
+                                        <input type="password" name="password" class="form-control" required>
+
                                     </div>
                                     <button type="submit" class="btn btn-primary w-100">Login</button>
                                     <p class="mt-3 text-center">Don't have an account? <span class="toggle-link"
@@ -69,40 +68,52 @@
                                 <form action="{{ route('serlzo.register') }}" method="POST">@csrf
                                     <div class="mb-3">
                                         <label for="firstname" class="form-label">First Name</label>
-                                        <input type="text" name="firstname"
-                                            class="form-control @error('firstname') is-invalid @enderror" required>
-                                        @error('firstname')
-                                            <span class="invalid-feedback">{{ $message }}</span>
-                                        @enderror
+                                        <input type="text" name="firstname" class="form-control" required>
                                     </div>
+
                                     <div class="mb-3">
                                         <label for="lastname" class="form-label">Last Name</label>
-                                        <input type="text" name="lastname"
-                                            class="form-control @error('lastname') is-invalid @enderror" required>
-                                        @error('lastname')
-                                            <span class="invalid-feedback">{{ $message }}</span>
-                                        @enderror
+                                        <input type="text" name="lastname" class="form-control" required>
                                     </div>
+
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Username</label>
+                                        <input type="text" name="username" class="form-control" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="business_name" class="form-label">Business Name</label>
+                                        <input type="text" name="business_name" class="form-control" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="country" class="form-label">Country</label>
+                                        <input type="text" name="country" class="form-control" value="Nigeria" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label">Phone</label>
+                                        <input type="text" name="phone" class="form-control" required>
+                                    </div>
+
                                     <div class="mb-3">
                                         <label for="email" class="form-label">Email</label>
-                                        <input type="email" name="email"
-                                            class="form-control @error('email') is-invalid @enderror" required>
-                                        @error('email')
-                                            <span class="invalid-feedback">{{ $message }}</span>
-                                        @enderror
+                                        <input type="email" name="email" class="form-control" required>
                                     </div>
+
                                     <div class="mb-3">
                                         <label for="password" class="form-label">Password</label>
-                                        <input type="password" name="password"
-                                            class="form-control @error('password') is-invalid @enderror" required>
-                                        @error('password')
-                                            <span class="invalid-feedback">{{ $message }}</span>
-                                        @enderror
+                                        <input type="password" name="password" class="form-control" required>
                                     </div>
+
                                     <button type="submit" class="btn btn-success w-100">Register</button>
-                                    <p class="mt-3 text-center">Already have an account? <span class="toggle-link"
-                                            onclick="toggleForms()">Login here</span></p>
+
+                                    <p class="mt-3 text-center">
+                                        Already have an account? <span class="toggle-link" onclick="toggleForms()">Login
+                                            here</span>
+                                    </p>
                                 </form>
+
                             </div>
                         </div>
                     </div>

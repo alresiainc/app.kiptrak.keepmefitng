@@ -25,8 +25,10 @@ class SerlzoWhatsAppAccountController extends Controller
         $response = Http::withHeaders(['x-serlzo-api-key' => $apiKey])
             ->get("$this->apiBaseUrl/whatsapp/get-all-whatsapp-accounts");
 
-        if ($response->status() === 401) {
-            return view('pages.settings.serlzo.connect-account');
+        // dd($response);
+        if ($response->status() == 401) {
+            // dd($response);
+            return view('pages.settings.serlzo.connect-account')->with('error', $this->getErrorMessage($response));
         }
 
         $accounts = $response->json()['data'] ?? [];
@@ -38,7 +40,7 @@ class SerlzoWhatsAppAccountController extends Controller
         return view('pages.settings.serlzo.dashboard', compact('accounts'));
     }
 
-    public function register(Request $request)
+    public function registerrr(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
@@ -53,6 +55,38 @@ class SerlzoWhatsAppAccountController extends Controller
 
         return back()->with('error', $this->getErrorMessage($response));
     }
+    public function register(Request $request)
+    {
+        $request->validate([
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'username' => 'required|string|max:255',
+            'business_name' => 'required|string|max:255',
+            'country' => 'required|string|max:100',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+        ]);
+
+        $data = [
+            'email' => $request->input('email'),
+            'fullName' => $request->input('firstname') . ' ' . $request->input('lastname'),
+            'username' => $request->input('username'),
+            'businessName' => $request->input('business_name'),
+            'password' => $request->input('password'),
+            'country' => $request->input('country'),
+            'phone' => $request->input('phone'),
+        ];
+
+        $response = Http::post("$this->apiBaseUrl/auth/signup", $data);
+
+        if ($response->status() === 201) {
+            return redirect()->route('serlzo.index')->with('success', 'Registration successful. Please log in.');
+        }
+
+        return back()->with('error', $this->getErrorMessage($response));
+    }
+
 
     public function login(Request $request)
     {
@@ -61,19 +95,23 @@ class SerlzoWhatsAppAccountController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        $response = Http::post("$this->apiBaseUrl/auth/signin", $request->only('email', 'password'));
+        try {
+            $response = Http::post("$this->apiBaseUrl/auth/signin", $request->only('email', 'password'));
 
-        if ($response->status() === 200) {
-            $apiKey = $response->json()['data']['apiKey'] ?? null;
+            if ($response->status() === 200) {
+                $apiKey = $response->json()['data']['apiKey'] ?? null;
 
-            if ($apiKey) {
-                GeneralSetting::first()->update(['serlzo_api_key' => $apiKey]);
-                Session::put('whatsapp_api_key', $apiKey); // Store API key in session for quick access
-                return redirect()->route('serlzo.index')->with('success', 'Login successful.');
+                if ($apiKey) {
+                    GeneralSetting::first()->update(['serlzo_api_key' => $apiKey]);
+                    Session::put('whatsapp_api_key', $apiKey); // Store API key in session for quick access
+                    return redirect()->route('serlzo.index')->with('success', 'Login successful.');
+                }
             }
-        }
 
-        return back()->with('error', 'Invalid credentials.');
+            return back()->with('error', 'Invalid credentials.');
+        } catch (\Throwable $th) {
+            return back()->with('error', $th->getMessage());
+        }
     }
 
     private function initializeWhatsApp($apiKey)
