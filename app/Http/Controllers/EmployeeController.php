@@ -72,7 +72,7 @@ class EmployeeController extends Controller
         $user->city = !empty($data['city']) ? $data['city'] : null;
         $user->state = $data['state'];
         $user->country_id = $data['country'];
-        $user->adkombo_whatsapp_session_name = $data['adkombo_whatsapp_session_name'];
+        $user->serlzo_account_token = $data['serlzo_account_token'];
         $user->address = !empty($data['address']) ? $data['address'] : null;
         $user->current_salary = !empty($data['current_salary']) ? $data['current_salary'] : null;
 
@@ -170,7 +170,7 @@ class EmployeeController extends Controller
         $user->city = !empty($data['city']) ? $data['city'] : null;
         $user->state = $data['state'];
         $user->country_id = $data['country'];
-        $user->adkombo_whatsapp_session_name = $data['adkombo_whatsapp_session_name'];
+        $user->serlzo_account_token = $data['serlzo_account_token'];
         $user->address = !empty($data['address']) ? $data['address'] : null;
         $user->current_salary = !empty($data['current_salary']) ? $data['current_salary'] : null;
 

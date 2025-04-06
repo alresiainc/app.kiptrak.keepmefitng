@@ -15,8 +15,8 @@
         }
 
         /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
-                                                                                                        color: #999;
-                                                                                                    } */
+                                                                                                            color: #999;
+                                                                                                        } */
         div.filter-option-inner-inner {
             color: #000 !important;
         }
@@ -236,11 +236,12 @@
                                             );
 
                                             if ($response->status() === 200) {
-                                                $accounts = collect($response->json()['data'] ?? [])->filter(function (
-                                                    $account,
-                                                ) {
-                                                    return $account['status'] == 'active';
-                                                });
+                                                // $accounts = collect($response->json()['data'] ?? [])->filter(function (
+                                                //     $account,
+                                                // ) {
+                                                //     return $account['status'] == 'active';
+                                                // });
+                                                $accounts = $response->json()['data'] ?? [];
                                                 if (count($accounts) == 0) {
                                                     $errorMessage = 'No active account found';
                                                 }

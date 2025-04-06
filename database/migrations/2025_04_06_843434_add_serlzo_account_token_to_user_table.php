@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->text('serlzo_api_key')->nullable();
+            $table->text('serlzo_account_token')->nullable();
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['serlzo_api_key']);
+            $table->dropColumn(['serlzo_account_token']);
         });
     }
 };
