@@ -7,6 +7,7 @@ use App\Models\Message;
 use App\Models\User;
 use Illuminate\Notifications\Notification;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class WhatsAppChannel
@@ -76,9 +77,9 @@ class WhatsAppChannel
             ];
 
             if ($staff) {
-                $session_name = $staff->adkombo_whatsapp_session_name ?? config('site.adkombo_whatsapp.default_session_name');
-                if (!empty($session_name)) {
-                    $individualWhatsappData['session_name'] = $session_name;
+                $token = $staff->serlzo_account_token ?? '';
+                if (!empty($token)) {
+                    $individualWhatsappData['token'] = $token;
                 }
             }
 

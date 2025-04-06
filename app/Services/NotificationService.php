@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\GeneralSetting;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 
@@ -12,7 +13,7 @@ class NotificationService
      * 
      * @var string
      */
-    protected string $whatsAppApiUrl;
+    protected string $apiBaseUrl;
 
     /**
      * The WhatsApp API key used for authentication.
@@ -42,13 +43,16 @@ class NotificationService
      */
     protected string $smsSender;
 
+
+
     /**
      * Constructor to initialize API URLs and API keys.
      */
     public function __construct()
     {
-        $this->whatsAppApiUrl = config('site.adkombo_whatsapp.api_url', 'https://ad.adkombo.com/api/whatsapp/send');
-        $this->whatsAppApiKey = config('site.adkombo_whatsapp.api_key', 'e1961a42-abd3-4f32-80f8-54d24d86a6c5');
+
+        $this->apiBaseUrl = 'https://ad.adkombo.com/api/whatsapp/send';
+        $this->whatsAppApiKey = GeneralSetting::first()?->serlzo_api_key;
 
         $this->smsApiUrl = config('site.bulk_sms_nigeria.api_url', 'https://www.bulksmsnigeria.com/api/v1/sms/create');
         $this->smsApiKey = config('site.bulk_sms_nigeria.api_token', 'qEbZEBUsgTjDGsaVe09Cop1yLnrNrByMifqcP0U2TBzO27rBWOwX0Ssr35I5');
@@ -61,23 +65,35 @@ class NotificationService
      * @param array $contacts
      * @return array
      */
+
+
     public function sendWhatsAppMessage(array $contacts): array
     {
-        $postData = [
-            'contact' => $contacts
-        ];
+        $results = [];
+        foreach ($contacts as $contact) {
+            $postData = [
+                'token' => isset($contact['token']) ? $contact['token'] : $this->getDefaultToken(),
+                'phone' => $contact['number'],
+                'message' => $contact['message'],
+            ];
 
-        return $this->sendRequest($this->whatsAppApiUrl, $postData, [
-            'Api-key' => $this->whatsAppApiKey,
-            'Content-Type' => 'application/json'
-        ]);
+            $response = $this->sendRequest("https://ad.adkombo.com/api/whatsapp/send-message", $postData, [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'x-serlzo-api-key' => $this->whatsAppApiKey,
+            ]);
+
+            $results[] = $response;
+        }
+
+        return $results;
     }
 
     /**
      * Send an SMS message.
      * 
      * @param array $messageData
-     * @return array
+     * @return array 
      */
     public function sendSMSMessage(array $messageData): array
     {
@@ -129,6 +145,37 @@ class NotificationService
                 'success' => false,
                 'message' => 'An error occurred: ' . $e->getMessage()
             ];
+        }
+    }
+
+    private function getDefaultToken(): string
+    {
+        try {
+            $apiKey = \App\Models\GeneralSetting::first()?->serlzo_api_key;
+            $response = Http::withHeaders(['x-serlzo-api-key' => $apiKey])->get(
+                'https://whatsapp-reseller.serlzo.com/whatsapp/get-all-whatsapp-accounts',
+            );
+
+            if ($response->status() === 200) {
+                $accounts = collect($response->json()['data'] ?? [])->filter(function (
+                    $account,
+                ) {
+                    return $account['status'] == 'active';
+                });
+                if (count($accounts) == 0) {
+                    $errorMessage = 'No active account found';
+                }
+            } else {
+                $errorMessage = 'No account found';
+            }
+        } catch (\Throwable $e) {
+            $errorMessage = $e->getMessage();
+        }
+
+        if (isset($accounts[0])) {
+            return $accounts[0]['token'];
+        } else {
+            return "";
         }
     }
 }
