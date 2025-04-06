@@ -28,10 +28,17 @@
                     <div class="card">
                         <div class="card-body">
                             @if (Session::has('error'))
-                                <div class="alert alert-danger text-center">
-                                    {{ Session::get('error') }}
-                                </div>
+                                @php $errors = Session::get('error'); @endphp
+
+                                @if (is_array($errors))
+                                    @foreach ($errors as $err)
+                                        <div class="alert alert-danger text-center">{{ $err }}</div>
+                                    @endforeach
+                                @else
+                                    <div class="alert alert-danger text-center">{{ $errors }}</div>
+                                @endif
                             @endif
+
                             <div id="login-form">
                                 <h4 class="text-center">Login</h4>
                                 <form action="{{ route('serlzo.login') }}" method="POST">@csrf

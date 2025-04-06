@@ -89,6 +89,21 @@ class NotificationService
         return $results;
     }
 
+    public function sendWhatsAppMessageWithImage(array $contact): array
+    {
+        $postData = [
+            'token' => $this->whatsAppApiKey,
+            'phone' => $contact['number'],
+            'message' => $contact['message'],
+            'file' => $contact['file'], // Should be a valid image URL or base64 string
+        ];
+
+        return $this->sendRequest("https://ad.adkombo.com/api/whatsapp/send-message-with-image", $postData, [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json'
+        ]);
+    }
+
     /**
      * Send an SMS message.
      * 
