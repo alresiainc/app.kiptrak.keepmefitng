@@ -51,7 +51,7 @@ class NotificationService
     public function __construct()
     {
 
-        $this->apiBaseUrl = 'https://ad.adkombo.com/api/whatsapp/send';
+        $this->apiBaseUrl = "https://whatsapp-reseller.serlzo.com";
         $this->whatsAppApiKey = GeneralSetting::first()?->serlzo_api_key;
 
         $this->smsApiUrl = config('site.bulk_sms_nigeria.api_url', 'https://www.bulksmsnigeria.com/api/v1/sms/create');
@@ -77,7 +77,7 @@ class NotificationService
                 'message' => $contact['message'],
             ];
 
-            $response = $this->sendRequest("https://ad.adkombo.com/api/whatsapp/send-message", $postData, [
+            $response = $this->sendRequest("$this->apiBaseUrl/whatsapp/send-message", $postData, [
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
                 'x-serlzo-api-key' => $this->whatsAppApiKey,
@@ -145,14 +145,14 @@ class NotificationService
             $response = Http::withHeaders($headers)->post($url, $data);
             Log::info('Request response', ['response' => $response]);
             if ($response->failed()) {
-                Log::error('Request failed', ['response' => $response->json()]);
+                Log::error('Request failed', ['response' => $response]);
                 return [
                     'success' => false,
                     'message' => 'Failed to send request'
                 ];
             }
 
-            Log::info('Request successful', ['response' => $response->json()]);
+            Log::info('Request successful', ['response' => $response]);
             return $response->json();
         } catch (\Exception $e) {
             Log::error('Request exception', ['error' => $e->getMessage()]);
