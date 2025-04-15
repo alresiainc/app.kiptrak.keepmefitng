@@ -12,12 +12,53 @@
                 </ol>
             </nav>
         </div><!-- End Page Title -->
+        @if (Session::has('error') || isset($error))
+            @php
+                $errors = Session::get('error') ?? $error;
+                // dd($errors);
+            @endphp
+
+            @if (is_array($errors))
+                <div class="alert alert-danger text-center">
+                    @foreach ($errors as $err)
+                        {{ $err }},
+                    @endforeach
+                </div>
+            @else
+                <div class="alert alert-danger text-center">{{ $errors }}</div>
+            @endif
+        @endif
+
+        @if (Session::has('success') || isset($success))
+            @php
+                $messages = Session::get('success') ?? $success;
+                // dd($errors);
+            @endphp
+
+            @if (is_array($messages))
+                <div class="alert alert-success text-center">
+                    @foreach ($messages as $msg)
+                        {{ $msg }},
+                    @endforeach
+                </div>
+            @else
+                <div class="alert alert-success text-center">{{ $messages }}</div>
+            @endif
+        @endif
 
         <section class="section dashboard">
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
-                        <div class="card-header">Your Connected WhatsApp Accounts</div>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                Your Connected WhatsApp Accounts</div>
+                            <div>
+                                <a class="btn btn-outline-primary rounded-pill d-flex px-4"
+                                    href="{{ route('serlzo.initialize') }}">Initialize
+                                    New Session</a>
+                            </div>
+                        </div>
                         <div class="card-body">
                             @if (count($accounts) > 0)
                                 <table class="table table-striped">

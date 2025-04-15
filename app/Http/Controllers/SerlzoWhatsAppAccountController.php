@@ -22,7 +22,7 @@ class SerlzoWhatsAppAccountController extends Controller
 
 
         // Validate API Key
-        $response = Http::withHeaders(['x-serlzo-api-key' => $apiKey])
+        $response = Http::withOptions(['verify' => false])->withHeaders(['x-serlzo-api-key' => $apiKey])
             ->get("$this->apiBaseUrl/whatsapp/get-all-whatsapp-accounts");
 
         // dd($response);
@@ -33,9 +33,9 @@ class SerlzoWhatsAppAccountController extends Controller
 
         $accounts = $response->json()['data'] ?? [];
 
-        if (empty($accounts)) {
-            return $this->initializeWhatsApp($apiKey);
-        }
+        // if (empty($accounts)) {
+        //     return $this->initializeWhatsApp($apiKey);
+        // }
 
         return view('pages.settings.serlzo.dashboard', compact('accounts'));
     }
@@ -47,7 +47,7 @@ class SerlzoWhatsAppAccountController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        $response = Http::post("$this->apiBaseUrl/auth/signup", $request->only('email', 'password'));
+        $response = Http::withOptions(['verify' => false])->post("$this->apiBaseUrl/auth/signup", $request->only('email', 'password'));
 
         if ($response->status() === 201) {
             return redirect()->route('serlzo.login')->with('success', 'Registration successful. Please log in.');
@@ -78,7 +78,7 @@ class SerlzoWhatsAppAccountController extends Controller
             'phone' => $request->input('phone'),
         ];
 
-        $response = Http::post("$this->apiBaseUrl/auth/signup", $data);
+        $response = Http::withOptions(['verify' => false])->post("$this->apiBaseUrl/auth/signup", $data);
 
         if ($response->status() === 201) {
             return redirect()->route('serlzo.index')->with('success', 'Registration successful. Please log in.');
@@ -96,7 +96,7 @@ class SerlzoWhatsAppAccountController extends Controller
         ]);
 
         try {
-            $response = Http::post("$this->apiBaseUrl/auth/signin", $request->only('email', 'password'));
+            $response = Http::withOptions(['verify' => false])->post("$this->apiBaseUrl/auth/signin", $request->only('email', 'password'));
 
             if ($response->status() === 200) {
                 $apiKey = $response->json()['data']['apiKey'] ?? null;
@@ -116,7 +116,7 @@ class SerlzoWhatsAppAccountController extends Controller
 
     private function initializeWhatsApp($apiKey)
     {
-        $response = Http::withHeaders(['x-serlzo-api-key' => $apiKey])
+        $response = Http::withOptions(['verify' => false])->withHeaders(['x-serlzo-api-key' => $apiKey])
             ->post("$this->apiBaseUrl/whatsapp/initialize");
 
         if ($response->status() === 200) {
@@ -124,6 +124,22 @@ class SerlzoWhatsAppAccountController extends Controller
                 'message' => 'WhatsApp connection initialized. Scan the QR Code to connect.',
             ]);
         }
+
+        return back()->with('error', $this->getErrorMessage($response));
+    }
+
+    public function initialize()
+    {
+        $apiKey = GeneralSetting::first()?->serlzo_api_key;
+
+        $response = Http::withOptions(['verify' => false])->withHeaders(['x-serlzo-api-key' => $apiKey])
+            ->post("$this->apiBaseUrl/whatsapp/initialize");
+
+        if ($response->status() === 200) {
+            return back()->with('success', 'WhatsApp connection initialized. Scan the QR Code to connect.');
+        }
+
+        return back()->with('error', $this->getErrorMessage($response));
 
         return back()->with('error', $this->getErrorMessage($response));
     }
@@ -136,7 +152,7 @@ class SerlzoWhatsAppAccountController extends Controller
             return response()->json(['error' => 'API Key missing. Please log in.'], 401);
         }
 
-        $response = Http::withHeaders(['x-serlzo-api-key' => $apiKey])
+        $response = Http::withOptions(['verify' => false])->withHeaders(['x-serlzo-api-key' => $apiKey])
             ->post("$this->apiBaseUrl/whatsapp/generate-qr-code", ['token' => $token]);
 
         if ($response->successful()) {
@@ -155,7 +171,7 @@ class SerlzoWhatsAppAccountController extends Controller
             return response()->json(['error' => 'API Key missing. Please log in.'], 401);
         }
 
-        $response = Http::withHeaders(['x-serlzo-api-key' => $apiKey])
+        $response = Http::withOptions(['verify' => false])->withHeaders(['x-serlzo-api-key' => $apiKey])
             ->post("$this->apiBaseUrl/whatsapp/status", ['token' => $token]);
 
         if ($response->successful()) {
@@ -175,7 +191,7 @@ class SerlzoWhatsAppAccountController extends Controller
             return redirect()->route('whatsapp.login')->with('error', 'API Key missing. Please log in.');
         }
 
-        $response = Http::withHeaders(['x-serlzo-api-key' => $apiKey])
+        $response = Http::withOptions(['verify' => false])->withHeaders(['x-serlzo-api-key' => $apiKey])
             ->delete("$this->apiBaseUrl/whatsapp/$token");
 
         if ($response->status() === 200) {
