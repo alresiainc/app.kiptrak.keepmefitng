@@ -594,7 +594,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     //serlzo
     Route::get('/serlzo-setting', [SerlzoWhatsAppAccountController::class, 'index'])->name('serlzo.index');
-    Route::get('/serlzo-setting/initialize', [SerlzoWhatsAppAccountController::class, 'initialize'])->name('serlzo.initialize');
+    Route::post('/serlzo-setting/initialize', [SerlzoWhatsAppAccountController::class, 'initialize'])->name('serlzo.initialize');
     Route::post('/serlzo-setting/register', [SerlzoWhatsAppAccountController::class, 'register'])->name('serlzo.register');
     Route::post('/serlzo-setting/login', [SerlzoWhatsAppAccountController::class, 'login'])->name('serlzo.login');
     Route::get('/serlzo-setting/generate-qr-code/{token}', [SerlzoWhatsAppAccountController::class, 'generateQrCode'])->name('serlzo.qr');

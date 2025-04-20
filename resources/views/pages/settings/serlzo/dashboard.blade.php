@@ -54,9 +54,9 @@
                             <div>
                                 Your Connected WhatsApp Accounts</div>
                             <div>
-                                <a class="btn btn-outline-primary rounded-pill d-flex px-4"
-                                    href="{{ route('serlzo.initialize') }}">Initialize
-                                    New Session</a>
+                                <button class="btn btn-outline-primary rounded-pill d-flex px-4"
+                                    data-bs-target="#initializeModal" data-bs-toggle="modal">Initialize
+                                    New Session</button>
                             </div>
                         </div>
                         <div class="card-body">
@@ -106,6 +106,40 @@
                                 <p class="text-center text-muted">No connected accounts found.</p>
                             @endif
                         </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal initializeModal -->
+            <div class="modal fade" id="initializeModal" tabindex="-1" aria-labelledby="initializeModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="initializeModalLabel">Initialize New Session</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{{ route('serlzo.initialize') }}" method="post">
+                            @csrf
+                            <div class="modal-body">
+
+
+                                <div class="form-group">
+                                    <label for="">Username</label>
+                                    <div class="d-flex align-items-center product-container mb-2 w-100">
+                                        <input type="text" id="username" name="username" class="form-control border">
+
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary addAgentBtn">Initialize</button>
+                            </div>
+                        </form>
+
                     </div>
                 </div>
             </div>

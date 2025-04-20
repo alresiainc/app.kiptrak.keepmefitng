@@ -128,12 +128,21 @@ class SerlzoWhatsAppAccountController extends Controller
         return back()->with('error', $this->getErrorMessage($response));
     }
 
-    public function initialize()
+    public function initialize(Request $request)
     {
+        $request->validate([
+            'username' => 'required|string|max:255',
+        ]);
+
+        $data = [
+            'username' => $request->input('username'),
+        ];
+
+
         $apiKey = GeneralSetting::first()?->serlzo_api_key;
 
         $response = Http::withOptions(['verify' => false])->withHeaders(['x-serlzo-api-key' => $apiKey])
-            ->post("$this->apiBaseUrl/whatsapp/initialize");
+            ->post("$this->apiBaseUrl/whatsapp/initialize", $data);
 
         if ($response->status() === 200) {
             return back()->with('success', 'WhatsApp connection initialized. Scan the QR Code to connect.');
