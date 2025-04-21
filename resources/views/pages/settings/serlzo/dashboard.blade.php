@@ -73,7 +73,8 @@
                                     <tbody>
                                         @foreach ($accounts as $account)
                                             <tr id="account-{{ $account['token'] }}">
-                                                <td>{{ $account['publicName'] ?? $account['username'] }}</td>
+                                                <td>{{ $account['publicName'] != '' ? $account['publicName'] : $account['username'] }}
+                                                </td>
 
 
                                                 <td>

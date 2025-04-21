@@ -15,8 +15,8 @@
         }
 
         /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
-                                        color: #999;
-                                    } */
+                                            color: #999;
+                                        } */
         div.filter-option-inner-inner {
             color: #000 !important;
         }
@@ -283,7 +283,7 @@
                                         @foreach ($accounts as $account)
                                             <option value="{{ $account['token'] }}"
                                                 @if ($staff->serlzo_account_token == $account['token']) selected @endif>
-                                                {{ $account['publicName'] ?? $account['username'] }}
+                                                {{ $account['publicName'] != '' ? $account['publicName'] : $account['username'] }}
                                             </option>
                                         @endforeach
                                     </select>
