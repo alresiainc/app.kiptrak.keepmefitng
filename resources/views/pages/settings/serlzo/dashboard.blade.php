@@ -59,6 +59,7 @@
                                     New Session</button>
                             </div>
                         </div>
+
                         <div class="card-body">
                             @if (count($accounts) > 0)
                                 <table class="table table-striped">
@@ -72,7 +73,7 @@
                                     <tbody>
                                         @foreach ($accounts as $account)
                                             <tr id="account-{{ $account['token'] }}">
-                                                <td>{{ $account['username'] }}</td>
+                                                <td>{{ $account['publicName'] ?? $account['username'] }}</td>
 
 
                                                 <td>
