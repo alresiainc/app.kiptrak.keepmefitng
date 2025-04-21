@@ -79,7 +79,7 @@
 
                                                 <td>
                                                     <span
-                                                        class="badge {{ $account['status'] == 'Active' ? 'bg-success' : 'bg-danger' }}">
+                                                        class="badge {{ $account['status'] == 'active' ? 'bg-success' : 'bg-danger' }} text-capitalize">
                                                         {{ $account['status'] }}
                                                     </span>
                                                 </td>
