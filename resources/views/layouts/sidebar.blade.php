@@ -251,7 +251,7 @@ if (!isset($authUser)) {
                                     Transit</span></a>
                         </li>
                         <li>
-                            <a href="{{ route('allOrders') }}"><i style="font-size: 100%!important;"
+                            <a href="{{ route('allOrders', 'all') }}"><i style="font-size: 100%!important;"
                                     class="bi bi-card-list"></i><span>All Orders</span></a>
                         </li>
                     @endif
