@@ -123,6 +123,7 @@ class OrderNotification extends Notification
             'recipients' => \serialize([$notifiable->routeNotificationForEmail()]),
             'message_status' => 'pending',
             'created_by' => $this?->order->staff_assigned_id,
+            'order_id' => $this?->order->id,
         ]);
     }
 
@@ -151,6 +152,7 @@ class OrderNotification extends Notification
             'recipients' => \serialize([$notifiable->routeNotificationForWhatsapp()]),
             'message_status' => 'pending',
             'created_by' => $this?->order->staff_assigned_id,
+            'order_id' => $this?->order->id,
         ]);
     }
 
@@ -179,6 +181,7 @@ class OrderNotification extends Notification
             'recipients' => \serialize([$notifiable->routeNotificationForSMS()]),
             'message_status' => 'pending',
             'created_by' => $this?->order->staff_assigned_id,
+            'order_id' => $this?->order->id,
         ]);
     }
 

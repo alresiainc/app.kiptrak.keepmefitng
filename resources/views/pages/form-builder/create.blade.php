@@ -231,9 +231,9 @@
 
 
         /* .text-field-content {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        pointer-events: auto;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        user-select: text;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            pointer-events: auto;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            user-select: text;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        } */
 
         .text-field-content,
         .form-submit-btn {
@@ -922,6 +922,24 @@
                                                         @include('pages.form-builder.components.scripts-settings')
 
                                                     </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="accordion-item">
+                                                <div class="accordion-header" id="Messaging">
+                                                    <div class="tab-item-header collapsed" data-bs-toggle="collapse"
+                                                        data-bs-target="#collapseMessaging" aria-expanded="false"
+                                                        aria-controls="collapseMessaging">
+                                                        <div>Messaging</div>
+                                                        <i class="bi bi-caret-right-fill"></i>
+                                                    </div>
+                                                </div>
+                                                <div id="collapseMessaging" class="accordion-collapse collapse"
+                                                    aria-labelledby="Messaging" data-bs-parent="#settingsAccordion">
+                                                    <div class="accordion-body">
+                                                        @include('pages.form-builder.components.serlzo-account-settings')
+                                                    </div>
+
                                                 </div>
                                             </div>
                                         </div>

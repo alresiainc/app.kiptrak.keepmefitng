@@ -4,6 +4,7 @@ namespace App\Channels;
 
 use App\Helpers\PhoneHelper;
 use App\Models\Message;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Notifications\Notification;
 use App\Services\NotificationService;
@@ -57,6 +58,8 @@ class WhatsAppChannel
         $dataToSend = [];
 
         $staff = User::find($whatsappData['created_by']);
+        $order = Order::find($whatsappData['order_id']);
+        $form_serlzo_account_token = $order->formHolder->serlzo_account_token;
 
         foreach ($phones as $phone) {
             // Filter out any invalid phone numbers (empty or improperly formatted)
@@ -75,8 +78,12 @@ class WhatsAppChannel
                 'number' => $formattedPhoneNumber,
                 'message' => $body,
             ];
-
-            if ($staff) {
+            if ($form_serlzo_account_token) {
+                $token = $form_serlzo_account_token ?? '';
+                if (!empty($token)) {
+                    $individualWhatsappData['token'] = $token;
+                }
+            } elseif ($staff) {
                 $token = $staff->serlzo_account_token ?? '';
                 if (!empty($token)) {
                     $individualWhatsappData['token'] = $token;

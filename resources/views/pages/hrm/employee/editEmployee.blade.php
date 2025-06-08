@@ -15,8 +15,8 @@
         }
 
         /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
-                                            color: #999;
-                                        } */
+                                                color: #999;
+                                            } */
         div.filter-option-inner-inner {
             color: #000 !important;
         }
@@ -286,6 +286,7 @@
                                                 {{ $account['publicName'] != '' ? $account['publicName'] : $account['username'] }}
                                             </option>
                                         @endforeach
+                                        <option value="">None</option>
                                     </select>
 
 
