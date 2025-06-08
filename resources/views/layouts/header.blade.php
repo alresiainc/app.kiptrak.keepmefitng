@@ -2,6 +2,10 @@
     if (!isset($authUser)) {
         $authUser = Auth::user();
     }
+
+    if (!isset($user_role)) {
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+    }
 @endphp
 <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="d-flex align-items-center justify-content-between">

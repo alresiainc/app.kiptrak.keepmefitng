@@ -4,6 +4,9 @@ $routeName = \Route::currentRouteName();
 if (!isset($authUser)) {
     $authUser = Auth::user();
 }
+if (!isset($user_role)) {
+    $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+}
 //dd($routeName);
 ?>
 <aside id="sidebar" class="sidebar">
