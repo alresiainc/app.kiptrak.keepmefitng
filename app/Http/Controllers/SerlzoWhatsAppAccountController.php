@@ -136,6 +136,7 @@ class SerlzoWhatsAppAccountController extends Controller
 
         $data = [
             'username' => $request->input('username'),
+            'publicName' => $request->input('username'),
         ];
 
 
