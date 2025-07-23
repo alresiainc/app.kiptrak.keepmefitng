@@ -43,8 +43,8 @@
 
         .whatsapp-icon {
             /* font-size: 22px;
-                                                                                                                                                                                                                                                                                                                                                                    color: #012970;
-                                                                                                                                                                                                                                                                                                                                                                    margin-right: 25px; */
+                                                                                                                                                                                                                                                                                                                                                                                color: #012970;
+                                                                                                                                                                                                                                                                                                                                                                                margin-right: 25px; */
             position: relative;
         }
 
@@ -549,7 +549,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="d-flex justify-content-end">
-                                        {{ $orders->links() }}
+                                        {{ $orders->links('pagination.custom-pagination') }}
                                     </div>
                                 </div>
                             </div>
@@ -1133,7 +1133,7 @@
     </script>
     <script>
         $(document).ready(function() {
-            var ordersTable = $('#orders-table').DataTable({
+            var ordersTable = $('#orders-table-js').DataTable({
                 pageLength: 10, // Default rows per page
                 lengthMenu: [
                     [10, 25, 50, 100],

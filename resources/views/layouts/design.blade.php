@@ -74,6 +74,17 @@
             border-color: #04512d !important;
             color: #04512d !important;
         }
+
+        .page-link {
+            color: #04512d !important;
+        }
+
+        .active>.page-link,
+        .page-link.active {
+            background-color: #04512d !important;
+            color: #fff !important;
+            border-color: #04512d !important;
+        }
     </style>
     @yield('extra_css')
     {!! $headerScripts !!}
