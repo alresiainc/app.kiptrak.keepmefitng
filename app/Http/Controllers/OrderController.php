@@ -207,62 +207,62 @@ class OrderController extends Controller
 
             switch ($status) {
                 case "":
-                    $orders = Order::orderBy('id', 'DESC')->get();
+                    $orders = Order::orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "new":
-                    $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "new_from_alarm":
                     DB::table('sound_notifications')->update(['status' => 'seen']);
-                    $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "pending":
-                    $orders = Order::where('status', 'pending')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'pending')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "cancelled":
-                    $orders = Order::where('status', 'cancelled')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'cancelled')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "delivered_not_remitted":
-                    $orders = Order::where('status', 'delivered_not_remitted')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'delivered_not_remitted')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "delivered_and_remitted":
-                    $orders = Order::where('status', 'delivered_and_remitted')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'delivered_and_remitted')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "rescheduled_order":
-                    $orders = Order::where('status', 'rescheduled_order')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'rescheduled_order')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "order_in_transit":
-                    $orders = Order::where('status', 'order_in_transit')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'order_in_transit')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "order_confirmed":
-                    $orders = Order::where('status', 'order_confirmed')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'order_confirmed')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "order_sent_out":
-                    $orders = Order::where('status', 'order_sent_out')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'order_sent_out')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "delivery_attempted_1":
-                    $orders = Order::where('status', 'delivery_attempted_1')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'delivery_attempted_1')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "delivery_attempted_2":
-                    $orders = Order::where('status', 'delivery_attempted_2')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'delivery_attempted_2')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "delivery_attempted_3":
-                    $orders = Order::where('status', 'delivery_attempted_3')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'delivery_attempted_3')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "cancelled_admin":
-                    $orders = Order::where('status', 'cancelled_admin')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'cancelled_admin')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "customer_unreachable":
-                    $orders = Order::where('status', 'customer_unreachable')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'customer_unreachable')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "cancelled_customer":
-                    $orders = Order::where('status', 'cancelled_customer')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'cancelled_customer')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "rejected_customer":
-                    $orders = Order::where('status', 'rejected_customer')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'rejected_customer')->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "duplicate_order":
-                    $orders = Order::where('status', 'duplicate_order')->orderBy('id', 'DESC')->get();
+                    $orders = Order::where('status', 'duplicate_order')->orderBy('id', 'DESC')->paginate(10);
                     break;
             }
 
@@ -276,7 +276,7 @@ class OrderController extends Controller
                     $orders = Order::whereIn('orders.id', $formOrders->pluck('id'))
                         ->where('customer_id', '!=', null)
                         ->orderBy('id', 'DESC')
-                        ->get();
+                        ->paginate(10);
                     $entries = true;
                 }
             }
@@ -285,7 +285,7 @@ class OrderController extends Controller
                 ->orWhere('staff_assigned_id', $authUser->id)
                 ->orWhere('created_by', $authUser->id)
                 ->orderBy('id', 'DESC')
-                ->get();
+                ->paginate(10);
 
             switch ($status) {
                 case "":
@@ -293,7 +293,7 @@ class OrderController extends Controller
                         ->orWhere('staff_assigned_id', $authUser->id)
                         ->orWhere('created_by', $authUser->id)
                         ->orderBy('id', 'DESC')
-                        ->get();
+                        ->paginate(10);
                     break;
                 case "new":
                     $orders = Order::where('status', 'new')
@@ -303,7 +303,7 @@ class OrderController extends Controller
                                 ->orWhere('created_by', $authUser->id);
                         })
                         ->orderBy('id', 'DESC')
-                        ->get();
+                        ->paginate(10);
                     break;
 
                 case "new_from_alarm":
@@ -313,7 +313,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "pending":
                     $orders = Order::where('status', 'pending')->where(function ($query) use ($authUser) {
@@ -321,7 +321,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "cancelled":
                     $orders = Order::where('status', 'cancelled')->where(function ($query) use ($authUser) {
@@ -329,7 +329,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "delivered_not_remitted":
                     $orders = Order::where('status', 'delivered_not_remitted')->where(function ($query) use ($authUser) {
@@ -337,7 +337,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "delivered_and_remitted":
                     $orders = Order::where('status', 'delivered_and_remitted')->where(function ($query) use ($authUser) {
@@ -345,7 +345,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "rescheduled_order":
                     $orders = Order::where('status', 'rescheduled_order')->where(function ($query) use ($authUser) {
@@ -353,7 +353,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "order_in_transit":
                     $orders = Order::where('status', 'order_in_transit')->where(function ($query) use ($authUser) {
@@ -361,7 +361,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "order_confirmed":
                     $orders = Order::where('status', 'order_confirmed')->where(function ($query) use ($authUser) {
@@ -369,7 +369,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "order_sent_out":
                     $orders = Order::where('status', 'order_sent_out')->where(function ($query) use ($authUser) {
@@ -377,7 +377,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "delivery_attempted_1":
                     $orders = Order::where('status', 'delivery_attempted_1')->where(function ($query) use ($authUser) {
@@ -385,7 +385,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "delivery_attempted_2":
                     $orders = Order::where('status', 'delivery_attempted_2')->where(function ($query) use ($authUser) {
@@ -393,7 +393,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "delivery_attempted_3":
                     $orders = Order::where('status', 'delivery_attempted_3')->where(function ($query) use ($authUser) {
@@ -401,7 +401,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "cancelled_admin":
                     $orders = Order::where('status', 'cancelled_admin')->where(function ($query) use ($authUser) {
@@ -409,7 +409,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "customer_unreachable":
                     $orders = Order::where('status', 'customer_unreachable')->where(function ($query) use ($authUser) {
@@ -417,7 +417,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "cancelled_customer":
                     $orders = Order::where('status', 'cancelled_customer')->where(function ($query) use ($authUser) {
@@ -425,7 +425,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "rejected_customer":
                     $orders = Order::where('status', 'rejected_customer')->where(function ($query) use ($authUser) {
@@ -433,7 +433,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
                 case "duplicate_order":
                     $orders = Order::where('status', 'duplicate_order')->where(function ($query) use ($authUser) {
@@ -441,7 +441,7 @@ class OrderController extends Controller
                             ->orWhere('staff_assigned_id', $authUser->id)
                             ->orWhere('created_by', $authUser->id);
                     })
-                        ->orderBy('id', 'DESC')->get();
+                        ->orderBy('id', 'DESC')->paginate(10);
                     break;
             }
 
@@ -455,7 +455,7 @@ class OrderController extends Controller
                     $orders = Order::whereIn('orders.id', $formOrders->pluck('id'))
                         ->where('customer_id', '!=', null)
                         ->orderBy('id', 'DESC')
-                        ->get();
+                        ->paginate(10);
                     $entries = true;
                 }
             }

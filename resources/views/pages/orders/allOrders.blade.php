@@ -43,8 +43,8 @@
 
         .whatsapp-icon {
             /* font-size: 22px;
-                                                                                                                                                                                                                                                                                                                                                                color: #012970;
-                                                                                                                                                                                                                                                                                                                                                                margin-right: 25px; */
+                                                                                                                                                                                                                                                                                                                                                                    color: #012970;
+                                                                                                                                                                                                                                                                                                                                                                    margin-right: 25px; */
             position: relative;
         }
 
@@ -215,7 +215,7 @@
                             </div>
 
                             <div class="table table-responsive">
-                                <table id="orders-table" class="table table-striped custom-table2" style="width:100%">
+                                <table id="orders-tablee" class="table table-striped custom-table2" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th><input type="checkbox" id="users-master"></th>
@@ -538,6 +538,20 @@
 
                                     </tbody>
                                 </table>
+                            </div>
+                            <!-- Laravel Pagination Links -->
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <p class="text-muted">
+                                        Showing {{ $orders->firstItem() }} to {{ $orders->lastItem() }} of
+                                        {{ $orders->total() }} results
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-end">
+                                        {{ $orders->links() }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
