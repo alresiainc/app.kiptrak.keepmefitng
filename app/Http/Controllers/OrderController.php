@@ -203,7 +203,7 @@ class OrderController extends Controller
         $staffs = User::where('type', 'staff')->orderBy('id', 'DESC')->get();
 
         if ($authUser->isSuperAdmin || $user_role->permissions->contains('slug', 'view-all-orders')) {
-            $orders = Order::orderBy('id', 'DESC')->get();
+            $orders = Order::orderBy('id', 'DESC')->paginate(10);
 
             switch ($status) {
                 case "":
