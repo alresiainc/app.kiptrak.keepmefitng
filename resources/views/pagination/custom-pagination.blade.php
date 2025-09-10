@@ -1,6 +1,6 @@
 @if ($paginator->hasPages())
     <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center mb-0">
+        <ul class="pagination justify-content-center flex-wrap mb-0">
             {{-- Previous Page Link --}}
             @if ($paginator->onFirstPage())
                 <li class="page-item disabled">
