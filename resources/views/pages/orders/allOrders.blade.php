@@ -43,8 +43,8 @@
 
         .whatsapp-icon {
             /* font-size: 22px;
-                                                                                                                                                                                                                                                                                                                                                                                color: #012970;
-                                                                                                                                                                                                                                                                                                                                                                                margin-right: 25px; */
+                                                                                                                                                                                                                                                                                                                                                                                                            color: #012970;
+                                                                                                                                                                                                                                                                                                                                                                                                            margin-right: 25px; */
             position: relative;
         }
 
@@ -200,19 +200,54 @@
                             </div>
                             <hr>
 
-                            <div class="row mb-3">
-                                <div class="col-lg-3 col-md-6">
-                                    <label for="">Start Date</label>
-                                    <input type="text" name="start_date" id="start_date" autocomplete="false"
-                                        class="form-control  order_date" readonly>
-                                </div>
+                            <form method="GET" action="">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
 
-                                <div class="col-lg-3 col-md-6">
-                                    <label for="">End Date</label>
-                                    <input type="text" name="end_date" id="end_date" autocomplete="false"
-                                        class="form-control order_date" readonly>
+                                    <!-- Date Filters -->
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div style="min-width: 200px;">
+                                            <label for="start_date" class="form-label">Start Date</label>
+                                            <input type="date" name="start_date" id="start_date"
+                                                value="{{ request('start_date') }}" class="form-control">
+                                        </div>
+
+                                        <div style="min-width: 200px;">
+                                            <label for="end_date" class="form-label">End Date</label>
+                                            <input type="date" name="end_date" id="end_date"
+                                                value="{{ request('end_date') }}" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <!-- Pagination + Search + Button -->
+                                    <div class="d-flex flex-wrap gap-3 align-items-end">
+                                        <div style="min-width: 150px;">
+                                            <label for="page_length" class="form-label">Items per page</label>
+                                            <select name="page_length" id="page_length" class="form-control">
+                                                @foreach ([10, 25, 50, 100] as $size)
+                                                    <option value="{{ $size }}"
+                                                        {{ request('page_length', 10) == $size ? 'selected' : '' }}>
+                                                        {{ $size }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div style="min-width: 200px;">
+                                            <label for="search" class="form-label">Search</label>
+                                            <input type="text" name="search" id="search"
+                                                value="{{ request('search') }}" class="form-control">
+                                        </div>
+
+                                        <div>
+                                            <button type="submit" class="btn btn-primary">Apply</button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
+
+
+
+
 
                             <div class="table table-responsive">
                                 <table id="orders-tablee" class="table table-striped custom-table2" style="width:100%">
@@ -447,7 +482,8 @@
                                                                         class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder"
                                                                         data-bs-toggle="dropdown"
                                                                         style="font-size: 10px;">
-                                                                        <span>Order Cancelled Due to Duplicate Order</span>
+                                                                        <span>Order Cancelled Due to Duplicate
+                                                                            Order</span>
                                                                     </button>
                                                                 @elseif($order->status == 'delivered_not_remitted')
                                                                     <button type="button"
@@ -524,11 +560,13 @@
                                                             @if (isset($order->customer_id))
                                                                 <div class="mb-1"><a
                                                                         href="{{ route('editOrder', $order->unique_key) }}"
-                                                                        class="btn-info btn-sm w-100 p-1">Edit</a></div>
+                                                                        class="btn-info btn-sm w-100 p-1">Edit</a>
+                                                                </div>
                                                             @endif
                                                             <div><a href="{{ route('deleteOrder', $order->unique_key) }}"
                                                                     onclick="return confirm('Are you sure?')"
-                                                                    class="btn-danger btn-sm w-100 p-1">Delete</a></div>
+                                                                    class="btn-danger btn-sm w-100 p-1">Delete</a>
+                                                            </div>
 
                                                         </td>
                                                     </tr>

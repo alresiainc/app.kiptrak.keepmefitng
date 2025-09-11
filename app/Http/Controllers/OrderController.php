@@ -195,273 +195,374 @@ class OrderController extends Controller
         return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents', 'staffs', 'status', 'entries', 'formHolder'));
     }
 
-    public function allOrders($status = "")
+    // public function allOrders($status = "")
+    // {
+    //     $authUser = auth()->user();
+    //     $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+    //     $agents = User::where('type', 'agent')->orderBy('id', 'DESC')->get();
+    //     $staffs = User::where('type', 'staff')->orderBy('id', 'DESC')->get();
+
+    //     if ($authUser->isSuperAdmin || $user_role->permissions->contains('slug', 'view-all-orders')) {
+    //         $orders = Order::orderBy('id', 'DESC')->paginate(10);
+
+    //         switch ($status) {
+    //             case "":
+    //                 $orders = Order::orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "new":
+    //                 $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "new_from_alarm":
+    //                 DB::table('sound_notifications')->update(['status' => 'seen']);
+    //                 $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "pending":
+    //                 $orders = Order::where('status', 'pending')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "cancelled":
+    //                 $orders = Order::where('status', 'cancelled')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "delivered_not_remitted":
+    //                 $orders = Order::where('status', 'delivered_not_remitted')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "delivered_and_remitted":
+    //                 $orders = Order::where('status', 'delivered_and_remitted')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "rescheduled_order":
+    //                 $orders = Order::where('status', 'rescheduled_order')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "order_in_transit":
+    //                 $orders = Order::where('status', 'order_in_transit')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "order_confirmed":
+    //                 $orders = Order::where('status', 'order_confirmed')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "order_sent_out":
+    //                 $orders = Order::where('status', 'order_sent_out')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "delivery_attempted_1":
+    //                 $orders = Order::where('status', 'delivery_attempted_1')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "delivery_attempted_2":
+    //                 $orders = Order::where('status', 'delivery_attempted_2')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "delivery_attempted_3":
+    //                 $orders = Order::where('status', 'delivery_attempted_3')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "cancelled_admin":
+    //                 $orders = Order::where('status', 'cancelled_admin')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "customer_unreachable":
+    //                 $orders = Order::where('status', 'customer_unreachable')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "cancelled_customer":
+    //                 $orders = Order::where('status', 'cancelled_customer')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "rejected_customer":
+    //                 $orders = Order::where('status', 'rejected_customer')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "duplicate_order":
+    //                 $orders = Order::where('status', 'duplicate_order')->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //         }
+
+    //         $entries = false;
+    //         $formHolder = '';
+    //         if ($status !== "") {
+    //             $formHolder = FormHolder::where('unique_key', $status);
+    //             if ($formHolder->exists()) {
+    //                 $formHolder = $formHolder->first();
+    //                 $formOrders = $formHolder->formOrders;
+    //                 $orders = Order::whereIn('orders.id', $formOrders->pluck('id'))
+    //                     ->where('customer_id', '!=', null)
+    //                     ->orderBy('id', 'DESC')
+    //                     ->paginate(10);
+    //                 $entries = true;
+    //             }
+    //         }
+    //     } else {
+    //         $orders = Order::where('agent_assigned_id', $authUser->id)
+    //             ->orWhere('staff_assigned_id', $authUser->id)
+    //             ->orWhere('created_by', $authUser->id)
+    //             ->orderBy('id', 'DESC')
+    //             ->paginate(10);
+
+    //         switch ($status) {
+    //             case "":
+    //                 $orders = Order::where('agent_assigned_id', $authUser->id)
+    //                     ->orWhere('staff_assigned_id', $authUser->id)
+    //                     ->orWhere('created_by', $authUser->id)
+    //                     ->orderBy('id', 'DESC')
+    //                     ->paginate(10);
+    //                 break;
+    //             case "new":
+    //                 $orders = Order::where('status', 'new')
+    //                     ->where(function ($query) use ($authUser) {
+    //                         $query->where('agent_assigned_id', $authUser->id)
+    //                             ->orWhere('staff_assigned_id', $authUser->id)
+    //                             ->orWhere('created_by', $authUser->id);
+    //                     })
+    //                     ->orderBy('id', 'DESC')
+    //                     ->paginate(10);
+    //                 break;
+
+    //             case "new_from_alarm":
+    //                 DB::table('sound_notifications')->update(['status' => 'seen']);
+    //                 $orders = Order::where('status', 'new')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "pending":
+    //                 $orders = Order::where('status', 'pending')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "cancelled":
+    //                 $orders = Order::where('status', 'cancelled')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "delivered_not_remitted":
+    //                 $orders = Order::where('status', 'delivered_not_remitted')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "delivered_and_remitted":
+    //                 $orders = Order::where('status', 'delivered_and_remitted')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "rescheduled_order":
+    //                 $orders = Order::where('status', 'rescheduled_order')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "order_in_transit":
+    //                 $orders = Order::where('status', 'order_in_transit')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "order_confirmed":
+    //                 $orders = Order::where('status', 'order_confirmed')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "order_sent_out":
+    //                 $orders = Order::where('status', 'order_sent_out')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "delivery_attempted_1":
+    //                 $orders = Order::where('status', 'delivery_attempted_1')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "delivery_attempted_2":
+    //                 $orders = Order::where('status', 'delivery_attempted_2')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "delivery_attempted_3":
+    //                 $orders = Order::where('status', 'delivery_attempted_3')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "cancelled_admin":
+    //                 $orders = Order::where('status', 'cancelled_admin')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "customer_unreachable":
+    //                 $orders = Order::where('status', 'customer_unreachable')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "cancelled_customer":
+    //                 $orders = Order::where('status', 'cancelled_customer')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "rejected_customer":
+    //                 $orders = Order::where('status', 'rejected_customer')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //             case "duplicate_order":
+    //                 $orders = Order::where('status', 'duplicate_order')->where(function ($query) use ($authUser) {
+    //                     $query->where('agent_assigned_id', $authUser->id)
+    //                         ->orWhere('staff_assigned_id', $authUser->id)
+    //                         ->orWhere('created_by', $authUser->id);
+    //                 })
+    //                     ->orderBy('id', 'DESC')->paginate(10);
+    //                 break;
+    //         }
+
+    //         $entries = false;
+    //         $formHolder = '';
+    //         if ($status !== "") {
+    //             $formHolder = FormHolder::where('unique_key', $status);
+    //             if ($formHolder->exists()) {
+    //                 $formHolder = $formHolder->first();
+    //                 $formOrders = $formHolder->formOrders;
+    //                 $orders = Order::whereIn('orders.id', $formOrders->pluck('id'))
+    //                     ->where('customer_id', '!=', null)
+    //                     ->orderBy('id', 'DESC')
+    //                     ->paginate(10);
+    //                 $entries = true;
+    //             }
+    //         }
+    //     }
+
+    //     return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents', 'staffs', 'status', 'entries', 'formHolder'));
+    // }
+
+    public function allOrders(Request $request, $status = "")
     {
         $authUser = auth()->user();
-        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
-        $agents = User::where('type', 'agent')->orderBy('id', 'DESC')->get();
-        $staffs = User::where('type', 'staff')->orderBy('id', 'DESC')->get();
+        $user_role = $authUser->hasAnyRole($authUser->id)
+            ? $authUser->role($authUser->id)->role
+            : false;
 
-        if ($authUser->isSuperAdmin || $user_role->permissions->contains('slug', 'view-all-orders')) {
-            $orders = Order::orderBy('id', 'DESC')->paginate(10);
+        //  dd($user_role->permissions->pluck('slug')->toArray());
 
-            switch ($status) {
-                case "":
-                    $orders = Order::orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "new":
-                    $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "new_from_alarm":
-                    DB::table('sound_notifications')->update(['status' => 'seen']);
-                    $orders = Order::where('status', 'new')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "pending":
-                    $orders = Order::where('status', 'pending')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "cancelled":
-                    $orders = Order::where('status', 'cancelled')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "delivered_not_remitted":
-                    $orders = Order::where('status', 'delivered_not_remitted')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "delivered_and_remitted":
-                    $orders = Order::where('status', 'delivered_and_remitted')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "rescheduled_order":
-                    $orders = Order::where('status', 'rescheduled_order')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "order_in_transit":
-                    $orders = Order::where('status', 'order_in_transit')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "order_confirmed":
-                    $orders = Order::where('status', 'order_confirmed')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "order_sent_out":
-                    $orders = Order::where('status', 'order_sent_out')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "delivery_attempted_1":
-                    $orders = Order::where('status', 'delivery_attempted_1')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "delivery_attempted_2":
-                    $orders = Order::where('status', 'delivery_attempted_2')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "delivery_attempted_3":
-                    $orders = Order::where('status', 'delivery_attempted_3')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "cancelled_admin":
-                    $orders = Order::where('status', 'cancelled_admin')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "customer_unreachable":
-                    $orders = Order::where('status', 'customer_unreachable')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "cancelled_customer":
-                    $orders = Order::where('status', 'cancelled_customer')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "rejected_customer":
-                    $orders = Order::where('status', 'rejected_customer')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "duplicate_order":
-                    $orders = Order::where('status', 'duplicate_order')->orderBy('id', 'DESC')->paginate(10);
-                    break;
-            }
+        $agents = User::where('type', 'agent')->latest()->get();
+        $staffs = User::where('type', 'staff')->latest()->get();
 
-            $entries = false;
-            $formHolder = '';
-            if ($status !== "") {
-                $formHolder = FormHolder::where('unique_key', $status);
-                if ($formHolder->exists()) {
-                    $formHolder = $formHolder->first();
-                    $formOrders = $formHolder->formOrders;
-                    $orders = Order::whereIn('orders.id', $formOrders->pluck('id'))
-                        ->where('customer_id', '!=', null)
-                        ->orderBy('id', 'DESC')
-                        ->paginate(10);
-                    $entries = true;
-                }
-            }
+        // Items per page (default 10)
+        $perPage = $request->get('page_length', 10);
+
+        // 🔹 Base query depending on user role
+        if ($authUser->isSuperAdmin || $user_role->permissions->contains('slug', 'view-order-list')) {
+            $query = Order::query();
         } else {
-            $orders = Order::where('agent_assigned_id', $authUser->id)
-                ->orWhere('staff_assigned_id', $authUser->id)
-                ->orWhere('created_by', $authUser->id)
-                ->orderBy('id', 'DESC')
-                ->paginate(10);
-
-            switch ($status) {
-                case "":
-                    $orders = Order::where('agent_assigned_id', $authUser->id)
-                        ->orWhere('staff_assigned_id', $authUser->id)
-                        ->orWhere('created_by', $authUser->id)
-                        ->orderBy('id', 'DESC')
-                        ->paginate(10);
-                    break;
-                case "new":
-                    $orders = Order::where('status', 'new')
-                        ->where(function ($query) use ($authUser) {
-                            $query->where('agent_assigned_id', $authUser->id)
-                                ->orWhere('staff_assigned_id', $authUser->id)
-                                ->orWhere('created_by', $authUser->id);
-                        })
-                        ->orderBy('id', 'DESC')
-                        ->paginate(10);
-                    break;
-
-                case "new_from_alarm":
-                    DB::table('sound_notifications')->update(['status' => 'seen']);
-                    $orders = Order::where('status', 'new')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "pending":
-                    $orders = Order::where('status', 'pending')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "cancelled":
-                    $orders = Order::where('status', 'cancelled')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "delivered_not_remitted":
-                    $orders = Order::where('status', 'delivered_not_remitted')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "delivered_and_remitted":
-                    $orders = Order::where('status', 'delivered_and_remitted')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "rescheduled_order":
-                    $orders = Order::where('status', 'rescheduled_order')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "order_in_transit":
-                    $orders = Order::where('status', 'order_in_transit')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "order_confirmed":
-                    $orders = Order::where('status', 'order_confirmed')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "order_sent_out":
-                    $orders = Order::where('status', 'order_sent_out')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "delivery_attempted_1":
-                    $orders = Order::where('status', 'delivery_attempted_1')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "delivery_attempted_2":
-                    $orders = Order::where('status', 'delivery_attempted_2')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "delivery_attempted_3":
-                    $orders = Order::where('status', 'delivery_attempted_3')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "cancelled_admin":
-                    $orders = Order::where('status', 'cancelled_admin')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "customer_unreachable":
-                    $orders = Order::where('status', 'customer_unreachable')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "cancelled_customer":
-                    $orders = Order::where('status', 'cancelled_customer')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "rejected_customer":
-                    $orders = Order::where('status', 'rejected_customer')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-                case "duplicate_order":
-                    $orders = Order::where('status', 'duplicate_order')->where(function ($query) use ($authUser) {
-                        $query->where('agent_assigned_id', $authUser->id)
-                            ->orWhere('staff_assigned_id', $authUser->id)
-                            ->orWhere('created_by', $authUser->id);
-                    })
-                        ->orderBy('id', 'DESC')->paginate(10);
-                    break;
-            }
-
-            $entries = false;
-            $formHolder = '';
-            if ($status !== "") {
-                $formHolder = FormHolder::where('unique_key', $status);
-                if ($formHolder->exists()) {
-                    $formHolder = $formHolder->first();
-                    $formOrders = $formHolder->formOrders;
-                    $orders = Order::whereIn('orders.id', $formOrders->pluck('id'))
-                        ->where('customer_id', '!=', null)
-                        ->orderBy('id', 'DESC')
-                        ->paginate(10);
-                    $entries = true;
-                }
-            }
+            $query = Order::where(function ($q) use ($authUser) {
+                $q->where('agent_assigned_id', $authUser->id)
+                    ->orWhere('staff_assigned_id', $authUser->id)
+                    ->orWhere('created_by', $authUser->id);
+            });
         }
 
-        return view('pages.orders.allOrders', compact('authUser', 'user_role', 'orders', 'agents', 'staffs', 'status', 'entries', 'formHolder'));
+        // 🔹 Status filter
+        if ($status !== "") {
+            if ($status === "new_from_alarm") {
+                DB::table('sound_notifications')->update(['status' => 'seen']);
+                $status = "new";
+            }
+
+            $query->where('status', $status);
+
+            $formHolder = FormHolder::where('unique_key', $status)->first();
+            if ($formHolder) {
+                $formOrders = $formHolder->formOrders->pluck('id');
+                $query->whereIn('orders.id', $formOrders)->whereNotNull('customer_id');
+                $entries = true;
+            } else {
+                $entries = false;
+                $formHolder = '';
+            }
+        } else {
+            $entries = false;
+            $formHolder = '';
+        }
+
+        // 🔹 Date filters
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        // 🔹 Search filter (order id, order code, customer name, phone)
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                // 🔹 Handle order code format kp-000XX
+                if (preg_match('/^kp-0*(\d+)$/i', $search, $matches)) {
+                    $searchId = $matches[1]; // extract actual ID from kp-00126 → 126
+                    $q->where('id', $searchId);
+                } else {
+                    // 🔹 Normal searches
+                    $q->where('id', 'like', "%$search%")
+                        ->orWhereHas('customer', function ($sub) use ($search) {
+                            $sub->where('firstname', 'like', "%$search%")
+                                ->orWhere('lastname', 'like', "%$search%")
+                                ->orWhere('phone_number', 'like', "%$search%")
+                                ->orWhere('whatsapp_phone_number', 'like', "%$search%")
+                                ->orWhere('email', 'like', "%$search%")
+                                ->orWhere('city', 'like', "%$search%")
+                                ->orWhere('state', 'like', "%$search%")
+                                ->orWhere('delivery_address', 'like', "%$search%")
+                                ->orWhereHas('country', function ($c) use ($search) {
+                                    $c->where('name', 'like', "%$search%");
+                                });
+                        });
+                }
+            });
+        }
+
+        // 🔹 Final query
+        $orders = $query->latest()->paginate($perPage)->appends($request->all());
+
+        return view('pages.orders.allOrders', compact(
+            'authUser',
+            'user_role',
+            'orders',
+            'agents',
+            'staffs',
+            'status',
+            'entries',
+            'formHolder'
+        ));
     }
 
 
