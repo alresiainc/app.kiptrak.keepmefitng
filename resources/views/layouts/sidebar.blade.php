@@ -153,160 +153,200 @@ if (!isset($user_role)) {
                         'all',
                     ];
 
-                    $orderCounts = [];
+                    $authUser = auth()->user();
+                    $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
 
+                    // 🔹 Base query depending on user role (same as controller)
+                    if (
+                        $authUser->isSuperAdmin ||
+                        ($user_role && $user_role->permissions->pluck('slug')->contains('view-order-list'))
+                    ) {
+                        $baseQuery = \App\Models\Order::query();
+                    } else {
+                        $baseQuery = \App\Models\Order::where(function ($q) use ($authUser) {
+                            $q->where('agent_assigned_id', $authUser->id)
+                                ->orWhere('staff_assigned_id', $authUser->id)
+                                ->orWhere('created_by', $authUser->id);
+                        });
+                    }
+
+                    // 🔹 Build counts per status
+                    $orderCounts = [];
                     foreach ($statuses as $status) {
+                        $query = clone $baseQuery; // prevent reusing modified builder
                         if ($status === 'all') {
-                            $orderCounts[$status] = \App\Models\Order::count();
+                            $orderCounts[$status] = $query->count();
                         } else {
-                            $orderCounts[$status] = \App\Models\Order::where('status', $status)->count();
+                            $orderCounts[$status] = $query->where('status', $status)->count();
                         }
                     }
 
+                    $hasAccess = false;
+
+                    if (
+                        $authUser->isSuperAdmin ||
+                        ($user_role && $user_role->permissions->pluck('slug')->contains('view-order-list'))
+                    ) {
+                        $hasAccess = true;
+                    } else {
+                        // check if user has assigned orders
+                        $assignedOrders = \App\Models\Order::where(function ($q) use ($authUser) {
+                            $q->where('agent_assigned_id', $authUser->id)
+                                ->orWhere('staff_assigned_id', $authUser->id)
+                                ->orWhere('created_by', $authUser->id);
+                        })->exists();
+
+                        if ($assignedOrders) {
+                            $hasAccess = true;
+                        }
+                    }
                 @endphp
+                @if ($hasAccess)
 
-                <ul id="orders-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-                    @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-order-list')))
-                        <li>
-                            <a href="{{ route('allOrders', 'new') }}"
-                                class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="bi bi-card-list"></i><span>New Orders</span>
-                                </div>
-                                <span class="badge bg-primary ms-auto" style="margin-right: 10px;">
-                                    {{ $orderCounts['new'] ?? 0 }}
-                                </span>
-                            </a>
-                        </li>
 
-                        <li>
-                            <a href="{{ route('allOrders', 'pending') }}"
-                                class="d-flex justify-content-between align-items-center">
-                                <div><i class="bi bi-card-list"></i><span>Pending Orders</span></div>
-                                <span class="badge bg-primary ms-auto" style="margin-right: 10px;">
-                                    {{ $orderCounts['pending'] ?? 0 }}
-                                </span>
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('allOrders', 'order_confirmed') }}"
-                                class="d-flex justify-content-between align-items-center">
-                                <div><i class="bi bi-card-list"></i><span>Order Confirmed</span></div>
-                                <span class="badge bg-info ms-auto" style="margin-right: 10px;">
-                                    {{ $orderCounts['order_confirmed'] ?? 0 }}
-                                </span>
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('allOrders', 'rescheduled_order') }}"
-                                class="d-flex justify-content-between align-items-center">
-                                <div><i class="bi bi-card-list"></i><span>Order Rescheduled</span></div>
-                                <span class="badge bg-info ms-auto" style="margin-right: 10px;">
-                                    {{ $orderCounts['rescheduled_order'] ?? 0 }}
-                                </span>
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('allOrders', 'order_sent_out') }}"
-                                class="d-flex justify-content-between align-items-center">
-                                <div><i class="bi bi-card-list"></i><span>Order Sent Out</span></div>
-                                <span class="badge bg-warning text-dark ms-auto" style="margin-right: 10px;">
-                                    {{ $orderCounts['order_sent_out'] ?? 0 }}
-                                </span>
-                            </a>
-                        </li>
-
-                        {{-- Delivery Attempted --}}
-                        @foreach (['delivery_attempted_1', 'delivery_attempted_2', 'delivery_attempted_3'] as $attempt)
+                    <ul id="orders-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                        @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-order-list')))
                             <li>
-                                <a href="{{ route('allOrders', $attempt) }}"
+                                <a href="{{ route('allOrders', 'new') }}"
                                     class="d-flex justify-content-between align-items-center">
-                                    <div><i
-                                            class="bi bi-card-list"></i><span>{{ ucwords(str_replace('_', ' ', $attempt)) }}</span>
+                                    <div>
+                                        <i class="bi bi-card-list"></i><span>New Orders</span>
                                     </div>
+                                    <span class="badge bg-primary ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['new'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('allOrders', 'pending') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>Pending Orders</span></div>
+                                    <span class="badge bg-primary ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['pending'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('allOrders', 'order_confirmed') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>Order Confirmed</span></div>
+                                    <span class="badge bg-info ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['order_confirmed'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('allOrders', 'rescheduled_order') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>Order Rescheduled</span></div>
+                                    <span class="badge bg-info ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['rescheduled_order'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('allOrders', 'order_sent_out') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>Order Sent Out</span></div>
                                     <span class="badge bg-warning text-dark ms-auto" style="margin-right: 10px;">
-                                        {{ $orderCounts[$attempt] ?? 0 }}
+                                        {{ $orderCounts['order_sent_out'] ?? 0 }}
                                     </span>
                                 </a>
                             </li>
-                        @endforeach
 
-                        {{-- Cancelled --}}
-                        @foreach (['cancelled_admin', 'cancelled_customer', 'rejected_customer', 'duplicate_order'] as $cancel)
+                            {{-- Delivery Attempted --}}
+                            @foreach (['delivery_attempted_1', 'delivery_attempted_2', 'delivery_attempted_3'] as $attempt)
+                                <li>
+                                    <a href="{{ route('allOrders', $attempt) }}"
+                                        class="d-flex justify-content-between align-items-center">
+                                        <div><i
+                                                class="bi bi-card-list"></i><span>{{ ucwords(str_replace('_', ' ', $attempt)) }}</span>
+                                        </div>
+                                        <span class="badge bg-warning text-dark ms-auto" style="margin-right: 10px;">
+                                            {{ $orderCounts[$attempt] ?? 0 }}
+                                        </span>
+                                    </a>
+                                </li>
+                            @endforeach
+
+                            {{-- Cancelled --}}
+                            @foreach (['cancelled_admin', 'cancelled_customer', 'rejected_customer', 'duplicate_order'] as $cancel)
+                                <li>
+                                    <a href="{{ route('allOrders', $cancel) }}"
+                                        class="d-flex justify-content-between align-items-center">
+                                        <div><i
+                                                class="bi bi-card-list"></i><span>{{ ucwords(str_replace('_', ' ', $cancel)) }}</span>
+                                        </div>
+                                        <span class="badge bg-danger ms-auto" style="margin-right: 10px;">
+                                            {{ $orderCounts[$cancel] ?? 0 }}
+                                        </span>
+                                    </a>
+                                </li>
+                            @endforeach
+
                             <li>
-                                <a href="{{ route('allOrders', $cancel) }}"
+                                <a href="{{ route('allOrders', 'customer_unreachable') }}"
                                     class="d-flex justify-content-between align-items-center">
-                                    <div><i
-                                            class="bi bi-card-list"></i><span>{{ ucwords(str_replace('_', ' ', $cancel)) }}</span>
-                                    </div>
-                                    <span class="badge bg-danger ms-auto" style="margin-right: 10px;">
-                                        {{ $orderCounts[$cancel] ?? 0 }}
+                                    <div><i class="bi bi-card-list"></i><span>Customer Unreachable</span></div>
+                                    <span class="badge bg-secondary ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['customer_unreachable'] ?? 0 }}
                                     </span>
                                 </a>
                             </li>
-                        @endforeach
 
-                        <li>
-                            <a href="{{ route('allOrders', 'customer_unreachable') }}"
-                                class="d-flex justify-content-between align-items-center">
-                                <div><i class="bi bi-card-list"></i><span>Customer Unreachable</span></div>
-                                <span class="badge bg-secondary ms-auto" style="margin-right: 10px;">
-                                    {{ $orderCounts['customer_unreachable'] ?? 0 }}
-                                </span>
-                            </a>
-                        </li>
+                            <li>
+                                <a href="{{ route('allOrders', 'delivered_not_remitted') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>Delivered Not Remitted</span></div>
+                                    <span class="badge bg-dark ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['delivered_not_remitted'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
 
-                        <li>
-                            <a href="{{ route('allOrders', 'delivered_not_remitted') }}"
-                                class="d-flex justify-content-between align-items-center">
-                                <div><i class="bi bi-card-list"></i><span>Delivered Not Remitted</span></div>
-                                <span class="badge bg-dark ms-auto" style="margin-right: 10px;">
-                                    {{ $orderCounts['delivered_not_remitted'] ?? 0 }}
-                                </span>
-                            </a>
-                        </li>
+                            <li>
+                                <a href="{{ route('allOrders', 'delivered_and_remitted') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>Delivered & Remitted</span></div>
+                                    <span class="badge bg-success ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['delivered_and_remitted'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
 
-                        <li>
-                            <a href="{{ route('allOrders', 'delivered_and_remitted') }}"
-                                class="d-flex justify-content-between align-items-center">
-                                <div><i class="bi bi-card-list"></i><span>Delivered & Remitted</span></div>
-                                <span class="badge bg-success ms-auto" style="margin-right: 10px;">
-                                    {{ $orderCounts['delivered_and_remitted'] ?? 0 }}
-                                </span>
-                            </a>
-                        </li>
+                            <li>
+                                <a href="{{ route('allOrders', 'order_in_transit') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>Order In Transit</span></div>
+                                    <span class="badge bg-info ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['order_in_transit'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
 
-                        <li>
-                            <a href="{{ route('allOrders', 'order_in_transit') }}"
-                                class="d-flex justify-content-between align-items-center">
-                                <div><i class="bi bi-card-list"></i><span>Order In Transit</span></div>
-                                <span class="badge bg-info ms-auto" style="margin-right: 10px;">
-                                    {{ $orderCounts['order_in_transit'] ?? 0 }}
-                                </span>
-                            </a>
-                        </li>
+                            <li>
+                                <a href="{{ route('allOrders', 'all') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>All Orders</span></div>
+                                    <span class="badge bg-secondary ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['all'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
+                        @endif
 
-                        <li>
-                            <a href="{{ route('allOrders', 'all') }}"
-                                class="d-flex justify-content-between align-items-center">
-                                <div><i class="bi bi-card-list"></i><span>All Orders</span></div>
-                                <span class="badge bg-secondary ms-auto" style="margin-right: 10px;">
-                                    {{ $orderCounts['all'] ?? 0 }}
-                                </span>
-                            </a>
-                        </li>
-                    @endif
-
-                    @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-order-list')))
-                        <li>
-                            <a href="{{ route('cartAbandon') }}"><i style="font-size: 100%!important;"
-                                    class="bi bi-card-list"></i><span>Cart Abandoned</span></a>
-                        </li>
-                    @endif
-                </ul>
+                        @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-order-list')))
+                            <li>
+                                <a href="{{ route('cartAbandon') }}"><i style="font-size: 100%!important;"
+                                        class="bi bi-card-list"></i><span>Cart Abandoned</span></a>
+                            </li>
+                        @endif
+                    </ul>
+                @endif
 
 
             </li>
