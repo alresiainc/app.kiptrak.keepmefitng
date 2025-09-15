@@ -120,7 +120,20 @@
                                     Extra Cost</div>
                             </div>
                         </div>
+                        @if (isset($order->order_note))
+                            <hr>
+                            <div class="d-flex align-items-center gap-3 g-3 m-1 mx-3">
+                                <div>
+
+                                    <div for="" class="fw-bolder " style="font-size: 20px;"> Order Note:</div>
+                                    <div>
+                                        {{ $order->order_note }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                         <hr>
+
                         <div class="row g-3 m-1">
                             <div class="col-lg-3">
                                 <label for="" class="fw-bolder">Order Code</label>
@@ -131,7 +144,8 @@
                                 <div class="text-dark">{{ $order->customer_id ? $order->customer->firstname : 'N/A' }}
                                     {{ $order->customer_id ? $order->customer->lastname : 'N/A' }}
                                     | Email: <span
-                                        class="lead">{{ $order->customer_id ? $order->customer->email : 'N/A' }}</div>
+                                        class="lead">{{ $order->customer_id ? $order->customer->email : 'N/A' }}
+                                </div>
                                 <div>Phone: <span class="lead">
                                         @if ($order->customer_id)
                                             <a
@@ -184,7 +198,8 @@
                             </div>
                             <div class="col-lg-2">
                                 <label for="" class="fw-bolder">Agent</label>
-                                <div class="text-dark">{{ $order->agent_assigned_id ? $order->agent->name : 'None' }}</div>
+                                <div class="text-dark">{{ $order->agent_assigned_id ? $order->agent->name : 'None' }}
+                                </div>
                             </div>
                         </div>
                         <div class="row g-3 m-1">
@@ -200,26 +215,30 @@
 
                                     <div class="col-lg-3">
                                         <label for="" class="fw-bolder">Product Name</label>
-                                        <div class="text-dark" style="font-size: 14px;">{{ $package->product->name }}</div>
+                                        <div class="text-dark" style="font-size: 14px;">{{ $package->product->name }}
+                                        </div>
                                     </div>
 
                                     <div class="col-lg-3">
                                         <label for="" class="fw-bolder">Quantity Ordered</label>
                                         <div class="text-dark d-none" style="font-size: 14px;">
                                             {{ $package->quantity_removed . ' @' . $package->product->price }}</div>
-                                        <div class="text-dark" style="font-size: 14px;">{{ $package->quantity_removed }}
+                                        <div class="text-dark" style="font-size: 14px;">
+                                            {{ $package->quantity_removed }}
                                         </div>
                                     </div>
 
                                     <div class="col-lg-3">
                                         <label for="" class="fw-bolder">Revenue</label>
-                                        <div class="text-dark" style="font-size: 14px;">{{ $package->amount_accrued }}
+                                        <div class="text-dark" style="font-size: 14px;">
+                                            {{ $package->amount_accrued }}
                                         </div>
                                     </div>
 
                                     <div class="col-lg-3">
                                         <label for="" class="fw-bolder">Date</label>
-                                        <div class="text-dark" style="font-size: 14px;">{{ $order->created_at }}</div>
+                                        <div class="text-dark" style="font-size: 14px;">{{ $order->created_at }}
+                                        </div>
                                     </div>
 
                                 </div>

@@ -634,6 +634,46 @@ class OrderController extends Controller
         return back()->with('success', 'Order Date Status Updated Successfully!');
     }
 
+    public function updateOrderDateStatusWithMessage(Request $request)
+    {
+        // dd($request->all());
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id) ? $authUser->role($authUser->id)->role : false;
+
+        $data = $request->all();
+
+        $order_id = $data['order_id'];
+        $order_delivery_date = $data['order_delivery_date'];
+        $order_status = $data['order_status'];
+        $order_note = $data['order_note'];
+
+        $order = Order::where('id', $order_id)->first();
+
+        $order->status = !empty($order_status) ? $order_status : $order->status;
+        $order->order_note = !empty($order_note) ? $order_note : null;
+        $order->expected_delivery_date = !empty($order_delivery_date) ? $order_delivery_date : $order->expected_delivery_date;
+        $order->save();
+        $channels = config('site.notification_channels') ?? [];
+
+        $messages = [];
+
+        foreach ($channels as $type) {
+            $message_type = MessageTemplate::where('type', $type . '_order_status_changed_to_' . $order_status)->first();
+
+            if ($message_type && $message_type->is_active) {
+                $messages[$type]['title'] = $message_type->subject;
+                $messages[$type]['message'] = $message_type->message;
+            }
+        }
+
+        $customer = $order->customer;
+        $customer?->notify(new OrderNotification($order, $messages));
+
+        //upd order
+        //DB::table('orders')->where('id',$order_id)->update(['status'=>$status, 'order_note'=>$order_note, 'expected_delivery_date'=>$order_delivery_date]);
+        return back()->with('success', 'Order Date Status Updated Successfully!');
+    }
+
     //orderForm
     public function singleOrder($unique_key)
     {

@@ -43,8 +43,8 @@
 
         .whatsapp-icon {
             /* font-size: 22px;
-                                                                                                                                                                                                                                                                                                                                                                                                            color: #012970;
-                                                                                                                                                                                                                                                                                                                                                                                                            margin-right: 25px; */
+                                                                                                                                                                                                                                                                                                                                                                                                                                        color: #012970;
+                                                                                                                                                                                                                                                                                                                                                                                                                                        margin-right: 25px; */
             position: relative;
         }
 
@@ -500,7 +500,7 @@
                                                                         <span>Delivered & Remitted</span>
                                                                     </button>
                                                                 @endif
-                                                                <ul class="dropdown-menu">
+                                                                {{-- <ul class="dropdown-menu">
                                                                     <li><a class="dropdown-item"
                                                                             href="{{ route('updateOrderStatus', [$order->unique_key, 'new']) }}">New
                                                                             Order</a></li>
@@ -511,9 +511,8 @@
                                                                             href="{{ route('updateOrderStatus', [$order->unique_key, 'order_confirmed']) }}">Order
                                                                             Confirmed</a></li>
                                                                     <li><a class="dropdown-item"
-                                                                            onclick="rescheduledOrder('{{ $order->id }}', '{{ $order->orderCode($order->id) }}', `{{ ucFirst(str_replace('_', ' ', $order->status)) }}`, `{{ $order->customer->firstname . ' ' . $order->customer->lastname }}`,
-                                                                 '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')"
-                                                                            {{-- href="{{ route('updateOrderStatus', [$order->unique_key, 'rescheduled_order']) }}" --}}>Order
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}', '{{ $order->orderCode($order->id) }}', `{{ ucFirst(str_replace('_', ' ', $order->status)) }}`, `{{ $order->customer->firstname . ' ' . $order->customer->lastname }}`,
+                                                                 '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}')">Order
                                                                             Rescheduled</a></li>
                                                                     <li><a class="dropdown-item"
                                                                             href="{{ route('updateOrderStatus', [$order->unique_key, 'order_sent_out']) }}">Order
@@ -548,7 +547,159 @@
                                                                     <li><a class="dropdown-item"
                                                                             href="{{ route('updateOrderStatus', [$order->unique_key, 'delivered_and_remitted']) }}">Delivered
                                                                             & Remitted</a></li>
+                                                                </ul> --}}
+                                                                <ul class="dropdown-menu">
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'new')">
+                                                                            New Order
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'pending')">
+                                                                            Pending Order
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'order_confirmed')">
+                                                                            Order Confirmed
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'rescheduled_order')">
+                                                                            Order Rescheduled
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'order_sent_out')">
+                                                                            Order Sent Out for Delivery
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'delivery_attempted_1')">
+                                                                            Delivery Attempted 1
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'delivery_attempted_2')">
+                                                                            Delivery Attempted 2
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'delivery_attempted_3')">
+                                                                            Delivery Attempted 3
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'cancelled_admin')">
+                                                                            Order Cancelled by Admin
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'customer_unreachable')">
+                                                                            Customer Unreachable
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'cancelled_customer')">
+                                                                            Order Cancelled by Customer
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'rejected_customer')">
+                                                                            Order Rejected by Customer
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'duplicate_order')">
+                                                                            Order Cancelled Due to Duplicate Order
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'delivered_not_remitted')">
+                                                                            Delivered Not Remitted
+                                                                        </a></li>
+
+                                                                    <li><a class="dropdown-item"
+                                                                            onclick="UpdateOrderStatus('{{ $order->id }}',
+                                      '{{ $order->orderCode($order->id) }}',
+                                      '{{ ucFirst(str_replace('_', ' ', $order->status)) }}',
+                                      '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
+                                      '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
+                                      'delivered_and_remitted')">
+                                                                            Delivered & Remitted
+                                                                        </a></li>
                                                                 </ul>
+
                                                             </div>
                                                         </td>
 
@@ -919,6 +1070,47 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="updateOrderModal" tabindex="-1" aria-labelledby="updateOrderModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title fs-7">Update Order <br> Order: <span class="order_code"
+                            style="color: #04512d"></span> &nbsp; Order Status: <span class="order_status"
+                            style="color: #04512d"></span>
+                        <br>Customer: <span class="order_customer text-success" style="color: #04512d"></span>
+                    </div>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('updateOrderDateStatusWithMessage') }}" method="POST">@csrf
+                    <div class="modal-body">
+
+                        <input type="hidden" id="order_id" class="order_id" name="order_id" value="">
+                        <div class="d-grid mb-3 date-container">
+                            <label for="">Reschdeduled Date</label>
+                            <input type="text" name="order_delivery_date"
+                                class="order_delivery_date form-control @error('order_delivery_date') is-invalid @enderror"
+                                id="" value="">
+                        </div>
+
+                        <input type="hidden" name="order_status" class="new_status">
+
+
+
+                        <div class="d-grid mb-3">
+                            <label for="">Note | Optional</label>
+                            <textarea name="order_note" id="" cols="30" rows="3" class="form-control"></textarea>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary addAgentBtn">Update Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -975,6 +1167,24 @@
             $('.order_status').html($orderStatus);
             $('.order_customer').html($orderCustomer);
             $('.order_delivery_date').val($orderDeliveryDate);
+        }
+
+        function UpdateOrderStatus($orderId = "", $orderCode = "", $orderStatus = "", $orderCustomer = "",
+            $orderDeliveryDate = "", $newStatus = "") {
+
+            $('#updateOrderModal').modal("show");
+            $('.order_id').val($orderId);
+            $('.order_code').html($orderCode);
+            $('.order_status').html($orderStatus);
+            $('.order_customer').html($orderCustomer);
+            $('.order_delivery_date').val($orderDeliveryDate);
+            $('.new_status').val($newStatus);
+
+            if ($newStatus != 'rescheduled_order') {
+                $(".date-container").addClass("d-none");
+            } else {
+                $(".date-container").removeClass("d-none");
+            }
         }
 
         function rescheduledOrder($orderId = "", $orderCode = "", $orderStatus = "", $orderCustomer = "",

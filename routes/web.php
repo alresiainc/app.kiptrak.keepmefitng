@@ -403,6 +403,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/assign-agent-to-order', [OrderController::class, 'assignAgentToOrder'])->name('assignAgentToOrder');
     Route::post('/assign-staff-to-order', [OrderController::class, 'assignStaffToOrder'])->name('assignStaffToOrder');
     Route::post('/update-order-date-status', [OrderController::class, 'updateOrderDateStatus'])->name('updateOrderDateStatus');
+    Route::post('/update-order-status-with-message', [OrderController::class, 'updateOrderDateStatusWithMessage'])->name('updateOrderDateStatusWithMessage');
     Route::get('/delete-order/{unique_key}', [OrderController::class, 'deleteOrder'])->name('deleteOrder');
     Route::get('/delete-all-orders', [OrderController::class, 'deleteAllOrders'])->name('deleteAllOrders');
     Route::post('/add-extra-cost-to-order', [OrderController::class, 'extraCostToOrder'])->name('extraCostToOrder');
