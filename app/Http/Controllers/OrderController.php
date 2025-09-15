@@ -491,7 +491,7 @@ class OrderController extends Controller
         }
 
         // 🔹 Status filter
-        if ($status !== "") {
+        if ($status !== "" && $status !== "all") {
             if ($status === "new_from_alarm") {
                 DB::table('sound_notifications')->update(['status' => 'seen']);
                 $status = "new";
