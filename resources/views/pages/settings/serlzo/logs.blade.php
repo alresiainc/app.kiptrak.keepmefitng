@@ -73,7 +73,7 @@
                                                 <th>Message ID</th>
                                                 <th>Status</th>
                                                 {{-- <th>Response Code</th> --}}
-                                                <th>Response Details</th>
+                                                <th>Details</th>
                                                 <th>Sent At</th>
                                                 {{-- <th>Updated At</th> --}}
                                             </tr>
