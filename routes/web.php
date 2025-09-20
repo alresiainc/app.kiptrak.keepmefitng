@@ -408,7 +408,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/delete-all-orders', [OrderController::class, 'deleteAllOrders'])->name('deleteAllOrders');
     Route::post('/add-extra-cost-to-order', [OrderController::class, 'extraCostToOrder'])->name('extraCostToOrder');
 
-    //register any user, customer or agent, staff, etc
+    //register any user, customer or agent, staff, etc 
     //staff
     Route::get('/employees', [EmployeeController::class, 'allStaff'])->name('allStaff');
     Route::get('/create-employee', [EmployeeController::class, 'addStaff'])->name('addStaff');
@@ -600,6 +600,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/serlzo-setting/login', [SerlzoWhatsAppAccountController::class, 'login'])->name('serlzo.login');
     Route::get('/serlzo-setting/generate-qr-code/{token}', [SerlzoWhatsAppAccountController::class, 'generateQrCode'])->name('serlzo.qr');
     Route::get('/serlzo-setting/status/{token}', [SerlzoWhatsAppAccountController::class, 'checkStatus'])->name('serlzo.status');
+    Route::get('/serlzo-setting/logs/{token}', [SerlzoWhatsAppAccountController::class, 'getLogs'])->name('serlzo.logs');
     Route::delete('/serlzo-setting/{token}', [SerlzoWhatsAppAccountController::class, 'deleteDevice'])->name('serlzo.delete');
 
     //companyStructure

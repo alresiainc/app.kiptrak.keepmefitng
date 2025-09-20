@@ -51,14 +51,16 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <div>
-                                Your Connected WhatsApp Accounts</div>
-                            <div>
+                            <div>Your Connected WhatsApp Accounts</div>
+                            <div class="d-flex gap-2">
+
                                 <button class="btn btn-outline-primary rounded-pill d-flex px-4"
-                                    data-bs-target="#initializeModal" data-bs-toggle="modal">Initialize
-                                    New Session</button>
+                                    data-bs-target="#initializeModal" data-bs-toggle="modal">
+                                    Initialize New Session
+                                </button>
                             </div>
                         </div>
+
 
                         <div class="card-body">
                             @if (count($accounts) > 0)
@@ -92,6 +94,10 @@
                                                         data-bs-target="#qrModal">
                                                         Checking...
                                                     </button>
+                                                    <a class="btn btn-sm btn-primary"
+                                                        href="{{ route('serlzo.logs', $account['token'] ?? '') }}">
+                                                        View Logs
+                                                    </a>
                                                     <form method="POST"
                                                         action="{{ route('serlzo.delete', $account['token']) }}"
                                                         class="d-inline">

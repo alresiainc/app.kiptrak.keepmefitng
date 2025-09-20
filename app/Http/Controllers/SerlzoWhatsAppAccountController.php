@@ -215,4 +215,26 @@ class SerlzoWhatsAppAccountController extends Controller
     {
         return $response->json()['message'] ?? 'An error occurred. Please try again.';
     }
+
+    public function getLogs($token)
+    {
+        $apiKey = GeneralSetting::first()?->serlzo_api_key;
+
+        if (!$apiKey) {
+            return redirect()->route('whatsapp.login')->with('error', 'API Key missing. Please log in.');
+        }
+
+        $response = Http::withOptions(['verify' => false])
+            ->withHeaders(['x-serlzo-api-key' => $apiKey])
+            ->post("$this->apiBaseUrl/log/get-all", ['token' => $token]);
+        // dd($apiKey);
+
+        // $logs = json_decode('')
+        if ($response->successful()) {
+            $logs = $response->json()['data'] ?? [];
+            return view('pages.settings.serlzo.logs', compact('logs'));
+        }
+
+        return back()->with('error', $this->getErrorMessage($response));
+    }
 }
