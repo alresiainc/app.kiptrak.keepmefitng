@@ -83,6 +83,7 @@ class NotificationService
                 'x-serlzo-api-key' => $this->whatsAppApiKey,
             ]);
 
+            Log::info('WhatsApp message sent', ['response' => $response]);
             $results[] = $response;
         }
 
