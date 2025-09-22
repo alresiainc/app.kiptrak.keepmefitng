@@ -217,65 +217,7 @@ class SerlzoWhatsAppAccountController extends Controller
         return $response->json()['message'] ?? 'An error occurred. Please try again.';
     }
 
-    // public function getLogs($token)
-    // {
-    //     $apiKey = GeneralSetting::first()?->serlzo_api_key;
 
-    //     if (!$apiKey) {
-    //         return redirect()->route('whatsapp.login')->with('error', 'API Key missing. Please log in.');
-    //     }
-
-    //     $response = Http::withOptions(['verify' => false])
-    //         ->withHeaders(['x-serlzo-api-key' => $apiKey])
-    //         ->post("$this->apiBaseUrl/log/get-all", ['token' => $token]);
-    //     // dd($apiKey);
-
-    //     // $logs = json_decode('')
-    //     if ($response->successful()) {
-    //         $logs = $response->json()['data'] ?? [];
-    //         return view('pages.settings.serlzo.logs', compact('logs'));
-    //     }
-
-    //     return back()->with('error', $this->getErrorMessage($response));
-    // }
-
-    public function getLogsss($token)
-    {
-        $apiKey = GeneralSetting::first()?->serlzo_api_key;
-
-        if (!$apiKey) {
-            return redirect()->route('whatsapp.login')
-                ->with('error', 'API Key missing. Please log in.');
-        }
-
-        $response = Http::withOptions(['verify' => false])
-            ->withHeaders(['x-serlzo-api-key' => $apiKey])
-            ->post("$this->apiBaseUrl/log/get-all", ['token' => $token]);
-
-        if ($response->successful()) {
-            $logsArray = $response->json()['data'] ?? [];
-
-            // Turn into a collection
-            $logsCollection = collect($logsArray);
-
-            // Pagination setup
-            $perPage = 20; // how many per page
-            $currentPage = request()->get('page', 1); // current page
-            $pagedData = $logsCollection->forPage($currentPage, $perPage);
-
-            $logs = new LengthAwarePaginator(
-                $pagedData,
-                $logsCollection->count(),
-                $perPage,
-                $currentPage,
-                ['path' => request()->url(), 'query' => request()->query()]
-            );
-
-            return view('pages.settings.serlzo.logs', compact('logs'));
-        }
-
-        return back()->with('error', $this->getErrorMessage($response));
-    }
 
     public function getLogs($token)
     {
@@ -286,16 +228,15 @@ class SerlzoWhatsAppAccountController extends Controller
                 ->with('error', 'API Key missing. Please log in.');
         }
 
-        // Grab filters from request
-        $pageSize   = request()->get('pageSize', 20);
-        $pageNumber = request()->get('page', 1); // map Laravel's "page" to API's pageNumber
-        $search     = request()->get('search');
-        $startDate  = request()->get('startDate');
-        $endDate    = request()->get('endDate');
+        $page     = request()->get('page', 1); // Laravel uses "page"
+        $pageSize = request()->get('pageSize', 20);
+        $search   = request()->get('search');
+        $startDate = request()->get('startDate');
+        $endDate   = request()->get('endDate');
 
         $queryParams = array_filter([
             'pageSize'   => $pageSize,
-            'pageNumber' => $pageNumber,
+            'pageNumber' => $page,
             'search'     => $search,
             'startDate'  => $startDate,
             'endDate'    => $endDate,
@@ -306,17 +247,16 @@ class SerlzoWhatsAppAccountController extends Controller
             ->get("$this->apiBaseUrl/log/get-all/{$token}", $queryParams);
 
         if ($response->successful()) {
-            $data = $response->json();
+            $data = $response->json()['data'] ?? [];
 
-            $logsArray  = $data['data'] ?? [];
-            $totalItems = $data['total'] ?? count($logsArray); // API may return total count
+            $logsArray   = $data['data'] ?? [];
+            $pagination  = $data['pagination'] ?? [];
 
-            // Laravel paginator
             $logs = new LengthAwarePaginator(
                 $logsArray,
-                $totalItems,
-                $pageSize,
-                $pageNumber,
+                $pagination['totalItem'] ?? count($logsArray), // total items
+                $pagination['pageSize'] ?? $pageSize,          // per page
+                $pagination['pageNumber'] ?? $page,            // current page
                 ['path' => request()->url(), 'query' => request()->query()]
             );
 
