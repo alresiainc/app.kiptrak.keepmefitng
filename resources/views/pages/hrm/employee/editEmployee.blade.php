@@ -15,8 +15,8 @@
         }
 
         /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
-                                                color: #999;
-                                            } */
+                                                    color: #999;
+                                                } */
         div.filter-option-inner-inner {
             color: #000 !important;
         }
@@ -278,7 +278,7 @@
                                     <select name="serlzo_account_token" data-live-search="true"
                                         class="custom-select form-control border tags @error('country') is-invalid @enderror">
 
-                                        <option value="1">Select WhatsApp Account</option>
+                                        <option value="">Select WhatsApp Account</option>
 
                                         @foreach ($accounts as $account)
                                             <option value="{{ $account['token'] }}"
