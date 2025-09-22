@@ -146,6 +146,20 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <!-- Laravel Pagination Links -->
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <p class="text-muted">
+                                            Showing {{ $logs->firstItem() }} to {{ $logs->lastItem() }} of
+                                            {{ $logs->total() }} results
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex justify-content-end">
+                                            {{ $logs->links('pagination.custom-pagination') }}
+                                        </div>
+                                    </div>
+                                </div>
                             @else
                                 <p class="text-center text-muted">No logs found.</p>
                             @endif

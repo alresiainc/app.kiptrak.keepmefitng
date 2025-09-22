@@ -26,6 +26,17 @@ if (!isset($user_role)) {
             </li>
         @endif
 
+        <!---analytics--->
+        @if (
+            $authUser->isSuperAdmin ||
+                ($user_role !== false && $user_role->permissions->contains('slug', 'view-analytics')))
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('analytics') }}" 
+                    @if ($routeName == 'analytics') style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
+                    <i class="bi bi-graph-up"></i><span>Analytics</span></a>
+            </li>
+        @endif
+
         <!---products--->
         @if (
             $authUser->isSuperAdmin ||

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GeneralSetting;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 
@@ -216,22 +217,60 @@ class SerlzoWhatsAppAccountController extends Controller
         return $response->json()['message'] ?? 'An error occurred. Please try again.';
     }
 
+    // public function getLogs($token)
+    // {
+    //     $apiKey = GeneralSetting::first()?->serlzo_api_key;
+
+    //     if (!$apiKey) {
+    //         return redirect()->route('whatsapp.login')->with('error', 'API Key missing. Please log in.');
+    //     }
+
+    //     $response = Http::withOptions(['verify' => false])
+    //         ->withHeaders(['x-serlzo-api-key' => $apiKey])
+    //         ->post("$this->apiBaseUrl/log/get-all", ['token' => $token]);
+    //     // dd($apiKey);
+
+    //     // $logs = json_decode('')
+    //     if ($response->successful()) {
+    //         $logs = $response->json()['data'] ?? [];
+    //         return view('pages.settings.serlzo.logs', compact('logs'));
+    //     }
+
+    //     return back()->with('error', $this->getErrorMessage($response));
+    // }
+
     public function getLogs($token)
     {
         $apiKey = GeneralSetting::first()?->serlzo_api_key;
 
         if (!$apiKey) {
-            return redirect()->route('whatsapp.login')->with('error', 'API Key missing. Please log in.');
+            return redirect()->route('whatsapp.login')
+                ->with('error', 'API Key missing. Please log in.');
         }
 
         $response = Http::withOptions(['verify' => false])
             ->withHeaders(['x-serlzo-api-key' => $apiKey])
             ->post("$this->apiBaseUrl/log/get-all", ['token' => $token]);
-        // dd($apiKey);
 
-        // $logs = json_decode('')
         if ($response->successful()) {
-            $logs = $response->json()['data'] ?? [];
+            $logsArray = $response->json()['data'] ?? [];
+
+            // Turn into a collection
+            $logsCollection = collect($logsArray);
+
+            // Pagination setup
+            $perPage = 20; // how many per page
+            $currentPage = request()->get('page', 1); // current page
+            $pagedData = $logsCollection->forPage($currentPage, $perPage);
+
+            $logs = new LengthAwarePaginator(
+                $pagedData,
+                $logsCollection->count(),
+                $perPage,
+                $currentPage,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
+
             return view('pages.settings.serlzo.logs', compact('logs'));
         }
 
