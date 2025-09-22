@@ -37,14 +37,15 @@
         <select name="serlzo_account_token" data-live-search="true"
             class="custom-select form-control border tags @error('country') is-invalid @enderror">
 
-            <option value="<option value="1">Select WhatsApp Account</option>">Select WhatsApp Account</option>
+
+
+            <option value="1">Select WhatsApp Account</option>
 
             @foreach ($accounts as $account)
-                <option value="{{ $account['token'] }}" @if (old('footer_scripts', isset($form) ? $form?->serlzo_account_token : '') == $account['token']) selected @endif>
+                <option value="{{ $account['token'] }}" @if ($staff->serlzo_account_token == $account['token']) selected @endif>
                     {{ $account['publicName'] != '' ? $account['publicName'] : $account['username'] }}
                 </option>
             @endforeach
-
             <option value="">None</option>
 
         </select>
