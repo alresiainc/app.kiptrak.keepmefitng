@@ -239,7 +239,7 @@ class SerlzoWhatsAppAccountController extends Controller
     //     return back()->with('error', $this->getErrorMessage($response));
     // }
 
-    public function getLogs($token)
+    public function getLogsss($token)
     {
         $apiKey = GeneralSetting::first()?->serlzo_api_key;
 
@@ -268,6 +268,55 @@ class SerlzoWhatsAppAccountController extends Controller
                 $logsCollection->count(),
                 $perPage,
                 $currentPage,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
+
+            return view('pages.settings.serlzo.logs', compact('logs'));
+        }
+
+        return back()->with('error', $this->getErrorMessage($response));
+    }
+
+    public function getLogs($token)
+    {
+        $apiKey = GeneralSetting::first()?->serlzo_api_key;
+
+        if (!$apiKey) {
+            return redirect()->route('whatsapp.login')
+                ->with('error', 'API Key missing. Please log in.');
+        }
+
+        // Grab filters from request
+        $pageSize   = request()->get('pageSize', 20);
+        $pageNumber = request()->get('page', 1); // map Laravel's "page" to API's pageNumber
+        $search     = request()->get('search');
+        $startDate  = request()->get('startDate');
+        $endDate    = request()->get('endDate');
+
+        $queryParams = array_filter([
+            'pageSize'   => $pageSize,
+            'pageNumber' => $pageNumber,
+            'search'     => $search,
+            'startDate'  => $startDate,
+            'endDate'    => $endDate,
+        ]);
+
+        $response = Http::withOptions(['verify' => false])
+            ->withHeaders(['x-serlzo-api-key' => $apiKey])
+            ->get("$this->apiBaseUrl/log/get-all/{$token}", $queryParams);
+
+        if ($response->successful()) {
+            $data = $response->json();
+
+            $logsArray  = $data['data'] ?? [];
+            $totalItems = $data['total'] ?? count($logsArray); // API may return total count
+
+            // Laravel paginator
+            $logs = new LengthAwarePaginator(
+                $logsArray,
+                $totalItems,
+                $pageSize,
+                $pageNumber,
                 ['path' => request()->url(), 'query' => request()->query()]
             );
 
