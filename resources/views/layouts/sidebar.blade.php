@@ -27,11 +27,9 @@ if (!isset($user_role)) {
         @endif
 
         <!---analytics--->
-        @if (
-            $authUser->isSuperAdmin ||
-                ($user_role !== false && $user_role->permissions->contains('slug', 'view-analytics')))
+        @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-analytics')))
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('analytics') }}" 
+                <a class="nav-link" href="{{ route('analytics') }}"
                     @if ($routeName == 'analytics') style="color: #198754; background: #affdd3; border-left: 3px solid #ffc107;" @endif>
                     <i class="bi bi-graph-up"></i><span>Analytics</span></a>
             </li>
@@ -170,7 +168,7 @@ if (!isset($user_role)) {
                     // 🔹 Base query depending on user role (same as controller)
                     if (
                         $authUser->isSuperAdmin ||
-                        ($user_role && $user_role->permissions->pluck('slug')->contains('view-order-list'))
+                        ($user_role && $user_role->permissions->pluck('slug')->contains('view-all-orders'))
                     ) {
                         $baseQuery = \App\Models\Order::query();
                     } else {
@@ -196,7 +194,7 @@ if (!isset($user_role)) {
 
                     if (
                         $authUser->isSuperAdmin ||
-                        ($user_role && $user_role->permissions->pluck('slug')->contains('view-order-list'))
+                        ($user_role && $user_role->permissions->pluck('slug')->contains('view-all-orders'))
                     ) {
                         $hasAccess = true;
                     } else {
@@ -216,7 +214,7 @@ if (!isset($user_role)) {
 
 
                     <ul id="orders-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-                        @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-order-list')))
+                        @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-all-orders')))
                             <li>
                                 <a href="{{ route('allOrders', 'new') }}"
                                     class="d-flex justify-content-between align-items-center">

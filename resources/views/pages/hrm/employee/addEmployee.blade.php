@@ -15,8 +15,8 @@
         }
 
         /* .bootstrap-select>.dropdown-toggle.bs-placeholder, .bootstrap-select>.dropdown-toggle.bs-placeholder:active, .bootstrap-select>.dropdown-toggle.bs-placeholder:focus, .bootstrap-select>.dropdown-toggle.bs-placeholder:hover {
-                                                                                                                    color: #999;
-                                                                                                                } */
+                                                                                                                                color: #999;
+                                                                                                                            } */
         div.filter-option-inner-inner {
             color: #000 !important;
         }
@@ -57,7 +57,9 @@
                         <div class="card-body">
 
                             <form class="row g-3 needs-validation" action="{{ route('addStaffPost') }}" method="POST"
-                                enctype="multipart/form-data">@csrf
+                                enctype="multipart/form-data">
+                                @csrf
+
                                 <div class="col-md-6">
                                     <label for="" class="form-label">First Name</label>
                                     <input type="text" name="firstname"
@@ -69,6 +71,7 @@
                                         </span>
                                     @enderror
                                 </div>
+
                                 <div class="col-md-6">
                                     <label for="" class="form-label">Last Name</label>
                                     <input type="text" name="lastname"
@@ -115,6 +118,7 @@
                                         </span>
                                     @enderror
                                 </div>
+
                                 <div class="col-md-6">
                                     <label for="" class="form-label">Phone 2</label>
                                     <input type="tel" name="phone_2"
@@ -223,8 +227,6 @@
                                         </span>
                                     @enderror
                                 </div>
-
-
                                 <div class="col-md-6">
                                     @php
                                         $errorMessage = '';

@@ -213,7 +213,7 @@ class OrderController extends Controller
 
         // 🔹 Base query depending on user role
         if ($authUser->isSuperAdmin || (
-            $user_role && $user_role->permissions->contains('slug', 'view-order-list')
+            $user_role && $user_role->permissions->contains('slug', 'view-all-orders')
         )) {
             // Super admins or users with permission can see everything
             $query = Order::query();
