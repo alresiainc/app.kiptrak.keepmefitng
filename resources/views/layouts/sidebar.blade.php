@@ -214,7 +214,7 @@ if (!isset($user_role)) {
 
 
                     <ul id="orders-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-                        @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-all-orders')))
+                        @if ($authUser->isSuperAdmin || ($user_role !== false && $user_role->permissions->contains('slug', 'view-order-list')))
                             <li>
                                 <a href="{{ route('allOrders', 'new') }}"
                                     class="d-flex justify-content-between align-items-center">
