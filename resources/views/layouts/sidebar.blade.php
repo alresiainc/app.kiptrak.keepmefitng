@@ -160,6 +160,7 @@ if (!isset($user_role)) {
                         'delivered_and_remitted',
                         'order_in_transit',
                         'all',
+                        'old'
                     ];
 
                     $authUser = auth()->user();
