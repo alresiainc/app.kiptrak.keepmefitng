@@ -43,8 +43,8 @@
 
         .whatsapp-icon {
             /* font-size: 22px;
-                                                                                                                                                                                                                                                                                                                                                                                                                                        color: #012970;
-                                                                                                                                                                                                                                                                                                                                                                                                                                        margin-right: 25px; */
+                                                                                                                                                                                                                                                                                                                                                                                                                                            color: #012970;
+                                                                                                                                                                                                                                                                                                                                                                                                                                            margin-right: 25px; */
             position: relative;
         }
 
@@ -418,13 +418,13 @@
                                                                         style="font-size: 10px;">
                                                                         <span>Pending Order</span>
                                                                     </button>
-                                                                @elseif($order->status == 'order_confirmed')
+                                                                    {{-- @elseif($order->status == 'order_confirmed')
                                                                     <button type="button"
                                                                         class="btn btn-primary btn-sm dropdown-toggle rounded-pill fw-bolder"
                                                                         data-bs-toggle="dropdown"
                                                                         style="font-size: 10px;">
                                                                         <span>Order Confirmed</span>
-                                                                    </button>
+                                                                    </button> --}}
                                                                 @elseif($order->status == 'rescheduled_order')
                                                                     <button type="button"
                                                                         class="btn btn-warning btn-sm dropdown-toggle rounded-pill fw-bolder"
@@ -454,9 +454,9 @@
                                                                         class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder"
                                                                         data-bs-toggle="dropdown"
                                                                         style="font-size: 10px;">
-                                                                        <span>Order Cancelled by Admin</span>
+                                                                        <span>Order Cancelled</span>
                                                                     </button>
-                                                                @elseif($order->status == 'customer_unreachable')
+                                                                    {{-- @elseif($order->status == 'customer_unreachable')
                                                                     <button type="button"
                                                                         class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder"
                                                                         data-bs-toggle="dropdown"
@@ -476,7 +476,7 @@
                                                                         data-bs-toggle="dropdown"
                                                                         style="font-size: 10px;">
                                                                         <span>Order Rejected by Customer</span>
-                                                                    </button>
+                                                                    </button> --}}
                                                                 @elseif($order->status == 'duplicate_order')
                                                                     <button type="button"
                                                                         class="btn btn-dark btn-sm dropdown-toggle rounded-pill fw-bolder"
@@ -636,9 +636,9 @@
                                       '{{ $order->customer->firstname . ' ' . $order->customer->lastname }}',
                                       '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
                                       'cancelled_admin')">
-                                                                            Order Cancelled by Admin
+                                                                            Order Cancelled
                                                                         </a></li>
-
+                                                                    {{-- 
                                                                     <li><a class="dropdown-item"
                                                                             onclick="UpdateOrderStatus('{{ $order->id }}',
                                       '{{ $order->orderCode($order->id) }}',
@@ -667,7 +667,7 @@
                                       '{{ \Carbon\Carbon::parse($order->expected_delivery_date)->format('Y-m-d') }}',
                                       'rejected_customer')">
                                                                             Order Rejected by Customer
-                                                                        </a></li>
+                                                                        </a></li> --}}
 
                                                                     <li><a class="dropdown-item"
                                                                             onclick="UpdateOrderStatus('{{ $order->id }}',
@@ -996,11 +996,11 @@
 
                                 <option value="new">New</option>
                                 <option value="pending">Pending</option>
-                                <option value="cancelled">Cancelled</option>
+                                <option value="cancelled_by_admin">Cancelled</option>
                                 <option value="delivered_not_remitted">Delivered Not Remitted</option>
                                 <option value="delivered_and_remitted">Delivered and Remitted</option>
                                 <option value="rescheduled_order">Rescheduled Order</option>
-                                <option value="order_in_transit">Order in transit</option>
+                                {{-- <option value="order_in_transit">Order in transit</option> --}}
                             </select>
                         </div>
 
@@ -1049,11 +1049,11 @@
 
                                 <option value="new">New</option>
                                 <option value="pending">Pending</option>
-                                <option value="cancelled">Cancelled</option>
+                                <option value="cancelled_by_admin">Cancelled</option>
                                 <option value="delivered_not_remitted">Delivered Not Remitted</option>
                                 <option value="delivered_and_remitted">Delivered and Remitted</option>
                                 <option value="rescheduled_order" selected>Rescheduled Order</option>
-                                <option value="order_in_transit">Order in transit</option>
+                                {{-- <option value="order_in_transit">Order in transit</option> --}}
                             </select>
                         </div>
 

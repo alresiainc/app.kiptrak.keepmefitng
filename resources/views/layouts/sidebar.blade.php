@@ -259,7 +259,7 @@ if (!isset($user_role)) {
                                 </a>
                             </li>
 
-                            <li>
+                            {{-- <li>
                                 <a href="{{ route('allOrders', 'order_confirmed') }}"
                                     class="d-flex justify-content-between align-items-center">
                                     <div><i class="bi bi-card-list"></i><span>Order Confirmed</span></div>
@@ -267,7 +267,7 @@ if (!isset($user_role)) {
                                         {{ $orderCounts['order_confirmed'] ?? 0 }}
                                     </span>
                                 </a>
-                            </li>
+                            </li> --}}
 
                             <li>
                                 <a href="{{ route('allOrders', 'rescheduled_order') }}"
