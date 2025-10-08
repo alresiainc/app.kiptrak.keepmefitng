@@ -250,13 +250,7 @@ class OrderController extends Controller
             $formHolder = '';
         }
 
-        // 🔹 Date filters
-        if ($request->filled('start_date')) {
-            $query->whereDate('created_at', '>=', $request->start_date);
-        }
-        if ($request->filled('end_date')) {
-            $query->whereDate('created_at', '<=', $request->end_date);
-        }
+
 
         // 🔹 Search filter (order id, order code, customer name, phone)
         if ($request->filled('search')) {
