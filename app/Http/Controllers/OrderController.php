@@ -228,7 +228,7 @@ class OrderController extends Controller
 
 
         // 🔹 Status filter
-        if ($status !== "" && $status !== "all") {
+        if ($status !== "" && $status !== "all" && $status !== "old") {
             if ($status === "new_from_alarm") {
                 DB::table('sound_notifications')->update(['status' => 'seen']);
                 $status = "new";
@@ -250,6 +250,17 @@ class OrderController extends Controller
             $formHolder = '';
         }
 
+        // 🔹 Define the cutoff date (you can make this dynamic later if needed)
+        $cutoffDate = '2025-10-01';
+
+        // 🔹 Date filter logic based on status
+        if ($status === 'old') {
+            // Show all orders BEFORE the cutoff date
+            $query->whereDate('created_at', '<', $cutoffDate);
+        } else {
+            // For every other status, including "all", show from cutoff date forward
+            $query->whereDate('created_at', '>=', $cutoffDate);
+        }
 
 
         // 🔹 Search filter (order id, order code, customer name, phone)
@@ -281,17 +292,7 @@ class OrderController extends Controller
             });
         }
 
-        // 🔹 Define the cutoff date (you can make this dynamic later if needed)
-        $cutoffDate = '2025-10-01';
 
-        // 🔹 Date filter logic based on status
-        if ($status === 'old') {
-            // Show all orders BEFORE the cutoff date
-            $query->whereDate('created_at', '<', $cutoffDate);
-        } else {
-            // For every other status, including "all", show from cutoff date forward
-            $query->whereDate('created_at', '>=', $cutoffDate);
-        }
 
         // 🔹 Optional: still respect manual date filters if provided in the request
         if ($request->filled('start_date')) {
