@@ -160,7 +160,7 @@ if (!isset($user_role)) {
                         'delivered_and_remitted',
                         'order_in_transit',
                         'all',
-                        'old'
+                        'old',
                     ];
 
                     $authUser = auth()->user();
@@ -305,7 +305,28 @@ if (!isset($user_role)) {
                             @endforeach
 
                             {{-- Cancelled --}}
-                            @foreach (['cancelled_admin', 'cancelled_customer', 'rejected_customer', 'duplicate_order'] as $cancel)
+
+                            <li>
+                                <a href="{{ route('allOrders', 'cancelled_admin') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>Cancelled</span></div>
+                                    <span class="badge bg-secondary ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['cancelled_admin'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('allOrders', 'duplicate_order') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>Duplicate order</span></div>
+                                    <span class="badge bg-secondary ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['duplicate_order'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
+
+                            {{-- @foreach (['cancelled_admin', 'cancelled_customer', 'rejected_customer', 'duplicate_order'] as $cancel)
                                 <li>
                                     <a href="{{ route('allOrders', $cancel) }}"
                                         class="d-flex justify-content-between align-items-center">
@@ -317,9 +338,9 @@ if (!isset($user_role)) {
                                         </span>
                                     </a>
                                 </li>
-                            @endforeach
+                            @endforeach --}}
 
-                            <li>
+                            {{-- <li>
                                 <a href="{{ route('allOrders', 'customer_unreachable') }}"
                                     class="d-flex justify-content-between align-items-center">
                                     <div><i class="bi bi-card-list"></i><span>Customer Unreachable</span></div>
@@ -327,7 +348,7 @@ if (!isset($user_role)) {
                                         {{ $orderCounts['customer_unreachable'] ?? 0 }}
                                     </span>
                                 </a>
-                            </li>
+                            </li> --}}
 
                             <li>
                                 <a href="{{ route('allOrders', 'delivered_not_remitted') }}"
@@ -349,7 +370,7 @@ if (!isset($user_role)) {
                                 </a>
                             </li>
 
-                            <li>
+                            {{-- <li>
                                 <a href="{{ route('allOrders', 'order_in_transit') }}"
                                     class="d-flex justify-content-between align-items-center">
                                     <div><i class="bi bi-card-list"></i><span>Order In Transit</span></div>
@@ -357,7 +378,7 @@ if (!isset($user_role)) {
                                         {{ $orderCounts['order_in_transit'] ?? 0 }}
                                     </span>
                                 </a>
-                            </li>
+                            </li> --}}
 
                             <li>
                                 <a href="{{ route('allOrders', 'all') }}"
