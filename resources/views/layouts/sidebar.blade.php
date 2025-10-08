@@ -180,13 +180,34 @@ if (!isset($user_role)) {
                     }
 
                     // 🔹 Build counts per status
+                    // $orderCounts = [];
+                    // foreach ($statuses as $status) {
+                    //     $query = clone $baseQuery; // prevent reusing modified builder
+                    //     if ($status === 'all') {
+                    //         $orderCounts[$status] = $query->count();
+                    //     } else {
+                    //         $orderCounts[$status] = $query->where('status', $status)->count();
+                    //     }
+                    // }
+                    // 🔹 Build counts per status
+                    $cutoffDate = '2025-10-01';
                     $orderCounts = [];
+
                     foreach ($statuses as $status) {
-                        $query = clone $baseQuery; // prevent reusing modified builder
-                        if ($status === 'all') {
-                            $orderCounts[$status] = $query->count();
+                        $query = clone $baseQuery; // Prevent builder contamination
+
+                        if ($status === 'old') {
+                            // Count orders created BEFORE cutoff date
+                            $orderCounts[$status] = $query->whereDate('created_at', '<', $cutoffDate)->count();
+                        } elseif ($status === 'all') {
+                            // Count orders created ON/AFTER cutoff date
+                            $orderCounts[$status] = $query->whereDate('created_at', '>=', $cutoffDate)->count();
                         } else {
-                            $orderCounts[$status] = $query->where('status', $status)->count();
+                            // Count orders by status ON/AFTER cutoff date
+                            $orderCounts[$status] = $query
+                                ->where('status', $status)
+                                ->whereDate('created_at', '>=', $cutoffDate)
+                                ->count();
                         }
                     }
 
@@ -343,6 +364,16 @@ if (!isset($user_role)) {
                                     <div><i class="bi bi-card-list"></i><span>All Orders</span></div>
                                     <span class="badge bg-secondary ms-auto" style="margin-right: 10px;">
                                         {{ $orderCounts['all'] ?? 0 }}
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('allOrders', 'old') }}"
+                                    class="d-flex justify-content-between align-items-center">
+                                    <div><i class="bi bi-card-list"></i><span>Old Orders</span></div>
+                                    <span class="badge bg-secondary ms-auto" style="margin-right: 10px;">
+                                        {{ $orderCounts['old'] ?? 0 }}
                                     </span>
                                 </a>
                             </li>

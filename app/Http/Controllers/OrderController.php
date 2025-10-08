@@ -287,6 +287,26 @@ class OrderController extends Controller
             });
         }
 
+        // 🔹 Define the cutoff date (you can make this dynamic later if needed)
+        $cutoffDate = '2025-10-01';
+
+        // 🔹 Date filter logic based on status
+        if ($status === 'old') {
+            // Show all orders BEFORE the cutoff date
+            $query->whereDate('created_at', '<', $cutoffDate);
+        } else {
+            // For every other status, including "all", show from cutoff date forward
+            $query->whereDate('created_at', '>=', $cutoffDate);
+        }
+
+        // 🔹 Optional: still respect manual date filters if provided in the request
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
         // 🔹 Final query
         $orders = $query->latest()->paginate($perPage)->appends($request->all());
 
