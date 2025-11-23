@@ -3,10 +3,38 @@
 @section('title')Analytics Dashboard @endsection
 
 @section('extra_css')
+<style>
+  #loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 2000;
+    backdrop-filter: blur(1px);
+  }
+  #loading-overlay.show { display: flex; }
+  #loading-overlay .loading-content { text-align: center; }
+  #loading-overlay .loading-content .spinner-border { width: 3rem; height: 3rem; }
+  #loading-overlay .loading-text { color: #fff; margin-top: 10px; font-weight: 600; }
+</style>
 @endsection
 
 @section('content')
 <main id="main" class="main">
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" aria-hidden="true">
+    <div class="loading-content">
+      <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="loading-text">Loading...</div>
+    </div>
+  </div>
   <div class="pagetitle">
     <h1>Analytics Dashboard</h1>
     <nav>
@@ -476,6 +504,16 @@
   const currencySymbol = '{{ $currency }}';
   const periodLabels = { today: 'Today', weekly: 'This Week', monthly: 'This Month', yearly: 'This Year' };
 
+  function showLoading() {
+    const el = document.getElementById('loading-overlay');
+    if (el) el.classList.add('show');
+  }
+
+  function hideLoading() {
+    const el = document.getElementById('loading-overlay');
+    if (el) el.classList.remove('show');
+  }
+
   // Sales Trends Chart (ApexCharts)
   const salesTrendsChart = new ApexCharts(document.querySelector('#salesTrendsChart'), {
     series: [{
@@ -530,6 +568,7 @@
     if (target) target.classList.add('active');
 
     // Fetch analytics data and update UI
+    showLoading();
     fetch(`{{ route('analytics.data') }}?period=${encodeURIComponent(period)}`)
       .then(res => res.json())
       .then(data => {
@@ -559,7 +598,8 @@
         renderDayOfWeekCounts(data.dayOfWeekCounts[key] || []);
         renderDeliveryRate(data.deliveryRate[key] || { total_orders: 0, payment_received_orders: 0, delivery_rate_percentage: 0 });
       })
-      .catch(err => console.error('Error loading analytics data:', err));
+      .catch(err => console.error('Error loading analytics data:', err))
+      .finally(() => hideLoading());
   }
 
   function renderStatusCounts(items) {
