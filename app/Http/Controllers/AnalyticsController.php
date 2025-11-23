@@ -189,17 +189,17 @@ class AnalyticsController extends Controller
         ]);
     }
 
-    private function applyPeriodFilter($query, string $period)
+    private function applyPeriodFilter($query, string $period, string $column = 'created_at')
     {
         switch ($period) {
             case 'today':
-                return $query->whereDate('created_at', Carbon::today());
+                return $query->whereDate($column, Carbon::today());
             case 'week':
-                return $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                return $query->whereBetween($column, [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
             case 'month':
-                return $query->whereMonth('created_at', Carbon::now()->month)->whereYear('created_at', Carbon::now()->year);
+                return $query->whereMonth($column, Carbon::now()->month)->whereYear($column, Carbon::now()->year);
             case 'year':
-                return $query->whereYear('created_at', Carbon::now()->year);
+                return $query->whereYear($column, Carbon::now()->year);
             default:
                 return $query;
         }
@@ -224,11 +224,12 @@ class AnalyticsController extends Controller
 
     private function getStateCounts(string $period)
     {
-        // Count orders grouped by customer state
+        // Count orders grouped by customer state (customers table has 'state')
         $q = DB::table('orders as o')
-            ->leftJoin('users as c', 'c.id', '=', 'o.customer_id')
+            ->leftJoin('customers as c', 'c.id', '=', 'o.customer_id')
             ->select(DB::raw('COALESCE(c.state, "N/A") as state_name'), DB::raw('COUNT(o.id) as total_orders'));
-        $this->applyPeriodFilter($q, $period);
+        // Explicitly filter on orders.created_at to avoid ambiguity
+        $this->applyPeriodFilter($q, $period, 'o.created_at');
         $rows = $q->groupBy('c.state')->orderBy('total_orders', 'desc')->limit(50)->get();
         return $rows->map(function ($row) {
             return [

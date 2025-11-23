@@ -530,7 +530,7 @@
     if (target) target.classList.add('active');
 
     // Fetch analytics data and update UI
-    fetch(`/analytics/data?period=${encodeURIComponent(period)}`)
+    fetch(`{{ route('analytics.data') }}?period=${encodeURIComponent(period)}`)
       .then(res => res.json())
       .then(data => {
         const key = data.selected_key; // 'today' | 'weekly' | 'monthly' | 'yearly'
