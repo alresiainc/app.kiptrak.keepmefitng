@@ -43,8 +43,8 @@
 
         .whatsapp-icon {
             /* font-size: 22px;
-                                                                                                                                                                                                                                                                                                                                                                                                                                            color: #012970;
-                                                                                                                                                                                                                                                                                                                                                                                                                                            margin-right: 25px; */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                color: #012970;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                margin-right: 25px; */
             position: relative;
         }
 
@@ -258,7 +258,8 @@
                                                 <th>Order Code</th>
                                             @endif
                                             <th>Customer</th>
-                                            <th>Delivery Due Date</th>
+                                            {{-- <th>Delivery Due Date</th> --}}
+                                            <th>Form Name</th>
                                             <th>Delivery Address</th>
                                             <th>Staff Assigned</th>
                                             <th>Agent</th>
@@ -306,7 +307,10 @@
 
                                                         </td>
 
-                                                        <td>{{ $order->customer_id ? $order->customer->delivery_address : 'No response' }}
+                                                        {{-- <td>{{ $order->customer_id ? $order->customer->delivery_address : 'No response' }}
+                                                        </td> --}}
+
+                                                        <td>{{ $order->formHolder ? $order->formHolder->name : 'No form details' }}
                                                         </td>
 
                                                         <!--Assign Staff-->
