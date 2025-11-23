@@ -90,6 +90,42 @@ class AnalyticsController extends Controller
         $orderStats = $this->getOrderStatistics();
         $revenueAnalysis = $this->getRevenueAnalysis();
 
+        // New metrics by periods
+        $orderStatusCounts = [
+            'yearly' => $this->getOrderStatusCounts('year'),
+            'monthly' => $this->getOrderStatusCounts('month'),
+            'weekly' => $this->getOrderStatusCounts('week'),
+            'today' => $this->getOrderStatusCounts('today'),
+        ];
+
+        $stateCounts = [
+            'yearly' => $this->getStateCounts('year'),
+            'monthly' => $this->getStateCounts('month'),
+            'weekly' => $this->getStateCounts('week'),
+            'today' => $this->getStateCounts('today'),
+        ];
+
+        $productCounts = [
+            'yearly' => $this->getProductCounts('year'),
+            'monthly' => $this->getProductCounts('month'),
+            'weekly' => $this->getProductCounts('week'),
+            'today' => $this->getProductCounts('today'),
+        ];
+
+        $dayOfWeekCounts = [
+            'yearly' => $this->getOrdersByDayOfWeek('year'),
+            'monthly' => $this->getOrdersByDayOfWeek('month'),
+            'weekly' => $this->getOrdersByDayOfWeek('week'),
+            'today' => $this->getOrdersByDayOfWeek('today'),
+        ];
+
+        $deliveryRate = [
+            'yearly' => $this->getDeliveryRate('year'),
+            'monthly' => $this->getDeliveryRate('month'),
+            'weekly' => $this->getDeliveryRate('week'),
+            'today' => $this->getDeliveryRate('today'),
+        ];
+
         // Compute 'today' variants where applicable
         $todayBestSelling = $this->formatProductData(
             Sale::select('product_id', DB::raw('SUM(product_qty_sold) as total_sold'), DB::raw('SUM(amount_paid) as total_revenue'))
@@ -137,6 +173,11 @@ class AnalyticsController extends Controller
         return response()->json([
             'period' => $period,
             'selected_key' => $selectedKey,
+            'orderStatusCounts' => $orderStatusCounts,
+            'stateCounts' => $stateCounts,
+            'productCounts' => $productCounts,
+            'dayOfWeekCounts' => $dayOfWeekCounts,
+            'deliveryRate' => $deliveryRate,
             'bestSellingProducts' => $bestSellingProducts,
             'bestCustomers' => $bestCustomers,
             'bestStaff' => $bestStaff,
@@ -146,6 +187,106 @@ class AnalyticsController extends Controller
             'orderStats' => $orderStats,
             'revenueAnalysis' => $revenueAnalysis,
         ]);
+    }
+
+    private function applyPeriodFilter($query, string $period)
+    {
+        switch ($period) {
+            case 'today':
+                return $query->whereDate('created_at', Carbon::today());
+            case 'week':
+                return $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+            case 'month':
+                return $query->whereMonth('created_at', Carbon::now()->month)->whereYear('created_at', Carbon::now()->year);
+            case 'year':
+                return $query->whereYear('created_at', Carbon::now()->year);
+            default:
+                return $query;
+        }
+    }
+
+    private function getOrderStatusCounts(string $period)
+    {
+        $q = Order::select('status', DB::raw('COUNT(id) as order_count'));
+        $this->applyPeriodFilter($q, $period);
+        $rows = $q->groupBy('status')->orderBy('order_count', 'desc')->get();
+
+        // Map display labels using config if available
+        $labels = config('site.order_statuses', []);
+        return $rows->map(function ($row) use ($labels) {
+            return [
+                'status' => $labels[$row->status] ?? $row->status,
+                'code' => $row->status,
+                'order_count' => (int) $row->order_count,
+            ];
+        })->values();
+    }
+
+    private function getStateCounts(string $period)
+    {
+        // Count orders grouped by customer state
+        $q = DB::table('orders as o')
+            ->leftJoin('users as c', 'c.id', '=', 'o.customer_id')
+            ->select(DB::raw('COALESCE(c.state, "N/A") as state_name'), DB::raw('COUNT(o.id) as total_orders'));
+        $this->applyPeriodFilter($q, $period);
+        $rows = $q->groupBy('c.state')->orderBy('total_orders', 'desc')->limit(50)->get();
+        return $rows->map(function ($row) {
+            return [
+                'state_name' => $row->state_name,
+                'total_orders' => (int) $row->total_orders,
+            ];
+        })->values();
+    }
+
+    private function getProductCounts(string $period)
+    {
+        // Use sales table as proxy for product orders
+        $q = Sale::select('product_id', DB::raw('SUM(product_qty_sold) as total_orders'));
+        $this->applyPeriodFilter($q, $period);
+        $rows = $q->groupBy('product_id')->orderBy('total_orders', 'desc')->limit(50)->get();
+        $productIds = $rows->pluck('product_id')->filter()->unique()->values();
+        $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+        return $rows->map(function ($row) use ($products) {
+            $p = $products->get($row->product_id);
+            return [
+                'product_name' => $p?->name ?? 'N/A',
+                'total_orders' => (int) $row->total_orders,
+            ];
+        })->values();
+    }
+
+    private function getOrdersByDayOfWeek(string $period)
+    {
+        $q = Order::select(DB::raw('DAYNAME(created_at) as day_name'), DB::raw('DAYOFWEEK(created_at) as day_number'), DB::raw('COUNT(id) as order_count'));
+        $this->applyPeriodFilter($q, $period);
+        $rows = $q->groupBy('day_name', 'day_number')->orderBy('day_number')->get();
+        return $rows->map(function ($row) {
+            return [
+                'day_name' => $row->day_name,
+                'day_number' => (int) $row->day_number,
+                'order_count' => (int) $row->order_count,
+            ];
+        })->values();
+    }
+
+    private function getDeliveryRate(string $period)
+    {
+        // total orders in period
+        $totalQ = Order::query();
+        $this->applyPeriodFilter($totalQ, $period);
+        $total = (int) $totalQ->count();
+
+        // payment received = delivered_and_remitted
+        $deliveredQ = Order::where('status', 'delivered_and_remitted');
+        $this->applyPeriodFilter($deliveredQ, $period);
+        $paymentReceived = (int) $deliveredQ->count();
+
+        $percentage = $total > 0 ? round(($paymentReceived / $total) * 100, 2) : 0;
+        return [
+            'total_orders' => $total,
+            'payment_received_orders' => $paymentReceived,
+            'delivery_rate_percentage' => $percentage,
+        ];
     }
 
     /**

@@ -340,12 +340,139 @@
       </div>
     </div>
   </section>
-</main>
+
+  <!-- Additional Analytics: Sorted tables and Delivery Rate -->
+  <section class="section mt-4">
+    <div class="row">
+      <!-- Sorted by Status -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">SORTED BY STATUS</h5>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>S/N</th>
+                    <th>ORDER STATUS</th>
+                    <th>COUNT</th>
+                  </tr>
+                </thead>
+                <tbody id="status-counts-body">
+                  <tr><td colspan="3" class="text-center">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sorted by States -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">SORTED BY STATES</h5>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>S/N</th>
+                    <th>LIST OF STATES</th>
+                    <th>COUNT</th>
+                  </tr>
+                </thead>
+                <tbody id="state-counts-body">
+                  <tr><td colspan="3" class="text-center">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <!-- Sorted by Products -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">SORTED BY PRODUCTS</h5>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>S/N</th>
+                    <th>PRODUCT NAME</th>
+                    <th>COUNT</th>
+                  </tr>
+                </thead>
+                <tbody id="product-counts-body">
+                  <tr><td colspan="3" class="text-center">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sorted by Days of the Week -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">SORTED BY DAYS OF THE WEEK</h5>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>S/N</th>
+                    <th>DAYS OF THE WEEK</th>
+                    <th>COUNT</th>
+                  </tr>
+                </thead>
+                <tbody id="dayofweek-counts-body">
+                  <tr><td colspan="3" class="text-center">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <!-- Delivery Rate Analysis -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Delivery Rate Analysis</h5>
+            <div id="deliveryRateChart" style="height: 320px;"></div>
+            <div class="row text-center mt-3">
+              <div class="col-md-4">
+                <h4 id="total-orders-count">0</h4>
+                <p>Total Orders</p>
+              </div>
+              <div class="col-md-4">
+                <h4 id="delivered-orders-count">0</h4>
+                <p>Payment Received</p>
+              </div>
+              <div class="col-md-4">
+                <h4 id="delivery-percentage">0%</h4>
+                <p>Delivery Rate</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
 
 <!-- ApexCharts -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <script>
+  let deliveryRateChart = null;
   const currencySymbol = '{{ $currency }}';
   const periodLabels = { today: 'Today', weekly: 'This Week', monthly: 'This Month', yearly: 'This Year' };
 
@@ -424,8 +551,126 @@
         renderBestSelling(data.bestSellingProducts[key] || []);
         renderBestCustomers(data.bestCustomers[key] || []);
         renderBestStaff(data.bestStaff[key] || []);
+
+        // New sections
+        renderStatusCounts(data.orderStatusCounts[key] || []);
+        renderStateCounts(data.stateCounts[key] || []);
+        renderProductCounts(data.productCounts[key] || []);
+        renderDayOfWeekCounts(data.dayOfWeekCounts[key] || []);
+        renderDeliveryRate(data.deliveryRate[key] || { total_orders: 0, payment_received_orders: 0, delivery_rate_percentage: 0 });
       })
       .catch(err => console.error('Error loading analytics data:', err));
+  }
+
+  function renderStatusCounts(items) {
+    const tbody = document.getElementById('status-counts-body');
+    if (!items || items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="text-center">No data available</td></tr>';
+      return;
+    }
+    let total = 0;
+    tbody.innerHTML = items.map((item, idx) => {
+      total += Number(item.order_count || 0);
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${escapeHtml(item.status || item.code || 'N/A')}</td>
+          <td>${numberFormat(item.order_count || 0)}</td>
+        </tr>`;
+    }).join('') + `
+      <tr>
+        <td colspan="2" style="font-weight:600;">TOTAL</td>
+        <td>${numberFormat(total)}</td>
+      </tr>`;
+  }
+
+  function renderStateCounts(items) {
+    const tbody = document.getElementById('state-counts-body');
+    if (!items || items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="text-center">No data available</td></tr>';
+      return;
+    }
+    let total = 0;
+    tbody.innerHTML = items.map((item, idx) => {
+      total += Number(item.total_orders || 0);
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${escapeHtml(item.state_name || 'N/A')}</td>
+          <td>${numberFormat(item.total_orders || 0)}</td>
+        </tr>`;
+    }).join('') + `
+      <tr>
+        <td colspan="2" style="font-weight:600;">TOTAL</td>
+        <td>${numberFormat(total)}</td>
+      </tr>`;
+  }
+
+  function renderProductCounts(items) {
+    const tbody = document.getElementById('product-counts-body');
+    if (!items || items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="text-center">No data available</td></tr>';
+      return;
+    }
+    let total = 0;
+    tbody.innerHTML = items.map((item, idx) => {
+      total += Number(item.total_orders || 0);
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${escapeHtml(item.product_name || 'N/A')}</td>
+          <td>${numberFormat(item.total_orders || 0)}</td>
+        </tr>`;
+    }).join('') + `
+      <tr>
+        <td colspan="2" style="font-weight:600;">TOTAL</td>
+        <td>${numberFormat(total)}</td>
+      </tr>`;
+  }
+
+  function renderDayOfWeekCounts(items) {
+    const tbody = document.getElementById('dayofweek-counts-body');
+    if (!items || items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="text-center">No data available</td></tr>';
+      return;
+    }
+    let total = 0;
+    tbody.innerHTML = items.map((item, idx) => {
+      total += Number(item.order_count || 0);
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${escapeHtml(item.day_name || 'N/A')}</td>
+          <td>${numberFormat(item.order_count || 0)}</td>
+        </tr>`;
+    }).join('') + `
+      <tr>
+        <td colspan="2" style="font-weight:600;">TOTAL</td>
+        <td>${numberFormat(total)}</td>
+      </tr>`;
+  }
+
+  function renderDeliveryRate(data) {
+    const delivered = Number(data.payment_received_orders || 0);
+    const pending = Math.max(Number(data.total_orders || 0) - delivered, 0);
+    document.getElementById('total-orders-count').textContent = numberFormat(data.total_orders || 0);
+    document.getElementById('delivered-orders-count').textContent = numberFormat(delivered);
+    document.getElementById('delivery-percentage').textContent = `${Number(data.delivery_rate_percentage || 0)}%`;
+
+    const options = {
+      series: [delivered, pending],
+      labels: ['Payment Received', 'Pending'],
+      chart: { type: 'donut', height: 300 },
+      colors: ['#28a745', '#dc3545'],
+      legend: { position: 'bottom' }
+    };
+    if (deliveryRateChart) {
+      deliveryRateChart.updateOptions(options);
+      deliveryRateChart.updateSeries(options.series);
+    } else {
+      deliveryRateChart = new ApexCharts(document.querySelector('#deliveryRateChart'), options);
+      deliveryRateChart.render();
+    }
   }
 
   function renderBestSelling(items) {
@@ -513,5 +758,10 @@
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return String(text).replace(/[&<>"']/g, m => map[m]);
   }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', function() {
+    filterData('all');
+  });
 </script>
 @endsection
