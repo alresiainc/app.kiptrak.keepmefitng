@@ -328,6 +328,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/weekly', [DashboardController::class, 'weeklyRecord'])->name('weeklyRecord');
     Route::get('/monthly', [DashboardController::class, 'monthlyRecord'])->name('monthlyRecord');
     Route::get('/analytics', [AnalyticsController::class, 'analytics'])->name('analytics');
+    Route::get('/analytics/data', [AnalyticsController::class, 'data'])->name('analytics.data');
     Route::get('/yearly', [DashboardController::class, 'yearlyRecord'])->name('yearlyRecord');
 
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');

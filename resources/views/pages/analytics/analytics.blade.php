@@ -37,7 +37,7 @@
           <div class="card-body p-2">
             <div class="d-flex justify-content-between align-items-center">
               <div class="text-start">
-                <h2 class="fw-bold">{{ $currency }}{{ number_format($revenueAnalysis['total_revenue'], 2, '.', ',') }}</h2>
+                <h2 id="total-revenue" class="fw-bold">{{ $currency }}{{ number_format($revenueAnalysis['total_revenue'], 2, '.', ',') }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold">Total Revenue</small>
               </div>
               <div class="rounded-circle float-end">
@@ -53,7 +53,7 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
-                <h2 class="fw-bold">{{ $orderStats['total_orders'] }}</h2>
+                <h2 id="total-orders" class="fw-bold">{{ $orderStats['total_orders'] }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold">Total Orders</small>
               </div>
               <div class="rounded-circle float-end">
@@ -69,7 +69,7 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
-                <h2 class="fw-bold">{{ $customerInsights['total_customers'] }}</h2>
+                <h2 id="total-customers" class="fw-bold">{{ $customerInsights['total_customers'] }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold">Total Customers</small>
               </div>
               <div class="rounded-circle float-end">
@@ -85,7 +85,7 @@
           <div class="card-body p-2">
             <div class="d-flex align-items-center justify-content-between">
               <div class="text-start">
-                <h2 class="fw-bold">{{ $productPerformance['total_products'] }}</h2>
+                <h2 id="total-products" class="fw-bold">{{ $productPerformance['total_products'] }}</h2>
                 <small class="text-uppercase small pt-1 fw-bold">Total Products</small>
               </div>
               <div class="rounded-circle float-end">
@@ -104,7 +104,7 @@
       <div class="col-lg-6">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Best Selling Products (Monthly)</h5>
+            <h5 class="card-title">Best Selling Products (<span id="best-selling-period-label">Monthly</span>)</h5>
             <div class="table-responsive">
               <table class="table">
                 <thead>
@@ -114,7 +114,7 @@
                     <th>Revenue</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="best-selling-body">
                   @forelse ($bestSellingProducts['monthly'] as $product)
                   <tr>
                     <td>
@@ -150,7 +150,7 @@
       <div class="col-lg-6">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Best Customers (Monthly)</h5>
+            <h5 class="card-title">Best Customers (<span id="best-customers-period-label">Monthly</span>)</h5>
             <div class="table-responsive">
               <table class="table">
                 <thead>
@@ -160,7 +160,7 @@
                     <th>Total Spent</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="best-customers-body">
                   @forelse ($bestCustomers['monthly'] as $customer)
                   <tr>
                     <td>
@@ -200,9 +200,7 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Sales Trends</h5>
-        <div id="salesTrendsChart">
-          <canvas id="salesTrendsCanvas"></canvas>
-        </div>
+        <div id="salesTrendsChart"></div>
       </div>
     </div>
   </section>
@@ -300,7 +298,7 @@
   <section class="section mt-4">
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title">Best Performing Staff (Monthly)</h5>
+        <h5 class="card-title">Best Performing Staff (<span id="best-staff-period-label">Monthly</span>)</h5>
         <div class="table-responsive">
           <table class="table">
             <thead>
@@ -310,7 +308,7 @@
                 <th>Total Sales</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="best-staff-body">
               @forelse ($bestStaff['monthly'] as $staff)
               <tr>
                 <td>
@@ -348,10 +346,11 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <script>
-  // Sales Trends Chart
-  const salesTrendsCtx = document.getElementById('salesTrendsCanvas').getContext('2d');
+  const currencySymbol = '{{ $currency }}';
+  const periodLabels = { today: 'Today', weekly: 'This Week', monthly: 'This Month', yearly: 'This Year' };
 
-  const salesTrendsChart = new ApexCharts(salesTrendsCtx, {
+  // Sales Trends Chart (ApexCharts)
+  const salesTrendsChart = new ApexCharts(document.querySelector('#salesTrendsChart'), {
     series: [{
       name: 'Sales',
       data: [
@@ -396,20 +395,123 @@
 
   // Filter data function
   function filterData(period) {
-    // Update active button
-    document.querySelectorAll('.btn-group button').forEach(btn => {
-      btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
+    // Update active button without relying on global event
+    const buttons = document.querySelectorAll('.btn-group button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    const labelMap = { all: 'All Time', today: 'Today', week: 'This Week', month: 'This Month', year: 'This Year' };
+    const target = Array.from(buttons).find(b => b.textContent.trim() === labelMap[period]);
+    if (target) target.classList.add('active');
 
-    // Here you would typically make an AJAX request to fetch filtered data
-    // For now, we'll just show an alert
-    console.log(`Filtering data for period: ${period}`);
+    // Fetch analytics data and update UI
+    fetch(`/analytics/data?period=${encodeURIComponent(period)}`)
+      .then(res => res.json())
+      .then(data => {
+        const key = data.selected_key; // 'today' | 'weekly' | 'monthly' | 'yearly'
+        const label = periodLabels[key] || 'This Year';
 
-    // In a real application, you would:
-    // 1. Send an AJAX request to your backend with the period parameter
-    // 2. Receive the updated analytics data
-    // 3. Update all charts and tables with the new data
+        // Update period labels
+        document.getElementById('best-selling-period-label').textContent = label;
+        document.getElementById('best-customers-period-label').textContent = label;
+        document.getElementById('best-staff-period-label').textContent = label;
+
+        // Update top stats
+        document.getElementById('total-revenue').textContent = `${currencySymbol}${numberFormat(data.revenueAnalysis.total_revenue)}`;
+        document.getElementById('total-orders').textContent = numberFormat(data.orderStats.total_orders);
+        document.getElementById('total-customers').textContent = numberFormat(data.customerInsights.total_customers);
+        document.getElementById('total-products').textContent = numberFormat(data.productPerformance.total_products);
+
+        // Render tables
+        renderBestSelling(data.bestSellingProducts[key] || []);
+        renderBestCustomers(data.bestCustomers[key] || []);
+        renderBestStaff(data.bestStaff[key] || []);
+      })
+      .catch(err => console.error('Error loading analytics data:', err));
+  }
+
+  function renderBestSelling(items) {
+    const tbody = document.getElementById('best-selling-body');
+    if (!items || items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="text-center">No data available</td></tr>';
+      return;
+    }
+    tbody.innerHTML = items.map(item => `
+      <tr>
+        <td>
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              ${item.image ? `<img src="/storage/products/${item.image}" alt="Product Image" style="width: 40px; height: 40px;">` : `<img src="/assets/img/no-image.png" alt="Product Image" style="width: 40px; height: 40px;">`}
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <h6 class="mb-0">${escapeHtml(item.name || '')}</h6>
+              <small class="text-muted">SKU: ${escapeHtml(item.code || '')}</small>
+            </div>
+          </div>
+        </td>
+        <td>${numberFormat(item.total_sold || 0)}</td>
+        <td>${currencySymbol}${numberFormat((item.total_revenue || 0).toFixed ? item.total_revenue.toFixed(2) : item.total_revenue)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderBestCustomers(items) {
+    const tbody = document.getElementById('best-customers-body');
+    if (!items || items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="text-center">No data available</td></tr>';
+      return;
+    }
+    tbody.innerHTML = items.map(item => `
+      <tr>
+        <td>
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <img src="/assets/img/no-image.png" alt="Customer Image" style="width: 40px; height: 40px;">
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <h6 class="mb-0">${escapeHtml(item.name || '')}</h6>
+              <small class="text-muted">${escapeHtml(item.email || '')}</small>
+            </div>
+          </div>
+        </td>
+        <td>${numberFormat(item.order_count || 0)}</td>
+        <td>${currencySymbol}${numberFormat((item.total_spent || 0).toFixed ? item.total_spent.toFixed(2) : item.total_spent)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderBestStaff(items) {
+    const tbody = document.getElementById('best-staff-body');
+    if (!items || items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="text-center">No data available</td></tr>';
+      return;
+    }
+    tbody.innerHTML = items.map(item => `
+      <tr>
+        <td>
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              ${item.image ? `<img src="/storage/staff/${item.image}" alt="Staff Image" style="width: 40px; height: 40px;">` : `<img src="/assets/img/no-image.png" alt="Staff Image" style="width: 40px; height: 40px;">`}
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <h6 class="mb-0">${escapeHtml(item.name || '')}</h6>
+              <small class="text-muted">${escapeHtml(item.email || '')}</small>
+            </div>
+          </div>
+        </td>
+        <td>${numberFormat(item.order_count || 0)}</td>
+        <td>${currencySymbol}${numberFormat((item.total_sales || 0).toFixed ? item.total_sales.toFixed(2) : item.total_sales)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function numberFormat(x) {
+    if (x === null || x === undefined) return '0';
+    const num = typeof x === 'string' ? parseFloat(x) : x;
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function escapeHtml(text) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
   }
 </script>
 @endsection

@@ -74,6 +74,81 @@ class AnalyticsController extends Controller
     }
 
     /**
+     * Return analytics data as JSON for AJAX consumers
+     */
+    public function data(Request $request)
+    {
+        $period = strtolower($request->query('period', 'all'));
+
+        // Base datasets using existing helpers
+        $bestSellingProducts = $this->getBestSellingProducts();
+        $bestCustomers = $this->getBestCustomers();
+        $bestStaff = $this->getBestStaff();
+        $salesTrends = $this->getSalesTrends();
+        $productPerformance = $this->getProductPerformance();
+        $customerInsights = $this->getCustomerInsights();
+        $orderStats = $this->getOrderStatistics();
+        $revenueAnalysis = $this->getRevenueAnalysis();
+
+        // Compute 'today' variants where applicable
+        $todayBestSelling = $this->formatProductData(
+            Sale::select('product_id', DB::raw('SUM(product_qty_sold) as total_sold'), DB::raw('SUM(amount_paid) as total_revenue'))
+                ->whereDate('created_at', Carbon::today())
+                ->groupBy('product_id')
+                ->orderBy('total_sold', 'desc')
+                ->take(5)
+                ->get()
+        );
+
+        $todayBestCustomers = $this->formatCustomerData(
+            Sale::select('customer_id', DB::raw('COUNT(id) as order_count'), DB::raw('SUM(amount_paid) as total_spent'))
+                ->whereDate('created_at', Carbon::today())
+                ->groupBy('customer_id')
+                ->orderBy('total_spent', 'desc')
+                ->take(5)
+                ->get()
+        );
+
+        $todayBestStaff = $this->formatStaffData(
+            Order::select('staff_assigned_id', DB::raw('COUNT(id) as order_count'), DB::raw('SUM(amount_realised) as total_sales'))
+                ->whereDate('created_at', Carbon::today())
+                ->whereNotNull('staff_assigned_id')
+                ->groupBy('staff_assigned_id')
+                ->orderBy('total_sales', 'desc')
+                ->take(5)
+                ->get()
+        );
+
+        // Attach 'today' buckets to match existing structure
+        $bestSellingProducts['today'] = $todayBestSelling;
+        $bestCustomers['today'] = $todayBestCustomers;
+        $bestStaff['today'] = $todayBestStaff;
+
+        // Choose selected dataset alias
+        $map = [
+            'today' => 'today',
+            'week' => 'weekly',
+            'month' => 'monthly',
+            'year' => 'yearly',
+            'all' => 'yearly',
+        ];
+        $selectedKey = $map[$period] ?? 'yearly';
+
+        return response()->json([
+            'period' => $period,
+            'selected_key' => $selectedKey,
+            'bestSellingProducts' => $bestSellingProducts,
+            'bestCustomers' => $bestCustomers,
+            'bestStaff' => $bestStaff,
+            'salesTrends' => $salesTrends,
+            'productPerformance' => $productPerformance,
+            'customerInsights' => $customerInsights,
+            'orderStats' => $orderStats,
+            'revenueAnalysis' => $revenueAnalysis,
+        ]);
+    }
+
+    /**
      * Get best selling products
      */
     private function getBestSellingProducts()
