@@ -234,6 +234,127 @@ class OrderController extends Controller
                 $status = "new";
             }
 
+
+            $formHolder = FormHolder::where('unique_key', $status)->first();
+            if ($formHolder) {
+                $formOrders = $formHolder->formOrders->pluck('id');
+                $query->whereIn('orders.id', $formOrders)->whereNotNull('customer_id');
+                $entries = true;
+            } else {
+                $entries = false;
+                $formHolder = '';
+                $query->where('status', $status);
+            }
+        } else {
+            $entries = false;
+            $formHolder = '';
+        }
+
+        // 🔹 Define the cutoff date (you can make this dynamic later if needed)
+        $cutoffDate = '2025-10-01';
+
+        // 🔹 Date filter logic based on status
+        if ($status === 'old') {
+            // Show all orders BEFORE the cutoff date
+            $query->whereDate('created_at', '<', $cutoffDate);
+        } else {
+            // For every other status, including "all", show from cutoff date forward
+            $query->whereDate('created_at', '>=', $cutoffDate);
+        }
+
+
+        // 🔹 Search filter (order id, order code, customer name, phone)
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                // 🔹 Handle order code format kp-000XX
+                if (preg_match('/^kp-0*(\d+)$/i', $search, $matches)) {
+                    $searchId = $matches[1]; // extract actual ID from kp-00126 → 126
+                    $q->where('id', $searchId);
+                } else {
+                    // 🔹 Normal searches
+                    $q->where('id', 'like', "%$search%")
+                        ->orWhereHas('customer', function ($sub) use ($search) {
+                            $sub->where('firstname', 'like', "%$search%")
+                                ->orWhere('lastname', 'like', "%$search%")
+                                ->orWhere('phone_number', 'like', "%$search%")
+                                ->orWhere('whatsapp_phone_number', 'like', "%$search%")
+                                ->orWhere('email', 'like', "%$search%")
+                                ->orWhere('city', 'like', "%$search%")
+                                ->orWhere('state', 'like', "%$search%")
+                                ->orWhere('delivery_address', 'like', "%$search%")
+                                ->orWhereHas('country', function ($c) use ($search) {
+                                    $c->where('name', 'like', "%$search%");
+                                });
+                        });
+                }
+            });
+        }
+
+
+
+        // 🔹 Optional: still respect manual date filters if provided in the request
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        // 🔹 Final query
+        $orders = $query->latest()->paginate($perPage)->appends($request->all());
+
+        return view('pages.orders.allOrders', compact(
+            'authUser',
+            'user_role',
+            'orders',
+            'agents',
+            'staffs',
+            'status',
+            'entries',
+            'formHolder'
+        ));
+    }
+
+    public function formOrders(Request $request, $formId = "")
+    {
+        $authUser = auth()->user();
+        $user_role = $authUser->hasAnyRole($authUser->id)
+            ? $authUser->role($authUser->id)->role
+            : false;
+
+        //  dd($user_role->permissions->pluck('slug')->toArray());
+
+        $agents = User::where('type', 'agent')->latest()->get();
+        $staffs = User::where('type', 'staff')->latest()->get();
+
+        // Items per page (default 10)
+        $perPage = $request->get('page_length', 10);
+
+        // 🔹 Base query depending on user role
+        if ($authUser->isSuperAdmin || (
+            $user_role && $user_role->permissions->contains('slug', 'view-all-orders')
+        )) {
+            // Super admins or users with permission can see everything
+            $query = Order::query();
+        } else {
+            // Staff/agents see only orders tied to them
+            $query = Order::where(function ($q) use ($authUser) {
+                $q->where('agent_assigned_id', $authUser->id)
+                    ->orWhere('staff_assigned_id', $authUser->id)
+                    ->orWhere('created_by', $authUser->id);
+            });
+        }
+
+
+        // 🔹 Status filter
+        if ($status !== "" && $status !== "all" && $status !== "old") {
+            if ($status === "new_from_alarm") {
+                DB::table('sound_notifications')->update(['status' => 'seen']);
+                $status = "new";
+            }
+
             $query->where('status', $status);
 
             $formHolder = FormHolder::where('unique_key', $status)->first();
@@ -316,6 +437,7 @@ class OrderController extends Controller
             'formHolder'
         ));
     }
+
 
 
 
