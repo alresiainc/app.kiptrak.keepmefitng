@@ -43,8 +43,8 @@
 
         .whatsapp-icon {
             /* font-size: 22px;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                color: #012970;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                margin-right: 25px; */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    color: #012970;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    margin-right: 25px; */
             position: relative;
         }
 
@@ -258,9 +258,9 @@
                                                 <th>Order Code</th>
                                             @endif
                                             <th>Customer</th>
-                                            {{-- <th>Delivery Due Date</th> --}}
+                                            <th>Delivery Due Date</th>
+                                            {{-- <th>Delivery Address</th> --}}
                                             <th>Form Name</th>
-                                            <th>Delivery Address</th>
                                             <th>Staff Assigned</th>
                                             <th>Agent</th>
                                             <th>Message</th>
