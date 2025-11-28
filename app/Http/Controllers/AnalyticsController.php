@@ -126,34 +126,47 @@ class AnalyticsController extends Controller
             'today' => $this->getDeliveryRate('today'),
         ];
 
-        // Compute 'today' variants where applicable
-        $todayBestSelling = $this->formatProductData(
-            Sale::select('product_id', DB::raw('SUM(product_qty_sold) as total_sold'), DB::raw('SUM(amount_paid) as total_revenue'))
-                ->whereDate('created_at', Carbon::today())
-                ->groupBy('product_id')
-                ->orderBy('total_sold', 'desc')
-                ->take(5)
-                ->get()
-        );
+        // Compute 'today' variants from Orders domain
+        $todayBestSelling = $this->formatProductData($this->aggregateProducts('today', 5));
 
-        $todayBestCustomers = $this->formatCustomerData(
-            Sale::select('customer_id', DB::raw('COUNT(id) as order_count'), DB::raw('SUM(amount_paid) as total_spent'))
-                ->whereDate('created_at', Carbon::today())
-                ->groupBy('customer_id')
-                ->orderBy('total_spent', 'desc')
-                ->take(5)
-                ->get()
-        );
+        // Best customers today (computed realised amount)
+        $todayOrders = Order::with('outgoingStock')->whereDate('created_at', Carbon::today())->get();
+        $custAgg = [];
+        foreach ($todayOrders as $o) {
+            if (!$o->customer_id) continue;
+            $amt = $this->orderRealisedAmount($o);
+            if (!isset($custAgg[$o->customer_id])) {
+                $custAgg[$o->customer_id] = (object) [
+                    'customer_id' => $o->customer_id,
+                    'order_count' => 0,
+                    'total_spent' => 0.0,
+                ];
+            }
+            $custAgg[$o->customer_id]->order_count += 1;
+            $custAgg[$o->customer_id]->total_spent += $amt;
+        }
+        $custList = array_values($custAgg);
+        usort($custList, fn($a, $b) => ($b->total_spent <=> $a->total_spent));
+        $todayBestCustomers = $this->formatCustomerData(array_slice($custList, 0, 5));
 
-        $todayBestStaff = $this->formatStaffData(
-            Order::select('staff_assigned_id', DB::raw('COUNT(id) as order_count'), DB::raw('SUM(amount_realised) as total_sales'))
-                ->whereDate('created_at', Carbon::today())
-                ->whereNotNull('staff_assigned_id')
-                ->groupBy('staff_assigned_id')
-                ->orderBy('total_sales', 'desc')
-                ->take(5)
-                ->get()
-        );
+        // Best staff today (computed realised amount)
+        $staffAgg = [];
+        foreach ($todayOrders as $o) {
+            if (!$o->staff_assigned_id) continue;
+            $amt = $this->orderRealisedAmount($o);
+            if (!isset($staffAgg[$o->staff_assigned_id])) {
+                $staffAgg[$o->staff_assigned_id] = (object) [
+                    'staff_assigned_id' => $o->staff_assigned_id,
+                    'order_count' => 0,
+                    'total_sales' => 0.0,
+                ];
+            }
+            $staffAgg[$o->staff_assigned_id]->order_count += 1;
+            $staffAgg[$o->staff_assigned_id]->total_sales += $amt;
+        }
+        $staffList = array_values($staffAgg);
+        usort($staffList, fn($a, $b) => ($b->total_sales <=> $a->total_sales));
+        $todayBestStaff = $this->formatStaffData(array_slice($staffList, 0, 5));
 
         // Attach 'today' buckets to match existing structure
         $bestSellingProducts['today'] = $todayBestSelling;
@@ -205,6 +218,41 @@ class AnalyticsController extends Controller
         }
     }
 
+    /**
+     * Compute realised amount for an order based on outgoingStock.package_bundle (accepted items)
+     * plus extra_cost_amount. Mirrors the logic in OrderController::singleOrder().
+     */
+    private function orderRealisedAmount(Order $order): float
+    {
+        $sum = 0.0;
+        if ($order->outgoingStock && $order->outgoingStock->package_bundle) {
+            $bundle = $order->outgoingStock->package_bundle;
+            $decoded = is_string($bundle) ? json_decode($bundle, true) : $bundle;
+            if (is_array($decoded)) {
+                foreach ($decoded as $item) {
+                    if (!is_array($item)) continue;
+                    $accepted = ($item['customer_acceptance_status'] ?? null) === 'accepted';
+                    $reason = $item['reason_removed'] ?? null;
+                    if ($accepted && in_array($reason, ['as_order_firstphase', 'as_orderbump', 'as_upsell'])) {
+                        $sum += (float) ($item['amount_accrued'] ?? 0);
+                    }
+                }
+            }
+        }
+
+        // Add extra cost if any (stored as string sometimes)
+        $extraRaw = $order->extra_cost_amount ?? 0;
+        $extra = is_numeric($extraRaw) ? (float) $extraRaw : (float) preg_replace('/[^\d.\-]/', '', (string) $extraRaw);
+        return $sum + ($extra ?: 0.0);
+    }
+
+    private function ordersForPeriod(string $period)
+    {
+        $q = Order::with('outgoingStock');
+        $this->applyPeriodFilter($q, $period);
+        return $q->get();
+    }
+
     private function getOrderStatusCounts(string $period)
     {
         $q = Order::select('status', DB::raw('COUNT(id) as order_count'));
@@ -241,19 +289,80 @@ class AnalyticsController extends Controller
 
     private function getProductCounts(string $period)
     {
-        // Use sales table as proxy for product orders
-        $q = Sale::select('product_id', DB::raw('SUM(product_qty_sold) as total_orders'));
-        $this->applyPeriodFilter($q, $period);
-        $rows = $q->groupBy('product_id')->orderBy('total_orders', 'desc')->limit(50)->get();
-        $productIds = $rows->pluck('product_id')->filter()->unique()->values();
+        // Aggregate product quantities from Orders domain
+        $agg = $this->aggregateProducts($period, 50); // returns product_id, total_sold, total_revenue
+        $productIds = collect($agg)->pluck('product_id')->unique()->values();
         $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
-        return $rows->map(function ($row) use ($products) {
-            $p = $products->get($row->product_id);
+        return collect($agg)->map(function ($row) use ($products) {
+            $p = $products->get($row['product_id']);
             return [
                 'product_name' => $p?->name ?? 'N/A',
-                'total_orders' => (int) $row->total_orders,
+                'total_orders' => (int) ($row['total_sold'] ?? 0),
             ];
         })->values();
+    }
+
+    private function aggregateProducts(string $period, int $limit = 0)
+    {
+        // Pull orders for the period with their outgoing stock package bundles
+        $ordersQ = Order::with('outgoingStock');
+        $this->applyPeriodFilter($ordersQ, $period);
+        $orders = $ordersQ->get();
+
+        $totals = [];
+        foreach ($orders as $order) {
+            $counted = false;
+            if ($order->outgoingStock && $order->outgoingStock->package_bundle) {
+                $bundle = $order->outgoingStock->package_bundle; // json cast? migration defines json column
+                // Ensure array
+                if (is_string($bundle)) {
+                    $decoded = json_decode($bundle, true);
+                } else {
+                    $decoded = $bundle; // already array if casted
+                }
+                if (is_array($decoded)) {
+                    foreach ($decoded as $item) {
+                        if (!is_array($item)) continue;
+                        $accepted = ($item['customer_acceptance_status'] ?? null) === 'accepted';
+                        $reason = $item['reason_removed'] ?? null;
+                        if ($accepted && in_array($reason, ['as_order_firstphase', 'as_orderbump', 'as_upsell'])) {
+                            $pid = (int) ($item['product_id'] ?? 0);
+                            if ($pid > 0) {
+                                $qty = (int) ($item['quantity_removed'] ?? 1);
+                                $rev = (float) ($item['amount_accrued'] ?? 0);
+                                if (!isset($totals[$pid])) $totals[$pid] = ['product_id' => $pid, 'total_sold' => 0, 'total_revenue' => 0];
+                                $totals[$pid]['total_sold'] += $qty;
+                                $totals[$pid]['total_revenue'] += $rev;
+                                $counted = true;
+                            }
+                        }
+                    }
+                }
+            }
+            // Fallback if no outgoing bundle: count product ids from orders.products
+            if (!$counted && !empty($order->products)) {
+                $ids = @unserialize($order->products);
+                if ($ids && is_array($ids)) {
+                    foreach ($ids as $pid) {
+                        $pid = (int) $pid;
+                        if ($pid > 0) {
+                            if (!isset($totals[$pid])) $totals[$pid] = ['product_id' => $pid, 'total_sold' => 0, 'total_revenue' => 0];
+                            $totals[$pid]['total_sold'] += 1; // no qty available, treat as 1
+                        }
+                    }
+                }
+            }
+        }
+
+        // Sort by total_sold desc and limit
+        $list = array_values($totals);
+        usort($list, function ($a, $b) {
+            return ($b['total_sold'] <=> $a['total_sold']);
+        });
+        if ($limit > 0) {
+            $list = array_slice($list, 0, $limit);
+        }
+        return $list;
     }
 
     private function getOrdersByDayOfWeek(string $period)
@@ -295,46 +404,15 @@ class AnalyticsController extends Controller
      */
     private function getBestSellingProducts()
     {
-        // Yearly best selling products
-        $yearlyBestSelling = Sale::select(
-            'product_id',
-            DB::raw('SUM(product_qty_sold) as total_sold'),
-            DB::raw('SUM(amount_paid) as total_revenue')
-        )
-            ->whereYear('created_at', Carbon::now()->year)
-            ->groupBy('product_id')
-            ->orderBy('total_sold', 'desc')
-            ->take(5)
-            ->get();
-
-        // Monthly best selling products
-        $monthlyBestSelling = Sale::select(
-            'product_id',
-            DB::raw('SUM(product_qty_sold) as total_sold'),
-            DB::raw('SUM(amount_paid) as total_revenue')
-        )
-            ->whereMonth('created_at', Carbon::now()->month)
-            ->groupBy('product_id')
-            ->orderBy('total_sold', 'desc')
-            ->take(5)
-            ->get();
-
-        // Weekly best selling products
-        $weeklyBestSelling = Sale::select(
-            'product_id',
-            DB::raw('SUM(product_qty_sold) as total_sold'),
-            DB::raw('SUM(amount_paid) as total_revenue')
-        )
-            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-            ->groupBy('product_id')
-            ->orderBy('total_sold', 'desc')
-            ->take(5)
-            ->get();
+        // Aggregate from Orders domain (orders + outgoing_stocks.package_bundle or orders.products)
+        $yearly = $this->aggregateProducts('year', 5);
+        $monthly = $this->aggregateProducts('month', 5);
+        $weekly = $this->aggregateProducts('week', 5);
 
         return [
-            'yearly' => $this->formatProductData($yearlyBestSelling),
-            'monthly' => $this->formatProductData($monthlyBestSelling),
-            'weekly' => $this->formatProductData($weeklyBestSelling)
+            'yearly' => $this->formatProductData($yearly),
+            'monthly' => $this->formatProductData($monthly),
+            'weekly' => $this->formatProductData($weekly)
         ];
     }
 
@@ -343,23 +421,25 @@ class AnalyticsController extends Controller
      */
     private function formatProductData($products)
     {
+        // $products: collection/array of arrays or objects with product_id, total_sold, total_revenue
         $formatted = [];
-
-        foreach ($products as $product) {
-            $productDetails = Product::find($product->product_id);
-
+        foreach ($products as $p) {
+            $productId = is_array($p) ? ($p['product_id'] ?? null) : ($p->product_id ?? null);
+            if (!$productId) continue;
+            $productDetails = Product::find($productId);
             if ($productDetails) {
-                $formatted[] = (object)[
-                    'id' => $product->product_id,
+                $totalSold = is_array($p) ? ($p['total_sold'] ?? 0) : ($p->total_sold ?? 0);
+                $totalRevenue = is_array($p) ? ($p['total_revenue'] ?? 0) : ($p->total_revenue ?? 0);
+                $formatted[] = (object) [
+                    'id' => $productId,
                     'name' => $productDetails->name,
                     'code' => $productDetails->code,
                     'image' => $productDetails->image,
-                    'total_sold' => $product->total_sold,
-                    'total_revenue' => $product->total_revenue
+                    'total_sold' => (int) $totalSold,
+                    'total_revenue' => (float) $totalRevenue,
                 ];
             }
         }
-
         return $formatted;
     }
 
@@ -368,46 +448,31 @@ class AnalyticsController extends Controller
      */
     private function getBestCustomers()
     {
-        // Yearly best customers
-        $yearlyBestCustomers = Sale::select(
-            'customer_id',
-            DB::raw('COUNT(id) as order_count'),
-            DB::raw('SUM(amount_paid) as total_spent')
-        )
-            ->whereYear('created_at', Carbon::now()->year)
-            ->groupBy('customer_id')
-            ->orderBy('total_spent', 'desc')
-            ->take(5)
-            ->get();
-
-        // Monthly best customers
-        $monthlyBestCustomers = Sale::select(
-            'customer_id',
-            DB::raw('COUNT(id) as order_count'),
-            DB::raw('SUM(amount_paid) as total_spent')
-        )
-            ->whereMonth('created_at', Carbon::now()->month)
-            ->groupBy('customer_id')
-            ->orderBy('total_spent', 'desc')
-            ->take(5)
-            ->get();
-
-        // Weekly best customers
-        $weeklyBestCustomers = Sale::select(
-            'customer_id',
-            DB::raw('COUNT(id) as order_count'),
-            DB::raw('SUM(amount_paid) as total_spent')
-        )
-            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-            ->groupBy('customer_id')
-            ->orderBy('total_spent', 'desc')
-            ->take(5)
-            ->get();
+        $build = function (string $period) {
+            $orders = $this->ordersForPeriod($period);
+            $agg = [];
+            foreach ($orders as $o) {
+                if (!$o->customer_id) continue;
+                $amt = $this->orderRealisedAmount($o);
+                if (!isset($agg[$o->customer_id])) {
+                    $agg[$o->customer_id] = (object) [
+                        'customer_id' => $o->customer_id,
+                        'order_count' => 0,
+                        'total_spent' => 0.0,
+                    ];
+                }
+                $agg[$o->customer_id]->order_count += 1;
+                $agg[$o->customer_id]->total_spent += $amt;
+            }
+            $list = array_values($agg);
+            usort($list, fn($a, $b) => ($b->total_spent <=> $a->total_spent));
+            return array_slice($list, 0, 5);
+        };
 
         return [
-            'yearly' => $this->formatCustomerData($yearlyBestCustomers),
-            'monthly' => $this->formatCustomerData($monthlyBestCustomers),
-            'weekly' => $this->formatCustomerData($weeklyBestCustomers)
+            'yearly' => $this->formatCustomerData($build('year')),
+            'monthly' => $this->formatCustomerData($build('month')),
+            'weekly' => $this->formatCustomerData($build('week'))
         ];
     }
 
@@ -417,22 +482,19 @@ class AnalyticsController extends Controller
     private function formatCustomerData($customers)
     {
         $formatted = [];
-
-        foreach ($customers as $customer) {
-            $customerDetails = Customer::find($customer->customer_id);
-
+        foreach ($customers as $c) {
+            $customerDetails = Customer::find($c->customer_id);
             if ($customerDetails) {
-                $formatted[] = (object)[
-                    'id' => $customer->customer_id,
-                    'name' => $customerDetails->first_name . ' ' . $customerDetails->last_name,
+                $formatted[] = (object) [
+                    'id' => $c->customer_id,
+                    'name' => trim(($customerDetails->firstname ?? '') . ' ' . ($customerDetails->lastname ?? '')),
                     'email' => $customerDetails->email,
-                    'phone' => $customerDetails->phone,
-                    'order_count' => $customer->order_count,
-                    'total_spent' => $customer->total_spent
+                    'phone' => $customerDetails->phone_number,
+                    'order_count' => (int) ($c->order_count ?? 0),
+                    'total_spent' => (float) ($c->total_spent ?? 0),
                 ];
             }
         }
-
         return $formatted;
     }
 
@@ -441,49 +503,31 @@ class AnalyticsController extends Controller
      */
     private function getBestStaff()
     {
-        // Yearly best staff
-        $yearlyBestStaff = Order::select(
-            'staff_assigned_id',
-            DB::raw('COUNT(id) as order_count'),
-            DB::raw('SUM(amount_realised) as total_sales')
-        )
-            ->whereYear('created_at', Carbon::now()->year)
-            ->whereNotNull('staff_assigned_id')
-            ->groupBy('staff_assigned_id')
-            ->orderBy('total_sales', 'desc')
-            ->take(5)
-            ->get();
-
-        // Monthly best staff
-        $monthlyBestStaff = Order::select(
-            'staff_assigned_id',
-            DB::raw('COUNT(id) as order_count'),
-            DB::raw('SUM(amount_realised) as total_sales')
-        )
-            ->whereMonth('created_at', Carbon::now()->month)
-            ->whereNotNull('staff_assigned_id')
-            ->groupBy('staff_assigned_id')
-            ->orderBy('total_sales', 'desc')
-            ->take(5)
-            ->get();
-
-        // Weekly best staff
-        $weeklyBestStaff = Order::select(
-            'staff_assigned_id',
-            DB::raw('COUNT(id) as order_count'),
-            DB::raw('SUM(amount_realised) as total_sales')
-        )
-            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-            ->whereNotNull('staff_assigned_id')
-            ->groupBy('staff_assigned_id')
-            ->orderBy('total_sales', 'desc')
-            ->take(5)
-            ->get();
+        $build = function (string $period) {
+            $orders = $this->ordersForPeriod($period);
+            $agg = [];
+            foreach ($orders as $o) {
+                if (!$o->staff_assigned_id) continue;
+                $amt = $this->orderRealisedAmount($o);
+                if (!isset($agg[$o->staff_assigned_id])) {
+                    $agg[$o->staff_assigned_id] = (object) [
+                        'staff_assigned_id' => $o->staff_assigned_id,
+                        'order_count' => 0,
+                        'total_sales' => 0.0,
+                    ];
+                }
+                $agg[$o->staff_assigned_id]->order_count += 1;
+                $agg[$o->staff_assigned_id]->total_sales += $amt;
+            }
+            $list = array_values($agg);
+            usort($list, fn($a, $b) => ($b->total_sales <=> $a->total_sales));
+            return $list;
+        };
 
         return [
-            'yearly' => $this->formatStaffData($yearlyBestStaff),
-            'monthly' => $this->formatStaffData($monthlyBestStaff),
-            'weekly' => $this->formatStaffData($weeklyBestStaff)
+            'yearly' => $this->formatStaffData(array_slice($build('year'), 0, 5)),
+            'monthly' => $this->formatStaffData(array_slice($build('month'), 0, 5)),
+            'weekly' => $this->formatStaffData(array_slice($build('week'), 0, 5))
         ];
     }
 
@@ -517,16 +561,20 @@ class AnalyticsController extends Controller
      */
     private function getSalesTrends()
     {
-        // Monthly sales for the current year
+        // Monthly realised revenue for the current year
         $monthlySales = [];
         $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
         foreach ($months as $index => $month) {
             $monthNumber = $index + 1;
-
-            $sales = Order::whereYear('created_at', Carbon::now()->year)
+            $orders = Order::with('outgoingStock')
+                ->whereYear('created_at', Carbon::now()->year)
                 ->whereMonth('created_at', $monthNumber)
-                ->sum('amount_realised');
+                ->get();
+            $sales = 0.0;
+            foreach ($orders as $o) {
+                $sales += $this->orderRealisedAmount($o);
+            }
 
             $monthlySales[] = [
                 'month' => $month,
@@ -582,8 +630,14 @@ class AnalyticsController extends Controller
         })
             ->count();
 
-        // Calculate average order value
-        $averageOrderValue = Order::avg('amount_realised');
+        // Calculate average order value using realised amounts
+        $allOrders = Order::with('outgoingStock')->get();
+        $totalRevenue = 0.0;
+        foreach ($allOrders as $o) {
+            $totalRevenue += $this->orderRealisedAmount($o);
+        }
+        $orderCount = max((int) Order::count(), 1);
+        $averageOrderValue = $totalRevenue / $orderCount;
 
         // Get repeat customers (more than 1 order)
         $repeatCustomers = Customer::whereHas('sales', function ($query) {
@@ -615,14 +669,18 @@ class AnalyticsController extends Controller
         $pendingOrders = Order::where('status', 'pending')
             ->count();
 
-        // Get delivered orders this month
+        // Get delivered orders this month (delivered_* statuses)
         $deliveredThisMonth = Order::whereMonth('created_at', Carbon::now()->month)
-            ->where('status', 'delivered')
+            ->whereIn('status', ['delivered_not_remitted', 'delivered_and_remitted'])
             ->count();
 
-        // Get average order value
-        $averageOrderValue = Order::whereNotNull('amount_realised')
-            ->avg('amount_realised');
+        // Get average order value using realised amounts
+        $allOrders = Order::with('outgoingStock')->get();
+        $totalRevenue = 0.0;
+        foreach ($allOrders as $o) {
+            $totalRevenue += $this->orderRealisedAmount($o);
+        }
+        $averageOrderValue = $totalOrders > 0 ? ($totalRevenue / $totalOrders) : 0;
 
         return [
             'total_orders' => $totalOrders,
@@ -637,22 +695,21 @@ class AnalyticsController extends Controller
      */
     private function getRevenueAnalysis()
     {
-        // Get total revenue this year
-        $totalRevenueThisYear = Order::whereYear('created_at', Carbon::now()->year)
-            ->sum('amount_realised');
+        // Compute realised revenue across periods
+        $sumFor = function (callable $filter) {
+            $orders = Order::with('outgoingStock')->where($filter)->get();
+            $sum = 0.0;
+            foreach ($orders as $o) { $sum += $this->orderRealisedAmount($o); }
+            return $sum;
+        };
 
-        // Get total revenue this month
-        $totalRevenueThisMonth = Order::whereMonth('created_at', Carbon::now()->month)
-            ->sum('amount_realised');
+        $totalRevenueThisYear = $sumFor(function ($q) { $q->whereYear('created_at', Carbon::now()->year); });
+        $totalRevenueThisMonth = $sumFor(function ($q) { $q->whereMonth('created_at', Carbon::now()->month)->whereYear('created_at', Carbon::now()->year); });
+        $totalRevenueThisWeek = $sumFor(function ($q) { $q->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]); });
 
-        // Get total revenue this week
-        $totalRevenueThisWeek = Order::whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-            ->sum('amount_realised');
-
-        // Get revenue growth rate (month over month)
-        $lastMonthRevenue = Order::whereMonth('created_at', Carbon::now()->subMonth()->month)
-            ->whereYear('created_at', Carbon::now()->year)
-            ->sum('amount_realised');
+        $lastMonthRevenue = $sumFor(function ($q) {
+            $q->whereMonth('created_at', Carbon::now()->subMonth()->month)->whereYear('created_at', Carbon::now()->year);
+        });
 
         $revenueGrowthRate = $lastMonthRevenue > 0
             ? (($totalRevenueThisMonth - $lastMonthRevenue) / $lastMonthRevenue) * 100
